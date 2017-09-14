@@ -1,0 +1,33 @@
+{
+  parserClass="net.seesharpsoft.idea.plugins.csv.parser.CsvParser"
+
+  extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
+
+  psiClassPrefix="Csv"
+  psiImplClassSuffix="Impl"
+  psiPackage="net.seesharpsoft.idea.plugins.csv.psi"
+  psiImplPackage="net.seesharpsoft.idea.plugins.csv.psi.impl"
+
+  elementTypeHolderClass="net.seesharpsoft.idea.plugins.csv.psi.CsvTypes"
+  elementTypeClass="net.seesharpsoft.idea.plugins.csv.psi.CsvElementType"
+  tokenTypeClass="net.seesharpsoft.idea.plugins.csv.psi.CsvTokenType"
+
+  tokens=[
+    TEXT='regexp:[^,\r\n"]+'
+    ESCAPED_TEXT='regexp:([,\r\n\f]|"")+'
+    COMMA=','
+    QUOTE='"'
+    CRLF='regexp:\n'
+    WHITE_SPACE='regexp:\s+'
+   ]
+}
+
+csvFile ::= record (CRLF record)* [CRLF]
+
+record ::= field (COMMA field)*
+
+field ::= (escaped | nonEscaped)
+
+private escaped ::= QUOTE ( TEXT | ESCAPED_TEXT)* QUOTE
+
+private nonEscaped ::= TEXT*

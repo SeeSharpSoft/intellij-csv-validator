@@ -1,0 +1,48 @@
+<idea-plugin>
+    <id>com.your.company.unique.plugin.id</id>
+    <name>Plugin display name here</name>
+    <version>1.0</version>
+    <vendor email="support@yourcompany.com" url="http://www.yourcompany.com">YourCompany</vendor>
+
+    <description><![CDATA[
+      Enter short description for your plugin here.<br>
+      <em>most HTML tags may be used</em>
+    ]]></description>
+
+    <change-notes><![CDATA[
+      Add change notes here.<br>
+      <em>most HTML tags may be used</em>
+    ]]>
+    </change-notes>
+
+    <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
+    <idea-version since-build="145.0"/>
+
+    <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
+         on how to target different products -->
+    <!-- uncomment to enable plugin in all products
+    <depends>com.intellij.modules.lang</depends>
+    -->
+
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- Add your extensions here -->
+        <fileTypeFactory implementation="net.seesharpsoft.idea.plugins.csv.CsvFileTypeFactory"/>
+        <lang.parserDefinition language="csv"
+                               implementationClass="net.seesharpsoft.idea.plugins.csv.CsvParserDefinition"/>
+        <lang.syntaxHighlighterFactory language="csv"
+                                       implementationClass="net.seesharpsoft.idea.plugins.csv.CsvSyntaxHighlighterFactory"/>
+        <colorSettingsPage implementation="net.seesharpsoft.idea.plugins.csv.CsvColorSettingsPage"/>
+        <lang.formatter language="csv"
+                        implementationClass="net.seesharpsoft.idea.plugins.csv.formatter.CsvFormattingModelBuilder"/>
+        <codeStyleSettingsProvider
+                implementation="net.seesharpsoft.idea.plugins.csv.formatter.CsvCodeStyleSettingsProvider"/>
+        <langCodeStyleSettingsProvider
+                implementation="net.seesharpsoft.idea.plugins.csv.formatter.CsvLanguageCodeStyleSettingsProvider"/>
+    </extensions>
+
+    <actions>
+        <!-- Add your actions here -->
+    </actions>
+
+
+</idea-plugin>
