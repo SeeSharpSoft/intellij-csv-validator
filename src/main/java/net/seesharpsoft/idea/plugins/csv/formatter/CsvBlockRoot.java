@@ -22,7 +22,7 @@ public class CsvBlockRoot extends CsvBlock {
         List<Block> blocks = buildChildrenInternal();
 
         if (settings.TABULARIZE) {
-            tabularize(blocks, collectTableInfo(blocks));
+            tabularize(blocks, collectTableInfo());
         }
 
         return blocks;
@@ -60,20 +60,20 @@ public class CsvBlockRoot extends CsvBlock {
         return child;
     }
 
-    private Map<Integer, Integer> collectTableInfo(List<Block> blocks) {
+    private Map<Integer, Integer> collectTableInfo() {
+        ASTNode child = myNode.getFirstChildNode();
         Map<Integer, Integer> columnSizeMap = new HashMap();
-        for (Block block : blocks) {
-            if (block instanceof CsvBlockLine) {
+        while (child != null) {
+            if (child.getElementType() == CsvTypes.RECORD) {
                 Integer column = 0;
-                List<Block> subBlocks = block.getSubBlocks();
-                for (int i = 0; i < subBlocks.size(); ++i) {
-                    Block columnBlock = subBlocks.get(i);
-                    if (columnBlock instanceof CsvBlockField) {
-                        Integer length = ((CsvBlockField) columnBlock).getNode().getTextLength();
+                ASTNode subChild = child.getFirstChildNode();
+                while (subChild != null) {
+                    if (subChild.getElementType() == CsvTypes.FIELD) {
+                        Integer length = subChild.getTextLength();
                         if (!columnSizeMap.containsKey(column) || columnSizeMap.get(column) < length) {
                             columnSizeMap.put(column, length);
                         }
-                        column++;
+                        ++column;
                     }
                 }
             }
