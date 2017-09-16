@@ -1,4 +1,4 @@
-package net.seesharpsoft.idea.plugins.csv;
+package net.seesharpsoft.intellij.plugins.csv;
 
 import com.intellij.openapi.editor.colors.TextAttributesKey;
 import com.intellij.openapi.fileTypes.SyntaxHighlighter;
@@ -12,6 +12,7 @@ import javax.swing.*;
 import java.util.Map;
 
 public class CsvColorSettingsPage implements ColorSettingsPage {
+
     private static final AttributesDescriptor[] DESCRIPTORS = new AttributesDescriptor[]{
             new AttributesDescriptor("Comma", CsvSyntaxHighlighter.COMMA),
             new AttributesDescriptor("Quote", CsvSyntaxHighlighter.QUOTE),

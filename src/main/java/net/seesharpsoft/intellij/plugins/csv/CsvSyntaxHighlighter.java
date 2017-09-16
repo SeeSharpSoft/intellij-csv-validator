@@ -1,4 +1,4 @@
-package net.seesharpsoft.idea.plugins.csv;
+package net.seesharpsoft.intellij.plugins.csv;
 
 import com.intellij.lexer.Lexer;
 import com.intellij.openapi.editor.DefaultLanguageHighlighterColors;
@@ -7,7 +7,7 @@ import com.intellij.openapi.editor.colors.TextAttributesKey;
 import com.intellij.openapi.fileTypes.SyntaxHighlighterBase;
 import com.intellij.psi.TokenType;
 import com.intellij.psi.tree.IElementType;
-import net.seesharpsoft.idea.plugins.csv.psi.CsvTypes;
+import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
 import org.jetbrains.annotations.NotNull;
 
 import static com.intellij.openapi.editor.colors.TextAttributesKey.createTextAttributesKey;
@@ -16,7 +16,7 @@ public class CsvSyntaxHighlighter extends SyntaxHighlighterBase {
     public static final TextAttributesKey COMMA =
             createTextAttributesKey("CSV_DEFAULT_COMMA", DefaultLanguageHighlighterColors.COMMA);
     public static final TextAttributesKey QUOTE =
-            createTextAttributesKey("CSV_DEFAULT_QUOTE", DefaultLanguageHighlighterColors.METADATA);
+            createTextAttributesKey("CSV_DEFAULT_QUOTE", DefaultLanguageHighlighterColors.CONSTANT);
     public static final TextAttributesKey TEXT =
             createTextAttributesKey("CSV_DEFAULT_STRING", DefaultLanguageHighlighterColors.STRING);
     public static final TextAttributesKey ESCAPED_TEXT =

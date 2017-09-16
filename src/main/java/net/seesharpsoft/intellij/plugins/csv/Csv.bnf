@@ -1,16 +1,16 @@
 {
-  parserClass="net.seesharpsoft.idea.plugins.csv.parser.CsvParser"
+  parserClass="net.seesharpsoft.intellij.plugins.csv.parser.CsvParser"
 
   extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
 
   psiClassPrefix="Csv"
   psiImplClassSuffix="Impl"
-  psiPackage="net.seesharpsoft.idea.plugins.csv.psi"
-  psiImplPackage="net.seesharpsoft.idea.plugins.csv.psi.impl"
+  psiPackage="net.seesharpsoft.intellij.plugins.csv.psi"
+  psiImplPackage="net.seesharpsoft.intellij.plugins.csv.psi.impl"
 
-  elementTypeHolderClass="net.seesharpsoft.idea.plugins.csv.psi.CsvTypes"
-  elementTypeClass="net.seesharpsoft.idea.plugins.csv.psi.CsvElementType"
-  tokenTypeClass="net.seesharpsoft.idea.plugins.csv.psi.CsvTokenType"
+  elementTypeHolderClass="net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes"
+  elementTypeClass="net.seesharpsoft.intellij.plugins.csv.psi.CsvElementType"
+  tokenTypeClass="net.seesharpsoft.intellij.plugins.csv.psi.CsvTokenType"
 
   tokens=[
     TEXT='regexp:[^,\r\n"]+'
@@ -18,7 +18,6 @@
     COMMA=','
     QUOTE='"'
     CRLF='regexp:\n'
-    WHITE_SPACE='regexp:\s+'
    ]
 }
 

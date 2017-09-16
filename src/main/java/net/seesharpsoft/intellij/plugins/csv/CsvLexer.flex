@@ -1,8 +1,8 @@
-package net.seesharpsoft.idea.plugins.csv;
+package net.seesharpsoft.intellij.plugins.csv;
 
 import com.intellij.lexer.FlexLexer;
 import com.intellij.psi.tree.IElementType;
-import net.seesharpsoft.idea.plugins.csv.psi.CsvTypes;
+import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
 import com.intellij.psi.TokenType;
 
 %%
@@ -15,12 +15,12 @@ import com.intellij.psi.TokenType;
 %eof{  return;
 %eof}
 
-TEXT=[^,\r\n\"]+
-ESCAPED_TEXT=([,\r\n\f]|\"\")+
+TEXT=[^ \t\f,\r\n\"]+
+ESCAPED_TEXT=([,\r\n]|\"\")+
 QUOTE=\"
 COMMA=\,
 EOL=\n
-WHITE_SPACE=[ \t\n\x0B\f\r]+
+WHITE_SPACE=[ \t\f]+
 
 %state AFTER_TEXT
 %state ESCAPED_TEXT
@@ -40,11 +40,14 @@ WHITE_SPACE=[ \t\n\x0B\f\r]+
     return CsvTypes.QUOTE;
 }
 
-<YYINITIAL, UNESCAPED_TEXT, ESCAPED_TEXT> {TEXT}
+<YYINITIAL> {TEXT}
 {
-    if (yystate() == YYINITIAL) {
-        yybegin(UNESCAPED_TEXT);
-    }
+    yybegin(UNESCAPED_TEXT);
+    return CsvTypes.TEXT;
+}
+
+<UNESCAPED_TEXT, ESCAPED_TEXT> {TEXT}
+{
     return CsvTypes.TEXT;
 }
 
@@ -63,6 +66,11 @@ WHITE_SPACE=[ \t\n\x0B\f\r]+
 {
     yybegin(YYINITIAL);
     return CsvTypes.CRLF;
+}
+
+{WHITE_SPACE}
+{
+    return TokenType.WHITE_SPACE;
 }
 
 .

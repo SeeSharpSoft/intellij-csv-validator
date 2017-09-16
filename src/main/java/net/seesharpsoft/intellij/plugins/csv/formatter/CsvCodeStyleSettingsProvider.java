@@ -1,4 +1,4 @@
-package net.seesharpsoft.idea.plugins.csv.formatter;
+package net.seesharpsoft.intellij.plugins.csv.formatter;
 
 import com.intellij.application.options.CodeStyleAbstractConfigurable;
 import com.intellij.application.options.CodeStyleAbstractPanel;
@@ -7,8 +7,7 @@ import com.intellij.openapi.options.Configurable;
 import com.intellij.psi.codeStyle.CodeStyleSettings;
 import com.intellij.psi.codeStyle.CodeStyleSettingsProvider;
 import com.intellij.psi.codeStyle.CustomCodeStyleSettings;
-import com.intellij.psi.codeStyle.LanguageCodeStyleSettingsProvider;
-import net.seesharpsoft.idea.plugins.csv.CsvLanguage;
+import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -48,12 +47,7 @@ public class CsvCodeStyleSettingsProvider extends CodeStyleSettingsProvider {
 
         @Override
         protected void initTabs(CodeStyleSettings settings) {
-            LanguageCodeStyleSettingsProvider provider = LanguageCodeStyleSettingsProvider.forLanguage(getDefaultLanguage());
-            addIndentOptionsTab(settings);
-            if (provider != null) {
-                addSpacesTab(settings);
-                addBlankLinesTab(settings);
-            }
+            addSpacesTab(settings);
         }
     }
 }
