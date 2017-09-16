@@ -19,15 +19,15 @@ public class CsvLanguageCodeStyleSettingsProvider extends LanguageCodeStyleSetti
             consumer.showCustomOption(CsvCodeStyleSettings.class,
                     "TRIM_LEADING_WHITE_SPACES",
                     "Trim leading whitespaces",
-                    "White Spaces");
+                    "Trimming");
             consumer.showCustomOption(CsvCodeStyleSettings.class,
                     "TRIM_TRAILING_WHITE_SPACES",
                     "Trim trailing whitespaces",
-                    "White Spaces");
+                    "Trimming");
             consumer.showCustomOption(CsvCodeStyleSettings.class,
                     "TABULARIZE",
                     "Enabled",
-                    "Tabularize (ignores White Space settings)");
+                    "Tabularize (ignores Trimming settings)");
             consumer.showCustomOption(CsvCodeStyleSettings.class,
                     "LEADING_WHITE_SPACES",
                     "Leading White Spaces",
