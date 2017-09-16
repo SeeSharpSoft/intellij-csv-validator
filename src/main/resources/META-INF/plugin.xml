@@ -18,7 +18,7 @@
     ]]></description>
 
     <change-notes><![CDATA[
-      Setting added: White Space Before/After Comma
+      Setting added: White Space Before/After Comma<br>
       Full support for tabularize with leading white spaces
     ]]>
     </change-notes>
