@@ -42,12 +42,23 @@ public class CsvFormattingInfo {
         return null;
     }
 
+    public ColumnInfo getColumnInfo(int columnIndex) {
+        return infoColumnMap.get(columnIndex);
+    }
+
     public static class ColumnInfo {
 
-        public ColumnInfo(int maxLength) {
+        public ColumnInfo(int columnIndex, int maxLength) {
+            this.columnIndex = columnIndex;
             this.maxLength = maxLength;
             this.nodes = new ArrayList<>();
         }
+
+        public int getColumnIndex() {
+            return columnIndex;
+        }
+
+        private int columnIndex;
 
         private int maxLength;
 

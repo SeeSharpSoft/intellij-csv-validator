@@ -48,19 +48,22 @@ public class CsvFormattingModelBuilder implements FormattingModelBuilder {
         SpacingBuilder builder = new SpacingBuilder(settings, CsvLanguage.INSTANCE);
         if (csvCodeStyleSettings.TRIM_LEADING_WHITE_SPACES || csvCodeStyleSettings.TABULARIZE) {
             builder
-                    .after(CsvTypes.COMMA).spaces(0)
+                    .after(CsvTypes.COMMA).spaceIf(settings.SPACE_AFTER_COMMA)
                     .before(CsvTypes.RECORD).spaces(0)
                     .before(CsvTypes.FIELD).spaces(0);
+        } else if (settings.SPACE_AFTER_COMMA) {
+            builder.after(CsvTypes.COMMA).spaces(1);
         }
+
         if (csvCodeStyleSettings.TRIM_TRAILING_WHITE_SPACES || csvCodeStyleSettings.TABULARIZE) {
             builder
-                    .before(CsvTypes.COMMA).spaces(0)
+                    .before(CsvTypes.COMMA).spaceIf(settings.SPACE_BEFORE_COMMA)
                     .after(CsvTypes.RECORD).spaces(0)
                     .after(CsvTypes.FIELD).spaces(0);
+        } else if (settings.SPACE_BEFORE_COMMA) {
+            builder.before(CsvTypes.COMMA).spaces(1);
         }
-        builder
-                .before(CsvTypes.COMMA).spaceIf(settings.SPACE_BEFORE_COMMA)
-                .after(CsvTypes.COMMA).spaceIf(settings.SPACE_AFTER_COMMA);
+
         return builder;
     }
 
@@ -75,7 +78,7 @@ public class CsvFormattingModelBuilder implements FormattingModelBuilder {
                     if (subChild.getElementType() == CsvTypes.FIELD) {
                         Integer length = subChild.getTextLength();
                         if (!columnInfoMap.containsKey(column)) {
-                            columnInfoMap.put(column, new CsvFormattingInfo.ColumnInfo(length));
+                            columnInfoMap.put(column, new CsvFormattingInfo.ColumnInfo(column, length));
                         } else if (columnInfoMap.get(column).getMaxLength() < length) {
                             columnInfoMap.get(column).setMaxLength(length);
                         }

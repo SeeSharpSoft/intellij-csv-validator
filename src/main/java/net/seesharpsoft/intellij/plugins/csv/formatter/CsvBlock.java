@@ -38,21 +38,45 @@ public class CsvBlock extends AbstractBlock {
     public Spacing getSpacing(@Nullable Block child1, @NotNull Block child2) {
         Spacing spacing;
         if (formattingInfo.getCsvCodeStyleSettings().TABULARIZE && myNode.getElementType() == CsvTypes.RECORD) {
-            ASTNode node = null;
-            CsvFormattingInfo.ColumnInfo columnInfo = null;
-            if (formattingInfo.getCsvCodeStyleSettings().LEADING_WHITE_SPACES && child2 != null && (node = ((CsvBlock) child2).myNode).getElementType() == CsvTypes.FIELD) {
-                columnInfo = formattingInfo.getColumnInfo(node);
-            } else if (!formattingInfo.getCsvCodeStyleSettings().LEADING_WHITE_SPACES && child1 != null && (node = ((CsvBlock) child1).myNode).getElementType() == CsvTypes.FIELD) {
-                columnInfo = formattingInfo.getColumnInfo(node);
-            }
-            int spaces = getAdditionalSpaces((CsvBlock) child1, (CsvBlock) child2);
-            if (columnInfo != null) {
-                spaces += columnInfo.getMaxLength() - node.getTextLength();
-            }
-            spacing = Spacing.createSpacing(spaces, spaces, 0, true, 0);
+            spacing = getSpacingForFields(child1 == null ? null : (CsvBlock) child1, child2 == null ? null : (CsvBlock) child2);
+        } else if (formattingInfo.getCsvCodeStyleSettings().TABULARIZE && formattingInfo.getCsvCodeStyleSettings().LEADING_WHITE_SPACES && myNode.getTreeParent() == null) {
+            spacing = getSpacingForRecords(child1 == null ? null : (CsvBlock) child1, child2 == null ? null : (CsvBlock) child2);
         } else {
             spacing = formattingInfo.getSpacingBuilder().getSpacing(this, child1, child2);
         }
+        return spacing;
+    }
+
+    private Spacing getSpacingForRecords(@Nullable CsvBlock child1, @Nullable CsvBlock child2) {
+        Spacing spacing;
+        Block fieldBlock = null;
+        CsvFormattingInfo.ColumnInfo columnInfo = null;
+        if (child2 != null && child2.myNode.getElementType() == CsvTypes.RECORD) {
+            columnInfo = formattingInfo.getColumnInfo(0);
+            fieldBlock = child2.getSubBlocks().get(0);
+        }
+        int spaces = 0;
+        if (columnInfo != null) {
+            spaces += columnInfo.getMaxLength() - fieldBlock.getTextRange().getLength();
+        }
+        spacing = Spacing.createSpacing(spaces, spaces, 0, true, formattingInfo.getCodeStyleSettings().KEEP_BLANK_LINES_IN_CODE);
+        return spacing;
+    }
+
+    private Spacing getSpacingForFields(@Nullable CsvBlock child1, @NotNull CsvBlock child2) {
+        Spacing spacing;
+        ASTNode node = null;
+        CsvFormattingInfo.ColumnInfo columnInfo = null;
+        if (formattingInfo.getCsvCodeStyleSettings().LEADING_WHITE_SPACES && child2 != null && (node = child2.myNode).getElementType() == CsvTypes.FIELD) {
+            columnInfo = formattingInfo.getColumnInfo(node);
+        } else if (!formattingInfo.getCsvCodeStyleSettings().LEADING_WHITE_SPACES && child1 != null && (node = child1.myNode).getElementType() == CsvTypes.FIELD) {
+            columnInfo = formattingInfo.getColumnInfo(node);
+        }
+        int spaces = getAdditionalSpaces(child1, child2);
+        if (columnInfo != null) {
+            spaces += columnInfo.getMaxLength() - node.getTextLength();
+        }
+        spacing = Spacing.createSpacing(spaces, spaces, 0, true, formattingInfo.getCodeStyleSettings().KEEP_BLANK_LINES_IN_CODE);
         return spacing;
     }
 
@@ -62,6 +86,16 @@ public class CsvBlock extends AbstractBlock {
             return 1;
         }
         return 0;
+    }
+
+    @Override
+    public Indent getIndent() {
+        if (formattingInfo.getCsvCodeStyleSettings().TABULARIZE && formattingInfo.getCsvCodeStyleSettings().LEADING_WHITE_SPACES && myNode.getElementType() == CsvTypes.RECORD) {
+            CsvFormattingInfo.ColumnInfo columnInfo = formattingInfo.getColumnInfo(0);
+            Block fieldBlock = getSubBlocks().get(0);
+            return Indent.getSpaceIndent(columnInfo.getMaxLength() - fieldBlock.getTextRange().getLength());
+        }
+        return null;
     }
 
     @Override
