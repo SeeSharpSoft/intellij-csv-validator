@@ -14,8 +14,8 @@ import java.util.List;
 public class CsvBlock extends AbstractBlock {
     protected CsvFormattingInfo formattingInfo;
 
-    protected CsvBlock(@NotNull ASTNode node, @Nullable Alignment alignment, CsvFormattingInfo formattingInfo) {
-        super(node, Wrap.createWrap(WrapType.NONE, false), alignment);
+    protected CsvBlock(@NotNull ASTNode node, CsvFormattingInfo formattingInfo) {
+        super(node, Wrap.createWrap(WrapType.NONE, false), Alignment.createAlignment());
         this.formattingInfo = formattingInfo;
     }
 
@@ -25,7 +25,7 @@ public class CsvBlock extends AbstractBlock {
         ASTNode node = myNode.getFirstChildNode();
         while (node != null) {
             if (node.getElementType() != TokenType.WHITE_SPACE) {
-                Block block = new CsvBlock(node, Alignment.createAlignment(), formattingInfo);
+                Block block = new CsvBlock(node, formattingInfo);
                 blocks.add(block);
             }
             node = node.getTreeNext();

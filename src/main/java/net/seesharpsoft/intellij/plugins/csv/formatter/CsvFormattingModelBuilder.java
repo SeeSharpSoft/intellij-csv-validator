@@ -1,6 +1,9 @@
 package net.seesharpsoft.intellij.plugins.csv.formatter;
 
-import com.intellij.formatting.*;
+import com.intellij.formatting.FormattingModel;
+import com.intellij.formatting.FormattingModelBuilder;
+import com.intellij.formatting.FormattingModelProvider;
+import com.intellij.formatting.SpacingBuilder;
 import com.intellij.lang.ASTNode;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
@@ -20,14 +23,17 @@ public class CsvFormattingModelBuilder implements FormattingModelBuilder {
     public FormattingModel createModel(PsiElement element, CodeStyleSettings settings) {
         ASTNode root = getRoot(element.getNode());
         CsvCodeStyleSettings customSettings = settings.getCustomSettings(CsvCodeStyleSettings.class);
-        CsvFormattingInfo formattingInfo = new CsvFormattingInfo(customSettings, createSpaceBuilder(customSettings), createColumnInfoMap(root, customSettings));
+        CsvFormattingInfo formattingInfo = new CsvFormattingInfo(
+                customSettings,
+                createSpaceBuilder(customSettings),
+                createColumnInfoMap(root, customSettings)
+        );
 
-        return FormattingModelProvider.createFormattingModelForPsiFile(element.getContainingFile(),
-                new CsvBlock(
-                        root,
-                        Alignment.createAlignment(),
-                        formattingInfo),
-                settings);
+        return FormattingModelProvider.createFormattingModelForPsiFile(
+                element.getContainingFile(),
+                new CsvBlock(root, formattingInfo),
+                settings
+        );
     }
 
     private static ASTNode getRoot(ASTNode node) {
