@@ -2,6 +2,7 @@ package net.seesharpsoft.intellij.plugins.csv.formatter;
 
 import com.intellij.formatting.SpacingBuilder;
 import com.intellij.lang.ASTNode;
+import com.intellij.psi.codeStyle.CodeStyleSettings;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,13 +17,17 @@ public class CsvFormattingInfo {
 
     private SpacingBuilder spacingBuilder;
 
-    public CsvCodeStyleSettings getCodeStyleSettings() {
+    public CsvCodeStyleSettings getCsvCodeStyleSettings() {
+        return codeStyleSettings.getCustomSettings(CsvCodeStyleSettings.class);
+    }
+
+    public CodeStyleSettings getCodeStyleSettings() {
         return codeStyleSettings;
     }
 
-    private CsvCodeStyleSettings codeStyleSettings;
+    private CodeStyleSettings codeStyleSettings;
 
-    public CsvFormattingInfo(CsvCodeStyleSettings codeStyleSettings, SpacingBuilder spacingBuilder, Map<Integer, ColumnInfo> infoColumnMap) {
+    public CsvFormattingInfo(CodeStyleSettings codeStyleSettings, SpacingBuilder spacingBuilder, Map<Integer, ColumnInfo> infoColumnMap) {
         this.infoColumnMap = infoColumnMap;
         this.spacingBuilder = spacingBuilder;
         this.codeStyleSettings = codeStyleSettings;

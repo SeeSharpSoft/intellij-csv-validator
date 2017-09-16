@@ -16,6 +16,9 @@ public class CsvLanguageCodeStyleSettingsProvider extends LanguageCodeStyleSetti
     @Override
     public void customizeSettings(@NotNull CodeStyleSettingsCustomizable consumer, @NotNull SettingsType settingsType) {
         if (settingsType == SettingsType.SPACING_SETTINGS) {
+            consumer.showStandardOptions("SPACE_AFTER_COMMA");
+            consumer.showStandardOptions("SPACE_BEFORE_COMMA");
+
             consumer.showCustomOption(CsvCodeStyleSettings.class,
                     "TRIM_LEADING_WHITE_SPACES",
                     "Trim leading whitespaces",
@@ -23,7 +26,9 @@ public class CsvLanguageCodeStyleSettingsProvider extends LanguageCodeStyleSetti
             consumer.showCustomOption(CsvCodeStyleSettings.class,
                     "TRIM_TRAILING_WHITE_SPACES",
                     "Trim trailing whitespaces",
-                    "Trimming");
+                    "Trimming",
+                    CodeStyleSettingsCustomizable.OptionAnchor.AFTER,
+                    "TRIM_LEADING_WHITE_SPACES");
             consumer.showCustomOption(CsvCodeStyleSettings.class,
                     "TABULARIZE",
                     "Enabled",
@@ -31,7 +36,9 @@ public class CsvLanguageCodeStyleSettingsProvider extends LanguageCodeStyleSetti
             consumer.showCustomOption(CsvCodeStyleSettings.class,
                     "LEADING_WHITE_SPACES",
                     "Leading White Spaces",
-                    "Tabularize (ignores White Space settings)");
+                    "Tabularize (ignores Trimming settings)",
+                    CodeStyleSettingsCustomizable.OptionAnchor.AFTER,
+                    "TABULARIZE");
         }
     }
 
