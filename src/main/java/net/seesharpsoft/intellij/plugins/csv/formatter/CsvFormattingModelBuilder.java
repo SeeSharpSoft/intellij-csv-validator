@@ -9,6 +9,7 @@ import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.codeStyle.CodeStyleSettings;
+import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfo;
 import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
 import org.jetbrains.annotations.NotNull;
@@ -67,8 +68,8 @@ public class CsvFormattingModelBuilder implements FormattingModelBuilder {
         return builder;
     }
 
-    private Map<Integer, CsvFormattingInfo.ColumnInfo> createColumnInfoMap(ASTNode root) {
-        Map<Integer, CsvFormattingInfo.ColumnInfo> columnInfoMap = new HashMap<>();
+    private Map<Integer, CsvColumnInfo<ASTNode>> createColumnInfoMap(ASTNode root) {
+        Map<Integer, CsvColumnInfo<ASTNode>> columnInfoMap = new HashMap<>();
         ASTNode child = root.getFirstChildNode();
         while (child != null) {
             if (child.getElementType() == CsvTypes.RECORD) {
@@ -78,11 +79,11 @@ public class CsvFormattingModelBuilder implements FormattingModelBuilder {
                     if (subChild.getElementType() == CsvTypes.FIELD) {
                         Integer length = subChild.getTextLength();
                         if (!columnInfoMap.containsKey(column)) {
-                            columnInfoMap.put(column, new CsvFormattingInfo.ColumnInfo(column, length));
+                            columnInfoMap.put(column, new CsvColumnInfo(column, length));
                         } else if (columnInfoMap.get(column).getMaxLength() < length) {
                             columnInfoMap.get(column).setMaxLength(length);
                         }
-                        columnInfoMap.get(column).addNode(subChild);
+                        columnInfoMap.get(column).addElement(subChild);
                         ++column;
                     }
                     subChild = subChild.getTreeNext();

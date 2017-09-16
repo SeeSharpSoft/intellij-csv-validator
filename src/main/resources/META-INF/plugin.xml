@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>net.seesharpsoft.intellij.plugins.csv</id>
     <name>CSV Plugin</name>
-    <version>0.3</version>
+    <version>0.5</version>
     <vendor email="mail@seesharpsoft.net" url="https://github.com/SeeSharpSoft/intellij-csv-validator">Martin Sommer
     </vendor>
 
@@ -12,14 +12,14 @@
         <li>syntax validation</li>
         <li>highlighting (configurable)</li>
         <li>content formatting (configurable)</li>
+        <li>structure view (header-entry layout)</li>
       </ul>
 
       <em><b>Note:</b> Default code formatting is 'Tabularize'. Can be changed in Settings -> Editor -> Code Style -> CSV</em>
     ]]></description>
 
     <change-notes><![CDATA[
-      Setting added: White Space Before/After Comma<br>
-      Full support for tabularize with leading white spaces
+      New: Structure view
     ]]>
     </change-notes>
 
@@ -44,6 +44,9 @@
                 implementation="net.seesharpsoft.intellij.plugins.csv.formatter.CsvCodeStyleSettingsProvider"/>
         <langCodeStyleSettingsProvider
                 implementation="net.seesharpsoft.intellij.plugins.csv.formatter.CsvLanguageCodeStyleSettingsProvider"/>
+        <lang.psiStructureViewFactory language="csv"
+                                      implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvStructureViewFactory"/>
+        <iconProvider implementation="net.seesharpsoft.intellij.plugins.csv.CsvIconPovider"/>
     </extensions>
 
     <actions>

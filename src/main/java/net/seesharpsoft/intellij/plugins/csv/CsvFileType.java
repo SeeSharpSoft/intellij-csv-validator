@@ -34,6 +34,6 @@ public class CsvFileType extends LanguageFileType {
     @Nullable
     @Override
     public Icon getIcon() {
-        return CsvIcons.FILE;
+        return CsvIconPovider.FILE;
     }
 }

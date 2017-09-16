@@ -23,7 +23,7 @@ public class CsvColorSettingsPage implements ColorSettingsPage {
     @Nullable
     @Override
     public Icon getIcon() {
-        return CsvIcons.FILE;
+        return CsvIconPovider.FILE;
     }
 
     @NotNull

@@ -4,6 +4,7 @@ import com.intellij.formatting.*;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.TokenType;
 import com.intellij.psi.formatter.common.AbstractBlock;
+import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfo;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -50,7 +51,7 @@ public class CsvBlock extends AbstractBlock {
     private Spacing getSpacingForRecords(@Nullable CsvBlock child1, @Nullable CsvBlock child2) {
         Spacing spacing;
         Block fieldBlock = null;
-        CsvFormattingInfo.ColumnInfo columnInfo = null;
+        CsvColumnInfo columnInfo = null;
         if (child2 != null && child2.myNode.getElementType() == CsvTypes.RECORD) {
             columnInfo = formattingInfo.getColumnInfo(0);
             fieldBlock = child2.getSubBlocks().get(0);
@@ -66,7 +67,7 @@ public class CsvBlock extends AbstractBlock {
     private Spacing getSpacingForFields(@Nullable CsvBlock child1, @NotNull CsvBlock child2) {
         Spacing spacing;
         ASTNode node = null;
-        CsvFormattingInfo.ColumnInfo columnInfo = null;
+        CsvColumnInfo columnInfo = null;
         if (formattingInfo.getCsvCodeStyleSettings().LEADING_WHITE_SPACES && child2 != null && (node = child2.myNode).getElementType() == CsvTypes.FIELD) {
             columnInfo = formattingInfo.getColumnInfo(node);
         } else if (!formattingInfo.getCsvCodeStyleSettings().LEADING_WHITE_SPACES && child1 != null && (node = child1.myNode).getElementType() == CsvTypes.FIELD) {
@@ -91,7 +92,7 @@ public class CsvBlock extends AbstractBlock {
     @Override
     public Indent getIndent() {
         if (formattingInfo.getCsvCodeStyleSettings().TABULARIZE && formattingInfo.getCsvCodeStyleSettings().LEADING_WHITE_SPACES && myNode.getElementType() == CsvTypes.RECORD) {
-            CsvFormattingInfo.ColumnInfo columnInfo = formattingInfo.getColumnInfo(0);
+            CsvColumnInfo columnInfo = formattingInfo.getColumnInfo(0);
             Block fieldBlock = getSubBlocks().get(0);
             return Indent.getSpaceIndent(columnInfo.getMaxLength() - fieldBlock.getTextRange().getLength());
         }
