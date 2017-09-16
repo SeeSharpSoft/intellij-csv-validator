@@ -66,9 +66,7 @@ public class CsvFormattingModelBuilder implements FormattingModelBuilder {
                     if (subChild.getElementType() == CsvTypes.FIELD) {
                         Integer length = subChild.getTextLength();
                         if (!columnInfoMap.containsKey(column)) {
-                            columnInfoMap.put(column,
-                                    new CsvFormattingInfo.ColumnInfo(length)
-                            );
+                            columnInfoMap.put(column, new CsvFormattingInfo.ColumnInfo(length));
                         } else if (columnInfoMap.get(column).getMaxLength() < length) {
                             columnInfoMap.get(column).setMaxLength(length);
                         }

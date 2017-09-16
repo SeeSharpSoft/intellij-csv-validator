@@ -33,16 +33,10 @@ public class CsvBlock extends AbstractBlock {
         return blocks;
     }
 
-    protected Block createBlock(ASTNode node) {
-        if (node.getElementType() != TokenType.WHITE_SPACE) {
-            return new CsvBlock(node, Alignment.createAlignment(), formattingInfo);
-        }
-        return null;
-    }
-
     @Nullable
     @Override
     public Spacing getSpacing(@Nullable Block child1, @NotNull Block child2) {
+        Spacing spacing;
         if (formattingInfo.getCodeStyleSettings().TABULARIZE && myNode.getElementType() == CsvTypes.RECORD) {
             ASTNode node = null;
             CsvFormattingInfo.ColumnInfo columnInfo = null;
@@ -54,10 +48,11 @@ public class CsvBlock extends AbstractBlock {
             if (columnInfo == null) {
                 return Spacing.createSpacing(0, 0, 0, true, 0);
             }
-            int spacing = columnInfo.getMaxLength() - node.getTextLength();
-            return Spacing.createSpacing(spacing, spacing, 0, true, 0);
+            int spaces = columnInfo.getMaxLength() - node.getTextLength();
+            spacing = Spacing.createSpacing(spaces, spaces, 0, true, 0);
+        } else {
+            spacing = formattingInfo.getSpacingBuilder().getSpacing(this, child1, child2);
         }
-        Spacing spacing = formattingInfo.getSpacingBuilder().getSpacing(this, child1, child2);
         return spacing;
     }
 
