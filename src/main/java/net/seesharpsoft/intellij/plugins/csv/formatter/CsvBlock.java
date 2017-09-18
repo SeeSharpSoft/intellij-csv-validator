@@ -23,7 +23,7 @@ public class CsvBlock extends AbstractBlock {
     @Override
     protected List<Block> buildChildren() {
         List<Block> blocks = new ArrayList<>();
-        ASTNode node = myNode.getFirstChildNode();
+        ASTNode node = getNode().getFirstChildNode();
         while (node != null) {
             if (node.getElementType() != TokenType.WHITE_SPACE) {
                 Block block = new CsvBlock(node, formattingInfo);
@@ -37,22 +37,73 @@ public class CsvBlock extends AbstractBlock {
     @Nullable
     @Override
     public Spacing getSpacing(@Nullable Block child1, @NotNull Block child2) {
-        Spacing spacing;
-        if (formattingInfo.getCsvCodeStyleSettings().TABULARIZE && myNode.getElementType() == CsvTypes.RECORD) {
-            spacing = getSpacingForFields(child1 == null ? null : (CsvBlock) child1, child2 == null ? null : (CsvBlock) child2);
-        } else if (formattingInfo.getCsvCodeStyleSettings().TABULARIZE && formattingInfo.getCsvCodeStyleSettings().LEADING_WHITE_SPACES && myNode.getTreeParent() == null) {
-            spacing = getSpacingForRecords(child1 == null ? null : (CsvBlock) child1, child2 == null ? null : (CsvBlock) child2);
-        } else {
+        Spacing spacing = null;
+        if (formattingInfo.getCsvCodeStyleSettings().TABULARIZE) {
+            CsvBlock block1 = child1 == null ? null : (CsvBlock) child1;
+            CsvBlock block2 = child2 == null ? null : (CsvBlock) child2;
+            if (!formattingInfo.getCsvCodeStyleSettings().WHITE_SPACES_OUTSIDE_QUOTES) {
+                spacing = getTabularizeInsideQuoteSpacing(block1, block2);
+            } else {
+                spacing = getTabularizeOutsideQuoteSpacing(block1, block2);
+            }
+        }
+        if (spacing == null) {
             spacing = formattingInfo.getSpacingBuilder().getSpacing(this, child1, child2);
         }
         return spacing;
+    }
+
+    private Spacing getTabularizeOutsideQuoteSpacing(@Nullable CsvBlock child1, @NotNull CsvBlock child2) {
+        Spacing spacing = null;
+        if (getNode().getElementType() == CsvTypes.RECORD) {
+            spacing = getSpacingForFields(child1, child2);
+        } else if (formattingInfo.getCsvCodeStyleSettings().LEADING_WHITE_SPACES && getNode().getTreeParent() == null) {
+            spacing = getSpacingForRecords(child1, child2);
+        }
+        return spacing;
+    }
+
+    private Spacing getTabularizeInsideQuoteSpacing(@Nullable CsvBlock child1, @NotNull CsvBlock child2) {
+        Spacing spacing = null;
+        if (getNode().getElementType() == CsvTypes.RECORD && !CsvFormatHelper.isFieldQuoted(child1) && !CsvFormatHelper.isFieldQuoted(child2)) {
+            spacing = getSpacingForFields(child1, child2);
+        } else if (getNode().getTreeParent() == null && formattingInfo.getCsvCodeStyleSettings().LEADING_WHITE_SPACES &&
+                !CsvFormatHelper.isFirstFieldOfRecordQuoted(child1) && !CsvFormatHelper.isFirstFieldOfRecordQuoted(child2)) {
+            spacing = getSpacingForRecords(child1, child2);
+        } else if (CsvFormatHelper.isFieldQuoted(this)) {
+            if (child1 != null && child1.getNode().getElementType() == CsvTypes.QUOTE && child2 != null) {
+                if (formattingInfo.getCsvCodeStyleSettings().LEADING_WHITE_SPACES) {
+                    // add spaces at the beginning
+                    spacing = getSpacingOfFieldNode();
+                } else {
+                    // trim spaces at the beginning
+                    spacing = Spacing.createSpacing(0, 0, 0, true, formattingInfo.getCodeStyleSettings().KEEP_BLANK_LINES_IN_CODE);
+                }
+            } else if (child2 != null && child2.getNode().getElementType() == CsvTypes.QUOTE && child1 != null) {
+                if (!formattingInfo.getCsvCodeStyleSettings().LEADING_WHITE_SPACES) {
+                    // add spaces at the end
+                    spacing = getSpacingOfFieldNode();
+                } else {
+                    // trim spaces at the end
+                    spacing = Spacing.createSpacing(0, 0, 0, true, formattingInfo.getCodeStyleSettings().KEEP_BLANK_LINES_IN_CODE);
+                }
+            }
+        }
+        return spacing;
+    }
+
+    private Spacing getSpacingOfFieldNode() {
+        CsvColumnInfo columnInfo = formattingInfo.getColumnInfo(this.getNode());
+        int textLength = CsvFormatHelper.getTextLength(getNode(), formattingInfo.getCodeStyleSettings());
+        int spaces = columnInfo.getMaxLength() - textLength;
+        return Spacing.createSpacing(spaces, spaces, 0, true, formattingInfo.getCodeStyleSettings().KEEP_BLANK_LINES_IN_CODE);
     }
 
     private Spacing getSpacingForRecords(@Nullable CsvBlock child1, @Nullable CsvBlock child2) {
         Spacing spacing;
         Block fieldBlock = null;
         CsvColumnInfo columnInfo = null;
-        if (child2 != null && child2.myNode.getElementType() == CsvTypes.RECORD) {
+        if (child2 != null && child2.getNode().getElementType() == CsvTypes.RECORD) {
             columnInfo = formattingInfo.getColumnInfo(0);
             fieldBlock = child2.getSubBlocks().get(0);
         }
@@ -68,9 +119,9 @@ public class CsvBlock extends AbstractBlock {
         Spacing spacing;
         ASTNode node = null;
         CsvColumnInfo columnInfo = null;
-        if (formattingInfo.getCsvCodeStyleSettings().LEADING_WHITE_SPACES && child2 != null && (node = child2.myNode).getElementType() == CsvTypes.FIELD) {
+        if (formattingInfo.getCsvCodeStyleSettings().LEADING_WHITE_SPACES && child2 != null && (node = child2.getNode()).getElementType() == CsvTypes.FIELD) {
             columnInfo = formattingInfo.getColumnInfo(node);
-        } else if (!formattingInfo.getCsvCodeStyleSettings().LEADING_WHITE_SPACES && child1 != null && (node = child1.myNode).getElementType() == CsvTypes.FIELD) {
+        } else if (!formattingInfo.getCsvCodeStyleSettings().LEADING_WHITE_SPACES && child1 != null && (node = child1.getNode()).getElementType() == CsvTypes.FIELD) {
             columnInfo = formattingInfo.getColumnInfo(node);
         }
         int spaces = getAdditionalSpaces(child1, child2);
@@ -82,8 +133,8 @@ public class CsvBlock extends AbstractBlock {
     }
 
     private int getAdditionalSpaces(@Nullable CsvBlock child1, @NotNull CsvBlock child2) {
-        if ((formattingInfo.getCodeStyleSettings().SPACE_AFTER_COMMA && child1 != null && child1.myNode.getElementType() == CsvTypes.COMMA)
-                || (formattingInfo.getCodeStyleSettings().SPACE_BEFORE_COMMA && child2 != null && child2.myNode.getElementType() == CsvTypes.COMMA)) {
+        if ((formattingInfo.getCodeStyleSettings().SPACE_AFTER_COMMA && child1 != null && child1.getNode().getElementType() == CsvTypes.COMMA)
+                || (formattingInfo.getCodeStyleSettings().SPACE_BEFORE_COMMA && child2 != null && child2.getNode().getElementType() == CsvTypes.COMMA)) {
             return 1;
         }
         return 0;
@@ -91,7 +142,7 @@ public class CsvBlock extends AbstractBlock {
 
     @Override
     public Indent getIndent() {
-        if (formattingInfo.getCsvCodeStyleSettings().TABULARIZE && formattingInfo.getCsvCodeStyleSettings().LEADING_WHITE_SPACES && myNode.getElementType() == CsvTypes.RECORD) {
+        if (formattingInfo.getCsvCodeStyleSettings().TABULARIZE && formattingInfo.getCsvCodeStyleSettings().LEADING_WHITE_SPACES && getNode().getElementType() == CsvTypes.RECORD) {
             CsvColumnInfo columnInfo = formattingInfo.getColumnInfo(0);
             Block fieldBlock = getSubBlocks().get(0);
             return Indent.getSpaceIndent(columnInfo.getMaxLength() - fieldBlock.getTextRange().getLength());
@@ -101,6 +152,6 @@ public class CsvBlock extends AbstractBlock {
 
     @Override
     public boolean isLeaf() {
-        return myNode.getFirstChildNode() == null;
+        return getNode().getFirstChildNode() == null;
     }
 }

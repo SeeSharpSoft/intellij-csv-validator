@@ -17,7 +17,24 @@ public class CsvLanguageCodeStyleSettingsProvider extends LanguageCodeStyleSetti
     public void customizeSettings(@NotNull CodeStyleSettingsCustomizable consumer, @NotNull SettingsType settingsType) {
         if (settingsType == SettingsType.SPACING_SETTINGS) {
             consumer.showStandardOptions("SPACE_AFTER_COMMA");
+            consumer.moveStandardOption("SPACE_AFTER_COMMA", "Separator");
             consumer.showStandardOptions("SPACE_BEFORE_COMMA");
+            consumer.moveStandardOption("SPACE_BEFORE_COMMA", "Separator");
+
+            consumer.showCustomOption(CsvCodeStyleSettings.class,
+                    "TABULARIZE",
+                    "Enabled",
+                    "Tabularize (ignores Trimming settings)");
+            consumer.showCustomOption(CsvCodeStyleSettings.class,
+                    "WHITE_SPACES_OUTSIDE_QUOTES",
+                    "Trimming/Spacing Outside Quotes",
+                    "Tabularize (ignores Trimming settings)",
+                    CodeStyleSettingsCustomizable.OptionAnchor.AFTER,
+                    "TABULARIZE");
+            consumer.showCustomOption(CsvCodeStyleSettings.class,
+                    "LEADING_WHITE_SPACES",
+                    "Leading White Spaces",
+                    "Tabularize (ignores Trimming settings)");
 
             consumer.showCustomOption(CsvCodeStyleSettings.class,
                     "TRIM_LEADING_WHITE_SPACES",
@@ -29,16 +46,6 @@ public class CsvLanguageCodeStyleSettingsProvider extends LanguageCodeStyleSetti
                     "Trimming",
                     CodeStyleSettingsCustomizable.OptionAnchor.AFTER,
                     "TRIM_LEADING_WHITE_SPACES");
-            consumer.showCustomOption(CsvCodeStyleSettings.class,
-                    "TABULARIZE",
-                    "Enabled",
-                    "Tabularize (ignores Trimming settings)");
-            consumer.showCustomOption(CsvCodeStyleSettings.class,
-                    "LEADING_WHITE_SPACES",
-                    "Leading White Spaces",
-                    "Tabularize (ignores Trimming settings)",
-                    CodeStyleSettingsCustomizable.OptionAnchor.AFTER,
-                    "TABULARIZE");
         }
     }
 

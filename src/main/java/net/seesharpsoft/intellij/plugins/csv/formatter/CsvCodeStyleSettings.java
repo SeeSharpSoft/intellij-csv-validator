@@ -14,5 +14,7 @@ public class CsvCodeStyleSettings extends CustomCodeStyleSettings {
 
     public boolean TABULARIZE = true;
 
+    public boolean WHITE_SPACES_OUTSIDE_QUOTES = false;
+
     public boolean LEADING_WHITE_SPACES = false;
 }

@@ -1,14 +1,15 @@
 <idea-plugin>
     <id>net.seesharpsoft.intellij.plugins.csv</id>
     <name>CSV Plugin</name>
-    <version>0.5</version>
+    <version>0.6</version>
     <vendor email="mail@seesharpsoft.net" url="https://github.com/SeeSharpSoft/intellij-csv-validator">Martin Sommer
     </vendor>
 
     <description><![CDATA[
-      Lightweight CSV plugin that supports<br>
+      Lightweight CSV plugin that supports editing files in CSV format.<br><br>
+      Features:<br>
       <ul>
-        <li>CSV file support in project view</li>
+        <li>CSV file icon in project view</li>
         <li>syntax validation</li>
         <li>highlighting (configurable)</li>
         <li>content formatting (configurable)</li>
@@ -19,7 +20,7 @@
     ]]></description>
 
     <change-notes><![CDATA[
-      New: Structure view
+      New: Trimming/Spacing inside or outside quotes
     ]]>
     </change-notes>
 

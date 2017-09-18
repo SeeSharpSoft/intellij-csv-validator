@@ -14,6 +14,7 @@ import org.jetbrains.annotations.Nullable;
 public class CsvCodeStyleSettingsProvider extends CodeStyleSettingsProvider {
     @Override
     public CustomCodeStyleSettings createCustomSettings(CodeStyleSettings settings) {
+        settings.SPACE_AFTER_COMMA = false;
         return new CsvCodeStyleSettings(settings);
     }
 
