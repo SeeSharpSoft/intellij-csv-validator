@@ -103,12 +103,13 @@ public class CsvBlock extends AbstractBlock {
         Spacing spacing;
         Block fieldBlock = null;
         CsvColumnInfo columnInfo = null;
+        List<Block> subBlocks = child2.getSubBlocks();
         if (child2 != null && child2.getNode().getElementType() == CsvTypes.RECORD) {
             columnInfo = formattingInfo.getColumnInfo(0);
-            fieldBlock = child2.getSubBlocks().get(0);
+            fieldBlock = subBlocks.get(0);
         }
         int spaces = 0;
-        if (columnInfo != null) {
+        if (columnInfo != null && subBlocks.size() > 1) {
             spaces += columnInfo.getMaxLength() - fieldBlock.getTextRange().getLength();
         }
         spacing = Spacing.createSpacing(spaces, spaces, 0, true, formattingInfo.getCodeStyleSettings().KEEP_BLANK_LINES_IN_CODE);
@@ -142,7 +143,10 @@ public class CsvBlock extends AbstractBlock {
 
     @Override
     public Indent getIndent() {
-        if (formattingInfo.getCsvCodeStyleSettings().TABULARIZE && formattingInfo.getCsvCodeStyleSettings().LEADING_WHITE_SPACES && getNode().getElementType() == CsvTypes.RECORD) {
+        if (formattingInfo.getCsvCodeStyleSettings().TABULARIZE
+                && formattingInfo.getCsvCodeStyleSettings().LEADING_WHITE_SPACES
+                && getNode().getElementType() == CsvTypes.RECORD
+                && (formattingInfo.getCsvCodeStyleSettings().WHITE_SPACES_OUTSIDE_QUOTES || !CsvFormatHelper.isFirstFieldOfRecordQuoted(this))) {
             CsvColumnInfo columnInfo = formattingInfo.getColumnInfo(0);
             Block fieldBlock = getSubBlocks().get(0);
             return Indent.getSpaceIndent(columnInfo.getMaxLength() - fieldBlock.getTextRange().getLength());

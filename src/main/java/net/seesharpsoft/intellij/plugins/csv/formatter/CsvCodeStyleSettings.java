@@ -16,5 +16,5 @@ public class CsvCodeStyleSettings extends CustomCodeStyleSettings {
 
     public boolean WHITE_SPACES_OUTSIDE_QUOTES = false;
 
-    public boolean LEADING_WHITE_SPACES = false;
+    public boolean LEADING_WHITE_SPACES = true;
 }

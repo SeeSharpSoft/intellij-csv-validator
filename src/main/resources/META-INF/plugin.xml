@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>net.seesharpsoft.intellij.plugins.csv</id>
     <name>CSV Plugin</name>
-    <version>0.6</version>
+    <version>0.7</version>
     <vendor email="mail@seesharpsoft.net" url="https://github.com/SeeSharpSoft/intellij-csv-validator">Martin Sommer
     </vendor>
 
@@ -20,7 +20,9 @@
     ]]></description>
 
     <change-notes><![CDATA[
-      New: Trimming/Spacing inside or outside quotes
+      New: Trimming/Spacing inside or outside quotes<br>
+      Fixed: White spaces will not added to empty line<br>
+      Default settings changed
     ]]>
     </change-notes>
 
@@ -32,7 +34,6 @@
     <depends>com.intellij.modules.lang</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <!-- Add your extensions here -->
         <fileTypeFactory implementation="net.seesharpsoft.intellij.plugins.csv.CsvFileTypeFactory"/>
         <lang.parserDefinition language="csv"
                                implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvParserDefinition"/>
