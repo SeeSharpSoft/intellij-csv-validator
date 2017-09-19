@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>net.seesharpsoft.intellij.plugins.csv</id>
     <name>CSV Plugin</name>
-    <version>0.7</version>
+    <version>0.8</version>
     <vendor email="mail@seesharpsoft.net" url="https://github.com/SeeSharpSoft/intellij-csv-validator">Martin Sommer
     </vendor>
 
@@ -15,14 +15,13 @@
         <li>content formatting (configurable)</li>
         <li>structure view (header-entry layout)</li>
       </ul>
-
+      <br>
+      After installation & restart, the IDE needs some time to re-index files before the plugin becomes active.<br><br>
       <em><b>Note:</b> Default code formatting is 'Tabularize'. Can be changed in Settings -> Editor -> Code Style -> CSV</em>
     ]]></description>
 
     <change-notes><![CDATA[
-      New: Trimming/Spacing inside or outside quotes<br>
-      Fixed: White spaces will not added to empty line<br>
-      Default settings changed
+      Structure View: fix empty value handling ('<undefined>' introduced)
     ]]>
     </change-notes>
 

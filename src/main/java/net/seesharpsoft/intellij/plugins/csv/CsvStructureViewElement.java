@@ -6,11 +6,14 @@ import com.intellij.ide.util.treeView.smartTree.TreeElement;
 import com.intellij.navigation.ItemPresentation;
 import com.intellij.navigation.NavigationItem;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiElementFactory;
+import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiNamedElement;
 import com.intellij.psi.util.PsiTreeUtil;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvField;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvFile;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvRecord;
+import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -82,9 +85,12 @@ public abstract class CsvStructureViewElement implements StructureViewTreeElemen
         return element.getIcon(ICON_FLAG_VISIBILITY);
     }
 
+    protected PsiElement createEmptyPsiField() {
+        return PsiElementFactory.SERVICE.getInstance(element.getProject()).createDummyHolder("<undefined>", CsvTypes.FIELD, null);
+    }
 
     public static class File extends CsvStructureViewElement {
-        public File(PsiElement element) {
+        public File(PsiFile element) {
             super(element);
         }
 
@@ -95,7 +101,11 @@ public abstract class CsvStructureViewElement implements StructureViewTreeElemen
                 TreeElement[] children = new TreeElement[columnInfoMap.size()];
                 for (Map.Entry<Integer, CsvColumnInfo<PsiElement>> entry : columnInfoMap.entrySet()) {
                     CsvColumnInfo<PsiElement> columnInfo = entry.getValue();
-                    children[entry.getKey()] = new Header(columnInfo.getHeaderElement(), columnInfo);
+                    PsiElement psiElement = columnInfo.getHeaderElement();
+                    if (psiElement == null) {
+                        psiElement = createEmptyPsiField();
+                    }
+                    children[entry.getKey()] = new Header(psiElement, columnInfo);
                 }
                 return children;
             } else {
@@ -106,6 +116,7 @@ public abstract class CsvStructureViewElement implements StructureViewTreeElemen
         private Map<Integer, CsvColumnInfo<PsiElement>> createColumnInfoMap(CsvFile csvFile) {
             Map<Integer, CsvColumnInfo<PsiElement>> columnInfoMap = new HashMap<>();
             CsvRecord[] records = PsiTreeUtil.getChildrenOfType(csvFile, CsvRecord.class);
+            int row = 0;
             for (CsvRecord record : records) {
                 int column = 0;
                 for (CsvField field : record.getFieldList()) {
@@ -115,9 +126,10 @@ public abstract class CsvStructureViewElement implements StructureViewTreeElemen
                     } else if (columnInfoMap.get(column).getMaxLength() < length) {
                         columnInfoMap.get(column).setMaxLength(length);
                     }
-                    columnInfoMap.get(column).addElement(field);
+                    columnInfoMap.get(column).addElement(field, row);
                     ++column;
                 }
+                ++row;
             }
             return columnInfoMap;
         }
@@ -139,7 +151,7 @@ public abstract class CsvStructureViewElement implements StructureViewTreeElemen
             TreeElement[] children = new TreeElement[elements.size() - 1];
             for (PsiElement element : elements) {
                 if (rowIndex > 0) {
-                    children[rowIndex - 1] = new Field(element, rowIndex - 1);
+                    children[rowIndex - 1] = new Field(element == null ? createEmptyPsiField() : element, rowIndex - 1);
                 }
                 ++rowIndex;
             }

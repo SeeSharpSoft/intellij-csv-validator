@@ -38,6 +38,17 @@ public class CsvColumnInfo<T> {
         return elements.add(element);
     }
 
+    public void addElement(T element, int row) {
+        if (row == elements.size()) {
+            addElement(element);
+        } else if (row < elements.size()) {
+            elements.set(row, element);
+        } else {
+            elements.addAll(Collections.nCopies(row - elements.size(), null));
+            addElement(element);
+        }
+    }
+
     public boolean containsElement(T element) {
         return elements.contains(element);
     }
