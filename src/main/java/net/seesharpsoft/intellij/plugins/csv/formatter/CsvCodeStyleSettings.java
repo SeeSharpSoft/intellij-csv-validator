@@ -8,6 +8,10 @@ public class CsvCodeStyleSettings extends CustomCodeStyleSettings {
         super("CsvCodeStyleSettings", settings);
     }
 
+    public boolean SPACE_BEFORE_SEPARATOR = false;
+
+    public boolean SPACE_AFTER_SEPARATOR = false;
+
     public boolean TRIM_LEADING_WHITE_SPACES = false;
 
     public boolean TRIM_TRAILING_WHITE_SPACES = false;

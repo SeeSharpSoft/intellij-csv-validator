@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>net.seesharpsoft.intellij.plugins.csv</id>
     <name>CSV Plugin</name>
-    <version>0.8</version>
+    <version>0.9</version>
     <vendor email="mail@seesharpsoft.net" url="https://github.com/SeeSharpSoft/intellij-csv-validator">Martin Sommer
     </vendor>
 
@@ -22,6 +22,7 @@
 
     <change-notes><![CDATA[
       Structure View: fix empty value handling ('<undefined>' introduced)
+      Settings: all settings now visible in IDE versions prior 2017.1
     ]]>
     </change-notes>
 

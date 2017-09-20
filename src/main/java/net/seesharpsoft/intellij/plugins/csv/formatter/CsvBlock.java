@@ -134,8 +134,8 @@ public class CsvBlock extends AbstractBlock {
     }
 
     private int getAdditionalSpaces(@Nullable CsvBlock child1, @NotNull CsvBlock child2) {
-        if ((formattingInfo.getCodeStyleSettings().SPACE_AFTER_COMMA && child1 != null && child1.getNode().getElementType() == CsvTypes.COMMA)
-                || (formattingInfo.getCodeStyleSettings().SPACE_BEFORE_COMMA && child2 != null && child2.getNode().getElementType() == CsvTypes.COMMA)) {
+        if ((formattingInfo.getCsvCodeStyleSettings().SPACE_AFTER_SEPARATOR && child1 != null && child1.getNode().getElementType() == CsvTypes.COMMA)
+                || (formattingInfo.getCsvCodeStyleSettings().SPACE_BEFORE_SEPARATOR && child2 != null && child2.getNode().getElementType() == CsvTypes.COMMA)) {
             return 1;
         }
         return 0;

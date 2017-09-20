@@ -42,19 +42,19 @@ public class CsvFormatHelper {
         SpacingBuilder builder = new SpacingBuilder(settings, CsvLanguage.INSTANCE);
         if (csvCodeStyleSettings.TRIM_LEADING_WHITE_SPACES || csvCodeStyleSettings.TABULARIZE) {
             builder
-                    .after(CsvTypes.COMMA).spaceIf(settings.SPACE_AFTER_COMMA)
+                    .after(CsvTypes.COMMA).spaceIf(csvCodeStyleSettings.SPACE_AFTER_SEPARATOR)
                     .before(CsvTypes.RECORD).spaces(0)
                     .before(CsvTypes.FIELD).spaces(0);
-        } else if (settings.SPACE_AFTER_COMMA) {
+        } else if (csvCodeStyleSettings.SPACE_AFTER_SEPARATOR) {
             builder.after(CsvTypes.COMMA).spaces(1);
         }
 
         if (csvCodeStyleSettings.TRIM_TRAILING_WHITE_SPACES || csvCodeStyleSettings.TABULARIZE) {
             builder
-                    .before(CsvTypes.COMMA).spaceIf(settings.SPACE_BEFORE_COMMA)
+                    .before(CsvTypes.COMMA).spaceIf(csvCodeStyleSettings.SPACE_BEFORE_SEPARATOR)
                     .after(CsvTypes.RECORD).spaces(0)
                     .after(CsvTypes.FIELD).spaces(0);
-        } else if (settings.SPACE_BEFORE_COMMA) {
+        } else if (csvCodeStyleSettings.SPACE_BEFORE_SEPARATOR) {
             builder.before(CsvTypes.COMMA).spaces(1);
         }
 

@@ -15,11 +15,28 @@ public class CsvLanguageCodeStyleSettingsProvider extends LanguageCodeStyleSetti
 
     @Override
     public void customizeSettings(@NotNull CodeStyleSettingsCustomizable consumer, @NotNull SettingsType settingsType) {
-        if (settingsType == SettingsType.SPACING_SETTINGS) {
-            consumer.showStandardOptions("SPACE_AFTER_COMMA");
-            consumer.moveStandardOption("SPACE_AFTER_COMMA", "Separator");
-            consumer.showStandardOptions("SPACE_BEFORE_COMMA");
-            consumer.moveStandardOption("SPACE_BEFORE_COMMA", "Separator");
+        if (settingsType == SettingsType.LANGUAGE_SPECIFIC) {
+            consumer.showCustomOption(CsvCodeStyleSettings.class,
+                    "SPACE_BEFORE_SEPARATOR",
+                    "Space before separator",
+                    "Separator");
+            consumer.showCustomOption(CsvCodeStyleSettings.class,
+                    "SPACE_AFTER_SEPARATOR",
+                    "Space after separator",
+                    "Separator",
+                    CodeStyleSettingsCustomizable.OptionAnchor.AFTER,
+                    "SPACE_BEFORE_SEPARATOR");
+
+            consumer.showCustomOption(CsvCodeStyleSettings.class,
+                    "TRIM_LEADING_WHITE_SPACES",
+                    "Trim leading whitespaces",
+                    "Trimming");
+            consumer.showCustomOption(CsvCodeStyleSettings.class,
+                    "TRIM_TRAILING_WHITE_SPACES",
+                    "Trim trailing whitespaces",
+                    "Trimming",
+                    CodeStyleSettingsCustomizable.OptionAnchor.AFTER,
+                    "TRIM_LEADING_WHITE_SPACES");
 
             consumer.showCustomOption(CsvCodeStyleSettings.class,
                     "TABULARIZE",
@@ -36,16 +53,7 @@ public class CsvLanguageCodeStyleSettingsProvider extends LanguageCodeStyleSetti
                     "Leading White Spaces",
                     "Tabularize (ignores Trimming settings)");
 
-            consumer.showCustomOption(CsvCodeStyleSettings.class,
-                    "TRIM_LEADING_WHITE_SPACES",
-                    "Trim leading whitespaces",
-                    "Trimming");
-            consumer.showCustomOption(CsvCodeStyleSettings.class,
-                    "TRIM_TRAILING_WHITE_SPACES",
-                    "Trim trailing whitespaces",
-                    "Trimming",
-                    CodeStyleSettingsCustomizable.OptionAnchor.AFTER,
-                    "TRIM_LEADING_WHITE_SPACES");
+
         }
     }
 
