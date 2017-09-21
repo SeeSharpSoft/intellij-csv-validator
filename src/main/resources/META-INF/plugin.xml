@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>net.seesharpsoft.intellij.plugins.csv</id>
     <name>CSV Plugin</name>
-    <version>0.9</version>
+    <version>1.0RC1</version>
     <vendor email="mail@seesharpsoft.net" url="https://github.com/SeeSharpSoft/intellij-csv-validator">Martin Sommer
     </vendor>
 
@@ -11,7 +11,7 @@
       <ul>
         <li>CSV file icon in project view</li>
         <li>syntax validation</li>
-        <li>highlighting (configurable)</li>
+        <li>syntax highlighting (configurable)</li>
         <li>content formatting (configurable)</li>
         <li>structure view (header-entry layout)</li>
       </ul>
@@ -21,8 +21,7 @@
     ]]></description>
 
     <change-notes><![CDATA[
-      Structure View: fix empty value handling ('<undefined>' introduced)
-      Settings: all settings now visible in IDE versions prior 2017.1
+      New settings: Value separator - comma and semicolon supported
     ]]>
     </change-notes>
 
@@ -49,6 +48,8 @@
         <lang.psiStructureViewFactory language="csv"
                                       implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvStructureViewFactory"/>
         <iconProvider implementation="net.seesharpsoft.intellij.plugins.csv.CsvIconPovider"/>
+        <editorHighlighterProvider filetype="CSV"
+                                   implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvEditorHighlighterProvider"/>
     </extensions>
 
     <actions>

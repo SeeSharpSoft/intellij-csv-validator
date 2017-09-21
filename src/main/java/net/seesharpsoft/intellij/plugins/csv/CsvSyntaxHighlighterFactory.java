@@ -10,6 +10,6 @@ public class CsvSyntaxHighlighterFactory extends SyntaxHighlighterFactory {
     @NotNull
     @Override
     public SyntaxHighlighter getSyntaxHighlighter(Project project, VirtualFile virtualFile) {
-        return new CsvSyntaxHighlighter();
+        return new CsvSyntaxHighlighter(project);
     }
 }

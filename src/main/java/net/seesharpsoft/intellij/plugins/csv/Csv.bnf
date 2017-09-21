@@ -1,6 +1,8 @@
 {
   parserClass="net.seesharpsoft.intellij.plugins.csv.parser.CsvParser"
 
+  parserImports=["static net.seesharpsoft.intellij.plugins.csv.parser.CsvParserUtil.*"]
+
   extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
 
   psiClassPrefix="Csv"
@@ -13,9 +15,9 @@
   tokenTypeClass="net.seesharpsoft.intellij.plugins.csv.psi.CsvTokenType"
 
   tokens=[
-    TEXT='regexp:[^,\r\n"]+'
-    ESCAPED_TEXT='regexp:([,\r\n\f]|"")+'
-    COMMA=','
+    TEXT='regexp:[^,;\r\n"]+'
+    ESCAPED_TEXT='regexp:([,;\r\n]|"")+'
+    COMMA='regexp:[,;]'
     QUOTE='"'
     CRLF='regexp:\n'
    ]
@@ -23,7 +25,7 @@
 
 csvFile ::= record (CRLF record)* [CRLF]
 
-record ::= field (COMMA field)*
+record ::= field ( << separator >> COMMA field)*
 
 field ::= (escaped | nonEscaped)
 

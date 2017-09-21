@@ -2,7 +2,9 @@ package net.seesharpsoft.intellij.plugins.csv;
 
 import com.intellij.lexer.FlexLexer;
 import com.intellij.psi.tree.IElementType;
+import com.intellij.openapi.project.Project;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
+import static net.seesharpsoft.intellij.plugins.csv.formatter.CsvCodeStyleSettings.getCurrentSeparator;
 import com.intellij.psi.TokenType;
 
 %%
@@ -12,15 +14,29 @@ import com.intellij.psi.TokenType;
 %unicode
 %function advance
 %type IElementType
+%{
+  private Project project;
+
+  private String currentSeparator;
+
+  /**
+   * Provide constructor that supports a Project as parameter.
+   */
+  CsvLexer(java.io.Reader in, Project project) {
+    this(in);
+    this.project = project;
+    this.currentSeparator = getCurrentSeparator(project);
+  }
+%}
 %eof{  return;
 %eof}
 
-TEXT=[^ \t\f,\r\n\"]+
-ESCAPED_TEXT=([,\r\n]|\"\")+
+TEXT=[^ ,;\r\n\"]+
+ESCAPED_TEXT=([,;\r\n]|\"\")+
 QUOTE=\"
-COMMA=\,
+COMMA=[,;]
 EOL=\n
-WHITE_SPACE=[ \t\f]+
+WHITE_SPACE=[ \f\t]+
 
 %state AFTER_TEXT
 %state ESCAPED_TEXT
@@ -58,8 +74,15 @@ WHITE_SPACE=[ \t\f]+
 
 <YYINITIAL, AFTER_TEXT, UNESCAPED_TEXT> {COMMA}
 {
-    yybegin(YYINITIAL);
-    return CsvTypes.COMMA;
+    if (currentSeparator.equals(yytext().toString())) {
+        yybegin(YYINITIAL);
+        return CsvTypes.COMMA;
+    }
+    if (yystate() != AFTER_TEXT) {
+        yybegin(UNESCAPED_TEXT);
+        return CsvTypes.TEXT;
+    }
+    return TokenType.BAD_CHARACTER;
 }
 
 <YYINITIAL, AFTER_TEXT, UNESCAPED_TEXT> {EOL}

@@ -5,6 +5,7 @@ import com.intellij.openapi.editor.DefaultLanguageHighlighterColors;
 import com.intellij.openapi.editor.HighlighterColors;
 import com.intellij.openapi.editor.colors.TextAttributesKey;
 import com.intellij.openapi.fileTypes.SyntaxHighlighterBase;
+import com.intellij.openapi.project.Project;
 import com.intellij.psi.TokenType;
 import com.intellij.psi.tree.IElementType;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
@@ -31,10 +32,16 @@ public class CsvSyntaxHighlighter extends SyntaxHighlighterBase {
     private static final TextAttributesKey[] ESCAPED_TEXT_KEYS = new TextAttributesKey[]{ESCAPED_TEXT};
     private static final TextAttributesKey[] EMPTY_KEYS = new TextAttributesKey[0];
 
+    private Project project;
+
+    public CsvSyntaxHighlighter(Project project) {
+        this.project = project;
+    }
+
     @NotNull
     @Override
     public Lexer getHighlightingLexer() {
-        return new CsvLexerAdapter();
+        return new CsvLexerAdapter(this.project);
     }
 
     @NotNull

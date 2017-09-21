@@ -5,7 +5,13 @@ import com.intellij.application.options.CodeStyleAbstractPanel;
 import com.intellij.application.options.TabbedLanguageCodeStylePanel;
 import com.intellij.application.options.codeStyle.WrappingAndBracesPanel;
 import com.intellij.lang.Language;
+import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.editor.colors.EditorColorsScheme;
+import com.intellij.openapi.editor.ex.EditorEx;
+import com.intellij.openapi.editor.highlighter.EditorHighlighter;
 import com.intellij.openapi.options.Configurable;
+import com.intellij.openapi.project.Project;
+import com.intellij.psi.PsiFile;
 import com.intellij.psi.codeStyle.CodeStyleSettings;
 import com.intellij.psi.codeStyle.CodeStyleSettingsProvider;
 import com.intellij.psi.codeStyle.CustomCodeStyleSettings;
@@ -72,6 +78,31 @@ public class CsvCodeStyleSettingsProvider extends CodeStyleSettingsProvider {
             @Override
             public Language getDefaultLanguage() {
                 return CsvCodeStyleMainPanel.this.getDefaultLanguage();
+            }
+
+            private void updatePreviewHighlighter(EditorEx editor) {
+                EditorColorsScheme scheme = editor.getColorsScheme();
+                editor.getSettings().setCaretRowShown(false);
+                EditorHighlighter highlighter = this.createHighlighter(scheme);
+                if (highlighter != null) {
+                    editor.setHighlighter(highlighter);
+                }
+            }
+
+            @Override
+            protected PsiFile createFileFromText(final Project project, final String text) {
+                // the highlighter is not properly updated - do it manually
+                Editor editor = this.getEditor();
+                if (editor != null) {
+                    updatePreviewHighlighter((EditorEx) editor);
+                }
+
+                return super.createFileFromText(project, applySettingsToText(project, text));
+            }
+
+            private String applySettingsToText(Project project, String text) {
+                return CsvCodeStyleSettings.REPLACE_DEFAULT_SEPARATOR_PATTERN
+                        .matcher(text).replaceAll(CsvCodeStyleSettings.getCurrentSeparator(project));
             }
         }
     }

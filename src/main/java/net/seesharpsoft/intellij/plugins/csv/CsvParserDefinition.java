@@ -24,7 +24,7 @@ public class CsvParserDefinition implements ParserDefinition {
     @NotNull
     @Override
     public Lexer createLexer(Project project) {
-        return new CsvLexerAdapter();
+        return new CsvLexerAdapter(project);
     }
 
     @Override

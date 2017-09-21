@@ -14,7 +14,7 @@ import java.util.Map;
 public class CsvColorSettingsPage implements ColorSettingsPage {
 
     private static final AttributesDescriptor[] DESCRIPTORS = new AttributesDescriptor[]{
-            new AttributesDescriptor("Comma", CsvSyntaxHighlighter.COMMA),
+            new AttributesDescriptor("Separator", CsvSyntaxHighlighter.COMMA),
             new AttributesDescriptor("Quote", CsvSyntaxHighlighter.QUOTE),
             new AttributesDescriptor("Text", CsvSyntaxHighlighter.TEXT),
             new AttributesDescriptor("Escaped Text", CsvSyntaxHighlighter.ESCAPED_TEXT),
@@ -29,7 +29,7 @@ public class CsvColorSettingsPage implements ColorSettingsPage {
     @NotNull
     @Override
     public SyntaxHighlighter getHighlighter() {
-        return new CsvSyntaxHighlighter();
+        return new CsvSyntaxHighlighter(null);
     }
 
     @NotNull

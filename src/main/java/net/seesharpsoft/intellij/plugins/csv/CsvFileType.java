@@ -16,7 +16,7 @@ public class CsvFileType extends LanguageFileType {
     @NotNull
     @Override
     public String getName() {
-        return "CSV file";
+        return "CSV";
     }
 
     @NotNull
