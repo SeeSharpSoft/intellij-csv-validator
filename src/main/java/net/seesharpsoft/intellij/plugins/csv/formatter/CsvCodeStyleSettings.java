@@ -1,5 +1,6 @@
 package net.seesharpsoft.intellij.plugins.csv.formatter;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectCoreUtil;
 import com.intellij.psi.codeStyle.CodeStyleSettings;
@@ -20,6 +21,9 @@ public class CsvCodeStyleSettings extends CustomCodeStyleSettings {
     public static final Pattern REPLACE_DEFAULT_SEPARATOR_PATTERN = Pattern.compile(CsvCodeStyleSettings.DEFAULT_SEPARATOR);
 
     public static String getCurrentSeparator(@Nullable Project project) {
+        if (ApplicationManager.getApplication().isUnitTestMode()) {
+            return DEFAULT_SEPARATOR;
+        }
         if (project != null) {
             CodeStyleSettings codeStyleSettings = CodeStyleSettingsManager.getInstance(project).getCurrentSettings();
             if (codeStyleSettings != null) {
