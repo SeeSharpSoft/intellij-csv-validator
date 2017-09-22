@@ -1,4 +1,4 @@
-#Lightweight CSV plugin for JetBrains IDE family
+# Lightweight CSV plugin for JetBrains IDE family
 
 Compatible with: IntelliJ IDEA  PhpStorm  WebStorm  PyCharm  RubyMine  AppCode  CLion  Gogland  DataGrip  Rider  MPS  Android Studio - for Versions >= 2016.1
 
