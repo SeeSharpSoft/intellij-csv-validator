@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>net.seesharpsoft.intellij.plugins.csv</id>
     <name>CSV Plugin</name>
-    <version>1.0RC1</version>
+    <version>1.0RC2</version>
     <vendor email="mail@seesharpsoft.net" url="https://github.com/SeeSharpSoft/intellij-csv-validator">Martin Sommer
     </vendor>
 
@@ -9,11 +9,12 @@
       Lightweight CSV plugin that supports editing files in CSV format.<br><br>
       Features:<br>
       <ul>
-        <li>CSV file icon in project view</li>
+        <li>CSV file detection</li>
         <li>syntax validation</li>
         <li>syntax highlighting (configurable)</li>
         <li>content formatting (configurable)</li>
         <li>structure view (header-entry layout)</li>
+        <li>support for ',' or ';' as value separator</li>
       </ul>
       <br>
       After installation & restart, the IDE needs some time to re-index files before the plugin becomes active.<br><br>
