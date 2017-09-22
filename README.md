@@ -1,7 +1,15 @@
-# CSV plugin for IntelliJ Idea
-Lightweight CSV plugin that supports
-      
-- CSV file support in project view
+#Lightweight CSV plugin for JetBrains IDE family
+
+Compatible with: IntelliJ IDEA  PhpStorm  WebStorm  PyCharm  RubyMine  AppCode  CLion  Gogland  DataGrip  Rider  MPS  Android Studio - for Versions >= 2016.1
+
+**Features:**
+
+- CSV file detection
 - syntax validation
-- highlighting (configurable)
+- syntax highlighting (configurable)
 - content formatting (configurable)
+- structure view (header-entry layout)
+- support for ',' or ';' as value separator
+
+
+JetBrains Plugin Repository Link: https://plugins.jetbrains.com/plugin/10037-csv-plugin
