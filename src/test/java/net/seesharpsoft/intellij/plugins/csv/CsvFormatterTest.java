@@ -45,7 +45,7 @@ public class CsvFormatterTest extends LightCodeInsightFixtureTestCase {
                 (binarySettings & 8) != 0,
                 (binarySettings & 16) != 0,
                 (binarySettings & 32) != 0,
-                (binarySettings & 1) != 64);
+                (binarySettings & 64) != 0);
     }
 
     private void executeTestConfiguration(int binarySettings, String relativeTargetPath) {
@@ -53,7 +53,7 @@ public class CsvFormatterTest extends LightCodeInsightFixtureTestCase {
             relativeTargetPath = ".";
         }
 
-        myFixture.configureByFiles("TestData.csv");
+        myFixture.configureByFiles(relativeTargetPath + "/TestData.csv");
 
         initCsvCodeStyleSettings(binarySettings);
 
@@ -83,6 +83,15 @@ public class CsvFormatterTest extends LightCodeInsightFixtureTestCase {
         }
     }
 
+    public void testSpecialFormattedFiles() throws Exception {
+        int[] optionsToTest = new int[]{0, 1, 16, 17, 18, 19};
+        for (int i = 0; i < optionsToTest.length; ++i) {
+            tearDown();
+            setUp();
+            executeTestConfiguration(optionsToTest[i], "/special");
+        }
+    }
+
     /**
      * This function should be executed (remove the underscore) if the current results are correct (manual testing).
      *
@@ -93,7 +102,7 @@ public class CsvFormatterTest extends LightCodeInsightFixtureTestCase {
             tearDown();
             setUp();
 
-            myFixture.configureByFiles("TestData.csv");
+            myFixture.configureByFiles("/generated/TestData.csv");
 
             initCsvCodeStyleSettings(binarySettings);
 

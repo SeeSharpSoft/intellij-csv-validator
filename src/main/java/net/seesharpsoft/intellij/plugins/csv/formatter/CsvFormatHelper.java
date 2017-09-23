@@ -90,12 +90,12 @@ public class CsvFormatHelper {
     public static boolean isFirstFieldOfRecordQuoted(@Nullable CsvBlock block) {
         if (block != null && block.getNode().getElementType() == CsvTypes.RECORD) {
             List<Block> subBlocks = block.buildChildren();
-            return isFieldQuoted((CsvBlock) subBlocks.get(0));
+            return isQuotedField((CsvBlock) subBlocks.get(0));
         }
         return false;
     }
 
-    public static boolean isFieldQuoted(@Nullable CsvBlock block) {
+    public static boolean isQuotedField(@Nullable CsvBlock block) {
         if (block != null && block.getNode().getElementType() == CsvTypes.FIELD) {
             List<Block> subBlocks = block.buildChildren();
             if (subBlocks.size() > 0) {
