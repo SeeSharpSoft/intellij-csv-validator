@@ -43,8 +43,10 @@ public class CsvFormatHelper {
         if (csvCodeStyleSettings.TRIM_LEADING_WHITE_SPACES || csvCodeStyleSettings.TABULARIZE) {
             builder
                     .after(CsvTypes.COMMA).spaceIf(csvCodeStyleSettings.SPACE_AFTER_SEPARATOR)
-                    .before(CsvTypes.RECORD).spaces(0)
-                    .before(CsvTypes.FIELD).spaces(0);
+                    .after(CsvTypes.CRLF).spaces(0);
+            if (csvCodeStyleSettings.TABULARIZE && !csvCodeStyleSettings.WHITE_SPACES_OUTSIDE_QUOTES) {
+                builder.before(CsvTypes.QUOTE).spaces(0);
+            }
         } else if (csvCodeStyleSettings.SPACE_AFTER_SEPARATOR) {
             builder.after(CsvTypes.COMMA).spaces(1);
         }
@@ -52,12 +54,14 @@ public class CsvFormatHelper {
         if (csvCodeStyleSettings.TRIM_TRAILING_WHITE_SPACES || csvCodeStyleSettings.TABULARIZE) {
             builder
                     .before(CsvTypes.COMMA).spaceIf(csvCodeStyleSettings.SPACE_BEFORE_SEPARATOR)
-                    .after(CsvTypes.RECORD).spaces(0)
-                    .after(CsvTypes.FIELD).spaces(0);
+                    .before(CsvTypes.CRLF).spaces(0);
+            if (csvCodeStyleSettings.TABULARIZE && !csvCodeStyleSettings.WHITE_SPACES_OUTSIDE_QUOTES) {
+                builder.after(CsvTypes.QUOTE).spaces(0);
+            }
         } else if (csvCodeStyleSettings.SPACE_BEFORE_SEPARATOR) {
             builder.before(CsvTypes.COMMA).spaces(1);
         }
-
+        
         return builder;
     }
 

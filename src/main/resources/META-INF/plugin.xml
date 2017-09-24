@@ -1,9 +1,8 @@
 <idea-plugin>
     <id>net.seesharpsoft.intellij.plugins.csv</id>
     <name>CSV Plugin</name>
-    <version>1.0RC2</version>
-    <vendor email="mail@seesharpsoft.net" url="https://github.com/SeeSharpSoft/intellij-csv-validator">Martin Sommer
-    </vendor>
+    <version>1.0</version>
+    <vendor email="mail@seesharpsoft.net" url="https://github.com/SeeSharpSoft/intellij-csv-validator">Martin Sommer</vendor>
 
     <description><![CDATA[
       Lightweight CSV plugin that supports editing files in CSV format.<br><br>
@@ -22,7 +21,7 @@
     ]]></description>
 
     <change-notes><![CDATA[
-      New settings: Value separator - comma and semicolon supported
+      New: Value separator - comma and semicolon supported
     ]]>
     </change-notes>
 

@@ -83,8 +83,12 @@ public class CsvFormatterTest extends LightCodeInsightFixtureTestCase {
         }
     }
 
+    public void testFormattedFilesSingle() throws Exception {
+        executeTestConfiguration(16, "/header/4");
+    }
+
     public void testSpecialFormattedFiles() throws Exception {
-        int[] optionsToTest = new int[]{0, 1, 16, 17, 18, 19};
+        int[] optionsToTest = new int[]{0, 1, 16, 17, 18, 19, 48, 80, 112};
         for (int i = 0; i < optionsToTest.length; ++i) {
             tearDown();
             setUp();
@@ -92,6 +96,17 @@ public class CsvFormatterTest extends LightCodeInsightFixtureTestCase {
         }
     }
 
+    public void testHeader() throws Exception {
+        int[] optionsToTest = new int[]{0, 1, 16, 17, 18, 19, 48, 80, 112};
+        for (int subTest = 1; subTest < 7; ++subTest) {
+            for (int i = 0; i < optionsToTest.length; ++i) {
+                tearDown();
+                setUp();
+                executeTestConfiguration(optionsToTest[i], "/header/" + subTest);
+            }
+        }
+    }
+    
     /**
      * This function should be executed (remove the underscore) if the current results are correct (manual testing).
      *
