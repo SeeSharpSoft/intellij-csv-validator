@@ -13,7 +13,7 @@ public class CsvInspectionTest extends LightCodeInsightFixtureTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        myFixture.enableInspections(CsvSyntaxInspection.class);
+        myFixture.enableInspections(CsvValidationInspection.class);
     }
     
     protected void doTestIntention(String testName, String hint) throws Throwable {
@@ -37,5 +37,8 @@ public class CsvInspectionTest extends LightCodeInsightFixtureTestCase {
     public void testSurroundWithQuotes() throws Throwable {
         doTestIntention("SurroundWithQuotes", "Surround with quotes");
     }
-    
+
+    public void testInvalidRange() throws Throwable {
+        doTestIntention("AddMissingSeparator", "Add separator");
+    }
 }

@@ -60,8 +60,12 @@
                                       implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvStructureViewFactory"/>
         <iconProvider implementation="net.seesharpsoft.intellij.plugins.csv.CsvIconPovider"/>
 
-        <inspectionToolProvider
-                implementation="net.seesharpsoft.intellij.plugins.csv.intention.CsvSyntaxInspectionProvider"/>
+        <localInspection
+                language="csv"
+                enabledByDefault="true"
+                groupName="CSV"
+                shortName="CsvValidation"
+                implementationClass="net.seesharpsoft.intellij.plugins.csv.intention.CsvValidationInspection" />
         
         <intentionAction id="CsvQuoteValue" order="FIRST">
             <className>net.seesharpsoft.intellij.plugins.csv.intention.CsvQuoteValueIntentionAction</className>

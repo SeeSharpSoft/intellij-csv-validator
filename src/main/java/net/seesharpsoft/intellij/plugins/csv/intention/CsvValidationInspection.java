@@ -26,7 +26,7 @@ import java.util.List;
 /**
  * @author max
  */
-public class CsvSyntaxInspection extends LocalInspectionTool {
+public class CsvValidationInspection extends LocalInspectionTool {
     private static final Logger LOG = Logger.getInstance("#net.seesharpsoft.intellij.plugins.csv.inspection.CsvSyntaxInspection");
 
     private final LocalQuickFix fixUnescapedSequence = new UnescapedSequenceFix();
