@@ -1,8 +1,11 @@
 <idea-plugin>
     <id>net.seesharpsoft.intellij.plugins.csv</id>
     <name>CSV Plugin</name>
-    <version>1.0</version>
-    <vendor email="mail@seesharpsoft.net" url="https://github.com/SeeSharpSoft/intellij-csv-validator">Martin Sommer</vendor>
+    <version>1.1</version>
+    <vendor email="mail@seesharpsoft.net"
+            url="https://github.com/SeeSharpSoft/intellij-csv-validator">
+        Martin Sommer
+    </vendor>
 
     <description><![CDATA[
       Lightweight CSV plugin that supports editing files in CSV format.<br><br>
@@ -12,6 +15,8 @@
         <li>syntax validation</li>
         <li>syntax highlighting (configurable)</li>
         <li>content formatting (configurable)</li>
+        <li>quick fix inspections</li>
+        <li>intentions, e.g. Quote/Unqote All</li>
         <li>structure view (header-entry layout)</li>
         <li>support for ',' or ';' as value separator</li>
       </ul>
@@ -21,7 +26,7 @@
     ]]></description>
 
     <change-notes><![CDATA[
-      New: Value separator - comma and semicolon supported
+      New: Intentions/Inspections added
     ]]>
     </change-notes>
 
@@ -34,22 +39,51 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <fileTypeFactory implementation="net.seesharpsoft.intellij.plugins.csv.CsvFileTypeFactory"/>
+        
         <lang.parserDefinition language="csv"
                                implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvParserDefinition"/>
+        
         <lang.syntaxHighlighterFactory language="csv"
                                        implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvSyntaxHighlighterFactory"/>
+        <editorHighlighterProvider filetype="CSV"
+                                   implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvEditorHighlighterProvider"/>
         <colorSettingsPage implementation="net.seesharpsoft.intellij.plugins.csv.CsvColorSettingsPage"/>
+        
         <lang.formatter language="csv"
                         implementationClass="net.seesharpsoft.intellij.plugins.csv.formatter.CsvFormattingModelBuilder"/>
         <codeStyleSettingsProvider
                 implementation="net.seesharpsoft.intellij.plugins.csv.formatter.CsvCodeStyleSettingsProvider"/>
         <langCodeStyleSettingsProvider
                 implementation="net.seesharpsoft.intellij.plugins.csv.formatter.CsvLanguageCodeStyleSettingsProvider"/>
+        
         <lang.psiStructureViewFactory language="csv"
                                       implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvStructureViewFactory"/>
         <iconProvider implementation="net.seesharpsoft.intellij.plugins.csv.CsvIconPovider"/>
-        <editorHighlighterProvider filetype="CSV"
-                                   implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvEditorHighlighterProvider"/>
+
+        <inspectionToolProvider
+                implementation="net.seesharpsoft.intellij.plugins.csv.intention.CsvSyntaxInspectionProvider"/>
+        
+        <intentionAction id="CsvQuoteValue" order="FIRST">
+            <className>net.seesharpsoft.intellij.plugins.csv.intention.CsvQuoteValueIntentionAction</className>
+            <category>CSV</category>
+            <descriptionDirectoryName>QuoteValue</descriptionDirectoryName>
+        </intentionAction>
+        <intentionAction id="CsvUnquoteValue" order="AFTER CsvQuoteValue">
+            <className>net.seesharpsoft.intellij.plugins.csv.intention.CsvUnquoteValueIntentionAction</className>
+            <category>CSV</category>
+            <descriptionDirectoryName>UnquoteValue</descriptionDirectoryName>
+        </intentionAction>
+        <intentionAction id="CsvQuoteAll" order="BEFORE CsvUnquoteAll">
+            <className>net.seesharpsoft.intellij.plugins.csv.intention.CsvQuoteAllIntentionAction</className>
+            <category>CSV</category>
+            <descriptionDirectoryName>QuoteAll</descriptionDirectoryName>
+        </intentionAction>
+        <intentionAction id="CsvUnquoteAll" order="LAST">
+            <className>net.seesharpsoft.intellij.plugins.csv.intention.CsvUnquoteAllIntentionAction</className>
+            <category>CSV</category>
+            <descriptionDirectoryName>UnquoteAll</descriptionDirectoryName>
+        </intentionAction>
+        
     </extensions>
 
     <actions>
