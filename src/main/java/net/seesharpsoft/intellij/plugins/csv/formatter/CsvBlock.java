@@ -23,7 +23,7 @@ public class CsvBlock extends AbstractBlock {
 
     @Override
     protected List<Block> buildChildren() {
-        List<CsvBlock> blocks = buildChildrenRecursive(getNode().getFirstChildNode());
+        List<CsvBlock> blocks = buildChildrenInternal(getNode().getFirstChildNode());
         List<Block> result = new ArrayList<>();
         CsvColumnInfo currentColumnInfo = null;
         CsvBlockField currentField = null;
@@ -46,21 +46,27 @@ public class CsvBlock extends AbstractBlock {
         return result;
     }
     
-    private List<CsvBlock> buildChildrenRecursive(ASTNode node) {
+    private List<CsvBlock> buildChildrenInternal(ASTNode node) {
+        List<ASTNode> todoNodes = new ArrayList<>();
+        todoNodes.add(node);
         List<CsvBlock> blocks = new ArrayList<>();
-        while (node != null) {
+        while (todoNodes.size() > 0) {
+            node = todoNodes.remove(todoNodes.size() - 1);
+            if (node == null) {
+                continue;
+            }
             IElementType elementType = node.getElementType();
             if (elementType == TokenType.ERROR_ELEMENT || elementType == TokenType.BAD_CHARACTER) {
                 break;
             }
+            todoNodes.add(node.getTreeNext());
             if (elementType == CsvTypes.FIELD) {
                 blocks.add(new CsvBlockField(node, formattingInfo));
             } else {
                 CsvBlockElement block = new CsvBlockElement(node, formattingInfo);
                 blocks.add(block);
-                blocks.addAll(buildChildrenRecursive(node.getFirstChildNode()));
+                todoNodes.add(node.getFirstChildNode());
             }
-            node = node.getTreeNext();
         }
         return blocks;
     }
