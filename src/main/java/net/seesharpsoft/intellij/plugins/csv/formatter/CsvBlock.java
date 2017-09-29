@@ -33,10 +33,6 @@ public class CsvBlock extends AbstractBlock {
             }
             
             IElementType elementType = node.getElementType();
-            if (elementType == TokenType.ERROR_ELEMENT || elementType == TokenType.BAD_CHARACTER) {
-                break;
-            }
-            
             todoNodes.add(node.getTreeNext());
             if (elementType == CsvTypes.RECORD) {
                 todoNodes.add(node.getFirstChildNode());
@@ -47,6 +43,8 @@ public class CsvBlock extends AbstractBlock {
                 }
             } else if (elementType == CsvTypes.COMMA || elementType == CsvTypes.CRLF) {
                 blocks.add(new CsvBlockElement(node, formattingInfo, currentField));
+            } else if (elementType != TokenType.WHITE_SPACE && node.getTextLength() > 0) {
+                blocks.add(new CsvDummyBlock(node, formattingInfo));
             }
         }
         return blocks;
@@ -61,7 +59,7 @@ public class CsvBlock extends AbstractBlock {
     @Override
     public Spacing getSpacing(@Nullable Block child1, @NotNull Block child2) {
         Spacing spacing = null;
-        if (child1 != null) {
+        if (child1 != null && !(child1 instanceof CsvDummyBlock) && !(child2 instanceof CsvDummyBlock)) {
             CsvBlockElement block1 = (CsvBlockElement) child1;
             CsvBlockElement block2 = (CsvBlockElement) child2;
             if (formattingInfo.getCsvCodeStyleSettings().TABULARIZE && isTabularizeSpacingRequired(block1, block2)) {
