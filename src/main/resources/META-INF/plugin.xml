@@ -2,8 +2,7 @@
     <id>net.seesharpsoft.intellij.plugins.csv</id>
     <name>CSV Plugin</name>
     <version>1.1</version>
-    <vendor email="mail@seesharpsoft.net"
-            url="https://github.com/SeeSharpSoft/intellij-csv-validator">
+    <vendor url="https://github.com/SeeSharpSoft/intellij-csv-validator">
         Martin Sommer
     </vendor>
 
@@ -26,7 +25,9 @@
     ]]></description>
 
     <change-notes><![CDATA[
-      New: Intentions/Inspections added
+      New: Intentions/Inspections added<br>
+      Improved formatter performance<br>
+      Several fixes
     ]]>
     </change-notes>
 
