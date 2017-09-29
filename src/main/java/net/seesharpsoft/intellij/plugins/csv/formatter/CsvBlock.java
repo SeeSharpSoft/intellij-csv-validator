@@ -49,7 +49,11 @@ public class CsvBlock extends AbstractBlock {
     private List<CsvBlock> buildChildrenRecursive(ASTNode node) {
         List<CsvBlock> blocks = new ArrayList<>();
         while (node != null) {
-            if (node.getElementType() == CsvTypes.FIELD) {
+            IElementType elementType = node.getElementType();
+            if (elementType == TokenType.ERROR_ELEMENT || elementType == TokenType.BAD_CHARACTER) {
+                break;
+            }
+            if (elementType == CsvTypes.FIELD) {
                 blocks.add(new CsvBlockField(node, formattingInfo));
             } else {
                 CsvBlockElement block = new CsvBlockElement(node, formattingInfo);

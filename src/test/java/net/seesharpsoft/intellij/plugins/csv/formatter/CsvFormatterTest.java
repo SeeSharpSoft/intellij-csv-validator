@@ -106,6 +106,10 @@ public class CsvFormatterTest extends LightCodeInsightFixtureTestCase {
         }
     }
     
+    public void testInvalidRangeException() throws Exception {
+        executeTestConfiguration(0, "/InvalidRange");
+    }
+    
     /**
      * This function should be executed (remove the underscore) if the current results are correct (manual testing).
      *
