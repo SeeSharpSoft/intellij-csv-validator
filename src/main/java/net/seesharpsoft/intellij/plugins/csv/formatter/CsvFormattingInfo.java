@@ -5,10 +5,13 @@ import com.intellij.lang.ASTNode;
 import com.intellij.psi.codeStyle.CodeStyleSettings;
 import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfo;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class CsvFormattingInfo {
     private Map<Integer, CsvColumnInfo<ASTNode>> infoColumnMap;
+    
+    private Map<ASTNode, CsvColumnInfo<ASTNode>> reverseInfoColumnMap;
 
     public SpacingBuilder getSpacingBuilder() {
         return spacingBuilder;
@@ -30,15 +33,20 @@ public class CsvFormattingInfo {
         this.infoColumnMap = infoColumnMap;
         this.spacingBuilder = spacingBuilder;
         this.codeStyleSettings = codeStyleSettings;
+        buildReverseMap();
+    }
+    
+    private void buildReverseMap() {
+        reverseInfoColumnMap = new HashMap<>();
+        for (CsvColumnInfo<ASTNode> columnInfo : infoColumnMap.values()) {
+            for (ASTNode node : columnInfo.getElements()) {
+                reverseInfoColumnMap.put(node, columnInfo);
+            }
+        }
     }
 
     public CsvColumnInfo getColumnInfo(ASTNode node) {
-        for (CsvColumnInfo columnInfo : infoColumnMap.values()) {
-            if (columnInfo.containsElement(node)) {
-                return columnInfo;
-            }
-        }
-        return null;
+        return reverseInfoColumnMap.get(node);
     }
 
     public CsvColumnInfo getColumnInfo(int columnIndex) {

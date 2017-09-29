@@ -5,8 +5,11 @@ import com.intellij.psi.codeStyle.CodeStyleManager;
 import com.intellij.psi.codeStyle.CodeStyleSettingsManager;
 import com.intellij.testFramework.fixtures.LightCodeInsightFixtureTestCase;
 import com.intellij.util.containers.ContainerUtil;
+import org.junit.Assert;
 
 import java.io.PrintWriter;
+import java.time.Instant;
+import java.util.Properties;
 
 public class CsvFormatterTest extends LightCodeInsightFixtureTestCase {
     @Override
@@ -48,6 +51,10 @@ public class CsvFormatterTest extends LightCodeInsightFixtureTestCase {
     }
 
     private void executeTestConfiguration(int binarySettings, String relativeTargetPath) {
+        executeTestConfiguration(binarySettings, relativeTargetPath, true);
+    }
+    
+    private void executeTestConfiguration(int binarySettings, String relativeTargetPath, boolean checkResults) {
         if (relativeTargetPath == null || relativeTargetPath.isEmpty()) {
             relativeTargetPath = ".";
         }
@@ -63,7 +70,9 @@ public class CsvFormatterTest extends LightCodeInsightFixtureTestCase {
                         ContainerUtil.newArrayList(myFixture.getFile().getTextRange()));
             }
         }.execute();
-        myFixture.checkResultByFile(relativeTargetPath + String.format("/TestResult%08d.csv", binarySettings));
+        if (checkResults) {
+            myFixture.checkResultByFile(relativeTargetPath + String.format("/TestResult%08d.csv", binarySettings));
+        }
     }
 
     public void testManualFormattedFiles() throws Exception {
@@ -96,7 +105,7 @@ public class CsvFormatterTest extends LightCodeInsightFixtureTestCase {
     }
 
     public void testHeader() throws Exception {
-        int[] optionsToTest = new int[]{0, 1, 16, 17, 18, 19, 48, 80, 112};
+        int[] optionsToTest = new int[]{0, 1, 4, 16, 17, 18, 19, 48, 80, 112};
         for (int subTest = 1; subTest < 7; ++subTest) {
             for (int i = 0; i < optionsToTest.length; ++i) {
                 tearDown();
@@ -107,7 +116,20 @@ public class CsvFormatterTest extends LightCodeInsightFixtureTestCase {
     }
     
     public void testInvalidRangeException() throws Exception {
-        executeTestConfiguration(0, "/InvalidRange");
+        executeTestConfiguration(0, "/invalidRange");
+    }
+    
+    public void testRuntimeSimple() throws Exception {
+        Long threshold = 1000l;
+        Properties runtime = new Properties();
+        runtime.load(this.getClass().getResourceAsStream("/formatter/performance/runtime.prop"));
+        
+        long start = Instant.now().toEpochMilli();
+        executeTestConfiguration(0, "/performance", false);
+        long end = Instant.now().toEpochMilli();
+        System.out.println(end - start);
+
+        Assert.assertTrue(end - start <= Long.parseLong(runtime.getProperty("00000000")) + threshold);
     }
     
     /**

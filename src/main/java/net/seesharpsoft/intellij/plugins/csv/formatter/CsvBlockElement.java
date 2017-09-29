@@ -15,21 +15,19 @@ import java.util.List;
 public class CsvBlockElement extends CsvBlock {
 
     public CsvBlockElement(ASTNode node, CsvFormattingInfo formattingInfo) {
-        super(node, formattingInfo);
+        this(node, formattingInfo, null);
     }
     
-
-    protected CsvColumnInfo columnInfo;
-
+    public CsvBlockElement(ASTNode node, CsvFormattingInfo formattingInfo, CsvBlockField field) {
+        super(node, formattingInfo);
+        setField(field);
+    }
+    
     public CsvColumnInfo getColumnInfo() {
-        return columnInfo;
+        return getField() == null ? null : getField().getColumnInfo();
     }
-
-    public void setColumnInfo(CsvColumnInfo columnInfo) {
-        this.columnInfo = columnInfo;
-    }
-
-    protected CsvBlockField field;
+    
+    private CsvBlockField field;
     
     public CsvBlockField getField() {
         return field;
@@ -48,7 +46,7 @@ public class CsvBlockElement extends CsvBlock {
     public Indent getIndent() {
         if (formattingInfo.getCsvCodeStyleSettings().TABULARIZE
                 && (formattingInfo.getCsvCodeStyleSettings().LEADING_WHITE_SPACES || this.getElementType() == CsvTypes.COMMA)
-                && (formattingInfo.getCsvCodeStyleSettings().WHITE_SPACES_OUTSIDE_QUOTES || !CsvFormatHelper.isQuotedField(this))
+                && (formattingInfo.getCsvCodeStyleSettings().WHITE_SPACES_OUTSIDE_QUOTES || !CsvFormatHelper.isQuotedField(getField()))
                 && getField() != null) {
             CsvColumnInfo columnInfo = formattingInfo.getColumnInfo(0);
             return Indent.getSpaceIndent(columnInfo.getMaxLength() - getField().getTextLength() + getAdditionalSpaces(null, this));

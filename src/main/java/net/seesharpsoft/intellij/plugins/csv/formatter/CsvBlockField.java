@@ -5,6 +5,7 @@ import com.intellij.formatting.Indent;
 import com.intellij.formatting.Spacing;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.TokenType;
+import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfo;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -13,18 +14,31 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CsvBlockField extends CsvBlockElement {
-    
+
+    protected CsvColumnInfo columnInfo;
+
     public CsvBlockField(ASTNode node, CsvFormattingInfo formattingInfo) {
-        super(node, formattingInfo);
+        super(node, formattingInfo, null);
+        columnInfo = formattingInfo.getColumnInfo(node);
     }
 
+    @Override
+    public CsvColumnInfo getColumnInfo() {
+        return columnInfo;
+    }
+    
+    @Override
+    public CsvBlockField getField() {
+        return this;
+    }
+    
     @Override
     protected List<Block> buildChildren() {
         ASTNode node = this.getNode().getFirstChildNode();
         List<Block> blocks = new ArrayList<>();
         while (node != null) {
             if (node.getElementType() != TokenType.WHITE_SPACE) {
-                CsvBlockElement block = new CsvBlockElement(node, formattingInfo);
+                CsvBlockElement block = new CsvBlockElement(node, formattingInfo, this);
                 blocks.add(block);
             }
             node = node.getTreeNext();
@@ -43,7 +57,7 @@ public class CsvBlockField extends CsvBlockElement {
         CsvBlockElement block2 = (CsvBlockElement) child2;
         if ((block1.getElementType() == CsvTypes.QUOTE && formattingInfo.getCsvCodeStyleSettings().LEADING_WHITE_SPACES) ||
                 (block2.getElementType() == CsvTypes.QUOTE && !formattingInfo.getCsvCodeStyleSettings().LEADING_WHITE_SPACES)) {
-            spaces = columnInfo.getMaxLength() - getTextLength();
+            spaces = getColumnInfo().getMaxLength() - getTextLength();
         } else {
             return formattingInfo.getSpacingBuilder().getSpacing(this, child1, child2);
         }
@@ -58,10 +72,8 @@ public class CsvBlockField extends CsvBlockElement {
     @Override
     @Nullable
     public Indent getIndent() {
-        Indent indent = super.getIndent();
-        if (indent == null && !formattingInfo.getCsvCodeStyleSettings().TABULARIZE) {
-            indent = Indent.getSpaceIndent(this.getNode().getStartOffset());
-        }
-        return indent;
+        return formattingInfo.getCsvCodeStyleSettings().TABULARIZE || formattingInfo.getCsvCodeStyleSettings().TRIM_LEADING_WHITE_SPACES
+                ? null
+                : Indent.getSpaceIndent(this.getNode().getStartOffset());
     }
 }

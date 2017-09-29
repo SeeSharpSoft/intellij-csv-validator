@@ -5,7 +5,6 @@ import com.intellij.lang.ASTNode;
 import com.intellij.psi.TokenType;
 import com.intellij.psi.formatter.common.AbstractBlock;
 import com.intellij.psi.tree.IElementType;
-import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfo;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -23,49 +22,31 @@ public class CsvBlock extends AbstractBlock {
 
     @Override
     protected List<Block> buildChildren() {
-        List<CsvBlock> blocks = buildChildrenInternal(getNode().getFirstChildNode());
-        List<Block> result = new ArrayList<>();
-        CsvColumnInfo currentColumnInfo = null;
-        CsvBlockField currentField = null;
-        for (CsvBlock block : blocks) {
-            IElementType elementType = block.getElementType();
-            CsvBlockElement blockElement = (CsvBlockElement)block;
-            if (elementType == TokenType.WHITE_SPACE || elementType == CsvTypes.RECORD) {
-                continue;
-            } else if (elementType == CsvTypes.FIELD) {
-                currentField = (CsvBlockField)block;
-                currentColumnInfo = formattingInfo.getColumnInfo(block.getNode());
-            }
-            blockElement.setField(currentField);
-            blockElement.setColumnInfo(currentColumnInfo);
-            if (block.getTextLength() == 0) {
-                continue;
-            }
-            result.add(block);
-        }
-        return result;
-    }
-    
-    private List<CsvBlock> buildChildrenInternal(ASTNode node) {
         List<ASTNode> todoNodes = new ArrayList<>();
-        todoNodes.add(node);
-        List<CsvBlock> blocks = new ArrayList<>();
+        List<Block> blocks = new ArrayList<>();
+        todoNodes.add(getNode().getFirstChildNode());
+        CsvBlockField currentField = null;
         while (todoNodes.size() > 0) {
-            node = todoNodes.remove(todoNodes.size() - 1);
+            ASTNode node = todoNodes.remove(todoNodes.size() - 1);
             if (node == null) {
                 continue;
             }
+            
             IElementType elementType = node.getElementType();
             if (elementType == TokenType.ERROR_ELEMENT || elementType == TokenType.BAD_CHARACTER) {
                 break;
             }
+            
             todoNodes.add(node.getTreeNext());
-            if (elementType == CsvTypes.FIELD) {
-                blocks.add(new CsvBlockField(node, formattingInfo));
-            } else {
-                CsvBlockElement block = new CsvBlockElement(node, formattingInfo);
-                blocks.add(block);
+            if (elementType == CsvTypes.RECORD) {
                 todoNodes.add(node.getFirstChildNode());
+            } else if (elementType == CsvTypes.FIELD) {
+                currentField = new CsvBlockField(node, formattingInfo);
+                if (currentField.getTextLength() > 0) {
+                    blocks.add(currentField);
+                }
+            } else if (elementType == CsvTypes.COMMA || elementType == CsvTypes.CRLF) {
+                blocks.add(new CsvBlockElement(node, formattingInfo, currentField));
             }
         }
         return blocks;
