@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>net.seesharpsoft.intellij.plugins.csv</id>
     <name>CSV Plugin</name>
-    <version>1.1</version>
+    <version>1.2</version>
     <vendor url="https://github.com/SeeSharpSoft/intellij-csv-validator">
         Martin Sommer
     </vendor>
@@ -15,7 +15,7 @@
         <li>syntax highlighting (configurable)</li>
         <li>content formatting (configurable)</li>
         <li>quick fix inspections</li>
-        <li>intentions, e.g. Quote/Unqote All</li>
+        <li>intentions, e.g. Quote/Unquote All</li>
         <li>structure view (header-entry layout)</li>
         <li>support for ',' or ';' as value separator</li>
       </ul>
