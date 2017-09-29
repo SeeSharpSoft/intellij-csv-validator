@@ -71,7 +71,7 @@ public class CsvValidationInspection extends LocalInspectionTool {
         return new PsiElementVisitor() {
             @Override
             public void visitElement(PsiElement element) {
-                if (element == null || element.getLanguage() != CsvLanguage.INSTANCE) {
+                if (element == null || !holder.getFile().getLanguage().isKindOf(CsvLanguage.INSTANCE)) {
                     return;
                 }
                 
