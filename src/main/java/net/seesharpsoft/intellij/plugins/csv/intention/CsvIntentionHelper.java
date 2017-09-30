@@ -87,7 +87,7 @@ public class CsvIntentionHelper {
     }
     
     private static Collection<PsiElement> getAllFields(PsiFile file) {
-        return getChildren(file).stream()
+        return getChildren(file).parallelStream()
                 .filter(element -> getElementType(element) == CsvTypes.RECORD)
                 .flatMap(record -> getChildren(record).stream())
                 .filter(element -> getElementType(element) == CsvTypes.FIELD)
