@@ -8,24 +8,28 @@
 
     <description><![CDATA[
       Lightweight CSV plugin that supports editing files in CSV format.<br><br>
-      Features:<br>
+      <b>Features:</b><br>
       <ul>
         <li>CSV file detection</li>
         <li>syntax validation</li>
         <li>syntax highlighting (configurable)</li>
         <li>content formatting (configurable)</li>
         <li>quick fix inspections</li>
-        <li>intentions, e.g. Quote/Unquote All</li>
+        <li>intentions, e.g. Quote/Unquote (all)</li>
         <li>structure view (header-entry layout)</li>
         <li>support for ',' or ';' as value separator</li>
       </ul>
       <br>
       After installation & restart, the IDE needs some time to re-index files before the plugin becomes active.<br><br>
-      <em><b>Note:</b> Default code formatting is 'Tabularize'. Can be changed in Settings -> Editor -> Code Style -> CSV</em>
+      <em><b>Note:</b> Default code formatting is 'Tabularize'. Can be changed in Settings -> Editor -> Code Style -> CSV</em><br><br><br><hr /><br>
+      <span style="color: #555555">
+      <b>IntelliJ IDEA Ultimate/PhpStorm/DataGrip/etc.:</b> The plugin is fully compatible with the <em>'Edit as Table...'</em> functionality.<br><br>
+      In IDE releases prior v2017.3, the shortcut in the editor context menu becomes invisible when using this plugin. However, the option can still be accessed via Toolbar -> Edit -> <em>'Edit as Table...'</em>.
+      </span>
     ]]></description>
 
     <change-notes><![CDATA[
-      New: Intentions/Inspections added<br>
+      <b>New:</b> Intentions/Inspections added<br>
       Improved formatter performance<br>
       Several fixes
     ]]>
