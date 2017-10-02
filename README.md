@@ -8,6 +8,8 @@ Compatible with: IntelliJ IDEA  PhpStorm  WebStorm  PyCharm  RubyMine  AppCode  
 - syntax validation
 - syntax highlighting (configurable)
 - content formatting (configurable)
+- quick fix inspections
+- intentions, e.g. Quote/Unquote (all)
 - structure view (header-entry layout)
 - support for ',' or ';' as value separator
 
