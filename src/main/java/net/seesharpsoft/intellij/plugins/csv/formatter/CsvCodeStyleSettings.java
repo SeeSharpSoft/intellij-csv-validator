@@ -61,6 +61,9 @@ public class CsvCodeStyleSettings extends CustomCodeStyleSettings {
     public int SEPARATOR_INDEX = 0;
 
     public String getSeparator() {
+        if (SEPARATOR_INDEX < 0 || SEPARATOR_INDEX >= SUPPORTED_SEPARATORS.length) {
+            SEPARATOR_INDEX = 0;
+        }
         return SUPPORTED_SEPARATORS[SEPARATOR_INDEX];
     }
 }
