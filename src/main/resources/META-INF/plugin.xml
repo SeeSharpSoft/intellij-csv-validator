@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>net.seesharpsoft.intellij.plugins.csv</id>
     <name>CSV Plugin</name>
-    <version>1.2</version>
+    <version>1.3</version>
     <vendor url="https://github.com/SeeSharpSoft/intellij-csv-validator">
         Martin Sommer
     </vendor>
@@ -29,9 +29,8 @@
     ]]></description>
 
     <change-notes><![CDATA[
-      <b>New:</b> Intentions/Inspections added<br>
-      Improved formatter performance<br>
-      Several fixes
+      Fixes issue <a href="https://github.com/SeeSharpSoft/intellij-csv-validator/issues/4"><i>java.lang.NoClassDefFoundError: com/intellij/psi/PsiElementFactory$SERVICE</i></a><br>
+      CodeInspection description added
     ]]>
     </change-notes>
 
