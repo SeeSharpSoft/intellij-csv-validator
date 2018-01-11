@@ -24,14 +24,12 @@ public class CsvFormatHelper {
     public static int getTextLength(ASTNode node, CodeStyleSettings codeStyleSettings) {
         CsvCodeStyleSettings csvCodeStyleSettings = codeStyleSettings.getCustomSettings(CsvCodeStyleSettings.class);
         String text = node.getText();
-        int length = 0;
+        int length = node.getTextLength();
         if (csvCodeStyleSettings.TABULARIZE && !csvCodeStyleSettings.WHITE_SPACES_OUTSIDE_QUOTES && text.startsWith("\"")) {
             text = text.substring(1, text.length() - 1);
             text = BEGIN_WHITE_SPACE_PATTERN.matcher(text).replaceFirst("");
             text = END_WHITE_SPACE_PATTERN.matcher(text).replaceFirst("");
             length = text.length() + 2;
-        } else {
-            length = node.getTextLength();
         }
         return length;
     }
@@ -96,14 +94,6 @@ public class CsvFormatHelper {
             child = child.getTreeNext();
         }
         return columnInfoMap;
-    }
-
-    public static boolean isFirstFieldOfRecordQuoted(@Nullable CsvBlock block) {
-        if (block != null && block.getNode().getElementType() == CsvTypes.RECORD) {
-            List<Block> subBlocks = block.buildChildren();
-            return isQuotedField((CsvBlock) subBlocks.get(0));
-        }
-        return false;
     }
 
     public static boolean isQuotedField(@Nullable CsvBlock block) {
