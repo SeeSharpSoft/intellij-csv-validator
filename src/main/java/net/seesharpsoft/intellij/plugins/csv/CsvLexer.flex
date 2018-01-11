@@ -36,7 +36,7 @@ ESCAPED_TEXT=([,;\r\n]|\"\")+
 QUOTE=\"
 COMMA=[,;]
 EOL=\n
-WHITE_SPACE=[ \f\t]+
+WHITE_SPACE=[ \f]+
 
 %state AFTER_TEXT
 %state ESCAPED_TEXT

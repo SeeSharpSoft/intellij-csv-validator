@@ -42,6 +42,9 @@ public class CsvCodeStyleSettings extends CustomCodeStyleSettings {
 
     public CsvCodeStyleSettings(CodeStyleSettings settings) {
         super("CsvCodeStyleSettings", settings);
+        settings.getIndentOptions().TAB_SIZE = 1;
+        settings.getIndentOptions().INDENT_SIZE = 1;
+        settings.getIndentOptions().USE_TAB_CHARACTER = false;
     }
 
     public boolean SPACE_BEFORE_SEPARATOR = false;

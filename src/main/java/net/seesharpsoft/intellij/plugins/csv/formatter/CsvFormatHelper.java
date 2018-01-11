@@ -13,16 +13,23 @@ import org.jetbrains.annotations.Nullable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 public class CsvFormatHelper {
 
+    private static String WHITE_SPACE_PATTERN_STRING = "[ \\f]+";
+    private static Pattern BEGIN_WHITE_SPACE_PATTERN = Pattern.compile("^" + WHITE_SPACE_PATTERN_STRING);
+    private static Pattern END_WHITE_SPACE_PATTERN = Pattern.compile(WHITE_SPACE_PATTERN_STRING + "$");
+    
     public static int getTextLength(ASTNode node, CodeStyleSettings codeStyleSettings) {
         CsvCodeStyleSettings csvCodeStyleSettings = codeStyleSettings.getCustomSettings(CsvCodeStyleSettings.class);
         String text = node.getText();
         int length = 0;
         if (csvCodeStyleSettings.TABULARIZE && !csvCodeStyleSettings.WHITE_SPACES_OUTSIDE_QUOTES && text.startsWith("\"")) {
             text = text.substring(1, text.length() - 1);
-            length = text.trim().length() + 2;
+            text = BEGIN_WHITE_SPACE_PATTERN.matcher(text).replaceFirst("");
+            text = END_WHITE_SPACE_PATTERN.matcher(text).replaceFirst("");
+            length = text.length() + 2;
         } else {
             length = node.getTextLength();
         }
