@@ -1,7 +1,6 @@
 package net.seesharpsoft.intellij.plugins.csv.formatter;
 
 import com.intellij.formatting.Block;
-import com.intellij.formatting.Indent;
 import com.intellij.formatting.Spacing;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.TokenType;
@@ -67,13 +66,5 @@ public class CsvBlockField extends CsvBlockElement {
     @Override
     public int getTextLength() {
         return CsvFormatHelper.getTextLength(getNode(), formattingInfo.getCodeStyleSettings());
-    }
-
-    @Override
-    @Nullable
-    public Indent getIndent() {
-        return formattingInfo.getCsvCodeStyleSettings().TABULARIZE || formattingInfo.getCsvCodeStyleSettings().TRIM_LEADING_WHITE_SPACES
-                ? null
-                : Indent.getSpaceIndent(this.getNode().getStartOffset());
     }
 }

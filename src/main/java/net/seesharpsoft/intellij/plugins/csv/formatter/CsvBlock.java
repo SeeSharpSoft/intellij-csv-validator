@@ -1,6 +1,7 @@
 package net.seesharpsoft.intellij.plugins.csv.formatter;
 
 import com.intellij.formatting.*;
+import com.intellij.lang.ASTFactory;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.TokenType;
 import com.intellij.psi.formatter.common.AbstractBlock;
@@ -12,6 +13,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
+import static net.seesharpsoft.intellij.plugins.csv.psi.CsvElementType.DOCUMENT_START;
+
 public class CsvBlock extends AbstractBlock {
     protected CsvFormattingInfo formattingInfo;
     
@@ -19,7 +22,14 @@ public class CsvBlock extends AbstractBlock {
         super(node, Wrap.createWrap(WrapType.NONE, false), Alignment.createAlignment());
         this.formattingInfo = formattingInfo;
     }
-
+    
+    private void validateBlocks(List<Block> blocks) {
+        if (blocks.isEmpty()) {
+            return;
+        }
+        blocks.add(0, new CsvBlockElement(ASTFactory.leaf(DOCUMENT_START, ""), formattingInfo));
+    }
+    
     @Override
     protected List<Block> buildChildren() {
         List<ASTNode> todoNodes = new ArrayList<>();
@@ -47,6 +57,7 @@ public class CsvBlock extends AbstractBlock {
                 blocks.add(new CsvDummyBlock(node, formattingInfo));
             }
         }
+        validateBlocks(blocks);
         return blocks;
     }
     
@@ -79,16 +90,22 @@ public class CsvBlock extends AbstractBlock {
     }
 
     private boolean isAnyBlockASpacingSeparator(@NotNull CsvBlockElement block1, @NotNull CsvBlockElement block2) {
-        return (block2.getElementType() == CsvTypes.COMMA && !formattingInfo.getCsvCodeStyleSettings().LEADING_WHITE_SPACES) ||
-                        (block2.getElementType() != CsvTypes.CRLF && (block1.getElementType() == CsvTypes.COMMA || block1.getElementType() == CsvTypes.CRLF)&& formattingInfo.getCsvCodeStyleSettings().LEADING_WHITE_SPACES);
+        return ((block1.getElementType() != CsvTypes.COMMA && block1.getElementType() != CsvTypes.CRLF) || block2.getElementType() != CsvTypes.CRLF) &&
+                (
+                    (formattingInfo.getCsvCodeStyleSettings().LEADING_WHITE_SPACES && (block1.getElementType() == DOCUMENT_START || block1.getElementType() == CsvTypes.COMMA || block1.getElementType() == CsvTypes.CRLF)) ||
+                    (!formattingInfo.getCsvCodeStyleSettings().LEADING_WHITE_SPACES && (block2.getElementType() == CsvTypes.COMMA && block2.getElementType() != CsvTypes.CRLF))
+                );
     }
 
-    protected int getAdditionalSpaces(@Nullable CsvBlock child1, @NotNull CsvBlock child2) {
-        if ((formattingInfo.getCsvCodeStyleSettings().SPACE_AFTER_SEPARATOR && child1 != null && child1.getNode().getElementType() == CsvTypes.COMMA && child2.getElementType() != CsvTypes.CRLF)
-                || (formattingInfo.getCsvCodeStyleSettings().SPACE_BEFORE_SEPARATOR && child2 != null && child2.getNode().getElementType() == CsvTypes.COMMA)) {
-            return 1;
+    protected int getAdditionalSpaces(@Nullable CsvBlockElement child1, @NotNull CsvBlockElement child2) {
+        int spaces = 0;
+        if (formattingInfo.getCsvCodeStyleSettings().SPACE_AFTER_SEPARATOR && child1.getElementType() == CsvTypes.COMMA) {
+            ++spaces;
         }
-        return 0;
+        if (formattingInfo.getCsvCodeStyleSettings().SPACE_BEFORE_SEPARATOR  && child2.getElementType() == CsvTypes.COMMA) {
+            ++spaces;
+        }
+        return spaces;
     }
 
     @Override

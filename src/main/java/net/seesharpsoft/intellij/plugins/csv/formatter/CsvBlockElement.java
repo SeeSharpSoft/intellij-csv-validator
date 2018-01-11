@@ -1,11 +1,9 @@
 package net.seesharpsoft.intellij.plugins.csv.formatter;
 
 import com.intellij.formatting.Block;
-import com.intellij.formatting.Indent;
 import com.intellij.formatting.Spacing;
 import com.intellij.lang.ASTNode;
 import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfo;
-import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -40,22 +38,6 @@ public class CsvBlockElement extends CsvBlock {
     @Override
     protected List<Block> buildChildren() {
         return Collections.emptyList();
-    }
-
-    @Override
-    public Indent getIndent() {
-        if (formattingInfo.getCsvCodeStyleSettings().TABULARIZE
-                && (formattingInfo.getCsvCodeStyleSettings().LEADING_WHITE_SPACES || this.getElementType() == CsvTypes.COMMA)
-                && (formattingInfo.getCsvCodeStyleSettings().WHITE_SPACES_OUTSIDE_QUOTES || !CsvFormatHelper.isQuotedField(getField()))
-                && getField() != null) {
-            CsvColumnInfo columnInfo = formattingInfo.getColumnInfo(0);
-            return Indent.getSpaceIndent(columnInfo.getMaxLength() - getField().getTextLength() + getAdditionalSpaces(null, this));
-        } else if (!formattingInfo.getCsvCodeStyleSettings().TABULARIZE &&
-                this.getElementType() == CsvTypes.COMMA &&
-                formattingInfo.getCsvCodeStyleSettings().SPACE_BEFORE_SEPARATOR) {
-            return Indent.getSpaceIndent(1);
-        }
-        return null;
     }
 
     @Nullable

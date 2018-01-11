@@ -2,27 +2,29 @@ package net.seesharpsoft.intellij.plugins.csv.psi;
 
 import com.intellij.extapi.psi.PsiFileBase;
 import com.intellij.openapi.fileTypes.FileType;
+import com.intellij.openapi.fileTypes.LanguageFileType;
 import com.intellij.psi.FileViewProvider;
-import net.seesharpsoft.intellij.plugins.csv.CsvFileType;
-import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 
 public class CsvFile extends PsiFileBase {
-    public CsvFile(@NotNull FileViewProvider viewProvider) {
-        super(viewProvider, CsvLanguage.INSTANCE);
+    private LanguageFileType fileType;
+    
+    public CsvFile(@NotNull FileViewProvider viewProvider, LanguageFileType fileType) {
+        super(viewProvider, fileType.getLanguage());
+        this.fileType = fileType;
     }
 
     @NotNull
     @Override
     public FileType getFileType() {
-        return CsvFileType.INSTANCE;
+        return fileType;
     }
 
     @Override
     public String toString() {
-        return "CSV File";
+        return String.format("%s File", fileType.getName());
     }
 
     @Override

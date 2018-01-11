@@ -15,17 +15,14 @@ import com.intellij.psi.TokenType;
 %function advance
 %type IElementType
 %{
-  private Project project;
-
   private String currentSeparator;
 
   /**
    * Provide constructor that supports a Project as parameter.
    */
-  CsvLexer(java.io.Reader in, Project project) {
+  CsvLexer(java.io.Reader in, String separator) {
     this(in);
-    this.project = project;
-    this.currentSeparator = getCurrentSeparator(project);
+    this.currentSeparator = separator;
   }
 %}
 %eof{  return;

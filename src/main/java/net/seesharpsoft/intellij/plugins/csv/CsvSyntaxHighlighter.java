@@ -1,13 +1,17 @@
 package net.seesharpsoft.intellij.plugins.csv;
 
+import com.intellij.lang.Language;
 import com.intellij.lexer.Lexer;
 import com.intellij.openapi.editor.DefaultLanguageHighlighterColors;
 import com.intellij.openapi.editor.HighlighterColors;
 import com.intellij.openapi.editor.colors.TextAttributesKey;
+import com.intellij.openapi.fileTypes.LanguageFileType;
 import com.intellij.openapi.fileTypes.SyntaxHighlighterBase;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.TokenType;
 import com.intellij.psi.tree.IElementType;
+import net.seesharpsoft.intellij.plugins.csv.formatter.CsvCodeStyleSettings;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
 import org.jetbrains.annotations.NotNull;
 
@@ -33,15 +37,19 @@ public class CsvSyntaxHighlighter extends SyntaxHighlighterBase {
     private static final TextAttributesKey[] EMPTY_KEYS = new TextAttributesKey[0];
 
     private Project project;
+    private Language language;
 
-    public CsvSyntaxHighlighter(Project project) {
+    public CsvSyntaxHighlighter(Project project, VirtualFile virtualFile) {
         this.project = project;
+        if (virtualFile != null && virtualFile.getFileType() instanceof LanguageFileType) {
+            this.language = ((LanguageFileType)virtualFile.getFileType()).getLanguage();
+        }
     }
 
     @NotNull
     @Override
     public Lexer getHighlightingLexer() {
-        return new CsvLexerAdapter(this.project);
+        return new CsvLexerAdapter(CsvCodeStyleSettings.getCurrentSeparator(this.project, this.language));
     }
 
     @NotNull
