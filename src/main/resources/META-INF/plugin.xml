@@ -29,7 +29,7 @@
     ]]></description>
 
     <change-notes><![CDATA[
-      Handle tabs as 1-length character - fixes tabularize issue of files with tabs
+      Handle tabs as 1-length character - fixes 'Tabularize' for csv files with tabs
     ]]>
     </change-notes>
 
