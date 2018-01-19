@@ -2,6 +2,7 @@ package net.seesharpsoft.intellij.plugins.csv.formatter;
 
 import com.intellij.lang.Language;
 import com.intellij.psi.codeStyle.CodeStyleSettingsCustomizable;
+import com.intellij.psi.codeStyle.CommonCodeStyleSettings;
 import com.intellij.psi.codeStyle.LanguageCodeStyleSettingsProvider;
 import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
 import org.jetbrains.annotations.NotNull;
@@ -67,5 +68,15 @@ public class CsvLanguageCodeStyleSettingsProvider extends LanguageCodeStyleSetti
                 "4   ,    R380 ,Clay Rozendal,483,  1198.97,195.99 \n" +
                 "3.1\n" +
                 "5 ,Holmes HEPA Air Purifier,Carlos Soltero,515,30.94,21.78";
+    }
+
+    @Override
+    public CommonCodeStyleSettings getDefaultCommonSettings() {
+        CommonCodeStyleSettings commonSettings = new CommonCodeStyleSettings(getLanguage());
+        commonSettings.initIndentOptions();
+        commonSettings.getIndentOptions().TAB_SIZE = 1;
+        commonSettings.getIndentOptions().INDENT_SIZE = 1;
+        commonSettings.getIndentOptions().USE_TAB_CHARACTER = false;
+        return commonSettings;
     }
 }

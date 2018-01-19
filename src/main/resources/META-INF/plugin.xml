@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>net.seesharpsoft.intellij.plugins.csv</id>
     <name>CSV Plugin</name>
-    <version>1.4</version>
+    <version>1.4.1</version>
     <vendor url="https://github.com/SeeSharpSoft/intellij-csv-validator">
         Martin Sommer
     </vendor>
@@ -29,7 +29,8 @@
     ]]></description>
 
     <change-notes><![CDATA[
-      Handle tabs as 1-length character - fixes 'Tabularize' for csv files with tabs
+      Handle tabs as 1-length character - fixes 'Tabularize' for csv files with tabs<br>
+      Fix default settings initialization
     ]]>
     </change-notes>
 
