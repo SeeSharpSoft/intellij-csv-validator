@@ -43,6 +43,8 @@ public class CsvIntentionHelper {
                 element = element.getParent();
             } else if (getElementType(element.getPrevSibling()) == CsvTypes.FIELD) {
                 element = element.getPrevSibling();
+            } else if (getElementType(element.getNextSibling()) == CsvTypes.FIELD) {
+                element = element.getNextSibling();
             } else {
                 element = null;
             }
@@ -54,7 +56,7 @@ public class CsvIntentionHelper {
         return element;
     }
     
-    private static PsiElement getPreviousSeparator(PsiElement fieldElement) {
+    public static PsiElement getPreviousSeparator(PsiElement fieldElement) {
         while (fieldElement != null) {
             if (getElementType(fieldElement) == CsvTypes.COMMA) {
                 break;
@@ -64,7 +66,7 @@ public class CsvIntentionHelper {
         return fieldElement;
     }
 
-    private static PsiElement getNextSeparator(PsiElement fieldElement) {
+    public static PsiElement getNextSeparator(PsiElement fieldElement) {
         while (fieldElement != null) {
             if (getElementType(fieldElement) == CsvTypes.COMMA) {
                 break;
@@ -72,6 +74,26 @@ public class CsvIntentionHelper {
             fieldElement = fieldElement.getNextSibling();
         }
         return fieldElement;
+    }
+
+    public static PsiElement getPreviousCRLF(PsiElement recordElement) {
+        while (recordElement != null) {
+            if (getElementType(recordElement) == CsvTypes.CRLF) {
+                break;
+            }
+            recordElement = recordElement.getPrevSibling();
+        }
+        return recordElement;
+    }
+
+    public static PsiElement getNextCRLF(PsiElement recordElement) {
+        while (recordElement != null) {
+            if (getElementType(recordElement) == CsvTypes.CRLF) {
+                break;
+            }
+            recordElement = recordElement.getNextSibling();
+        }
+        return recordElement;
     }
 
     public static Collection<PsiElement> getAllElements(PsiFile file) {

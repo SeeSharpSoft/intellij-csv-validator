@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>net.seesharpsoft.intellij.plugins.csv</id>
     <name>CSV Plugin</name>
-    <version>1.4.1</version>
+    <version>1.5.0</version>
     <vendor url="https://github.com/SeeSharpSoft/intellij-csv-validator">
         Martin Sommer
     </vendor>
@@ -15,7 +15,7 @@
         <li>syntax highlighting (configurable)</li>
         <li>content formatting (configurable)</li>
         <li>quick fix inspections</li>
-        <li>intentions, e.g. Quote/Unquote (all)</li>
+        <li>intentions (Alt+Enter), e.g. Quote/Unquote (all), Shift Column Left/Right</li>
         <li>structure view (header-entry layout)</li>
         <li>support for ',' or ';' as value separator</li>
       </ul>
@@ -29,8 +29,7 @@
     ]]></description>
 
     <change-notes><![CDATA[
-      Handle tabs as 1-length character - fixes 'Tabularize' for csv files with tabs<br>
-      Fix default settings initialization
+      NEW: intentions to shift a whole column left/right<br>
     ]]>
     </change-notes>
 
@@ -70,8 +69,18 @@
                 groupName="CSV"
                 shortName="CsvValidation"
                 implementationClass="net.seesharpsoft.intellij.plugins.csv.intention.CsvValidationInspection" />
-        
-        <intentionAction id="CsvQuoteValue" order="FIRST">
+
+        <intentionAction id="CsvShiftColumnLeft" order="FIRST">
+            <className>net.seesharpsoft.intellij.plugins.csv.intention.CsvShiftColumnLeftIntentionAction</className>
+            <category>CSV</category>
+            <descriptionDirectoryName>ShiftColumnLeft</descriptionDirectoryName>
+        </intentionAction>
+        <intentionAction id="CsvShiftColumnRight" order="AFTER CsvShiftColumnLeft">
+            <className>net.seesharpsoft.intellij.plugins.csv.intention.CsvShiftColumnRightIntentionAction</className>
+            <category>CSV</category>
+            <descriptionDirectoryName>ShiftColumnRight</descriptionDirectoryName>
+        </intentionAction>
+        <intentionAction id="CsvQuoteValue" order="AFTER CsvShiftColumnRight">
             <className>net.seesharpsoft.intellij.plugins.csv.intention.CsvQuoteValueIntentionAction</className>
             <category>CSV</category>
             <descriptionDirectoryName>QuoteValue</descriptionDirectoryName>

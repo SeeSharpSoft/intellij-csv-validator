@@ -34,4 +34,16 @@ public class CsvIntentionTest extends LightCodeInsightFixtureTestCase {
     public void testUnquoteIntention() throws Throwable {
         doTestIntention("UnquoteValue", "Unquote");
     }
+
+    public void testShiftColumnLeftIntention() throws Throwable {
+        for (int i = 1; i < 5; ++i) {
+            doTestIntention(String.format("ShiftColumnLeft%02d", i), "Shift Column Left");
+        }
+    }
+
+    public void testShiftColumnRightIntention() throws Throwable {
+        for (int i = 1; i < 5; ++i) {
+            doTestIntention(String.format("ShiftColumnRight%02d", i), "Shift Column Right");
+        }
+    }
 }
