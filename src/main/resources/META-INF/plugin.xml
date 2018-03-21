@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>net.seesharpsoft.intellij.plugins.csv</id>
     <name>CSV Plugin</name>
-    <version>1.5.0</version>
+    <version>1.5.1</version>
     <vendor url="https://github.com/SeeSharpSoft/intellij-csv-validator">
         Martin Sommer
     </vendor>
@@ -30,6 +30,7 @@
 
     <change-notes><![CDATA[
       NEW: intentions to shift a whole column left/right<br>
+      (includes bugfix for breaking intention functionality on previous IDE versions)
     ]]>
     </change-notes>
 

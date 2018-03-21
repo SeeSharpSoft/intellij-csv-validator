@@ -13,7 +13,7 @@ import java.util.Map;
 
 public class CsvShiftColumnLeftIntentionAction extends CsvShiftColumnIntentionAction {
 
-    protected CsvShiftColumnLeftIntentionAction() {
+    public CsvShiftColumnLeftIntentionAction() {
         super("Shift Column Left");
     }
 
