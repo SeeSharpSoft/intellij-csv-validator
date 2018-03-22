@@ -53,6 +53,9 @@
                                    implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvEditorHighlighterProvider"/>
         <colorSettingsPage implementation="net.seesharpsoft.intellij.plugins.csv.CsvColorSettingsPage"/>
         
+        <spellchecker.support language="csv"
+                              implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvSpellCheckingStrategy" />
+        
         <lang.formatter language="csv"
                         implementationClass="net.seesharpsoft.intellij.plugins.csv.formatter.CsvFormattingModelBuilder"/>
         <codeStyleSettingsProvider
