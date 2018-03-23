@@ -12,9 +12,9 @@ import java.util.regex.Pattern;
 
 public class CsvCodeStyleSettings extends CustomCodeStyleSettings {
 
-    public static final String[] SUPPORTED_SEPARATORS = new String[]{",", ";"};
+    public static final String[] SUPPORTED_SEPARATORS = new String[]{",", ";", "|"};
 
-    public static final String[] SUPPORTED_SEPARATORS_DISPLAY = new String[]{"Comma (,)", "Semicolon (;)"};
+    public static final String[] SUPPORTED_SEPARATORS_DISPLAY = new String[]{"Comma (,)", "Semicolon (;)", "Pipe (|)"};
 
     public static final String DEFAULT_SEPARATOR = ",";
 
