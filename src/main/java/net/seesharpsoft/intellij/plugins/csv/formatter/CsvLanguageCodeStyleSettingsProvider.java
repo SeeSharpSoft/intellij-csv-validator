@@ -61,7 +61,7 @@ public class CsvLanguageCodeStyleSettingsProvider extends LanguageCodeStyleSetti
 
     @Override
     public String getCodeSample(@NotNull SettingsType settingsType) {
-        return " 1,\"Eldon Base for stackable storage shelf, platinum\", Muhammed MacIntyre   ,3,-213.25 ,   38.94  \n" +
+        return "1 ,\"Eldon Base for stackable storage shelf, platinum\", Muhammed MacIntyre   ,3,-213.25 ,   38.94  \n" +
                 "   2 ,\"   1.7 Cubic Foot Compact \"\"Cube\"\" Office Refrigerators\",Barry French,  293,457.81,208.16\n" +
                 "\n" +
                 "3,\"Cardinal Slant-D® Ring Binder, Heavy Gauge Vinyl   \",Barry French, 293 ,46.71 ,8.69\n" +
@@ -76,7 +76,8 @@ public class CsvLanguageCodeStyleSettingsProvider extends LanguageCodeStyleSetti
         commonSettings.initIndentOptions();
         commonSettings.getIndentOptions().TAB_SIZE = 1;
         commonSettings.getIndentOptions().INDENT_SIZE = 1;
-        commonSettings.getIndentOptions().USE_TAB_CHARACTER = false;
+        commonSettings.getIndentOptions().USE_TAB_CHARACTER = true;
+        commonSettings.getIndentOptions().SMART_TABS = false;
         return commonSettings;
     }
 }

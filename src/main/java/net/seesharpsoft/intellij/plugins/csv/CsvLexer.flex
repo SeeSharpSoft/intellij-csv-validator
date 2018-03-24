@@ -31,10 +31,10 @@ import com.intellij.psi.TokenType;
 %eof{  return;
 %eof}
 
-TEXT=[^ ,;\r\n\"]+
-ESCAPED_TEXT=([,;\r\n]|\"\")+
+TEXT=[^ ,;\t\r\n\"]+
+ESCAPED_TEXT=([,;\t\r\n]|\"\")+
 QUOTE=\"
-COMMA=[,;]
+COMMA=[,;\t]
 EOL=\n
 WHITE_SPACE=[ \f]+
 

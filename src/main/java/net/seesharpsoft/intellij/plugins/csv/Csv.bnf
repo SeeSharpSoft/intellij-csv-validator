@@ -15,9 +15,9 @@
   tokenTypeClass="net.seesharpsoft.intellij.plugins.csv.psi.CsvTokenType"
 
   tokens=[
-    TEXT='regexp:[^,;\r\n"]+'
-    ESCAPED_TEXT='regexp:([,;\r\n]|"")+'
-    COMMA='regexp:[,;]'
+    TEXT='regexp:[^,;\t\r\n"]+'
+    ESCAPED_TEXT='regexp:([,;\t\r\n]|"")+'
+    COMMA='regexp:[,;\t]'
     QUOTE='"'
     CRLF='regexp:\n'
    ]

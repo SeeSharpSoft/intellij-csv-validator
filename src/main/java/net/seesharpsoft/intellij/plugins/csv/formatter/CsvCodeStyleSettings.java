@@ -12,26 +12,27 @@ import java.util.regex.Pattern;
 
 public class CsvCodeStyleSettings extends CustomCodeStyleSettings {
 
-    public static final String[] SUPPORTED_SEPARATORS = new String[]{",", ";"};
+    public static final String[] SUPPORTED_SEPARATORS = new String[]{",", ";", "\t"};
 
-    public static final String[] SUPPORTED_SEPARATORS_DISPLAY = new String[]{"Comma (,)", "Semicolon (;)"};
+    public static final String[] SUPPORTED_SEPARATORS_DISPLAY = new String[]{"Comma (,)", "Semicolon (;)", "Tab (\\t)"};
 
     public static final String DEFAULT_SEPARATOR = ",";
 
     public static final Pattern REPLACE_DEFAULT_SEPARATOR_PATTERN = Pattern.compile(CsvCodeStyleSettings.DEFAULT_SEPARATOR);
 
-    public static String getCurrentSeparator(@Nullable Project project) {
-        if (ApplicationManager.getApplication().isUnitTestMode()) {
-            return DEFAULT_SEPARATOR;
-        }
-        if (project != null) {
-            CodeStyleSettings codeStyleSettings = CodeStyleSettingsManager.getInstance(project).getCurrentSettings();
-            if (codeStyleSettings != null) {
-                CsvCodeStyleSettings csvCodeStyleSettings = codeStyleSettings.getCustomSettings(CsvCodeStyleSettings.class);
-                if (csvCodeStyleSettings != null) {
-                    return csvCodeStyleSettings.getSeparator();
-                }
+    public static String getCurrentSeparator(CodeStyleSettings codeStyleSettings) {
+        if (codeStyleSettings != null) {
+            CsvCodeStyleSettings csvCodeStyleSettings = codeStyleSettings.getCustomSettings(CsvCodeStyleSettings.class);
+            if (csvCodeStyleSettings != null) {
+                return csvCodeStyleSettings.getSeparator();
             }
+        }
+        return DEFAULT_SEPARATOR;
+    }
+    
+    public static String getCurrentSeparator(@Nullable Project project) {
+        if (!ApplicationManager.getApplication().isUnitTestMode() && project != null) {
+            return getCurrentSeparator(CodeStyleSettingsManager.getInstance(project).getCurrentSettings());
         }
         return DEFAULT_SEPARATOR;
     }

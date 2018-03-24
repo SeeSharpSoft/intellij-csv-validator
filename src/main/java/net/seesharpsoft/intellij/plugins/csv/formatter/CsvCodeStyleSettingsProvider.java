@@ -12,10 +12,7 @@ import com.intellij.openapi.editor.highlighter.EditorHighlighter;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiFile;
-import com.intellij.psi.codeStyle.CodeStyleSettings;
-import com.intellij.psi.codeStyle.CodeStyleSettingsProvider;
-import com.intellij.psi.codeStyle.CustomCodeStyleSettings;
-import com.intellij.psi.codeStyle.LanguageCodeStyleSettingsProvider;
+import com.intellij.psi.codeStyle.*;
 import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -97,12 +94,19 @@ public class CsvCodeStyleSettingsProvider extends CodeStyleSettingsProvider {
                     updatePreviewHighlighter((EditorEx) editor);
                 }
 
-                return super.createFileFromText(project, applySettingsToText(project, text));
+                return super.createFileFromText(project, this.getPreviewText());
             }
 
-            private String applySettingsToText(Project project, String text) {
+            @Override
+            protected String getPreviewText() {
                 return CsvCodeStyleSettings.REPLACE_DEFAULT_SEPARATOR_PATTERN
-                        .matcher(text).replaceAll(CsvCodeStyleSettings.getCurrentSeparator(project));
+                        .matcher(super.getPreviewText()).replaceAll(CsvCodeStyleSettings.getCurrentSeparator(this.getSettings()));
+            }
+
+            @Override
+            protected PsiFile doReformat(Project project, PsiFile psiFile) {
+                CodeStyleManager.getInstance(project).reformatText(psiFile, 0, psiFile.getTextLength());
+                return psiFile;
             }
         }
     }
