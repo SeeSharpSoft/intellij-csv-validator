@@ -6,6 +6,7 @@ import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiElement;
 import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfo;
+import net.seesharpsoft.intellij.plugins.csv.formatter.CsvCodeStyleSettings;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvFile;
 import org.jetbrains.annotations.NotNull;
 
@@ -19,11 +20,11 @@ public abstract class CsvShiftColumnIntentionAction extends CsvIntentionAction {
 
     protected static void changeLeftAndRightColumnOrder(@NotNull Project project, CsvFile psiFile, CsvColumnInfo<PsiElement> leftColumnInfo, CsvColumnInfo<PsiElement> rightColumnInfo) {
         Document document = PsiDocumentManager.getInstance(project).getDocument(psiFile);
-        document.setText(changeLeftAndRightColumnOrder(document.getText(), leftColumnInfo, rightColumnInfo));
+        document.setText(changeLeftAndRightColumnOrder(document.getText(), CsvCodeStyleSettings.getCurrentSeparator(project, psiFile.getLanguage()), leftColumnInfo, rightColumnInfo));
     }
 
     @NotNull
-    protected static String changeLeftAndRightColumnOrder(String text, CsvColumnInfo<PsiElement> leftColumnInfo, CsvColumnInfo<PsiElement>  rightColumnInfo) {
+    protected static String changeLeftAndRightColumnOrder(String text, String separator, CsvColumnInfo<PsiElement> leftColumnInfo, CsvColumnInfo<PsiElement>  rightColumnInfo) {
         List<PsiElement> rightElements = rightColumnInfo.getElements();
         List<PsiElement> leftElements = leftColumnInfo.getElements();
         int lastIndex = 0, maxRows = leftElements.size();
@@ -44,7 +45,7 @@ public abstract class CsvShiftColumnIntentionAction extends CsvIntentionAction {
 
             newText.append(text.substring(lastIndex, leftSeparator.getEndOffset()))
                     .append(text.substring(middleSeparator.getEndOffset(), rightSeparator.getStartOffset()))
-                    .append(",")
+                    .append(separator)
                     .append(text.substring(leftSeparator.getEndOffset(), middleSeparator.getStartOffset()));
 
             lastIndex = rightSeparator.getStartOffset();
