@@ -15,26 +15,23 @@ import com.intellij.psi.TokenType;
 %function advance
 %type IElementType
 %{
-  private Project project;
-
   private String currentSeparator;
 
   /**
    * Provide constructor that supports a Project as parameter.
    */
-  CsvLexer(java.io.Reader in, Project project) {
+  CsvLexer(java.io.Reader in, String separator) {
     this(in);
-    this.project = project;
-    this.currentSeparator = getCurrentSeparator(project);
+    this.currentSeparator = separator;
   }
 %}
 %eof{  return;
 %eof}
 
-TEXT=[^ ,;|\r\n\"]+
-ESCAPED_TEXT=([,;|\r\n]|\"\")+
+TEXT=[^ ,;|\t\r\n\"]+
+ESCAPED_TEXT=([,;|\t\r\n]|\"\")+
 QUOTE=\"
-COMMA=[,;|]
+COMMA=[,;|\t]
 EOL=\n
 WHITE_SPACE=[ \f]+
 

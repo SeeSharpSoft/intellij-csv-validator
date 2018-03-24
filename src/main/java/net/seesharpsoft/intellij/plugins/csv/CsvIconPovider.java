@@ -25,8 +25,9 @@ public class CsvIconPovider extends IconProvider {
             return FIELD;
         }
         if (element instanceof CsvFile) {
-            return FILE;
+            return ((CsvFile)element).getFileType().getIcon();
         }
+        
         return null;
     }
 }

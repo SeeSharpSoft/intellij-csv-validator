@@ -29,7 +29,7 @@ public class CsvColorSettingsPage implements ColorSettingsPage {
     @NotNull
     @Override
     public SyntaxHighlighter getHighlighter() {
-        return new CsvSyntaxHighlighter(null);
+        return new CsvSyntaxHighlighter(null, null);
     }
 
     @NotNull

@@ -7,6 +7,7 @@ import com.intellij.psi.codeStyle.CodeStyleSettings;
 import com.intellij.psi.formatter.common.AbstractBlock;
 import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfo;
 import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
+import net.seesharpsoft.intellij.plugins.csv.psi.CsvElementType;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
 import org.jetbrains.annotations.Nullable;
 
@@ -48,7 +49,8 @@ public class CsvFormatHelper {
         if (csvCodeStyleSettings.TRIM_LEADING_WHITE_SPACES || csvCodeStyleSettings.TABULARIZE) {
             builder
                     .after(CsvTypes.COMMA).spaceIf(csvCodeStyleSettings.SPACE_AFTER_SEPARATOR)
-                    .after(CsvTypes.CRLF).spaces(0);
+                    .after(CsvTypes.CRLF).spaces(0)
+                    .after(CsvElementType.DOCUMENT_START).spaces(0);
             if (csvCodeStyleSettings.TABULARIZE && !csvCodeStyleSettings.WHITE_SPACES_OUTSIDE_QUOTES) {
                 builder.before(CsvTypes.QUOTE).spaces(0);
             }
