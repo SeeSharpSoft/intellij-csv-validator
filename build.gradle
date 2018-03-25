@@ -1,0 +1,111 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { url 'http://dl.bintray.com/jetbrains/intellij-plugin-service' }
+        maven { url 'https://jitpack.io' }
+    }
+    dependencies {
+        classpath "com.github.hurricup:gradle-grammar-kit-plugin:2018.1.1"
+    }
+}
+
+plugins {
+    id "org.jetbrains.intellij" version "0.3.1"
+}
+
+group 'net.seesharpsoft.intellij.plugins'
+version pluginVersion
+
+apply plugin: 'java'
+sourceCompatibility = javaVersion
+targetCompatibility = javaTargetVersion
+tasks.withType(JavaCompile) { options.encoding = 'UTF-8' }
+repositories {
+    mavenCentral()
+}
+dependencies {
+    compileOnly "org.apache.ant:ant:1.7.0"
+}
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src/main/java', 'gen']
+        }
+        resources {
+            srcDirs = ['src/main/resources']
+        }
+    }
+    test {
+        java {
+            srcDirs = ['src/test/java']
+        }
+        resources {
+            srcDirs = ['src/test/resources']
+        }
+    }
+}
+
+apply plugin: 'idea'
+idea {
+    project {
+        jdkName = javaVersion
+        languageLevel = javaVersion
+        vcs = 'Git'
+    }
+    module {
+        generatedSourceDirs += file('gen')
+    }
+}
+
+apply plugin: 'org.jetbrains.intellij'
+intellij {
+    version = System.getenv().getOrDefault('IDEA_VERSION', 'IC-2017.3.5') //https://www.jetbrains.com/intellij-repository/releases
+    intellij.plugins = ['IntelliLang']
+    pluginName = 'CSV Plugin'
+    instrumentCode = true
+    updateSinceUntilBuild = true
+    downloadSources = downloadIntellijSources
+}
+
+test {
+    useJUnit {
+        if (project.hasProperty("runtest")) {
+            include '**/' + project.property('runtest') + '.class'
+        }
+    }
+    testLogging {
+        exceptionFormat = 'full'
+        showStandardStreams = true
+    }
+}
+
+apply plugin: 'org.jetbrains.grammarkit'
+grammarKit {
+    // version of IntelliJ patched JFlex (see bintray link below), Default is 1.7.0 
+    jflexRelease = '1.7.0-1'
+
+    // tag or short commit hash of Grammar-Kit to use (see link below). Default is 2017.1.2 
+    grammarKitRelease = System.getenv().getOrDefault('GRAMMAR_KIT_VERSION', '2017.1.2')
+}
+
+import org.jetbrains.grammarkit.tasks.GenerateLexer
+import org.jetbrains.grammarkit.tasks.GenerateParser
+
+task generateCsvParser(type: GenerateParser) {
+    source = 'src/main/java/net/seesharpsoft/intellij/plugins/csv/Csv.bnf'
+    targetRoot 'gen'
+    pathToParser = '/net/seesharpsoft/intellij/plugins/csv/parser/CsvParser.java'
+    pathToPsiRoot = '/net/seesharpsoft/intellij/plugins/csv/psi'
+    purgeOldFiles = true
+}
+
+task generateCsvLexer(dependsOn: generateCsvParser, type: GenerateLexer) {
+    source = "src/main/java/net/seesharpsoft/intellij/plugins/csv/CsvLexer.flex"
+    targetDir = "./gen/net/seesharpsoft/intellij/plugins/csv/"
+    targetClass = "CsvLexer"
+    purgeOldFiles = true
+}
+
+compileJava {
+    dependsOn generateCsvLexer
+}
