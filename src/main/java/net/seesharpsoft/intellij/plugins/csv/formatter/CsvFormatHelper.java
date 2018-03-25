@@ -5,6 +5,7 @@ import com.intellij.formatting.SpacingBuilder;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.codeStyle.CodeStyleSettings;
 import com.intellij.psi.formatter.common.AbstractBlock;
+import net.seesharpsoft.intellij.plugins.csv.settings.CsvCodeStyleSettings;
 import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfo;
 import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvElementType;

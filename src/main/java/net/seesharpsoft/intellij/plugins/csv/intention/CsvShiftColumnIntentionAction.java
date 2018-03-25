@@ -6,7 +6,7 @@ import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiElement;
 import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfo;
-import net.seesharpsoft.intellij.plugins.csv.formatter.CsvCodeStyleSettings;
+import net.seesharpsoft.intellij.plugins.csv.settings.CsvCodeStyleSettings;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvFile;
 import org.jetbrains.annotations.NotNull;
 

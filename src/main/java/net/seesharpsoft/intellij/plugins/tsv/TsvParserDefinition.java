@@ -7,7 +7,7 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.tree.IFileElementType;
 import net.seesharpsoft.intellij.plugins.csv.CsvLexerAdapter;
 import net.seesharpsoft.intellij.plugins.csv.CsvParserDefinition;
-import net.seesharpsoft.intellij.plugins.csv.formatter.CsvCodeStyleSettings;
+import net.seesharpsoft.intellij.plugins.csv.settings.CsvCodeStyleSettings;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvFile;
 import org.jetbrains.annotations.NotNull;
 

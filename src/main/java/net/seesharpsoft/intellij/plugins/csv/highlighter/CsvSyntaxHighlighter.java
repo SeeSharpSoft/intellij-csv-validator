@@ -1,4 +1,4 @@
-package net.seesharpsoft.intellij.plugins.csv;
+package net.seesharpsoft.intellij.plugins.csv.highlighter;
 
 import com.intellij.lang.Language;
 import com.intellij.lexer.Lexer;
@@ -11,8 +11,9 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.TokenType;
 import com.intellij.psi.tree.IElementType;
-import net.seesharpsoft.intellij.plugins.csv.formatter.CsvCodeStyleSettings;
+import net.seesharpsoft.intellij.plugins.csv.CsvLexerAdapter;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
+import net.seesharpsoft.intellij.plugins.csv.settings.CsvCodeStyleSettings;
 import org.jetbrains.annotations.NotNull;
 
 import static com.intellij.openapi.editor.colors.TextAttributesKey.createTextAttributesKey;

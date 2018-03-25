@@ -1,4 +1,4 @@
-package net.seesharpsoft.intellij.plugins.csv.formatter;
+package net.seesharpsoft.intellij.plugins.csv.settings;
 
 import com.intellij.lang.Language;
 import com.intellij.openapi.application.ApplicationManager;

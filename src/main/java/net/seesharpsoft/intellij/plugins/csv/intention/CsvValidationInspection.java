@@ -14,7 +14,7 @@ import com.intellij.psi.TokenType;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.util.IncorrectOperationException;
 import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
-import net.seesharpsoft.intellij.plugins.csv.formatter.CsvCodeStyleSettings;
+import net.seesharpsoft.intellij.plugins.csv.settings.CsvCodeStyleSettings;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;

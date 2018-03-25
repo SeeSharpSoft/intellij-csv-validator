@@ -1,7 +1,7 @@
 {
   parserClass="net.seesharpsoft.intellij.plugins.csv.parser.CsvParser"
 
-  parserImports=["static net.seesharpsoft.intellij.plugins.csv.parser.CsvParserUtil.*"]
+  parserImports=["static net.seesharpsoft.intellij.plugins.csv.CsvParserUtil.*"]
 
   extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
 

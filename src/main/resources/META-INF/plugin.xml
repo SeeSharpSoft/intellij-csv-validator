@@ -51,10 +51,10 @@
         <lang.parserDefinition language="tsv" implementationClass="net.seesharpsoft.intellij.plugins.tsv.TsvParserDefinition"/>
         
         <lang.syntaxHighlighterFactory language="csv"
-                                       implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvSyntaxHighlighterFactory"/>
+                                       implementationClass="net.seesharpsoft.intellij.plugins.csv.highlighter.CsvSyntaxHighlighterFactory"/>
         <editorHighlighterProvider filetype="CSV"
-                                   implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvEditorHighlighterProvider"/>
-        <colorSettingsPage implementation="net.seesharpsoft.intellij.plugins.csv.CsvColorSettingsPage"/>
+                                   implementationClass="net.seesharpsoft.intellij.plugins.csv.highlighter.CsvEditorHighlighterProvider"/>
+        <colorSettingsPage implementation="net.seesharpsoft.intellij.plugins.csv.settings.CsvColorSettingsPage"/>
         
         <spellchecker.support language="csv"
                               implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvSpellCheckingStrategy" />
@@ -62,12 +62,12 @@
         <lang.formatter language="csv"
                         implementationClass="net.seesharpsoft.intellij.plugins.csv.formatter.CsvFormattingModelBuilder"/>
         <codeStyleSettingsProvider
-                implementation="net.seesharpsoft.intellij.plugins.csv.formatter.CsvCodeStyleSettingsProvider"/>
+                implementation="net.seesharpsoft.intellij.plugins.csv.settings.CsvCodeStyleSettingsProvider"/>
         <langCodeStyleSettingsProvider
-                implementation="net.seesharpsoft.intellij.plugins.csv.formatter.CsvLanguageCodeStyleSettingsProvider"/>
+                implementation="net.seesharpsoft.intellij.plugins.csv.settings.CsvLanguageCodeStyleSettingsProvider"/>
         
         <lang.psiStructureViewFactory language="csv"
-                                      implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvStructureViewFactory"/>
+                                      implementationClass="net.seesharpsoft.intellij.plugins.csv.structureview.CsvStructureViewFactory"/>
         <iconProvider implementation="net.seesharpsoft.intellij.plugins.csv.CsvIconPovider"/>
 
         <localInspection

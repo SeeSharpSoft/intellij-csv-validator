@@ -1,9 +1,9 @@
-package net.seesharpsoft.intellij.plugins.csv.parser;
+package net.seesharpsoft.intellij.plugins.csv;
 
 import com.intellij.lang.PsiBuilder;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.impl.source.resolve.FileContextUtil;
-import net.seesharpsoft.intellij.plugins.csv.formatter.CsvCodeStyleSettings;
+import net.seesharpsoft.intellij.plugins.csv.settings.CsvCodeStyleSettings;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
 
 public class CsvParserUtil {

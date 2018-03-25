@@ -5,6 +5,7 @@ import com.intellij.psi.codeStyle.CodeStyleManager;
 import com.intellij.psi.codeStyle.CodeStyleSettingsManager;
 import com.intellij.testFramework.fixtures.LightCodeInsightFixtureTestCase;
 import com.intellij.util.containers.ContainerUtil;
+import net.seesharpsoft.intellij.plugins.csv.settings.CsvCodeStyleSettings;
 import org.junit.Assert;
 
 import java.io.PrintWriter;

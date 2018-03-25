@@ -11,10 +11,10 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.TokenType;
 import com.intellij.psi.tree.IFileElementType;
 import com.intellij.psi.tree.TokenSet;
-import net.seesharpsoft.intellij.plugins.csv.formatter.CsvCodeStyleSettings;
 import net.seesharpsoft.intellij.plugins.csv.parser.CsvParser;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvFile;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
+import net.seesharpsoft.intellij.plugins.csv.settings.CsvCodeStyleSettings;
 import org.jetbrains.annotations.NotNull;
 
 public class CsvParserDefinition implements ParserDefinition {

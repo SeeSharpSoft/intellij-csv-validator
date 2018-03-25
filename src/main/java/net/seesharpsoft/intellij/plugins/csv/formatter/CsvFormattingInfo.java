@@ -3,6 +3,7 @@ package net.seesharpsoft.intellij.plugins.csv.formatter;
 import com.intellij.formatting.SpacingBuilder;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.codeStyle.CodeStyleSettings;
+import net.seesharpsoft.intellij.plugins.csv.settings.CsvCodeStyleSettings;
 import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfo;
 
 import java.util.HashMap;

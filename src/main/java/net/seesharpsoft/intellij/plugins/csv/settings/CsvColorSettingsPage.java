@@ -1,10 +1,13 @@
-package net.seesharpsoft.intellij.plugins.csv;
+package net.seesharpsoft.intellij.plugins.csv.settings;
 
 import com.intellij.openapi.editor.colors.TextAttributesKey;
 import com.intellij.openapi.fileTypes.SyntaxHighlighter;
 import com.intellij.openapi.options.colors.AttributesDescriptor;
 import com.intellij.openapi.options.colors.ColorDescriptor;
 import com.intellij.openapi.options.colors.ColorSettingsPage;
+import net.seesharpsoft.intellij.plugins.csv.CsvIconPovider;
+import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
+import net.seesharpsoft.intellij.plugins.csv.highlighter.CsvSyntaxHighlighter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

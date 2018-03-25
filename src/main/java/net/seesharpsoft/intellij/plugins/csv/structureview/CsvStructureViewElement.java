@@ -1,4 +1,4 @@
-package net.seesharpsoft.intellij.plugins.csv;
+package net.seesharpsoft.intellij.plugins.csv.structureview;
 
 import com.intellij.ide.structureView.StructureViewTreeElement;
 import com.intellij.ide.util.treeView.smartTree.SortableTreeElement;
@@ -16,6 +16,10 @@ import com.intellij.psi.impl.source.DummyHolder;
 import com.intellij.psi.impl.source.DummyHolderFactory;
 import com.intellij.psi.impl.source.tree.FileElement;
 import com.intellij.psi.tree.IElementType;
+import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfo;
+import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
+import net.seesharpsoft.intellij.plugins.csv.CsvIconPovider;
+import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvFile;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
 import org.jetbrains.annotations.NotNull;

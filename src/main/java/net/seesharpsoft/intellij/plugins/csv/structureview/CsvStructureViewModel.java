@@ -1,4 +1,4 @@
-package net.seesharpsoft.intellij.plugins.csv;
+package net.seesharpsoft.intellij.plugins.csv.structureview;
 
 import com.intellij.ide.structureView.StructureViewModel;
 import com.intellij.ide.structureView.StructureViewModelBase;
