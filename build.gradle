@@ -11,6 +11,14 @@ buildscript {
 
 plugins {
     id "org.jetbrains.intellij" version "0.3.1"
+    id "jacoco"
+    id 'com.github.kt3k.coveralls' version '2.8.2'
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+    }
 }
 
 group 'net.seesharpsoft.intellij.plugins'
@@ -68,6 +76,11 @@ intellij {
 }
 
 test {
+
+    jacoco {
+        enabled = true
+    }
+    
     useJUnit {
         if (project.hasProperty("runtest")) {
             include '**/' + project.property('runtest') + '.class'
