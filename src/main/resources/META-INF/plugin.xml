@@ -17,10 +17,8 @@
         <li>quick fix inspections</li>
         <li>intentions (Alt+Enter), e.g. Quote/Unquote (all), Shift Column Left/Right</li>
         <li>structure view (header-entry layout)</li>
-        <li>support for ',', ';', '|' or '↹' as value separator</li>
+        <li>support for ',', ';', '|' or '&#8633;' as value separator</li>
       </ul>
-      <br>
-      After installation & restart, the IDE needs some time to re-index files before the plugin becomes active.<br><br>
       <em><b>Note:</b> Default code formatting is 'Tabularize'. Can be changed in Settings -> Editor -> Code Style -> CSV</em><br><br><br><hr /><br>
       <span style="color: #555555">
       <b>IntelliJ IDEA Ultimate/PhpStorm/DataGrip/etc.:</b> The plugin is fully compatible with the <em>'Edit as Table...'</em> functionality.<br><br>
@@ -30,14 +28,16 @@
 
     <change-notes><![CDATA[
       <b>NEW: TSV file support</b><br>
-      Note: <em>TSV files a recognized as such but treated as a variant of CSV files, the same syntax highlighting and code style settings are applied.</em><br>
-      <b>NEW:</b> tab (↹) and pipe (|) as separators added<br>
+      <em>TSV files a recognized as such but treated as a variant of CSV files, the same syntax highlighting and code style settings are applied.</em><br>
+      <b>NEW:</b> tab (&#8633;) and pipe (|) as separators added<br>
       <b>NEW:</b> spellchecker enabled<br>
+      <br>
+      <b>Note:</b> For CSV Plugin v1.6.0+ it was necessary to increase the minimum IDE version from 2016.1.1 to 2016.3.2 due to a required <a href="https://youtrack.jetbrains.com/issue/IDEA-162000">fix in the formatting code</a>. Previous versions of the plugin can still be downloaded directly from <a href="https://plugins.jetbrains.com/plugin/10037-csv-plugin">Jetbrains Plugin Repository</a>.   
     ]]>
     </change-notes>
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
-    <idea-version since-build="145.0"/>
+    <idea-version since-build="163.10154"/>
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
          on how to target different products -->
