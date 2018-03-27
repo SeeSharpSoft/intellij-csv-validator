@@ -5,13 +5,13 @@ buildscript {
         maven { url 'https://jitpack.io' }
     }
     dependencies {
-        classpath "com.github.hurricup:gradle-grammar-kit-plugin:2018.1.1"
+        classpath 'com.github.hurricup:gradle-grammar-kit-plugin:2018.1.1'
     }
 }
 
 plugins {
-    id "org.jetbrains.intellij" version "0.3.1"
-    id "jacoco"
+    id 'org.jetbrains.intellij' version '0.3.1'
+    id 'jacoco'
     id 'com.github.kt3k.coveralls' version '2.8.2'
 }
 
@@ -32,7 +32,7 @@ repositories {
     mavenCentral()
 }
 dependencies {
-    compileOnly "org.apache.ant:ant:1.7.0"
+    compileOnly 'org.apache.ant:ant:1.7.0'
 }
 sourceSets {
     main {
@@ -67,24 +67,17 @@ idea {
 
 apply plugin: 'org.jetbrains.intellij'
 intellij {
-    version = System.getenv().getOrDefault('IDEA_VERSION', 'IC-2017.3.5') //https://www.jetbrains.com/intellij-repository/releases
-    intellij.plugins = ['IntelliLang']
+    // IDE version - https://www.jetbrains.com/intellij-repository/releases
+    version = System.getenv().getOrDefault('IDEA_VERSION', 'IC-2017.3.5')
     pluginName = 'CSV Plugin'
     instrumentCode = true
     updateSinceUntilBuild = true
-    downloadSources = downloadIntellijSources
+    downloadSources = false
 }
 
 test {
-
     jacoco {
         enabled = true
-    }
-    
-    useJUnit {
-        if (project.hasProperty("runtest")) {
-            include '**/' + project.property('runtest') + '.class'
-        }
     }
     testLogging {
         exceptionFormat = 'full'
@@ -94,10 +87,10 @@ test {
 
 apply plugin: 'org.jetbrains.grammarkit'
 grammarKit {
-    // version of IntelliJ patched JFlex (see bintray link below), Default is 1.7.0 
+    // version of IntelliJ patched JFlex - https://bintray.com/jetbrains/intellij-third-party-dependencies/jflex
     jflexRelease = '1.7.0-1'
 
-    // tag or short commit hash of Grammar-Kit to use (see link below). Default is 2017.1.2 
+    // tag or short commit hash of Grammar-Kit to use - https://github.com/JetBrains/Grammar-Kit
     grammarKitRelease = System.getenv().getOrDefault('GRAMMAR_KIT_VERSION', '2017.1.2')
 }
 
@@ -113,9 +106,9 @@ task generateCsvParser(type: GenerateParser) {
 }
 
 task generateCsvLexer(dependsOn: generateCsvParser, type: GenerateLexer) {
-    source = "src/main/java/net/seesharpsoft/intellij/plugins/csv/CsvLexer.flex"
-    targetDir = "./gen/net/seesharpsoft/intellij/plugins/csv/"
-    targetClass = "CsvLexer"
+    source = 'src/main/java/net/seesharpsoft/intellij/plugins/csv/CsvLexer.flex'
+    targetDir = './gen/net/seesharpsoft/intellij/plugins/csv/'
+    targetClass = 'CsvLexer'
     purgeOldFiles = true
 }
 
