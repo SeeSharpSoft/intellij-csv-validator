@@ -68,6 +68,12 @@ On the other hand, formatting elements like whitespaces and tabs do have a meani
 However, in reality when parsing CSV, the leading and trailing whitespaces are quite often ignored or trimmed.
 Formatting can be completely disabled if no option is selected at all at the settings screen.
 
+The formatting is applied to CSV documents as normal code formatting:
+
+- _Code > Reformat code (Ctrl+Alt+L)_
+
+
+
 ![Format settings](./docs/codestyle.png)
 
 #### Formatting options
