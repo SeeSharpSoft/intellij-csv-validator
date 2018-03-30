@@ -119,8 +119,8 @@ public class CsvFormatterTest extends LightCodeInsightFixtureTestCase {
     public void testInvalidRangeException() throws Exception {
         executeTestConfiguration(0, "/invalidRange");
     }
-    
-    public void testRuntimeSimple() throws Exception {
+
+    public void _testRuntimeSimple() throws Exception {
         Long threshold = 1000l;
         Properties runtime = new Properties();
         runtime.load(this.getClass().getResourceAsStream("/formatter/performance/runtime.prop"));
