@@ -204,7 +204,7 @@ You can also download the JAR package from the [Jetbrains plugin repository](htt
 
 ## Contribution
 
-Contributions are welcome. Please check [CONTRIBUTING.md](./CONTRIBUTING.md) for more information.
+Contributions are welcome. Please check [CONTRIBUTING.md](./CONTRIBUTING.MD) for more information.
 
 Besides source code contributions, feel free to open bug reports or just suggest new features [here](https://github.com/SeeSharpSoft/intellij-csv-validator/issues).
 
