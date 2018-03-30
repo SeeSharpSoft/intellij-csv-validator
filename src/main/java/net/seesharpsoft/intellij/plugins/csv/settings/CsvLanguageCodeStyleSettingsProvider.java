@@ -50,11 +50,11 @@ public class CsvLanguageCodeStyleSettingsProvider extends LanguageCodeStyleSetti
                     "Tabularize (ignores Trimming settings)");
             consumer.showCustomOption(CsvCodeStyleSettings.class,
                     "WHITE_SPACES_OUTSIDE_QUOTES",
-                    "Trimming/Spacing Outside Quotes",
+                    "Trimming/spacing outside quotes",
                     "Tabularize (ignores Trimming settings)");
             consumer.showCustomOption(CsvCodeStyleSettings.class,
                     "LEADING_WHITE_SPACES",
-                    "Leading White Spaces",
+                    "Leading whitespaces",
                     "Tabularize (ignores Trimming settings)");
         }
     }
