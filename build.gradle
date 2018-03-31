@@ -71,7 +71,7 @@ intellij {
     version = System.getenv().getOrDefault('IDEA_VERSION', 'IC-2017.3.5')
     pluginName = 'CSV Plugin'
     instrumentCode = true
-    updateSinceUntilBuild = true
+    updateSinceUntilBuild = false
     downloadSources = false
 }
 
