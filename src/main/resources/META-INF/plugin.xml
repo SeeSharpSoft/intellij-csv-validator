@@ -19,7 +19,8 @@
         <li>structure view (header-entry layout)</li>
         <li>support for ',', ';', '|' or '&#8633;' as value separator</li>
       </ul>
-      <em><b>Note:</b> Default code formatting is 'Tabularize'. Can be changed in Settings -> Editor -> Code Style -> CSV</em><br><br><br><hr /><br>
+      <em><b>Note:</b> Default code formatting is 'Tabularize'. Can be changed in Settings -> Editor -> Code Style -> CSV</em><br><br>
+      For more detailed information please have a look at the <a href="https://github.com/SeeSharpSoft/intellij-csv-validator/blob/master/README.md">README</a>.<br><br><br><hr /><br>
       <span style="color: #555555">
       <b>IntelliJ IDEA Ultimate/PhpStorm/DataGrip/etc.:</b> The plugin is fully compatible with the <em>'Edit as Table...'</em> functionality.<br><br>
       In IDE releases prior v2017.3, the shortcut in the editor context menu becomes invisible when using this plugin. However, the option can still be accessed via Toolbar -> Edit -> <em>'Edit as Table...'</em>.
@@ -107,11 +108,9 @@
             <category>CSV</category>
             <descriptionDirectoryName>UnquoteAll</descriptionDirectoryName>
         </intentionAction>
-        
     </extensions>
 
     <actions>
-
     </actions>
 
 </idea-plugin>

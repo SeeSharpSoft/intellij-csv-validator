@@ -1,16 +1,16 @@
 # CONTRIBUTING
 You can fork this project within GitHub, as described on http://help.github.com.
 This fork will show up on your own github profile, and can be checked out to your local machine.
-After doing any changes in the project and commiting in to your fork repository - make sure, you are up-to-date with upstream.
-After that, create a pull request.
+After doing any changes in the project and committing in to your fork repository - make sure, you are up-to-date with upstream.
+After that, create a pull request (PR).
 
 ### Some guidance for a successful pull request
 
-- Open an issue to request a new feature, please do not just open a PR for an un-requested new feature
+- Reference the issue in your PR, hence do not open a PR without a corresponding issue
 - Follow the single-purpose principle: Only one fix or feature in one PR
-- Write a test for newly introduced features
+- Write tests for newly introduced features or fixes
 - Please follow/apply a proper code style that fits to the existing one
-- Do not change/commit the _src/main/resources/META-INF/plugin.xml_
+- Do not change the plugin metadata information (e.g. name, version, description, etc.) in _src/main/resources/META-INF/plugin.xml_
 
 ### Compiling the source code
 

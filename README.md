@@ -72,8 +72,6 @@ The formatting is applied to CSV documents as normal code formatting:
 
 - _Code > Reformat code (Ctrl+Alt+L)_
 
-
-
 ![Format settings](./docs/codestyle.png)
 
 #### Formatting options
@@ -88,7 +86,7 @@ Annasusanna,Amsterdam,1
 
 ##### Separator
 
-The following separators are currently supported: ',', ';', '|' and '&#8633;'
+The following separators are currently supported: **,** (Comma), **;** (Semicolon), **|** (Pipe) and **&#8633;** (Tab)
 
 When changing the separator, press the apply button to refresh the preview window properly. 
 
@@ -130,7 +128,7 @@ Annasusanna,Amsterdam,1
 
 ##### Tabularize enabled _(default)_
 
-Please note: The separator settings can be used in combination with Tabularize enabled, while trimming options are ignored.
+Separator settings can be used in combination with Tabularize enabled, while trimming options are ignored completely.
 
 ```
 "name     ","city   ","position"
