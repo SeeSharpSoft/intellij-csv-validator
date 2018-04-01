@@ -14,10 +14,7 @@ jobs:
     - if: (branch = master AND type = push) OR (type = pull_request)
       env: IDEA_VERSION=LATEST-EAP-SNAPSHOT GRAMMAR_KIT_VERSION=2017.1.2
       script: gradle check verifyPlugin
-    - if: branch IN (Staging, Stable) AND type = push
-      script: skip
     - stage: deploy
       if: branch IN (Staging, Stable) AND type = push
       env: IDEA_VERSION=IC-2017.3.2 GRAMMAR_KIT_VERSION=2017.1.2 JI_CHANNELS=$TRAVIS_BRANCH
-      script: gradle check publishPlugin
-
+      script: gradle publishPlugin
