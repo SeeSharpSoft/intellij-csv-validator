@@ -3,21 +3,20 @@ jdk:
   - oraclejdk8
 
 env:
-  global:
-    - JI_CHANNELS=$TRAVIS_BRANCH
-  matrix:
-    - IDEA_VERSION=IC-2016.3.2 GRAMMAR_KIT_VERSION=1.4.3
-    - IDEA_VERSION=IC-2017.3.2 GRAMMAR_KIT_VERSION=2017.1.2
-    - IDEA_VERSION=LATEST-EAP-SNAPSHOT GRAMMAR_KIT_VERSION=2017.1.2
+  - JI_CHANNELS=$TRAVIS_BRANCH
 
-script:
-  - gradle check verifyPlugin
-  
 after_success:
   - gradle jacocoTestReport coveralls
 
 jobs:
   include:
+    - stage: test
+      env:
+        - IDEA_VERSION=IC-2016.3.2 GRAMMAR_KIT_VERSION=1.4.3
+        - IDEA_VERSION=IC-2017.3.2 GRAMMAR_KIT_VERSION=2017.1.2
+        - IDEA_VERSION=LATEST-EAP-SNAPSHOT GRAMMAR_KIT_VERSION=2017.1.2
+      if: (branch IN (master, Staging, Stable) AND type = push) OR (type = pull_request)
+      script: gradle check verifyPlugin
     - stage: deploy
       env: IDEA_VERSION=IC-2018.1 GRAMMAR_KIT_VERSION=2017.1.2
       if: branch IN (Staging, Stable) AND type = push
