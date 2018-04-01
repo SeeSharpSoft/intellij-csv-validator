@@ -15,6 +15,6 @@ jobs:
       env: IDEA_VERSION=LATEST-EAP-SNAPSHOT GRAMMAR_KIT_VERSION=2017.1.2
       script: gradle check verifyPlugin
     - stage: deploy
-      if: branch IN (Staging, Stable) AND type = push
+      if: branch IN (Testing, Staging, Stable) AND type = push
       env: IDEA_VERSION=IC-2017.3.2 GRAMMAR_KIT_VERSION=2017.1.2 JI_CHANNELS=$TRAVIS_BRANCH
       script: gradle publishPlugin
