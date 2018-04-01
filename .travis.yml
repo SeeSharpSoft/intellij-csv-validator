@@ -11,10 +11,11 @@ after_success:
 
 jobs:
   include:
-    - if: (branch IN (master, Staging, Stable) AND type = push) OR (type = pull_request)
+    - if: (branch = master AND type = push) OR (type = pull_request)
       env: IDEA_VERSION=LATEST-EAP-SNAPSHOT GRAMMAR_KIT_VERSION=2017.1.2
       script: gradle check verifyPlugin
     - stage: deploy
       if: branch IN (Staging, Stable) AND type = push
       env: IDEA_VERSION=IC-2018.1 GRAMMAR_KIT_VERSION=2017.1.2 JI_CHANNELS=$TRAVIS_BRANCH
-      script: gradle publishPlugin
+      script: gradle check publishPlugin
+
