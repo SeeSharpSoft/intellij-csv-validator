@@ -68,11 +68,16 @@ idea {
 apply plugin: 'org.jetbrains.intellij'
 intellij {
     // IDE version - https://www.jetbrains.com/intellij-repository/releases
-    version = System.getenv().getOrDefault('IDEA_VERSION', 'IC-2017.3.5')
+    version = System.getenv().getOrDefault('IDEA_VERSION', 'IC-2018.1')
     pluginName = 'CSV Plugin'
     instrumentCode = true
     updateSinceUntilBuild = false
     downloadSources = false
+}
+publishPlugin {
+    username = System.getenv().getOrDefault('JI_USER', '')
+    password = System.getenv().getOrDefault('JI_PASSWORD', '')
+    channels = [System.getenv().getOrDefault('JI_CHANNELS', 'Testing')]
 }
 
 test {
@@ -99,7 +104,7 @@ import org.jetbrains.grammarkit.tasks.GenerateParser
 
 task generateCsvParser(type: GenerateParser) {
     source = 'src/main/java/net/seesharpsoft/intellij/plugins/csv/Csv.bnf'
-    targetRoot 'gen'
+    targetRoot = 'gen'
     pathToParser = '/net/seesharpsoft/intellij/plugins/csv/parser/CsvParser.java'
     pathToPsiRoot = '/net/seesharpsoft/intellij/plugins/csv/psi'
     purgeOldFiles = true
