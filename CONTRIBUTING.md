@@ -6,10 +6,11 @@ After that, create a pull request (PR).
 
 ### Some guidance for a successful pull request
 
-- Reference the issue in your PR, hence do not open a PR without a corresponding issue
+- Open PR for master branch only
+- Reference an issue in your PR, hence do not open a PR without a corresponding issue
 - Follow the single-purpose principle: Only one fix or feature in one PR
 - Write tests for newly introduced features or fixes
-- Please follow/apply a proper code style that fits to the existing one
+- Apply a proper code style that fits to the existing one
 - Do not change the plugin metadata information (e.g. name, version, description, etc.) in _src/main/resources/META-INF/plugin.xml_
 
 ### Compiling the source code
