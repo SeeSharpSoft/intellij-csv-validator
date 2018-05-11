@@ -1,5 +1,7 @@
+[![Plugin version](https://img.shields.io/jetbrains/plugin/d/10037-csv-plugin.svg)](https://plugins.jetbrains.com/plugin/10037-csv-plugin)
 [![Build Status](https://travis-ci.org/SeeSharpSoft/intellij-csv-validator.svg?branch=master)](https://travis-ci.org/SeeSharpSoft/intellij-csv-validator)
 [![Coverage Status](https://coveralls.io/repos/github/SeeSharpSoft/intellij-csv-validator/badge.svg?branch=master)](https://coveralls.io/github/SeeSharpSoft/intellij-csv-validator?branch=master)
+
 # Lightweight CSV Plugin for JetBrains IDE family
 
 Compatible with _IntelliJ IDEA  PhpStorm  WebStorm  PyCharm  RubyMine  AppCode  CLion  Gogland  DataGrip  Rider  MPS  Android Studio_ - __2016.3.2 and newer__
