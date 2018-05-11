@@ -27,7 +27,7 @@
     ]]></description>
 
     <change-notes><![CDATA[
-      <b>NEW: TSV file support</b><br>
+      <b>NEW: TSV file support (new icons)</b><br>
       <em>TSV files a recognized as such but treated as a variant of CSV files, the same syntax highlighting and code style settings are applied.</em><br>
       <b>NEW:</b> tab (&#8633;) and pipe (|) as separators added<br>
       <b>NEW:</b> spellchecker enabled<br>
