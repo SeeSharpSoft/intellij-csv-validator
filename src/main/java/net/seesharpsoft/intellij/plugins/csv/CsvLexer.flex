@@ -4,7 +4,6 @@ import com.intellij.lexer.FlexLexer;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.openapi.project.Project;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
-import static net.seesharpsoft.intellij.plugins.csv.settings.CsvCodeStyleSettings.getCurrentSeparator;
 import com.intellij.psi.TokenType;
 
 %%
