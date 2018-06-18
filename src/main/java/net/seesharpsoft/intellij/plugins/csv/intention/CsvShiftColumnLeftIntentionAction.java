@@ -21,7 +21,7 @@ public class CsvShiftColumnLeftIntentionAction extends CsvShiftColumnIntentionAc
     public void invoke(@NotNull Project project, Editor editor, @NotNull PsiElement psiElement) throws IncorrectOperationException {
         CsvFile psiFile = (CsvFile)psiElement.getContainingFile();
 
-        psiElement = CsvIntentionHelper.getParentFieldElement(psiElement);
+        psiElement = CsvHelper.getParentFieldElement(psiElement);
 
         Map<Integer, CsvColumnInfo<PsiElement>> columnInfoMap = CsvHelper.createColumnInfoMap(psiFile);
 

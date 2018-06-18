@@ -4,6 +4,7 @@ import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import com.intellij.util.IncorrectOperationException;
+import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvField;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
 import org.jetbrains.annotations.NonNls;
@@ -23,17 +24,17 @@ public class CsvUnquoteValueIntentionAction extends CsvIntentionAction {
             return false;
         }
         
-        element = CsvIntentionHelper.getParentFieldElement(element);
+        element = CsvHelper.getParentFieldElement(element);
         return element instanceof CsvField &&
                 element.getFirstChild() != null &&
-                (CsvIntentionHelper.getElementType(element.getFirstChild()) == CsvTypes.QUOTE ||
-                        CsvIntentionHelper.getElementType(element.getLastChild()) == CsvTypes.QUOTE) &&
-                CsvIntentionHelper.getChildren(element).stream().allMatch(psiElement -> CsvIntentionHelper.getElementType(psiElement) != CsvTypes.ESCAPED_TEXT);
+                (CsvHelper.getElementType(element.getFirstChild()) == CsvTypes.QUOTE ||
+                        CsvHelper.getElementType(element.getLastChild()) == CsvTypes.QUOTE) &&
+                CsvIntentionHelper.getChildren(element).stream().allMatch(psiElement -> CsvHelper.getElementType(psiElement) != CsvTypes.ESCAPED_TEXT);
     }
 
     @Override
     public void invoke(@NotNull Project project, Editor editor, PsiElement element) throws IncorrectOperationException {
-        CsvIntentionHelper.unquoteValue(project, CsvIntentionHelper.getParentFieldElement(element));
+        CsvIntentionHelper.unquoteValue(project, CsvHelper.getParentFieldElement(element));
     }
     
 }

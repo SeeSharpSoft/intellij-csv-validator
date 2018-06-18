@@ -1,15 +1,67 @@
 package net.seesharpsoft.intellij.plugins.csv;
 
+import com.intellij.lang.*;
+import com.intellij.lexer.Lexer;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.Key;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiManager;
+import com.intellij.psi.TokenType;
+import com.intellij.psi.impl.source.DummyHolder;
+import com.intellij.psi.impl.source.DummyHolderFactory;
+import com.intellij.psi.impl.source.tree.FileElement;
+import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvField;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvFile;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvRecord;
+import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class CsvHelper {
+
+    public static final Key<Map<Integer, CsvColumnInfo<PsiElement>>> COLUMN_INFO_KEY = Key.create("COLUMN_INFO_KEY");
+
+    // replaces PsiElementFactory.SERVICE.getInstance(element.getProject()).createDummyHolder("<undefined>", CsvTypes.FIELD, null);
+    // https://github.com/SeeSharpSoft/intellij-csv-validator/issues/4
+    public static PsiElement createEmptyCsvField(Project project) {
+        final String text = "<undefined>";
+        final IElementType type = CsvTypes.FIELD;
+        final PsiManager psiManager = PsiManager.getInstance(project);
+        final DummyHolder dummyHolder = DummyHolderFactory.createHolder(psiManager, null);
+        final FileElement fileElement = dummyHolder.getTreeElement();
+        final ParserDefinition parserDefinition = LanguageParserDefinitions.INSTANCE.forLanguage(CsvLanguage.INSTANCE);
+        final Lexer lexer = parserDefinition.createLexer(project);
+        final PsiBuilder psiBuilder = PsiBuilderFactory.getInstance().createBuilder(project, fileElement, lexer, CsvLanguage.INSTANCE, text);
+        final ASTNode node = parserDefinition.createParser(project).parse(type, psiBuilder);
+        fileElement.rawAddChildren((com.intellij.psi.impl.source.tree.TreeElement)node);
+        return node.getPsi();
+    }
+
+    public static IElementType getElementType(PsiElement element) {
+        return element == null || element.getNode() == null ? null : element.getNode().getElementType();
+    }
+
+    public static PsiElement getParentFieldElement(PsiElement element) {
+        if (CsvHelper.getElementType(element) == TokenType.WHITE_SPACE) {
+            if (CsvHelper.getElementType(element.getParent()) == CsvTypes.FIELD) {
+                element = element.getParent();
+            } else if (CsvHelper.getElementType(element.getPrevSibling()) == CsvTypes.FIELD) {
+                element = element.getPrevSibling();
+            } else if (CsvHelper.getElementType(element.getNextSibling()) == CsvTypes.FIELD) {
+                element = element.getNextSibling();
+            } else {
+                element = null;
+            }
+        } else {
+            while (element != null && CsvHelper.getElementType(element) != CsvTypes.FIELD) {
+                element = element.getParent();
+            }
+        }
+        return element;
+    }
 
     public static Map<Integer, CsvColumnInfo<PsiElement>> createColumnInfoMap(CsvFile csvFile) {
         Map<Integer, CsvColumnInfo<PsiElement>> columnInfoMap = new HashMap<>();

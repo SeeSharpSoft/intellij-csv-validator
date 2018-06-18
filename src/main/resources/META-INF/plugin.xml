@@ -55,7 +55,9 @@
         <editorHighlighterProvider filetype="CSV"
                                    implementationClass="net.seesharpsoft.intellij.plugins.csv.highlighter.CsvEditorHighlighterProvider"/>
         <colorSettingsPage implementation="net.seesharpsoft.intellij.plugins.csv.settings.CsvColorSettingsPage"/>
-        
+
+        <annotator language="csv" implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvAnnotator"/>
+
         <spellchecker.support language="csv"
                               implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvSpellCheckingStrategy" />
         

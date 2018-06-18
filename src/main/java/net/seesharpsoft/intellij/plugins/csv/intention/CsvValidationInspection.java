@@ -13,6 +13,7 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.TokenType;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.util.IncorrectOperationException;
+import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvCodeStyleSettings;
@@ -75,10 +76,10 @@ public class CsvValidationInspection extends LocalInspectionTool {
                     return;
                 }
                 
-                IElementType elementType = CsvIntentionHelper.getElementType(element);
+                IElementType elementType = CsvHelper.getElementType(element);
                 PsiElement firstChild = element.getFirstChild();
                 PsiElement nextSibling = element.getNextSibling();
-                if (elementType == TokenType.ERROR_ELEMENT && CsvIntentionHelper.getElementType(firstChild) == TokenType.BAD_CHARACTER) {
+                if (elementType == TokenType.ERROR_ELEMENT && CsvHelper.getElementType(firstChild) == TokenType.BAD_CHARACTER) {
                     if (firstChild.getText().equals("\"")) {
                         holder.registerProblem(element, UNESCAPED_SEQUENCE, fixUnescapedSequence);
                     } else {
@@ -86,7 +87,7 @@ public class CsvValidationInspection extends LocalInspectionTool {
                         holder.registerProblem(element, UNESCAPED_SEQUENCE, fixUnescapedSequence);
                     }
                 } else if ((elementType == CsvTypes.TEXT || elementType == CsvTypes.ESCAPED_TEXT)
-                        && CsvIntentionHelper.getElementType(nextSibling) == TokenType.ERROR_ELEMENT
+                        && CsvHelper.getElementType(nextSibling) == TokenType.ERROR_ELEMENT
                         && nextSibling.getFirstChild() == null) {
                     holder.registerProblem(element, CLOSING_QUOTE_MISSING, fixClosingQuoteMissing);
                 }
