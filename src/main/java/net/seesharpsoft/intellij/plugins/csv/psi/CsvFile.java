@@ -4,27 +4,40 @@ import com.intellij.extapi.psi.PsiFileBase;
 import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.fileTypes.LanguageFileType;
 import com.intellij.psi.FileViewProvider;
+import com.intellij.psi.PsiElement;
+import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfoMap;
+import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 
 public class CsvFile extends PsiFileBase {
-    private LanguageFileType fileType;
+    private final LanguageFileType myFileType;
+    private CsvColumnInfoMap<PsiElement> myColumnInfoMap;
+    private long myColumnInfoMapModifiedStamp;
     
     public CsvFile(@NotNull FileViewProvider viewProvider, LanguageFileType fileType) {
         super(viewProvider, fileType.getLanguage());
-        this.fileType = fileType;
+        myFileType = fileType;
+    }
+
+    public CsvColumnInfoMap<PsiElement> getMyColumnInfoMap() {
+        if (myColumnInfoMap == null || this.getModificationStamp() != myColumnInfoMapModifiedStamp) {
+            myColumnInfoMap = CsvHelper.createColumnInfoMap(this);
+            myColumnInfoMapModifiedStamp = getModificationStamp();
+        }
+        return myColumnInfoMap;
     }
 
     @NotNull
     @Override
     public FileType getFileType() {
-        return fileType;
+        return myFileType;
     }
 
     @Override
     public String toString() {
-        return String.format("%s File", fileType.getName());
+        return String.format("%s File", myFileType.getName());
     }
 
     @Override

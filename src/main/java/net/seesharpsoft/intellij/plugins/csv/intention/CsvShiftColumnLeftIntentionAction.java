@@ -5,11 +5,10 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import com.intellij.util.IncorrectOperationException;
 import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfo;
+import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfoMap;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvFile;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.Map;
 
 public class CsvShiftColumnLeftIntentionAction extends CsvShiftColumnIntentionAction {
 
@@ -19,27 +18,20 @@ public class CsvShiftColumnLeftIntentionAction extends CsvShiftColumnIntentionAc
 
     @Override
     public void invoke(@NotNull Project project, Editor editor, @NotNull PsiElement psiElement) throws IncorrectOperationException {
-        CsvFile psiFile = (CsvFile)psiElement.getContainingFile();
+        CsvFile csvFile = (CsvFile)psiElement.getContainingFile();
 
         psiElement = CsvHelper.getParentFieldElement(psiElement);
 
-        Map<Integer, CsvColumnInfo<PsiElement>> columnInfoMap = CsvHelper.createColumnInfoMap(psiFile);
-
-        CsvColumnInfo<PsiElement> rightColumnInfo = null;
-        for (CsvColumnInfo columnInfo : columnInfoMap.values()) {
-            if (columnInfo.containsElement(psiElement)) {
-                rightColumnInfo = columnInfo;
-                break;
-            }
-        }
+        CsvColumnInfoMap<PsiElement> columnInfoMap = csvFile.getMyColumnInfoMap();
+        CsvColumnInfo<PsiElement> rightColumnInfo = columnInfoMap.getColumnInfo(psiElement);
 
         // column must be at least index 1 to be shifted left
         if (rightColumnInfo == null || rightColumnInfo.getColumnIndex() < 1) {
             return;
         }
 
-        CsvColumnInfo<PsiElement> leftColumnInfo = columnInfoMap.get(rightColumnInfo.getColumnIndex() - 1);
+        CsvColumnInfo<PsiElement> leftColumnInfo = columnInfoMap.getColumnInfo(rightColumnInfo.getColumnIndex() - 1);
 
-        changeLeftAndRightColumnOrder(project, psiFile, leftColumnInfo, rightColumnInfo);
+        changeLeftAndRightColumnOrder(project, csvFile, leftColumnInfo, rightColumnInfo);
     }
 }

@@ -10,7 +10,8 @@ public class CsvAnnotatorTest extends LightCodeInsightFixtureTestCase {
     }
 
     public void testAnnotator() {
-        myFixture.testHighlighting("AnnotatorTestData.csv");
+        myFixture.configureByFile("AnnotatorTestData.csv");
+        myFixture.checkHighlighting(true, true, true, true);
     }
 
 }

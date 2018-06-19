@@ -3,7 +3,6 @@ package net.seesharpsoft.intellij.plugins.csv;
 import com.intellij.lang.*;
 import com.intellij.lexer.Lexer;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.Key;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.TokenType;
@@ -21,8 +20,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class CsvHelper {
-
-    public static final Key<Map<Integer, CsvColumnInfo<PsiElement>>> COLUMN_INFO_KEY = Key.create("COLUMN_INFO_KEY");
 
     // replaces PsiElementFactory.SERVICE.getInstance(element.getProject()).createDummyHolder("<undefined>", CsvTypes.FIELD, null);
     // https://github.com/SeeSharpSoft/intellij-csv-validator/issues/4
@@ -45,7 +42,19 @@ public class CsvHelper {
     }
 
     public static PsiElement getParentFieldElement(PsiElement element) {
-        if (CsvHelper.getElementType(element) == TokenType.WHITE_SPACE) {
+        IElementType elementType = CsvHelper.getElementType(element);
+
+        if(elementType == CsvTypes.COMMA || elementType == CsvTypes.CRLF) {
+            element = element.getPrevSibling();
+            elementType = CsvHelper.getElementType(element);
+        }
+
+        if(elementType == CsvTypes.RECORD) {
+            element = element.getLastChild();
+            elementType = CsvHelper.getElementType(element);
+        }
+
+        if (elementType == TokenType.WHITE_SPACE) {
             if (CsvHelper.getElementType(element.getParent()) == CsvTypes.FIELD) {
                 element = element.getParent();
             } else if (CsvHelper.getElementType(element.getPrevSibling()) == CsvTypes.FIELD) {
@@ -56,14 +65,15 @@ public class CsvHelper {
                 element = null;
             }
         } else {
-            while (element != null && CsvHelper.getElementType(element) != CsvTypes.FIELD) {
+            while (element != null && elementType != CsvTypes.FIELD) {
                 element = element.getParent();
+                elementType = CsvHelper.getElementType(element);
             }
         }
         return element;
     }
 
-    public static Map<Integer, CsvColumnInfo<PsiElement>> createColumnInfoMap(CsvFile csvFile) {
+    public static CsvColumnInfoMap<PsiElement> createColumnInfoMap(CsvFile csvFile) {
         Map<Integer, CsvColumnInfo<PsiElement>> columnInfoMap = new HashMap<>();
         CsvRecord[] records = PsiTreeUtil.getChildrenOfType(csvFile, CsvRecord.class);
         int row = 0;
@@ -81,7 +91,6 @@ public class CsvHelper {
             }
             ++row;
         }
-        return columnInfoMap;
+        return new CsvColumnInfoMap(columnInfoMap);
     }
-
 }
