@@ -28,7 +28,7 @@ public class CsvAnnotator implements Annotator {
         if (columnInfo != null) {
             PsiElement headerElement = columnInfo.getHeaderElement();
             String message = XmlStringUtil.escapeString(headerElement == null ? "" : headerElement.getText(), true);
-            String tooltip = XmlStringUtil.wrapInHtml(String.format("%s<br /><br />Column: %s<br />Index: %d", XmlStringUtil.escapeString(element.getText(), true), message, columnInfo.getColumnIndex()));
+            String tooltip = XmlStringUtil.wrapInHtml(String.format("%s<br /><br />Header: %s<br />Index: %d", XmlStringUtil.escapeString(element.getText(), true), message, columnInfo.getColumnIndex()));
 
             Annotation annotation = holder.createAnnotation(HighlightSeverity.INFORMATION, element.getTextRange(), message, tooltip);
             annotation.setEnforcedTextAttributes(EMPTY_TEXT_ATTRIBUTES);
