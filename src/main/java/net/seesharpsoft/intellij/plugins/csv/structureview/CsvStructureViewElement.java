@@ -90,7 +90,8 @@ public abstract class CsvStructureViewElement implements StructureViewTreeElemen
         @Override
         public TreeElement[] getChildren() {
             if (element instanceof CsvFile) {
-                Map<Integer, CsvColumnInfo<PsiElement>> columnInfoMap = CsvHelper.createColumnInfoMap((CsvFile) element);
+                CsvFile csvFile = (CsvFile)element;
+                Map<Integer, CsvColumnInfo<PsiElement>> columnInfoMap = csvFile.getMyColumnInfoMap().getColumnInfos();
                 TreeElement[] children = new TreeElement[columnInfoMap.size()];
                 for (Map.Entry<Integer, CsvColumnInfo<PsiElement>> entry : columnInfoMap.entrySet()) {
                     CsvColumnInfo<PsiElement> columnInfo = entry.getValue();
