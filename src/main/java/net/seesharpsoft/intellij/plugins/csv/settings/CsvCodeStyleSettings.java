@@ -3,7 +3,6 @@ package net.seesharpsoft.intellij.plugins.csv.settings;
 import com.intellij.lang.Language;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.project.ProjectCoreUtil;
 import com.intellij.psi.codeStyle.CodeStyleSettings;
 import com.intellij.psi.codeStyle.CodeStyleSettingsManager;
 import com.intellij.psi.codeStyle.CustomCodeStyleSettings;
@@ -46,10 +45,6 @@ public class CsvCodeStyleSettings extends CustomCodeStyleSettings {
             return ((CsvSeparatorHolder)language).getSeparator();
         }
         return getCurrentSeparator(project);
-    }
-
-    public static String getCurrentSeparator() {
-        return getCurrentSeparator(ProjectCoreUtil.theOnlyOpenProject());
     }
 
     public CsvCodeStyleSettings(CodeStyleSettings settings) {

@@ -17,9 +17,19 @@
         <li>intentions (Alt+Enter), e.g. Quote/Unquote (all), Shift Column Left/Right</li>
         <li>structure view (header-entry layout)</li>
         <li>support for ',', ';', '|' or '&#8633;' as value separator</li>
+        <li>highlight of active column values</li>
       </ul>
-      <em><b>Note:</b> Default code formatting is 'Tabularize'. Can be changed in Settings -> Editor -> Code Style -> CSV</em><br><br>
-      For more detailed information please have a look at the <a href="https://github.com/SeeSharpSoft/intellij-csv-validator/blob/master/README.md">README</a>.<br><br><br><hr /><br>
+
+      <b>TSV file support:</b> <em>TSV files are recognized as such but treated as a variant of CSV files, the same syntax highlighting and code style settings are applied.</em>
+      <br><br>
+      <b>Code formatting:</b> <em>Default code formatting is 'Tabularize'. Can be changed in Settings -> Editor -> Code Style -> CSV</em>
+      <br><br>
+      For more detailed information please have a look at the <a href="https://github.com/SeeSharpSoft/intellij-csv-validator/blob/master/README.md">README</a>.
+      <br><br><br>
+      <em>Thanks to @egoisticalgoat, @sabi0, @ptahchiev, @ghost and others for supporting me and the project!</em>
+      <br><br><br>
+
+      <hr /><br>
       <span style="color: #555555">
       <b>IntelliJ IDEA Ultimate/PhpStorm/DataGrip/etc.:</b> The plugin is fully compatible with the <em>'Edit as Table...'</em> functionality.<br><br>
       In IDE releases prior v2017.3, the shortcut in the editor context menu becomes invisible when using this plugin. However, the option can still be accessed via Toolbar -> Edit -> <em>'Edit as Table...'</em>.
@@ -27,12 +37,11 @@
     ]]></description>
 
     <change-notes><![CDATA[
-      <b>NEW: TSV file support (new icons)</b><br>
-      <em>TSV files a recognized as such but treated as a variant of CSV files, the same syntax highlighting and code style settings are applied.</em><br>
-      <b>NEW:</b> tab (&#8633;) and pipe (|) as separators added<br>
-      <b>NEW:</b> spellchecker enabled<br>
-      <br>
-      <b>Note:</b> For CSV Plugin v1.6.0+ it was necessary to increase the minimum IDE version from 2016.1.1 to 2016.3.2 due to a required <a href="https://youtrack.jetbrains.com/issue/IDEA-162000">fix in the formatting code</a>. Previous versions of the plugin can still be downloaded directly from <a href="https://plugins.jetbrains.com/plugin/10037-csv-plugin">Jetbrains Plugin Repository</a>.   
+      <b>NEW:</b> Annotated values: tooltip shows the value itself, the header and the column index<br>
+      <b>NEW:</b> Active column (caret position) is colored differently<br>
+      <b>FIX:</b> 'Add separator' inspection is adding correct separator (e.g. tabs in TSV files)<br>
+      + several code & performance improvements
+      <br><br>
     ]]>
     </change-notes>
 
@@ -54,11 +63,15 @@
                                        implementationClass="net.seesharpsoft.intellij.plugins.csv.highlighter.CsvSyntaxHighlighterFactory"/>
         <editorHighlighterProvider filetype="CSV"
                                    implementationClass="net.seesharpsoft.intellij.plugins.csv.highlighter.CsvEditorHighlighterProvider"/>
+        <highlightUsagesHandlerFactory implementation="net.seesharpsoft.intellij.plugins.csv.highlighter.CsvHighlightUsagesHandlerFactory"/>
+
         <colorSettingsPage implementation="net.seesharpsoft.intellij.plugins.csv.settings.CsvColorSettingsPage"/>
-        
+
+        <annotator language="csv" implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvAnnotator"/>
+
         <spellchecker.support language="csv"
                               implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvSpellCheckingStrategy" />
-        
+
         <lang.formatter language="csv"
                         implementationClass="net.seesharpsoft.intellij.plugins.csv.formatter.CsvFormattingModelBuilder"/>
         <codeStyleSettingsProvider

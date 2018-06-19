@@ -5,6 +5,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.TokenType;
 import com.intellij.util.IncorrectOperationException;
+import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -23,7 +24,7 @@ public class CsvUnquoteAllIntentionAction extends CsvIntentionAction {
         }
         
         return !CsvIntentionHelper.getAllElements(element.getContainingFile()).stream()
-                        .anyMatch(psiElement -> CsvIntentionHelper.getElementType(psiElement) == TokenType.BAD_CHARACTER);
+                        .anyMatch(psiElement -> CsvHelper.getElementType(psiElement) == TokenType.BAD_CHARACTER);
     }
 
     @Override

@@ -18,9 +18,9 @@ public abstract class CsvShiftColumnIntentionAction extends CsvIntentionAction {
         super(text);
     }
 
-    protected static void changeLeftAndRightColumnOrder(@NotNull Project project, CsvFile psiFile, CsvColumnInfo<PsiElement> leftColumnInfo, CsvColumnInfo<PsiElement> rightColumnInfo) {
-        Document document = PsiDocumentManager.getInstance(project).getDocument(psiFile);
-        document.setText(changeLeftAndRightColumnOrder(document.getText(), CsvCodeStyleSettings.getCurrentSeparator(project, psiFile.getLanguage()), leftColumnInfo, rightColumnInfo));
+    protected static void changeLeftAndRightColumnOrder(@NotNull Project project, CsvFile csvFile, CsvColumnInfo<PsiElement> leftColumnInfo, CsvColumnInfo<PsiElement> rightColumnInfo) {
+        Document document = PsiDocumentManager.getInstance(project).getDocument(csvFile);
+        document.setText(changeLeftAndRightColumnOrder(document.getText(), CsvCodeStyleSettings.getCurrentSeparator(project, csvFile.getLanguage()), leftColumnInfo, rightColumnInfo));
     }
 
     @NotNull
@@ -43,10 +43,10 @@ public abstract class CsvShiftColumnIntentionAction extends CsvIntentionAction {
                     TextRange.create(middleSeparator.getEndOffset(), middleSeparator.getEndOffset()) :
                     findNextSeparatorOrCRLF(rightElement);
 
-            newText.append(text.substring(lastIndex, leftSeparator.getEndOffset()))
-                    .append(text.substring(middleSeparator.getEndOffset(), rightSeparator.getStartOffset()))
+            newText.append(text, lastIndex, leftSeparator.getEndOffset())
+                    .append(text, middleSeparator.getEndOffset(), rightSeparator.getStartOffset())
                     .append(separator)
-                    .append(text.substring(leftSeparator.getEndOffset(), middleSeparator.getStartOffset()));
+                    .append(text, leftSeparator.getEndOffset(), middleSeparator.getStartOffset());
 
             lastIndex = rightSeparator.getStartOffset();
         }
