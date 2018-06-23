@@ -89,6 +89,7 @@
                 groupName="CSV"
                 shortName="CsvValidation"
                 implementationClass="net.seesharpsoft.intellij.plugins.csv.intention.CsvValidationInspection" />
+        <lang.inspectionSuppressor language="csv" implementationClass="net.seesharpsoft.intellij.plugins.csv.intention.CsvInspectionSuppressor" />
 
         <intentionAction id="CsvShiftColumnLeft" order="FIRST">
             <className>net.seesharpsoft.intellij.plugins.csv.intention.CsvShiftColumnLeftIntentionAction</className>

@@ -78,6 +78,7 @@ public class CsvLanguageCodeStyleSettingsProvider extends LanguageCodeStyleSetti
         commonSettings.getIndentOptions().INDENT_SIZE = 1;
         commonSettings.getIndentOptions().USE_TAB_CHARACTER = true;
         commonSettings.getIndentOptions().SMART_TABS = false;
+        commonSettings.getIndentOptions().KEEP_INDENTS_ON_EMPTY_LINES = true;
         return commonSettings;
     }
 }

@@ -1,9 +1,6 @@
 package net.seesharpsoft.intellij.plugins.csv.intention;
 
-import com.intellij.codeInspection.LocalInspectionTool;
-import com.intellij.codeInspection.LocalQuickFix;
-import com.intellij.codeInspection.ProblemDescriptor;
-import com.intellij.codeInspection.ProblemsHolder;
+import com.intellij.codeInspection.*;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.project.Project;
@@ -80,19 +77,26 @@ public class CsvValidationInspection extends LocalInspectionTool {
                 PsiElement firstChild = element.getFirstChild();
                 PsiElement nextSibling = element.getNextSibling();
                 if (elementType == TokenType.ERROR_ELEMENT && CsvHelper.getElementType(firstChild) == TokenType.BAD_CHARACTER) {
-                    if (firstChild.getText().equals("\"")) {
-                        holder.registerProblem(element, UNESCAPED_SEQUENCE, fixUnescapedSequence);
-                    } else {
-                        holder.registerProblem(element, SEPARATOR_MISSING, fixSeparatorMissing);
-                        holder.registerProblem(element, UNESCAPED_SEQUENCE, fixUnescapedSequence);
+                    CsvValidationInspection.this.registerError(holder, element, UNESCAPED_SEQUENCE, fixUnescapedSequence);
+                    if (!"\"".equals(firstChild.getText())) {
+                        CsvValidationInspection.this.registerError(holder, element, SEPARATOR_MISSING, fixSeparatorMissing);
                     }
                 } else if ((elementType == CsvTypes.TEXT || elementType == CsvTypes.ESCAPED_TEXT)
                         && CsvHelper.getElementType(nextSibling) == TokenType.ERROR_ELEMENT
                         && nextSibling.getFirstChild() == null) {
-                    holder.registerProblem(element, CLOSING_QUOTE_MISSING, fixClosingQuoteMissing);
+                    CsvValidationInspection.this.registerError(holder, element, CLOSING_QUOTE_MISSING, fixClosingQuoteMissing);
                 }
             }
         };
+    }
+
+    private boolean registerError(@NotNull final ProblemsHolder holder, @NotNull PsiElement element, @NotNull String descriptionTemplate, @Nullable LocalQuickFix fix) {
+        if (element != null && this.isSuppressedFor(element)) {
+            return false;
+        }
+
+        holder.registerProblem(element, descriptionTemplate, fix);
+        return true;
     }
     
     private static abstract class CsvLocalQuickFix implements LocalQuickFix {
