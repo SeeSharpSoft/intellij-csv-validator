@@ -3,8 +3,6 @@ package net.seesharpsoft.intellij.plugins.csv.settings;
 import com.intellij.application.options.CodeStyleAbstractConfigurable;
 import com.intellij.application.options.CodeStyleAbstractPanel;
 import com.intellij.application.options.TabbedLanguageCodeStylePanel;
-import com.intellij.application.options.codeStyle.WrappingAndBracesPanel;
-import com.intellij.lang.Language;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.colors.EditorColorsScheme;
 import com.intellij.openapi.editor.ex.EditorEx;
@@ -54,17 +52,23 @@ public class CsvCodeStyleSettingsProvider extends CodeStyleSettingsProvider {
         @Override
         protected void initTabs(CodeStyleSettings settings) {
             addTab(new CsvCodeStyleOptionTreeWithPreviewPanel(settings));
+            addTab(new CsvWrappingPanel(settings));
         }
 
-        public class CsvCodeStyleOptionTreeWithPreviewPanel extends WrappingAndBracesPanel {
-
-            public CsvCodeStyleOptionTreeWithPreviewPanel(CodeStyleSettings settings) {
+        protected class CsvWrappingPanel extends MyWrappingAndBracesPanel {
+            public CsvWrappingPanel(CodeStyleSettings settings) {
                 super(settings);
             }
 
             @Override
-            public LanguageCodeStyleSettingsProvider.SettingsType getSettingsType() {
-                return LanguageCodeStyleSettingsProvider.SettingsType.LANGUAGE_SPECIFIC;
+            public String getTabTitle() {
+                return "Wrapping";
+            }
+        }
+
+        protected class CsvCodeStyleOptionTreeWithPreviewPanel extends MyWrappingAndBracesPanel {
+            public CsvCodeStyleOptionTreeWithPreviewPanel(CodeStyleSettings settings) {
+                super(settings);
             }
 
             @Override
@@ -73,8 +77,8 @@ public class CsvCodeStyleSettingsProvider extends CodeStyleSettingsProvider {
             }
 
             @Override
-            public Language getDefaultLanguage() {
-                return CsvCodeStyleMainPanel.this.getDefaultLanguage();
+            public LanguageCodeStyleSettingsProvider.SettingsType getSettingsType() {
+                return LanguageCodeStyleSettingsProvider.SettingsType.LANGUAGE_SPECIFIC;
             }
 
             private void updatePreviewHighlighter(EditorEx editor) {
