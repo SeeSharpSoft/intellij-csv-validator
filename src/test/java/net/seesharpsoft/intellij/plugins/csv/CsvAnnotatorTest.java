@@ -1,10 +1,8 @@
 package net.seesharpsoft.intellij.plugins.csv;
 
-import com.intellij.codeInsight.daemon.impl.DaemonCodeAnalyzerImpl;
 import com.intellij.codeInsight.daemon.impl.HighlightInfo;
 import com.intellij.codeInsight.daemon.impl.HighlightInfoType;
 import com.intellij.openapi.Disposable;
-import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Disposer;
@@ -72,11 +70,6 @@ public class CsvAnnotatorTest extends LightCodeInsightFixtureTestCase {
 
         long elapsed = System.currentTimeMillis() - start;
         data.checkResult(infos, file.getText());
-        if (data.hasLineMarkers()) {
-            Document document = myFixture.getDocument(this.getFile());
-            data.checkLineMarkers(DaemonCodeAnalyzerImpl.getLineMarkers(document, myFixture.getProject()), document.getText());
-        }
-
         hardRefToFileElement.hashCode();
         return elapsed;
     }
