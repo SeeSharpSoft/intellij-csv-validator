@@ -1,4 +1,4 @@
-package net.seesharpsoft.intellij.plugins.csv.intention;
+package net.seesharpsoft.intellij.plugins.csv.inspection;
 
 import com.intellij.codeInspection.InspectionProfileEntry;
 import com.intellij.codeInspection.InspectionSuppressor;

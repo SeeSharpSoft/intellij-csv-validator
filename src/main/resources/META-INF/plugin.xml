@@ -69,10 +69,10 @@
 
         <colorSettingsPage implementation="net.seesharpsoft.intellij.plugins.csv.settings.CsvColorSettingsPage"/>
 
-        <annotator language="csv" implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvAnnotator"/>
+        <annotator language="csv" implementationClass="net.seesharpsoft.intellij.plugins.csv.annotation.CsvAnnotator"/>
 
         <spellchecker.support language="csv"
-                              implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvSpellCheckingStrategy" />
+                              implementationClass="net.seesharpsoft.intellij.plugins.csv.spellchecker.CsvSpellCheckingStrategy" />
 
         <lang.formatter language="csv"
                         implementationClass="net.seesharpsoft.intellij.plugins.csv.formatter.CsvFormattingModelBuilder"/>
@@ -90,8 +90,8 @@
                 enabledByDefault="true"
                 groupName="CSV"
                 shortName="CsvValidation"
-                implementationClass="net.seesharpsoft.intellij.plugins.csv.intention.CsvValidationInspection" />
-        <lang.inspectionSuppressor language="csv" implementationClass="net.seesharpsoft.intellij.plugins.csv.intention.CsvInspectionSuppressor" />
+                implementationClass="net.seesharpsoft.intellij.plugins.csv.inspection.CsvValidationInspection" />
+        <lang.inspectionSuppressor language="csv" implementationClass="net.seesharpsoft.intellij.plugins.csv.inspection.CsvInspectionSuppressor" />
 
         <intentionAction id="CsvShiftColumnLeft" order="FIRST">
             <className>net.seesharpsoft.intellij.plugins.csv.intention.CsvShiftColumnLeftIntentionAction</className>
