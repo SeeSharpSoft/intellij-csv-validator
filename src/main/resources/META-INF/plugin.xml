@@ -37,9 +37,11 @@
     ]]></description>
 
     <change-notes><![CDATA[
-      <b>NEW:</b> Annotated values: tooltip shows the value itself, the header and the column index<br>
-      <b>NEW:</b> Active column (caret position) is colored differently<br>
-      <b>FIX:</b> 'Add separator' inspection is adding correct separator (e.g. tabs in TSV files)<br>
+      <b>NEW:</b> Custom 'Wrapping' settings<br>
+      <b>NEW:</b> Column highlighter takes whitespaces into account<br>
+      <b>FIX:</b> CSV column info tooltip trumps spellchecker tooltip (but keeps the visualization of a typo)<br>
+      <b>FIX:</b> Show tooltip even when caret is at the last position withing the CSV file<br>
+      <b>FIX:</b> Support for suppressing inspections not relevant for CSV (e.g. 'Problematic Whitespace')<br>
       + several code & performance improvements
       <br><br>
     ]]>

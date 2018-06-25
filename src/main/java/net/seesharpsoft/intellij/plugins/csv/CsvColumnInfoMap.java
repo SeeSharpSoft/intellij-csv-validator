@@ -31,6 +31,11 @@ public class CsvColumnInfoMap<T> {
         return infoColumnMap.get(columnIndex);
     }
 
+    public CsvColumnInfo<T>.RowInfo getRowInfo(T element) {
+        CsvColumnInfo<T> columnInfo = getColumnInfo(element);
+        return columnInfo != null ? columnInfo.getRowInfo(element) : null;
+    }
+
     public Map<Integer, CsvColumnInfo<T>> getColumnInfos() {
         return Collections.unmodifiableMap(this.infoColumnMap);
     }

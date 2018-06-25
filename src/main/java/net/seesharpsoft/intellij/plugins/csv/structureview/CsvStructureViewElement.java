@@ -134,7 +134,7 @@ public abstract class CsvStructureViewElement implements StructureViewTreeElemen
         @Nullable
         @Override
         public String getLocationString() {
-            return String.format("Header (%s entries)", columnInfo.getElements().size() - 1);
+            return String.format("Header (%s entries)", columnInfo.getSize() - 1);
         }
 
         @Nullable

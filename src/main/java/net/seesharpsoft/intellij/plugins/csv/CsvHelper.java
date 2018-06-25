@@ -73,6 +73,64 @@ public class CsvHelper {
         return element;
     }
 
+    public static PsiElement getPreviousCRLF(PsiElement recordElement) {
+        while (recordElement != null) {
+            if (CsvHelper.getElementType(recordElement) == CsvTypes.CRLF) {
+                break;
+            }
+            recordElement = recordElement.getPrevSibling();
+        }
+        return recordElement;
+    }
+
+    public static PsiElement getNextCRLF(PsiElement recordElement) {
+        while (recordElement != null) {
+            if (CsvHelper.getElementType(recordElement) == CsvTypes.CRLF) {
+                break;
+            }
+            recordElement = recordElement.getNextSibling();
+        }
+        return recordElement;
+    }
+
+    public static PsiElement getPreviousSeparator(PsiElement fieldElement) {
+        PsiElement current = fieldElement;
+        while (current != null) {
+            if (CsvHelper.getElementType(current) == CsvTypes.COMMA) {
+                break;
+            }
+            current = current.getPrevSibling();
+        }
+        return current;
+    }
+
+    public static PsiElement getNextSeparator(PsiElement fieldElement) {
+        PsiElement current = fieldElement;
+        while (current != null) {
+            if (CsvHelper.getElementType(current) == CsvTypes.COMMA) {
+                break;
+            }
+            current = current.getNextSibling();
+        }
+        return current;
+    }
+
+    public static int getFieldStartOffset(PsiElement field) {
+        PsiElement separator = CsvHelper.getPreviousSeparator(field);
+        if (separator == null) {
+            separator = getPreviousCRLF(field.getParent());
+        }
+        return separator == null ? 0 :separator.getTextOffset() + separator.getTextLength();
+    }
+
+    public static int getFieldEndOffset(PsiElement field) {
+        PsiElement separator = CsvHelper.getNextSeparator(field);
+        if (separator == null) {
+            separator = getNextCRLF(field.getParent());
+        }
+        return separator == null ? field.getContainingFile().getTextLength() : separator.getTextOffset();
+    }
+
     public static CsvColumnInfoMap<PsiElement> createColumnInfoMap(CsvFile csvFile) {
         Map<Integer, CsvColumnInfo<PsiElement>> columnInfoMap = new HashMap<>();
         CsvRecord[] records = PsiTreeUtil.getChildrenOfType(csvFile, CsvRecord.class);
@@ -86,7 +144,7 @@ public class CsvHelper {
                 } else if (columnInfoMap.get(column).getMaxLength() < length) {
                     columnInfoMap.get(column).setMaxLength(length);
                 }
-                columnInfoMap.get(column).addElement(field, row);
+                columnInfoMap.get(column).addElement(field, row, getFieldStartOffset(field), getFieldEndOffset(field));
                 ++column;
             }
             ++row;

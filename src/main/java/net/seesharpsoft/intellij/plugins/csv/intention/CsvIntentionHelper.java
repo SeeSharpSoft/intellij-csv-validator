@@ -32,46 +32,6 @@ public class CsvIntentionHelper {
         return children;
     }
 
-    public static PsiElement getPreviousSeparator(PsiElement fieldElement) {
-        while (fieldElement != null) {
-            if (CsvHelper.getElementType(fieldElement) == CsvTypes.COMMA) {
-                break;
-            }
-            fieldElement = fieldElement.getPrevSibling();
-        }
-        return fieldElement;
-    }
-
-    public static PsiElement getNextSeparator(PsiElement fieldElement) {
-        while (fieldElement != null) {
-            if (CsvHelper.getElementType(fieldElement) == CsvTypes.COMMA) {
-                break;
-            }
-            fieldElement = fieldElement.getNextSibling();
-        }
-        return fieldElement;
-    }
-
-    public static PsiElement getPreviousCRLF(PsiElement recordElement) {
-        while (recordElement != null) {
-            if (CsvHelper.getElementType(recordElement) == CsvTypes.CRLF) {
-                break;
-            }
-            recordElement = recordElement.getPrevSibling();
-        }
-        return recordElement;
-    }
-
-    public static PsiElement getNextCRLF(PsiElement recordElement) {
-        while (recordElement != null) {
-            if (CsvHelper.getElementType(recordElement) == CsvTypes.CRLF) {
-                break;
-            }
-            recordElement = recordElement.getNextSibling();
-        }
-        return recordElement;
-    }
-
     public static Collection<PsiElement> getAllElements(PsiFile file) {
         List<PsiElement> todo = getChildren(file);
         Collection<PsiElement> elements = new HashSet();
@@ -100,7 +60,7 @@ public class CsvIntentionHelper {
             PsiElement separator;
             for (PsiElement field : fields) {
                 if (field.getFirstChild() == null || CsvHelper.getElementType(field.getFirstChild()) != CsvTypes.QUOTE) {
-                    separator = getPreviousSeparator(field);
+                    separator = CsvHelper.getPreviousSeparator(field);
                     if (separator == null) {
                         quotePositions.add(field.getParent().getTextOffset());
                     } else {
@@ -108,7 +68,7 @@ public class CsvIntentionHelper {
                     }
                 }
                 if (field.getLastChild() == null || CsvHelper.getElementType(field.getLastChild()) != CsvTypes.QUOTE) {
-                    separator = getNextSeparator(field);
+                    separator = CsvHelper.getNextSeparator(field);
                     if (separator == null) {
                         quotePositions.add(field.getParent().getTextOffset() + field.getParent().getTextLength());
                     } else {
