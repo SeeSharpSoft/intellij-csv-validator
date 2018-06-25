@@ -12,9 +12,13 @@ import net.seesharpsoft.intellij.plugins.csv.psi.CsvFile;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
 import org.jetbrains.annotations.NotNull;
 
+import static com.intellij.spellchecker.SpellCheckerSeveritiesProvider.TYPO;
+
 public class CsvAnnotator implements Annotator {
 
     private static final TextAttributes EMPTY_TEXT_ATTRIBUTES = TextAttributes.fromFlyweight(AttributesFlyweight.create(null, null, 0, null, null, null));
+
+    public static final HighlightSeverity CSV_COLUMN_INFO_SEVERITY = new HighlightSeverity("CSV_COLUMN_INFO_SEVERITY", TYPO.myVal + 5);
 
     @Override
     public void annotate(@NotNull final PsiElement element, @NotNull AnnotationHolder holder) {
@@ -30,7 +34,7 @@ public class CsvAnnotator implements Annotator {
             String message = XmlStringUtil.escapeString(headerElement == null ? "" : headerElement.getText(), true);
             String tooltip = XmlStringUtil.wrapInHtml(String.format("%s<br /><br />Header: %s<br />Index: %d", XmlStringUtil.escapeString(element.getText(), true), message, columnInfo.getColumnIndex()));
 
-            Annotation annotation = holder.createAnnotation(HighlightSeverity.INFORMATION, element.getTextRange(), message, tooltip);
+            Annotation annotation = holder.createAnnotation(CSV_COLUMN_INFO_SEVERITY, element.getTextRange(), message, tooltip);
             annotation.setEnforcedTextAttributes(EMPTY_TEXT_ATTRIBUTES);
             annotation.setNeedsUpdateOnTyping(false);
         }
