@@ -24,7 +24,7 @@ public class CsvUnquoteValueIntentionAction extends CsvIntentionAction {
             return false;
         }
         
-        element = CsvHelper.getParentFieldElement(element);
+        element = element == null ? null : CsvHelper.getParentFieldElement(element);
         return element instanceof CsvField &&
                 element.getFirstChild() != null &&
                 (CsvHelper.getElementType(element.getFirstChild()) == CsvTypes.QUOTE ||
@@ -33,7 +33,7 @@ public class CsvUnquoteValueIntentionAction extends CsvIntentionAction {
     }
 
     @Override
-    public void invoke(@NotNull Project project, Editor editor, PsiElement element) throws IncorrectOperationException {
+    public void invoke(@NotNull Project project, Editor editor, @NotNull PsiElement element) throws IncorrectOperationException {
         CsvIntentionHelper.unquoteValue(project, CsvHelper.getParentFieldElement(element));
     }
     

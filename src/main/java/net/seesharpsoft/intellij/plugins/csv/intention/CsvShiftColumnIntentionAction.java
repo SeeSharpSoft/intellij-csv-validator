@@ -6,8 +6,9 @@ import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiElement;
 import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfo;
-import net.seesharpsoft.intellij.plugins.csv.settings.CsvCodeStyleSettings;
+import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvFile;
+import net.seesharpsoft.intellij.plugins.csv.settings.CsvCodeStyleSettings;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -24,7 +25,7 @@ public abstract class CsvShiftColumnIntentionAction extends CsvIntentionAction {
     }
 
     @NotNull
-    protected static String changeLeftAndRightColumnOrder(String text, String separator, CsvColumnInfo<PsiElement> leftColumnInfo, CsvColumnInfo<PsiElement>  rightColumnInfo) {
+    protected static String changeLeftAndRightColumnOrder(String text, String separator, CsvColumnInfo<PsiElement> leftColumnInfo, CsvColumnInfo<PsiElement> rightColumnInfo) {
         List<PsiElement> rightElements = rightColumnInfo.getElements();
         List<PsiElement> leftElements = leftColumnInfo.getElements();
         int lastIndex = 0, maxRows = leftElements.size();
@@ -56,9 +57,9 @@ public abstract class CsvShiftColumnIntentionAction extends CsvIntentionAction {
 
     protected static TextRange findPreviousSeparatorOrCRLF(PsiElement psiElement) {
         TextRange textRange;
-        PsiElement separator = CsvIntentionHelper.getPreviousSeparator(psiElement);
+        PsiElement separator = CsvHelper.getPreviousSeparator(psiElement);
         if (separator == null) {
-            separator = CsvIntentionHelper.getPreviousCRLF(psiElement.getParent());
+            separator = CsvHelper.getPreviousCRLF(psiElement.getParent());
             if (separator == null) {
                 separator = psiElement.getParent().getParent().getFirstChild();
                 textRange = TextRange.create(separator.getTextRange().getStartOffset(), separator.getTextRange().getStartOffset());
@@ -73,9 +74,9 @@ public abstract class CsvShiftColumnIntentionAction extends CsvIntentionAction {
 
     protected static TextRange findNextSeparatorOrCRLF(PsiElement psiElement) {
         TextRange textRange;
-        PsiElement separator = CsvIntentionHelper.getNextSeparator(psiElement);
+        PsiElement separator = CsvHelper.getNextSeparator(psiElement);
         if (separator == null) {
-            separator = CsvIntentionHelper.getNextCRLF(psiElement.getParent());
+            separator = CsvHelper.getNextCRLF(psiElement.getParent());
             if (separator == null) {
                 separator = psiElement.getParent().getParent().getLastChild();
                 textRange = TextRange.create(separator.getTextRange().getEndOffset(), separator.getTextRange().getEndOffset());
