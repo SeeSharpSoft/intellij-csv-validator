@@ -108,7 +108,7 @@ public abstract class CsvStructureViewElement implements StructureViewTreeElemen
         }
     }
 
-    private static class Header extends CsvStructureViewElement {
+    public static class Header extends CsvStructureViewElement {
         private CsvColumnInfo<PsiElement> columnInfo;
 
         public Header(PsiElement element, CsvColumnInfo<PsiElement> columnInfo) {
@@ -124,7 +124,7 @@ public abstract class CsvStructureViewElement implements StructureViewTreeElemen
             TreeElement[] children = new TreeElement[elements.size() - 1];
             for (PsiElement element : elements) {
                 if (rowIndex > 0) {
-                    children[rowIndex - 1] = new Field(element == null ? CsvHelper.createEmptyCsvField(element.getProject()) : element, rowIndex - 1);
+                    children[rowIndex - 1] = new Field(element == null ? CsvHelper.createEmptyCsvField(this.element.getProject()) : element, rowIndex - 1);
                 }
                 ++rowIndex;
             }
@@ -144,7 +144,7 @@ public abstract class CsvStructureViewElement implements StructureViewTreeElemen
         }
     }
 
-    private static class Field extends CsvStructureViewElement {
+    public static class Field extends CsvStructureViewElement {
         private int rowIndex;
 
         public Field(PsiElement element, int rowIndex) {
