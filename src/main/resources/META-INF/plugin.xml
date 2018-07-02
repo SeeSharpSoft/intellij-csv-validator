@@ -39,6 +39,7 @@
     <change-notes><![CDATA[
       <b>NEW:</b> Custom 'Wrapping' settings<br>
       <b>NEW:</b> Column highlighter takes whitespaces into account<br>
+      <b>CHANGE:</b> Column highlighting only happens on selection<br>
       <b>FIX:</b> CSV column info tooltip trumps spellchecker tooltip (but keeps the visualization of a typo)<br>
       <b>FIX:</b> Show tooltip even when caret is at the last position withing the CSV file<br>
       <b>FIX:</b> Support for suppressing inspections not relevant for CSV (e.g. 'Problematic Whitespace')<br>

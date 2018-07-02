@@ -1,7 +1,6 @@
 package net.seesharpsoft.intellij.plugins.csv.highlighter;
 
 import com.intellij.codeInsight.highlighting.HighlightUsagesHandlerBase;
-import com.intellij.lang.injection.InjectedLanguageManager;
 import com.intellij.openapi.editor.Caret;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.util.TextRange;
@@ -28,6 +27,10 @@ public class CsvHighlightUsagesHandler extends HighlightUsagesHandlerBase<PsiEle
 
     @Override
     public List<PsiElement> getTargets() {
+        if (!this.myEditor.getSelectionModel().hasSelection()) {
+            return Collections.emptyList();
+        }
+
         Caret primaryCaret = this.myEditor.getCaretModel().getPrimaryCaret();
         PsiElement myFocusedElement = this.myFile.getViewProvider().findElementAt(primaryCaret.getOffset());
         if (myFocusedElement == null) {
@@ -39,8 +42,7 @@ public class CsvHighlightUsagesHandler extends HighlightUsagesHandlerBase<PsiEle
             return Collections.emptyList();
         }
 
-        CsvColumnInfo<PsiElement> columnInfo = getCsvFile().getMyColumnInfoMap().getColumnInfo(myFocusedElement);
-        return columnInfo == null ? Collections.emptyList() : Collections.unmodifiableList(columnInfo.getElements());
+        return Collections.singletonList(myFocusedElement);
     }
 
     @Override
@@ -51,9 +53,13 @@ public class CsvHighlightUsagesHandler extends HighlightUsagesHandlerBase<PsiEle
     @Override
     public void computeUsages(List<PsiElement> list) {
         CsvColumnInfoMap<PsiElement> columnInfoMap = getCsvFile().getMyColumnInfoMap();
-        list.forEach(element -> {
-            if (element != null && !element.getText().isEmpty()) { this.addOccurrence(columnInfoMap.getRowInfo(element)); }
-        });
+        for (PsiElement listElement : list) {
+            CsvColumnInfo<PsiElement> csvColumnInfo = getCsvFile().getMyColumnInfoMap().getColumnInfo(listElement);
+            if (csvColumnInfo == null) {
+                continue;
+            }
+            csvColumnInfo.getElements().forEach(element -> this.addOccurrence(columnInfoMap.getRowInfo(element)));
+        }
     }
 
     protected void addOccurrence(CsvColumnInfo<PsiElement>.RowInfo rowInfo) {
@@ -61,9 +67,7 @@ public class CsvHighlightUsagesHandler extends HighlightUsagesHandlerBase<PsiEle
             return;
         }
         TextRange range = rowInfo.getTextRange();
-        if (range != null) {
-            PsiElement element = rowInfo.getElement();
-            range = InjectedLanguageManager.getInstance(element.getProject()).injectedToHost(element, range);
+        if (range != null && range.getLength() > 0) {
             this.myReadUsages.add(range);
         }
     }
