@@ -21,13 +21,14 @@ public final class CsvIntentionHelper {
 
     private static final Logger LOG = Logger.getInstance("#net.seesharpsoft.intellij.plugins.csv.inspection.CsvIntentionHelper");
 
-    public static List<PsiElement> getChildren(PsiElement element) {
+    public static List<PsiElement> getChildren(final PsiElement element) {
+        PsiElement currentElement = element;
         List<PsiElement> children = new ArrayList<>();
-        if (element != null) {
-            element = element.getFirstChild();
-            while (element != null) {
-                children.add(element);
-                element = element.getNextSibling();
+        if (currentElement != null) {
+            currentElement = currentElement.getFirstChild();
+            while (currentElement != null) {
+                children.add(currentElement);
+                currentElement = currentElement.getNextSibling();
             }
         }
         return children;
@@ -107,12 +108,11 @@ public final class CsvIntentionHelper {
         }
     }
 
-    public static void quoteValue(@NotNull Project project, @NotNull PsiElement element) {
+    public static void quoteValue(@NotNull Project project, @NotNull final PsiElement element) {
         try {
             Document document = PsiDocumentManager.getInstance(project).getDocument(element.getContainingFile());
             List<Integer> quotePositions = new ArrayList<>();
 
-            element = CsvHelper.getParentFieldElement(element);
             int quotePosition = getOpeningQuotePosition(element.getFirstChild(), element.getLastChild());
             if (quotePosition != -1) {
                 quotePositions.add(quotePosition);
@@ -130,12 +130,11 @@ public final class CsvIntentionHelper {
         }
     }
 
-    public static void unquoteValue(@NotNull Project project, @NotNull PsiElement element) {
+    public static void unquoteValue(@NotNull Project project, @NotNull final PsiElement element) {
         try {
             Document document = PsiDocumentManager.getInstance(project).getDocument(element.getContainingFile());
             List<Integer> quotePositions = new ArrayList<>();
 
-            element = CsvHelper.getParentFieldElement(element);
             if (CsvHelper.getElementType(element.getFirstChild()) == CsvTypes.QUOTE) {
                 quotePositions.add(element.getFirstChild().getTextOffset());
             }
@@ -149,7 +148,8 @@ public final class CsvIntentionHelper {
         }
     }
 
-    public static String addQuotes(String text, List<Integer> quotePositions) {
+    public static String addQuotes(final String original, List<Integer> quotePositions) {
+        String text = original;
         int offset = 0;
         quotePositions.sort(Integer::compareTo);
         for (int position : quotePositions) {
@@ -160,7 +160,8 @@ public final class CsvIntentionHelper {
         return text;
     }
 
-    public static String removeQuotes(String text, List<Integer> quotePositions) {
+    public static String removeQuotes(final String original, List<Integer> quotePositions) {
+        String text = original;
         int offset = 0;
         quotePositions.sort(Integer::compareTo);
         for (int position : quotePositions) {
@@ -194,19 +195,20 @@ public final class CsvIntentionHelper {
 
     }
 
-    public static PsiElement findQuotePositionsUntilSeparator(PsiElement element, List<Integer> quotePositions) {
+    public static PsiElement findQuotePositionsUntilSeparator(final PsiElement element, List<Integer> quotePositions) {
+        PsiElement currentElement = element;
         PsiElement separatorElement = null;
-        while (separatorElement == null && element != null) {
-            if (CsvHelper.getElementType(element) == CsvTypes.COMMA || CsvHelper.getElementType(element) == CsvTypes.CRLF) {
-                separatorElement = element;
+        while (separatorElement == null && currentElement != null) {
+            if (CsvHelper.getElementType(currentElement) == CsvTypes.COMMA || CsvHelper.getElementType(currentElement) == CsvTypes.CRLF) {
+                separatorElement = currentElement;
                 continue;
             }
-            if (element.getFirstChild() != null) {
-                separatorElement = findQuotePositionsUntilSeparator(element.getFirstChild(), quotePositions);
-            } else if (element.getText().equals("\"")) {
-                quotePositions.add(element.getTextOffset());
+            if (currentElement.getFirstChild() != null) {
+                separatorElement = findQuotePositionsUntilSeparator(currentElement.getFirstChild(), quotePositions);
+            } else if (currentElement.getText().equals("\"")) {
+                quotePositions.add(currentElement.getTextOffset());
             }
-            element = element.getNextSibling();
+            currentElement = currentElement.getNextSibling();
         }
         return separatorElement;
     }

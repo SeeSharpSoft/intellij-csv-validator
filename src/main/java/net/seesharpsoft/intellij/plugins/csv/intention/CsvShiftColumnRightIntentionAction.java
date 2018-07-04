@@ -21,10 +21,10 @@ public class CsvShiftColumnRightIntentionAction extends CsvShiftColumnIntentionA
             throws IncorrectOperationException {
         CsvFile csvFile = (CsvFile)psiElement.getContainingFile();
 
-        psiElement = CsvHelper.getParentFieldElement(psiElement);
+        PsiElement element = CsvHelper.getParentFieldElement(psiElement);
 
         CsvColumnInfoMap<PsiElement> columnInfoMap = csvFile.getMyColumnInfoMap();
-        CsvColumnInfo<PsiElement> leftColumnInfo = columnInfoMap.getColumnInfo(psiElement);
+        CsvColumnInfo<PsiElement> leftColumnInfo = columnInfoMap.getColumnInfo(element);
 
         // column must be at least index 1 to be shifted left
         if (leftColumnInfo == null || leftColumnInfo.getColumnIndex() + 1 >= columnInfoMap.getColumnInfos().size()) {

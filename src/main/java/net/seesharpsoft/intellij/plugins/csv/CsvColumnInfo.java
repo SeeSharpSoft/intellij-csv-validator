@@ -7,51 +7,6 @@ import java.util.*;
 
 public class CsvColumnInfo<T> {
 
-    public class RowInfo {
-        private final T myElement;
-        private final int myRow;
-        private final TextRange myTextRange;
-
-        RowInfo(T element, int row) {
-            this(element, row, -1, -1);
-        }
-
-        RowInfo(@NotNull T element, @NotNull int row, int startIndex, int endIndex) {
-            this.myElement = element;
-            this.myRow = row;
-            if (startIndex <= endIndex && startIndex >= 0) {
-                this.myTextRange = TextRange.create(startIndex, endIndex);
-            } else {
-                this.myTextRange = null;
-            }
-        }
-
-        public T getElement() {
-            return myElement;
-        }
-
-        public int getRowIndex() {
-            return myRow;
-        }
-
-        public TextRange getTextRange() {
-            return myTextRange;
-        }
-
-        @Override
-        public int hashCode() {
-            return myElement.hashCode();
-        }
-
-        @Override
-        public boolean equals(Object other) {
-            if (!(other instanceof CsvColumnInfo.RowInfo)) {
-                return false;
-            }
-            return this.myElement.equals(((RowInfo) other).myElement);
-        }
-    }
-
     private int myColumnIndex;
     private int myMaxLength;
     private Map<T, RowInfo> myElementInfos;
@@ -95,7 +50,7 @@ public class CsvColumnInfo<T> {
     }
 
     protected void put(@NotNull T element, @NotNull RowInfo rowInfo) {
-        RowInfo previous = myElementInfos.put(element, rowInfo);
+        myElementInfos.put(element, rowInfo);
         if (this.getSize() <= rowInfo.myRow) {
             this.mySize = rowInfo.myRow + 1;
         }
@@ -130,5 +85,50 @@ public class CsvColumnInfo<T> {
 
     public T getHeaderElement() {
         return this.myHeaderElement;
+    }
+
+    public class RowInfo {
+        private final T myElement;
+        private final int myRow;
+        private final TextRange myTextRange;
+
+        RowInfo(T element, int row) {
+            this(element, row, -1, -1);
+        }
+
+        RowInfo(@NotNull T element, @NotNull int row, int startIndex, int endIndex) {
+            this.myElement = element;
+            this.myRow = row;
+            if (startIndex <= endIndex && startIndex >= 0) {
+                this.myTextRange = TextRange.create(startIndex, endIndex);
+            } else {
+                this.myTextRange = null;
+            }
+        }
+
+        public T getElement() {
+            return myElement;
+        }
+
+        public int getRowIndex() {
+            return myRow;
+        }
+
+        public TextRange getTextRange() {
+            return myTextRange;
+        }
+
+        @Override
+        public int hashCode() {
+            return myElement.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            if (!(other instanceof CsvColumnInfo.RowInfo)) {
+                return false;
+            }
+            return this.myElement.equals(((RowInfo) other).myElement);
+        }
     }
 }

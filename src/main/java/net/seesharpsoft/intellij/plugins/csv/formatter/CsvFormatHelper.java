@@ -36,12 +36,13 @@ public final class CsvFormatHelper {
         return length;
     }
 
-    public static ASTNode getRoot(ASTNode node) {
+    public static ASTNode getRoot(final ASTNode node) {
+        ASTNode currentNode = node;
         ASTNode parent;
-        while ((parent = node.getTreeParent()) != null) {
-            node = parent;
+        while ((parent = currentNode.getTreeParent()) != null) {
+            currentNode = parent;
         }
-        return node;
+        return currentNode;
     }
 
     public static SpacingBuilder createSpaceBuilder(CodeStyleSettings settings) {

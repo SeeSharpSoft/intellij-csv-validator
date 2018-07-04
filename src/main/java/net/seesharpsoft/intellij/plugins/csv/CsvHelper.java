@@ -41,56 +41,59 @@ public final class CsvHelper {
         return element == null || element.getNode() == null ? null : element.getNode().getElementType();
     }
 
-    public static PsiElement getParentFieldElement(PsiElement element) {
-        IElementType elementType = CsvHelper.getElementType(element);
+    public static PsiElement getParentFieldElement(final PsiElement element) {
+        PsiElement currentElement = element;
+        IElementType elementType = CsvHelper.getElementType(currentElement);
 
         if (elementType == CsvTypes.COMMA || elementType == CsvTypes.CRLF) {
-            element = element.getPrevSibling();
-            elementType = CsvHelper.getElementType(element);
+            currentElement = currentElement.getPrevSibling();
+            elementType = CsvHelper.getElementType(currentElement);
         }
 
         if (elementType == CsvTypes.RECORD) {
-            element = element.getLastChild();
-            elementType = CsvHelper.getElementType(element);
+            currentElement = currentElement.getLastChild();
+            elementType = CsvHelper.getElementType(currentElement);
         }
 
         if (elementType == TokenType.WHITE_SPACE) {
-            if (CsvHelper.getElementType(element.getParent()) == CsvTypes.FIELD) {
-                element = element.getParent();
-            } else if (CsvHelper.getElementType(element.getPrevSibling()) == CsvTypes.FIELD) {
-                element = element.getPrevSibling();
-            } else if (CsvHelper.getElementType(element.getNextSibling()) == CsvTypes.FIELD) {
-                element = element.getNextSibling();
+            if (CsvHelper.getElementType(currentElement.getParent()) == CsvTypes.FIELD) {
+                currentElement = currentElement.getParent();
+            } else if (CsvHelper.getElementType(currentElement.getPrevSibling()) == CsvTypes.FIELD) {
+                currentElement = currentElement.getPrevSibling();
+            } else if (CsvHelper.getElementType(currentElement.getNextSibling()) == CsvTypes.FIELD) {
+                currentElement = currentElement.getNextSibling();
             } else {
-                element = null;
+                currentElement = null;
             }
         } else {
-            while (element != null && elementType != CsvTypes.FIELD) {
-                element = element.getParent();
-                elementType = CsvHelper.getElementType(element);
+            while (currentElement != null && elementType != CsvTypes.FIELD) {
+                currentElement = currentElement.getParent();
+                elementType = CsvHelper.getElementType(currentElement);
             }
         }
-        return element;
+        return currentElement;
     }
 
-    public static PsiElement getPreviousCRLF(PsiElement recordElement) {
-        while (recordElement != null) {
-            if (CsvHelper.getElementType(recordElement) == CsvTypes.CRLF) {
+    public static PsiElement getPreviousCRLF(final PsiElement element) {
+        PsiElement currentElement = element;
+        while (currentElement != null) {
+            if (CsvHelper.getElementType(currentElement) == CsvTypes.CRLF) {
                 break;
             }
-            recordElement = recordElement.getPrevSibling();
+            currentElement = currentElement.getPrevSibling();
         }
-        return recordElement;
+        return currentElement;
     }
 
-    public static PsiElement getNextCRLF(PsiElement recordElement) {
-        while (recordElement != null) {
-            if (CsvHelper.getElementType(recordElement) == CsvTypes.CRLF) {
+    public static PsiElement getNextCRLF(final PsiElement element) {
+        PsiElement currentElement = element;
+        while (currentElement != null) {
+            if (CsvHelper.getElementType(currentElement) == CsvTypes.CRLF) {
                 break;
             }
-            recordElement = recordElement.getNextSibling();
+            currentElement = currentElement.getNextSibling();
         }
-        return recordElement;
+        return currentElement;
     }
 
     public static PsiElement getPreviousSeparator(PsiElement fieldElement) {
