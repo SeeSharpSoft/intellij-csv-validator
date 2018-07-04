@@ -10,11 +10,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class CsvIntentionAction extends PsiElementBaseIntentionAction implements IntentionAction {
-    
+
     protected CsvIntentionAction(String text) {
         setText(text);
     }
-    
+
     @NotNull
     public String getFamilyName() {
         return getText();

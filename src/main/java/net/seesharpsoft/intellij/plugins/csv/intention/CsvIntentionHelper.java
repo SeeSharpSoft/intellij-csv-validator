@@ -17,14 +17,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class CsvIntentionHelper {
+public final class CsvIntentionHelper {
+
     private static final Logger LOG = Logger.getInstance("#net.seesharpsoft.intellij.plugins.csv.inspection.CsvIntentionHelper");
 
     public static List<PsiElement> getChildren(PsiElement element) {
         List<PsiElement> children = new ArrayList<>();
         if (element != null) {
             element = element.getFirstChild();
-            while(element != null) {
+            while (element != null) {
                 children.add(element);
                 element = element.getNextSibling();
             }
@@ -35,7 +36,7 @@ public class CsvIntentionHelper {
     public static Collection<PsiElement> getAllElements(PsiFile file) {
         List<PsiElement> todo = getChildren(file);
         Collection<PsiElement> elements = new HashSet();
-        while(todo.size() > 0) {
+        while (todo.size() > 0) {
             PsiElement current = todo.get(todo.size() - 1);
             todo.remove(todo.size() - 1);
             elements.add(current);
@@ -43,7 +44,7 @@ public class CsvIntentionHelper {
         }
         return elements;
     }
-    
+
     private static Collection<PsiElement> getAllFields(PsiFile file) {
         return getChildren(file).parallelStream()
                 .filter(element -> CsvHelper.getElementType(element) == CsvTypes.RECORD)
@@ -51,7 +52,7 @@ public class CsvIntentionHelper {
                 .filter(element -> CsvHelper.getElementType(element) == CsvTypes.FIELD)
                 .collect(Collectors.toList());
     }
-    
+
     public static void quoteAll(@NotNull Project project, @NotNull PsiFile psiFile) {
         try {
             Document document = PsiDocumentManager.getInstance(project).getDocument(psiFile);
@@ -105,7 +106,7 @@ public class CsvIntentionHelper {
             LOG.error(e);
         }
     }
-    
+
     public static void quoteValue(@NotNull Project project, @NotNull PsiElement element) {
         try {
             Document document = PsiDocumentManager.getInstance(project).getDocument(element.getContainingFile());
@@ -158,7 +159,7 @@ public class CsvIntentionHelper {
         }
         return text;
     }
-    
+
     public static String removeQuotes(String text, List<Integer> quotePositions) {
         int offset = 0;
         quotePositions.sort(Integer::compareTo);
@@ -182,7 +183,7 @@ public class CsvIntentionHelper {
 
     public static int getOpeningQuotePosition(PsiElement errorElement) {
         PsiElement lastFieldElement = errorElement;
-        while(CsvHelper.getElementType(lastFieldElement) != CsvTypes.RECORD) {
+        while (CsvHelper.getElementType(lastFieldElement) != CsvTypes.RECORD) {
             lastFieldElement = lastFieldElement.getPrevSibling();
         }
         lastFieldElement = lastFieldElement.getLastChild();
@@ -209,5 +210,8 @@ public class CsvIntentionHelper {
         }
         return separatorElement;
     }
-    
+
+    private CsvIntentionHelper() {
+        // static utility class
+    }
 }

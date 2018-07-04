@@ -6,7 +6,7 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 
-public class CsvFileType extends LanguageFileType {
+public final class CsvFileType extends LanguageFileType {
     public static final CsvFileType INSTANCE = new CsvFileType();
 
     private CsvFileType() {
@@ -34,6 +34,6 @@ public class CsvFileType extends LanguageFileType {
     @Nullable
     @Override
     public Icon getIcon() {
-        return CsvIconPovider.FILE;
+        return CsvIconProvider.FILE;
     }
 }

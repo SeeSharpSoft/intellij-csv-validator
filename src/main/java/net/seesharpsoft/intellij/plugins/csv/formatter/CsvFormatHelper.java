@@ -17,12 +17,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-public class CsvFormatHelper {
+public final class CsvFormatHelper {
 
-    private static String WHITE_SPACE_PATTERN_STRING = "[ \\f]+";
-    private static Pattern BEGIN_WHITE_SPACE_PATTERN = Pattern.compile("^" + WHITE_SPACE_PATTERN_STRING);
-    private static Pattern END_WHITE_SPACE_PATTERN = Pattern.compile(WHITE_SPACE_PATTERN_STRING + "$");
-    
+    private static final String WHITE_SPACE_PATTERN_STRING = "[ \\f]+";
+    private static final Pattern BEGIN_WHITE_SPACE_PATTERN = Pattern.compile("^" + WHITE_SPACE_PATTERN_STRING);
+    private static final Pattern END_WHITE_SPACE_PATTERN = Pattern.compile(WHITE_SPACE_PATTERN_STRING + "$");
+
     public static int getTextLength(ASTNode node, CodeStyleSettings codeStyleSettings) {
         CsvCodeStyleSettings csvCodeStyleSettings = codeStyleSettings.getCustomSettings(CsvCodeStyleSettings.class);
         String text = node.getText();
@@ -69,7 +69,7 @@ public class CsvFormatHelper {
         } else if (csvCodeStyleSettings.SPACE_BEFORE_SEPARATOR) {
             builder.before(CsvTypes.COMMA).spaces(1);
         }
-        
+
         return builder;
     }
 
@@ -108,5 +108,9 @@ public class CsvFormatHelper {
             }
         }
         return false;
+    }
+
+    private CsvFormatHelper() {
+        // static utility class
     }
 }

@@ -19,7 +19,7 @@ import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CsvHelper {
+public final class CsvHelper {
 
     // replaces PsiElementFactory.SERVICE.getInstance(element.getProject()).createDummyHolder("<undefined>", CsvTypes.FIELD, null);
     // https://github.com/SeeSharpSoft/intellij-csv-validator/issues/4
@@ -33,7 +33,7 @@ public class CsvHelper {
         final Lexer lexer = parserDefinition.createLexer(project);
         final PsiBuilder psiBuilder = PsiBuilderFactory.getInstance().createBuilder(project, fileElement, lexer, CsvLanguage.INSTANCE, text);
         final ASTNode node = parserDefinition.createParser(project).parse(type, psiBuilder);
-        fileElement.rawAddChildren((com.intellij.psi.impl.source.tree.TreeElement)node);
+        fileElement.rawAddChildren((com.intellij.psi.impl.source.tree.TreeElement) node);
         return node.getPsi();
     }
 
@@ -44,12 +44,12 @@ public class CsvHelper {
     public static PsiElement getParentFieldElement(PsiElement element) {
         IElementType elementType = CsvHelper.getElementType(element);
 
-        if(elementType == CsvTypes.COMMA || elementType == CsvTypes.CRLF) {
+        if (elementType == CsvTypes.COMMA || elementType == CsvTypes.CRLF) {
             element = element.getPrevSibling();
             elementType = CsvHelper.getElementType(element);
         }
 
-        if(elementType == CsvTypes.RECORD) {
+        if (elementType == CsvTypes.RECORD) {
             element = element.getLastChild();
             elementType = CsvHelper.getElementType(element);
         }
@@ -120,7 +120,7 @@ public class CsvHelper {
         if (separator == null) {
             separator = getPreviousCRLF(field.getParent());
         }
-        return separator == null ? 0 :separator.getTextOffset() + separator.getTextLength();
+        return separator == null ? 0 : separator.getTextOffset() + separator.getTextLength();
     }
 
     public static int getFieldEndOffset(PsiElement field) {
@@ -150,5 +150,9 @@ public class CsvHelper {
             ++row;
         }
         return new CsvColumnInfoMap(columnInfoMap);
+    }
+
+    private CsvHelper() {
+        // static utility class
     }
 }

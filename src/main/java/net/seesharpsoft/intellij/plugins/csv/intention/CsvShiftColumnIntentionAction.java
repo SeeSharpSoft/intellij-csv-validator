@@ -19,9 +19,14 @@ public abstract class CsvShiftColumnIntentionAction extends CsvIntentionAction {
         super(text);
     }
 
-    protected static void changeLeftAndRightColumnOrder(@NotNull Project project, CsvFile csvFile, CsvColumnInfo<PsiElement> leftColumnInfo, CsvColumnInfo<PsiElement> rightColumnInfo) {
+    protected static void changeLeftAndRightColumnOrder(@NotNull Project project,
+                                                        CsvFile csvFile,
+                                                        CsvColumnInfo<PsiElement> leftColumnInfo,
+                                                        CsvColumnInfo<PsiElement> rightColumnInfo) {
         Document document = PsiDocumentManager.getInstance(project).getDocument(csvFile);
-        document.setText(changeLeftAndRightColumnOrder(document.getText(), CsvCodeStyleSettings.getCurrentSeparator(project, csvFile.getLanguage()), leftColumnInfo, rightColumnInfo));
+        document.setText(
+                changeLeftAndRightColumnOrder(document.getText(), CsvCodeStyleSettings.getCurrentSeparator(project, csvFile.getLanguage()), leftColumnInfo, rightColumnInfo)
+        );
     }
 
     @NotNull

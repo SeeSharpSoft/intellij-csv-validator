@@ -17,13 +17,13 @@ public class CsvQuoteValueIntentionAction extends CsvIntentionAction {
     public CsvQuoteValueIntentionAction() {
         super("Quote");
     }
-    
+
     @Override
     public boolean isAvailable(@NotNull Project project, Editor editor, @Nullable PsiElement element) {
         if (!super.isAvailable(project, editor, element)) {
             return false;
         }
-        
+
         element = element == null ? null : CsvHelper.getParentFieldElement(element);
         return element instanceof CsvField &&
                 element.getFirstChild() != null &&
@@ -35,5 +35,5 @@ public class CsvQuoteValueIntentionAction extends CsvIntentionAction {
     public void invoke(@NotNull Project project, Editor editor, @NotNull PsiElement element) throws IncorrectOperationException {
         CsvIntentionHelper.quoteValue(project, CsvHelper.getParentFieldElement(element));
     }
-    
+
 }

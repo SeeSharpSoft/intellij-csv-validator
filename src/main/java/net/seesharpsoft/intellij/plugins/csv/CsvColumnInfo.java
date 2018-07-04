@@ -8,39 +8,39 @@ import java.util.*;
 public class CsvColumnInfo<T> {
 
     public class RowInfo {
+        private final T myElement;
+        private final int myRow;
+        private final TextRange myTextRange;
+
         RowInfo(T element, int row) {
             this(element, row, -1, -1);
         }
 
         RowInfo(@NotNull T element, @NotNull int row, int startIndex, int endIndex) {
-            this.element = element;
-            this.row = row;
+            this.myElement = element;
+            this.myRow = row;
             if (startIndex <= endIndex && startIndex >= 0) {
-                this.textRange = TextRange.create(startIndex, endIndex);
+                this.myTextRange = TextRange.create(startIndex, endIndex);
             } else {
-                this.textRange = null;
+                this.myTextRange = null;
             }
         }
 
-        final T element;
-        final int row;
-        final TextRange textRange;
-
         public T getElement() {
-            return element;
+            return myElement;
         }
 
         public int getRowIndex() {
-            return row;
+            return myRow;
         }
 
         public TextRange getTextRange() {
-            return textRange;
+            return myTextRange;
         }
 
         @Override
         public int hashCode() {
-            return element.hashCode();
+            return myElement.hashCode();
         }
 
         @Override
@@ -48,64 +48,64 @@ public class CsvColumnInfo<T> {
             if (!(other instanceof CsvColumnInfo.RowInfo)) {
                 return false;
             }
-            return this.element.equals(((RowInfo) other).element);
+            return this.myElement.equals(((RowInfo) other).myElement);
         }
     }
 
-    private int columnIndex;
-    private int maxLength;
-    private Map<T, RowInfo> elementInfos;
-    private T headerElement;
-    private int size;
+    private int myColumnIndex;
+    private int myMaxLength;
+    private Map<T, RowInfo> myElementInfos;
+    private T myHeaderElement;
+    private int mySize;
 
     public CsvColumnInfo(int columnIndex, int maxLength) {
-        this.columnIndex = columnIndex;
-        this.maxLength = maxLength;
-        this.elementInfos = new HashMap<>();
-        this.headerElement = null;
-        this.size = 0;
+        this.myColumnIndex = columnIndex;
+        this.myMaxLength = maxLength;
+        this.myElementInfos = new HashMap<>();
+        this.myHeaderElement = null;
+        this.mySize = 0;
     }
 
     public RowInfo getRowInfo(T element) {
-        return elementInfos.get(element);
+        return myElementInfos.get(element);
     }
 
     public int getColumnIndex() {
-        return columnIndex;
+        return myColumnIndex;
     }
 
     public int getMaxLength() {
-        return maxLength;
+        return myMaxLength;
     }
 
     public void setMaxLength(int maxLength) {
-        this.maxLength = maxLength;
+        this.myMaxLength = maxLength;
     }
 
     public int getSize() {
-        return this.size;
+        return this.mySize;
     }
 
     public List<T> getElements() {
         List<T> result = new ArrayList<>(getSize());
         result.addAll(Collections.nCopies(getSize(), null));
-        elementInfos.values()
-                .forEach(rowInfo -> result.set(rowInfo.row, rowInfo.element));
+        myElementInfos.values()
+                .forEach(rowInfo -> result.set(rowInfo.myRow, rowInfo.myElement));
         return result;
     }
 
     protected void put(@NotNull T element, @NotNull RowInfo rowInfo) {
-        RowInfo previous = elementInfos.put(element, rowInfo);
-        if (this.getSize() <= rowInfo.row) {
-            this.size = rowInfo.row + 1;
+        RowInfo previous = myElementInfos.put(element, rowInfo);
+        if (this.getSize() <= rowInfo.myRow) {
+            this.mySize = rowInfo.myRow + 1;
         }
-        if (rowInfo.row == 0) {
-            this.headerElement = element;
+        if (rowInfo.myRow == 0) {
+            this.myHeaderElement = element;
         }
     }
 
     public void addElement(T element, int startIndex, int endIndex) {
-        this.put(element, new RowInfo(element, elementInfos.size(), startIndex, endIndex));
+        this.put(element, new RowInfo(element, myElementInfos.size(), startIndex, endIndex));
     }
 
     public void addElement(T element) {
@@ -121,7 +121,7 @@ public class CsvColumnInfo<T> {
     }
 
     public boolean containsElement(T needle) {
-        return elementInfos.containsKey(needle);
+        return myElementInfos.containsKey(needle);
     }
 
     public boolean isHeaderElement(@NotNull T element) {
@@ -129,6 +129,6 @@ public class CsvColumnInfo<T> {
     }
 
     public T getHeaderElement() {
-        return this.headerElement;
+        return this.myHeaderElement;
     }
 }

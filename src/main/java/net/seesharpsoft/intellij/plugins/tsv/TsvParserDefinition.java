@@ -13,13 +13,13 @@ import org.jetbrains.annotations.NotNull;
 
 public class TsvParserDefinition extends CsvParserDefinition {
     public static final IFileElementType TSV_FILE = new IFileElementType(TsvLanguage.INSTANCE);
-    
+
     @NotNull
     @Override
     public Lexer createLexer(Project project) {
         return new CsvLexerAdapter(CsvCodeStyleSettings.TAB_SEPARATOR);
     }
-    
+
     @Override
     public IFileElementType getFileNodeType() {
         return TSV_FILE;
