@@ -1,2 +1,2 @@
-Header 1, Header 2<caret>
+Header 1, Header <selection>2<caret></selection>
 Value 1, Value 2, Value 3
