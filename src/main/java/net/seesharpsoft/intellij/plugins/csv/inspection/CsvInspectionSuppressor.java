@@ -13,16 +13,16 @@ import java.util.Set;
 
 public class CsvInspectionSuppressor implements InspectionSuppressor {
 
-    private static final Set<String> generalSuppressedInspections;
+    private static final Set<String> GENERAL_SUPPRESSED_INSPECTIONS;
 
     static {
-        generalSuppressedInspections = new HashSet<>();
-        generalSuppressedInspections.add(InspectionProfileEntry.getShortName(ProblematicWhitespaceInspection.class.getSimpleName()));
+        GENERAL_SUPPRESSED_INSPECTIONS = new HashSet<>();
+        GENERAL_SUPPRESSED_INSPECTIONS.add(InspectionProfileEntry.getShortName(ProblematicWhitespaceInspection.class.getSimpleName()));
     }
 
     @Override
     public boolean isSuppressedFor(@NotNull PsiElement psiElement, @NotNull String s) {
-        return generalSuppressedInspections.contains(s);
+        return GENERAL_SUPPRESSED_INSPECTIONS.contains(s);
     }
 
     @NotNull

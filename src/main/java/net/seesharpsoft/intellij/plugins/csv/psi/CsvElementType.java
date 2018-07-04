@@ -10,5 +10,5 @@ public class CsvElementType extends IElementType {
         super(debugName, CsvLanguage.INSTANCE);
     }
 
-    public static IElementType DOCUMENT_START = new CsvElementType("DOCUMENT_START");
+    public static final IElementType DOCUMENT_START = new CsvElementType("DOCUMENT_START");
 }

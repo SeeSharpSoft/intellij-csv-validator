@@ -12,27 +12,27 @@ import java.util.List;
 
 public class CsvBlockElement extends CsvBlock {
 
+    private CsvBlockField myField;
+
     public CsvBlockElement(ASTNode node, CsvFormattingInfo formattingInfo) {
         this(node, formattingInfo, null);
     }
-    
+
     public CsvBlockElement(ASTNode node, CsvFormattingInfo formattingInfo, CsvBlockField field) {
         super(node, formattingInfo);
         setField(field);
     }
-    
+
     public CsvColumnInfo getColumnInfo() {
         return getField() == null ? null : getField().getColumnInfo();
     }
-    
-    private CsvBlockField field;
-    
+
     public CsvBlockField getField() {
-        return field;
+        return myField;
     }
-    
+
     public void setField(CsvBlockField field) {
-        this.field = field;
+        this.myField = field;
     }
 
     @Override

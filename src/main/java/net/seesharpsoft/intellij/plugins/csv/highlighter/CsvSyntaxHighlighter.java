@@ -37,20 +37,20 @@ public class CsvSyntaxHighlighter extends SyntaxHighlighterBase {
     private static final TextAttributesKey[] ESCAPED_TEXT_KEYS = new TextAttributesKey[]{ESCAPED_TEXT};
     private static final TextAttributesKey[] EMPTY_KEYS = new TextAttributesKey[0];
 
-    private Project project;
-    private Language language;
+    private Project myProject;
+    private Language myLanguage;
 
     public CsvSyntaxHighlighter(Project project, VirtualFile virtualFile) {
-        this.project = project;
+        this.myProject = project;
         if (virtualFile != null && virtualFile.getFileType() instanceof LanguageFileType) {
-            this.language = ((LanguageFileType)virtualFile.getFileType()).getLanguage();
+            this.myLanguage = ((LanguageFileType)virtualFile.getFileType()).getLanguage();
         }
     }
 
     @NotNull
     @Override
     public Lexer getHighlightingLexer() {
-        return new CsvLexerAdapter(CsvCodeStyleSettings.getCurrentSeparator(this.project, this.language));
+        return new CsvLexerAdapter(CsvCodeStyleSettings.getCurrentSeparator(this.myProject, this.myLanguage));
     }
 
     @NotNull

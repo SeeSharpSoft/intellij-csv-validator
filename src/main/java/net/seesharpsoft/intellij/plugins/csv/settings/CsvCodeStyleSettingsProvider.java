@@ -45,7 +45,7 @@ public class CsvCodeStyleSettingsProvider extends CodeStyleSettingsProvider {
     }
 
     private static class CsvCodeStyleMainPanel extends TabbedLanguageCodeStylePanel {
-        public CsvCodeStyleMainPanel(CodeStyleSettings currentSettings, CodeStyleSettings settings) {
+        CsvCodeStyleMainPanel(CodeStyleSettings currentSettings, CodeStyleSettings settings) {
             super(CsvLanguage.INSTANCE, currentSettings, settings);
         }
 
@@ -104,7 +104,8 @@ public class CsvCodeStyleSettingsProvider extends CodeStyleSettingsProvider {
             @Override
             protected String getPreviewText() {
                 return CsvCodeStyleSettings.REPLACE_DEFAULT_SEPARATOR_PATTERN
-                        .matcher(super.getPreviewText()).replaceAll(CsvCodeStyleSettings.getCurrentSeparator(this.getSettings()));
+                        .matcher(super.getPreviewText())
+                        .replaceAll(CsvCodeStyleSettings.getCurrentSeparator(this.getSettings()));
             }
 
             @Override
