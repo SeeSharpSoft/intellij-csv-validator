@@ -19,10 +19,6 @@ import java.util.regex.Pattern;
 
 public final class CsvFormatHelper {
 
-    private CsvFormatHelper() {
-        // static utility class
-    }
-
     private static final String WHITE_SPACE_PATTERN_STRING = "[ \\f]+";
     private static final Pattern BEGIN_WHITE_SPACE_PATTERN = Pattern.compile("^" + WHITE_SPACE_PATTERN_STRING);
     private static final Pattern END_WHITE_SPACE_PATTERN = Pattern.compile(WHITE_SPACE_PATTERN_STRING + "$");
@@ -112,5 +108,9 @@ public final class CsvFormatHelper {
             }
         }
         return false;
+    }
+
+    private CsvFormatHelper() {
+        // static utility class
     }
 }

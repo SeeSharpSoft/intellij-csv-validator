@@ -21,10 +21,6 @@ import java.util.Map;
 
 public final class CsvHelper {
 
-    private CsvHelper() {
-        // static utility class
-    }
-
     // replaces PsiElementFactory.SERVICE.getInstance(element.getProject()).createDummyHolder("<undefined>", CsvTypes.FIELD, null);
     // https://github.com/SeeSharpSoft/intellij-csv-validator/issues/4
     public static PsiElement createEmptyCsvField(Project project) {
@@ -154,5 +150,9 @@ public final class CsvHelper {
             ++row;
         }
         return new CsvColumnInfoMap(columnInfoMap);
+    }
+
+    private CsvHelper() {
+        // static utility class
     }
 }

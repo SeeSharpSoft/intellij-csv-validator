@@ -19,10 +19,6 @@ import java.util.stream.Collectors;
 
 public final class CsvIntentionHelper {
 
-    private CsvIntentionHelper() {
-        // static utility class
-    }
-
     private static final Logger LOG = Logger.getInstance("#net.seesharpsoft.intellij.plugins.csv.inspection.CsvIntentionHelper");
 
     public static List<PsiElement> getChildren(PsiElement element) {
@@ -215,4 +211,7 @@ public final class CsvIntentionHelper {
         return separatorElement;
     }
 
+    private CsvIntentionHelper() {
+        // static utility class
+    }
 }
