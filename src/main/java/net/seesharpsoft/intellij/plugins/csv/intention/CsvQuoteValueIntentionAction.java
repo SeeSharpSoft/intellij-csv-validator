@@ -19,12 +19,12 @@ public class CsvQuoteValueIntentionAction extends CsvIntentionAction {
     }
 
     @Override
-    public boolean isAvailable(@NotNull Project project, Editor editor, @Nullable PsiElement element) {
-        if (!super.isAvailable(project, editor, element)) {
+    public boolean isAvailable(@NotNull Project project, Editor editor, @Nullable final PsiElement psiElement) {
+        if (!super.isAvailable(project, editor, psiElement)) {
             return false;
         }
 
-        element = element == null ? null : CsvHelper.getParentFieldElement(element);
+        PsiElement element = psiElement == null ? null : CsvHelper.getParentFieldElement(psiElement);
         return element instanceof CsvField &&
                 element.getFirstChild() != null &&
                 (CsvHelper.getElementType(element.getFirstChild()) != CsvTypes.QUOTE ||

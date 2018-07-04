@@ -33,7 +33,8 @@ public abstract class CsvShiftColumnIntentionAction extends CsvIntentionAction {
     protected static String changeLeftAndRightColumnOrder(String text, String separator, CsvColumnInfo<PsiElement> leftColumnInfo, CsvColumnInfo<PsiElement> rightColumnInfo) {
         List<PsiElement> rightElements = rightColumnInfo.getElements();
         List<PsiElement> leftElements = leftColumnInfo.getElements();
-        int lastIndex = 0, maxRows = leftElements.size();
+        int lastIndex = 0;
+        int maxRows = leftElements.size();
         StringBuilder newText = new StringBuilder();
 
         for (int row = 0; row < maxRows; ++row) {
