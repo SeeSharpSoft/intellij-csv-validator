@@ -1,2 +1,2 @@
-<info descr="Header 1">Header 1</info>, <info descr="Header 2">Header 2</info>
-<info descr="Header 1">Value 1</info>, <info descr="Header 2">Value 2</info>, <info descr="">Value 3</info>
+<csv_column_info descr="Header 1">Header 1</csv_column_info>,<csv_column_info descr="Header 2"> Header 2</csv_column_info>
+<csv_column_info descr="Header 1">Value 1</csv_column_info>,<csv_column_info descr="Header 2"> Value 2</csv_column_info>,<csv_column_info descr=""> Value 3</csv_column_info>

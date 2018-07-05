@@ -3,9 +3,11 @@ package net.seesharpsoft.intellij.plugins.csv.highlighter;
 import com.intellij.codeInsight.highlighting.HighlightUsagesHandlerBase;
 import com.intellij.openapi.editor.Caret;
 import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
 import com.intellij.util.Consumer;
 import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfo;
+import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfoMap;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvFile;
 import org.jetbrains.annotations.NotNull;
@@ -25,15 +27,22 @@ public class CsvHighlightUsagesHandler extends HighlightUsagesHandlerBase<PsiEle
 
     @Override
     public List<PsiElement> getTargets() {
-        Caret primaryCaret = this.myEditor.getCaretModel().getPrimaryCaret();
-        PsiElement myFocusedFieldElement = CsvHelper.getParentFieldElement(this.myFile.getViewProvider().findElementAt(primaryCaret.getOffset()));
-
-        if (myFocusedFieldElement == null) {
+        if (!this.myEditor.getSelectionModel().hasSelection()) {
             return Collections.emptyList();
         }
 
-        CsvColumnInfo<PsiElement> columnInfo = getCsvFile().getMyColumnInfoMap().getColumnInfo(myFocusedFieldElement);
-        return columnInfo == null ? Collections.emptyList() : Collections.unmodifiableList(columnInfo.getElements());
+        Caret primaryCaret = this.myEditor.getCaretModel().getPrimaryCaret();
+        PsiElement myFocusedElement = this.myFile.getViewProvider().findElementAt(primaryCaret.getOffset());
+        if (myFocusedElement == null) {
+            myFocusedElement = this.myFile.getLastChild();
+        }
+        myFocusedElement = CsvHelper.getParentFieldElement(myFocusedElement);
+
+        if (myFocusedElement == null) {
+            return Collections.emptyList();
+        }
+
+        return Collections.singletonList(myFocusedElement);
     }
 
     @Override
@@ -43,8 +52,23 @@ public class CsvHighlightUsagesHandler extends HighlightUsagesHandlerBase<PsiEle
 
     @Override
     public void computeUsages(List<PsiElement> list) {
-        list.forEach(element -> {
-            if (element != null && !element.getText().isEmpty()) { this.addOccurrence(element); }
-        });
+        CsvColumnInfoMap<PsiElement> columnInfoMap = getCsvFile().getMyColumnInfoMap();
+        for (PsiElement listElement : list) {
+            CsvColumnInfo<PsiElement> csvColumnInfo = getCsvFile().getMyColumnInfoMap().getColumnInfo(listElement);
+            if (csvColumnInfo == null) {
+                continue;
+            }
+            csvColumnInfo.getElements().forEach(element -> this.addOccurrence(columnInfoMap.getRowInfo(element)));
+        }
+    }
+
+    protected void addOccurrence(CsvColumnInfo<PsiElement>.RowInfo rowInfo) {
+        if (rowInfo == null) {
+            return;
+        }
+        TextRange range = rowInfo.getTextRange();
+        if (range != null && range.getLength() > 0) {
+            this.myReadUsages.add(range);
+        }
     }
 }

@@ -7,7 +7,7 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 
-public class TsvFileType extends LanguageFileType {
+public final class TsvFileType extends LanguageFileType {
     public static final TsvFileType INSTANCE = new TsvFileType();
 
     public static final Icon ICON = IconLoader.getIcon("/media/icons/tsv-icon.png");

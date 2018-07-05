@@ -6,7 +6,11 @@ import com.intellij.psi.impl.source.resolve.FileContextUtil;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvCodeStyleSettings;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
 
-public class CsvParserUtil {
+public final class CsvParserUtil {
+
+    private CsvParserUtil() {
+        // static utility class
+    }
 
     public static boolean separator(PsiBuilder builder, int tokenType) {
         if (builder.getTokenType() == CsvTypes.COMMA) {

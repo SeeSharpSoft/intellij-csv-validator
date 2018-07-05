@@ -17,24 +17,24 @@ public class CsvUnquoteValueIntentionAction extends CsvIntentionAction {
     public CsvUnquoteValueIntentionAction() {
         super("Unquote");
     }
-    
+
     @Override
-    public boolean isAvailable(@NotNull Project project, Editor editor, @Nullable PsiElement element) {
-        if (!super.isAvailable(project, editor, element)) {
+    public boolean isAvailable(@NotNull Project project, Editor editor, @Nullable final PsiElement psiElement) {
+        if (!super.isAvailable(project, editor, psiElement)) {
             return false;
         }
-        
-        element = CsvHelper.getParentFieldElement(element);
+
+        PsiElement element = psiElement == null ? null : CsvHelper.getParentFieldElement(psiElement);
         return element instanceof CsvField &&
                 element.getFirstChild() != null &&
                 (CsvHelper.getElementType(element.getFirstChild()) == CsvTypes.QUOTE ||
                         CsvHelper.getElementType(element.getLastChild()) == CsvTypes.QUOTE) &&
-                CsvIntentionHelper.getChildren(element).stream().allMatch(psiElement -> CsvHelper.getElementType(psiElement) != CsvTypes.ESCAPED_TEXT);
+                CsvIntentionHelper.getChildren(element).stream().allMatch(childElement -> CsvHelper.getElementType(childElement) != CsvTypes.ESCAPED_TEXT);
     }
 
     @Override
-    public void invoke(@NotNull Project project, Editor editor, PsiElement element) throws IncorrectOperationException {
+    public void invoke(@NotNull Project project, Editor editor, @NotNull PsiElement element) throws IncorrectOperationException {
         CsvIntentionHelper.unquoteValue(project, CsvHelper.getParentFieldElement(element));
     }
-    
+
 }

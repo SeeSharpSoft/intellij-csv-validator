@@ -11,25 +11,24 @@ import java.util.Map;
 
 public class CsvFormattingInfo extends CsvColumnInfoMap<ASTNode> {
 
+    private SpacingBuilder mySpacingBuilder;
+    private CodeStyleSettings myCodeStyleSettings;
+
     public SpacingBuilder getSpacingBuilder() {
-        return spacingBuilder;
+        return mySpacingBuilder;
     }
 
-    private SpacingBuilder spacingBuilder;
-
     public CsvCodeStyleSettings getCsvCodeStyleSettings() {
-        return codeStyleSettings.getCustomSettings(CsvCodeStyleSettings.class);
+        return myCodeStyleSettings.getCustomSettings(CsvCodeStyleSettings.class);
     }
 
     public CodeStyleSettings getCodeStyleSettings() {
-        return codeStyleSettings;
+        return myCodeStyleSettings;
     }
-
-    private CodeStyleSettings codeStyleSettings;
 
     public CsvFormattingInfo(CodeStyleSettings codeStyleSettings, SpacingBuilder spacingBuilder, Map<Integer, CsvColumnInfo<ASTNode>> infoColumnMap) {
         super(infoColumnMap);
-        this.spacingBuilder = spacingBuilder;
-        this.codeStyleSettings = codeStyleSettings;
+        this.mySpacingBuilder = spacingBuilder;
+        this.myCodeStyleSettings = codeStyleSettings;
     }
 }

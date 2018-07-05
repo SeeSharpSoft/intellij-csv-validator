@@ -16,20 +16,20 @@ public class CsvUnquoteAllIntentionAction extends CsvIntentionAction {
     public CsvUnquoteAllIntentionAction() {
         super("Unquote All");
     }
-    
+
     @Override
     public boolean isAvailable(@NotNull Project project, Editor editor, @Nullable PsiElement element) {
         if (!super.isAvailable(project, editor, element)) {
             return false;
         }
-        
+
         return !CsvIntentionHelper.getAllElements(element.getContainingFile()).stream()
-                        .anyMatch(psiElement -> CsvHelper.getElementType(psiElement) == TokenType.BAD_CHARACTER);
+                .anyMatch(psiElement -> CsvHelper.getElementType(psiElement) == TokenType.BAD_CHARACTER);
     }
 
     @Override
     public void invoke(@NotNull Project project, Editor editor, PsiElement element) throws IncorrectOperationException {
         CsvIntentionHelper.unquoteAll(project, element.getContainingFile());
     }
-    
+
 }

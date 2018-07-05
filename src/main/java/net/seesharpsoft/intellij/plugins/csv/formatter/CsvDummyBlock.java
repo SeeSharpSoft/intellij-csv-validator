@@ -10,7 +10,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class CsvDummyBlock extends CsvBlock {
-    
+
     protected CsvDummyBlock(@NotNull ASTNode node, CsvFormattingInfo formattingInfo) {
         super(node, formattingInfo);
     }

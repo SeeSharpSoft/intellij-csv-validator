@@ -19,7 +19,7 @@ import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CsvHelper {
+public final class CsvHelper {
 
     // replaces PsiElementFactory.SERVICE.getInstance(element.getProject()).createDummyHolder("<undefined>", CsvTypes.FIELD, null);
     // https://github.com/SeeSharpSoft/intellij-csv-validator/issues/4
@@ -33,7 +33,7 @@ public class CsvHelper {
         final Lexer lexer = parserDefinition.createLexer(project);
         final PsiBuilder psiBuilder = PsiBuilderFactory.getInstance().createBuilder(project, fileElement, lexer, CsvLanguage.INSTANCE, text);
         final ASTNode node = parserDefinition.createParser(project).parse(type, psiBuilder);
-        fileElement.rawAddChildren((com.intellij.psi.impl.source.tree.TreeElement)node);
+        fileElement.rawAddChildren((com.intellij.psi.impl.source.tree.TreeElement) node);
         return node.getPsi();
     }
 
@@ -41,36 +41,97 @@ public class CsvHelper {
         return element == null || element.getNode() == null ? null : element.getNode().getElementType();
     }
 
-    public static PsiElement getParentFieldElement(PsiElement element) {
-        IElementType elementType = CsvHelper.getElementType(element);
+    public static PsiElement getParentFieldElement(final PsiElement element) {
+        PsiElement currentElement = element;
+        IElementType elementType = CsvHelper.getElementType(currentElement);
 
-        if(elementType == CsvTypes.COMMA || elementType == CsvTypes.CRLF) {
-            element = element.getPrevSibling();
-            elementType = CsvHelper.getElementType(element);
+        if (elementType == CsvTypes.COMMA || elementType == CsvTypes.CRLF) {
+            currentElement = currentElement.getPrevSibling();
+            elementType = CsvHelper.getElementType(currentElement);
         }
 
-        if(elementType == CsvTypes.RECORD) {
-            element = element.getLastChild();
-            elementType = CsvHelper.getElementType(element);
+        if (elementType == CsvTypes.RECORD) {
+            currentElement = currentElement.getLastChild();
+            elementType = CsvHelper.getElementType(currentElement);
         }
 
         if (elementType == TokenType.WHITE_SPACE) {
-            if (CsvHelper.getElementType(element.getParent()) == CsvTypes.FIELD) {
-                element = element.getParent();
-            } else if (CsvHelper.getElementType(element.getPrevSibling()) == CsvTypes.FIELD) {
-                element = element.getPrevSibling();
-            } else if (CsvHelper.getElementType(element.getNextSibling()) == CsvTypes.FIELD) {
-                element = element.getNextSibling();
+            if (CsvHelper.getElementType(currentElement.getParent()) == CsvTypes.FIELD) {
+                currentElement = currentElement.getParent();
+            } else if (CsvHelper.getElementType(currentElement.getPrevSibling()) == CsvTypes.FIELD) {
+                currentElement = currentElement.getPrevSibling();
+            } else if (CsvHelper.getElementType(currentElement.getNextSibling()) == CsvTypes.FIELD) {
+                currentElement = currentElement.getNextSibling();
             } else {
-                element = null;
+                currentElement = null;
             }
         } else {
-            while (element != null && elementType != CsvTypes.FIELD) {
-                element = element.getParent();
-                elementType = CsvHelper.getElementType(element);
+            while (currentElement != null && elementType != CsvTypes.FIELD) {
+                currentElement = currentElement.getParent();
+                elementType = CsvHelper.getElementType(currentElement);
             }
         }
-        return element;
+        return currentElement;
+    }
+
+    public static PsiElement getPreviousCRLF(final PsiElement element) {
+        PsiElement currentElement = element;
+        while (currentElement != null) {
+            if (CsvHelper.getElementType(currentElement) == CsvTypes.CRLF) {
+                break;
+            }
+            currentElement = currentElement.getPrevSibling();
+        }
+        return currentElement;
+    }
+
+    public static PsiElement getNextCRLF(final PsiElement element) {
+        PsiElement currentElement = element;
+        while (currentElement != null) {
+            if (CsvHelper.getElementType(currentElement) == CsvTypes.CRLF) {
+                break;
+            }
+            currentElement = currentElement.getNextSibling();
+        }
+        return currentElement;
+    }
+
+    public static PsiElement getPreviousSeparator(PsiElement fieldElement) {
+        PsiElement current = fieldElement;
+        while (current != null) {
+            if (CsvHelper.getElementType(current) == CsvTypes.COMMA) {
+                break;
+            }
+            current = current.getPrevSibling();
+        }
+        return current;
+    }
+
+    public static PsiElement getNextSeparator(PsiElement fieldElement) {
+        PsiElement current = fieldElement;
+        while (current != null) {
+            if (CsvHelper.getElementType(current) == CsvTypes.COMMA) {
+                break;
+            }
+            current = current.getNextSibling();
+        }
+        return current;
+    }
+
+    public static int getFieldStartOffset(PsiElement field) {
+        PsiElement separator = CsvHelper.getPreviousSeparator(field);
+        if (separator == null) {
+            separator = getPreviousCRLF(field.getParent());
+        }
+        return separator == null ? 0 : separator.getTextOffset() + separator.getTextLength();
+    }
+
+    public static int getFieldEndOffset(PsiElement field) {
+        PsiElement separator = CsvHelper.getNextSeparator(field);
+        if (separator == null) {
+            separator = getNextCRLF(field.getParent());
+        }
+        return separator == null ? field.getContainingFile().getTextLength() : separator.getTextOffset();
     }
 
     public static CsvColumnInfoMap<PsiElement> createColumnInfoMap(CsvFile csvFile) {
@@ -86,11 +147,15 @@ public class CsvHelper {
                 } else if (columnInfoMap.get(column).getMaxLength() < length) {
                     columnInfoMap.get(column).setMaxLength(length);
                 }
-                columnInfoMap.get(column).addElement(field, row);
+                columnInfoMap.get(column).addElement(field, row, getFieldStartOffset(field), getFieldEndOffset(field));
                 ++column;
             }
             ++row;
         }
         return new CsvColumnInfoMap(columnInfoMap);
+    }
+
+    private CsvHelper() {
+        // static utility class
     }
 }

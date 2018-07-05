@@ -57,6 +57,14 @@ public class CsvLanguageCodeStyleSettingsProvider extends LanguageCodeStyleSetti
                     "Leading whitespaces",
                     "Tabularize (ignores Trimming settings)");
         }
+
+        if (settingsType == SettingsType.WRAPPING_AND_BRACES_SETTINGS) {
+            consumer.showStandardOptions(
+                    CodeStyleSettingsCustomizable.WrappingOrBraceOption.RIGHT_MARGIN.toString(),
+                    CodeStyleSettingsCustomizable.WrappingOrBraceOption.WRAP_LONG_LINES.toString(),
+                    CodeStyleSettingsCustomizable.WrappingOrBraceOption.WRAP_ON_TYPING.toString()
+                    );
+        }
     }
 
     @Override
@@ -78,6 +86,10 @@ public class CsvLanguageCodeStyleSettingsProvider extends LanguageCodeStyleSetti
         commonSettings.getIndentOptions().INDENT_SIZE = 1;
         commonSettings.getIndentOptions().USE_TAB_CHARACTER = true;
         commonSettings.getIndentOptions().SMART_TABS = false;
+        commonSettings.getIndentOptions().KEEP_INDENTS_ON_EMPTY_LINES = true;
+        commonSettings.WRAP_ON_TYPING = CommonCodeStyleSettings.WrapOnTyping.NO_WRAP.intValue;
+        commonSettings.WRAP_LONG_LINES = false;
+        commonSettings.RIGHT_MARGIN = Integer.MAX_VALUE;
         return commonSettings;
     }
 }

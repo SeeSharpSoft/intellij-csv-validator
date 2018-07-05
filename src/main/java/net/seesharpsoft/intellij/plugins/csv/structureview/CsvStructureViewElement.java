@@ -10,7 +10,7 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiNamedElement;
 import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfo;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
-import net.seesharpsoft.intellij.plugins.csv.CsvIconPovider;
+import net.seesharpsoft.intellij.plugins.csv.CsvIconProvider;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -22,52 +22,52 @@ import java.util.Map;
 import static com.intellij.openapi.util.Iconable.ICON_FLAG_VISIBILITY;
 
 public abstract class CsvStructureViewElement implements StructureViewTreeElement, SortableTreeElement, ItemPresentation {
-    protected PsiElement element;
+    protected PsiElement myElement;
 
     public CsvStructureViewElement(PsiElement element) {
-        this.element = element;
+        this.myElement = element;
     }
 
     @Override
     public Object getValue() {
-        return element;
+        return myElement;
     }
 
     @Override
     public void navigate(boolean requestFocus) {
-        if (element instanceof NavigationItem) {
-            ((NavigationItem) element).navigate(requestFocus);
+        if (myElement instanceof NavigationItem) {
+            ((NavigationItem) myElement).navigate(requestFocus);
         }
     }
 
     @Override
     public boolean canNavigate() {
-        return element instanceof NavigationItem &&
-                ((NavigationItem) element).canNavigate();
+        return myElement instanceof NavigationItem &&
+                ((NavigationItem) myElement).canNavigate();
     }
 
     @Override
     public boolean canNavigateToSource() {
-        return element instanceof NavigationItem &&
-                ((NavigationItem) element).canNavigateToSource();
+        return myElement instanceof NavigationItem &&
+                ((NavigationItem) myElement).canNavigateToSource();
     }
 
     @Override
     public String getAlphaSortKey() {
-        return element instanceof PsiNamedElement ? ((PsiNamedElement) element).getName() : null;
+        return myElement instanceof PsiNamedElement ? ((PsiNamedElement) myElement).getName() : null;
     }
 
     @Override
     public ItemPresentation getPresentation() {
-        ItemPresentation presentation = element instanceof NavigationItem ?
-                ((NavigationItem) element).getPresentation() : this;
+        ItemPresentation presentation = myElement instanceof NavigationItem ?
+                ((NavigationItem) myElement).getPresentation() : this;
         return presentation == null ? this : presentation;
     }
 
     @Nullable
     @Override
     public String getPresentableText() {
-        return element.getText();
+        return myElement.getText();
     }
 
     @Nullable
@@ -79,7 +79,7 @@ public abstract class CsvStructureViewElement implements StructureViewTreeElemen
     @Nullable
     @Override
     public Icon getIcon(boolean unused) {
-        return element.getIcon(ICON_FLAG_VISIBILITY);
+        return myElement.getIcon(ICON_FLAG_VISIBILITY);
     }
 
     public static class File extends CsvStructureViewElement {
@@ -89,15 +89,15 @@ public abstract class CsvStructureViewElement implements StructureViewTreeElemen
 
         @Override
         public TreeElement[] getChildren() {
-            if (element instanceof CsvFile) {
-                CsvFile csvFile = (CsvFile)element;
+            if (myElement instanceof CsvFile) {
+                CsvFile csvFile = (CsvFile) myElement;
                 Map<Integer, CsvColumnInfo<PsiElement>> columnInfoMap = csvFile.getMyColumnInfoMap().getColumnInfos();
                 TreeElement[] children = new TreeElement[columnInfoMap.size()];
                 for (Map.Entry<Integer, CsvColumnInfo<PsiElement>> entry : columnInfoMap.entrySet()) {
                     CsvColumnInfo<PsiElement> columnInfo = entry.getValue();
                     PsiElement psiElement = columnInfo.getHeaderElement();
                     if (psiElement == null) {
-                        psiElement = CsvHelper.createEmptyCsvField(element.getProject());
+                        psiElement = CsvHelper.createEmptyCsvField(myElement.getProject());
                     }
                     children[entry.getKey()] = new Header(psiElement, columnInfo);
                 }
@@ -108,23 +108,23 @@ public abstract class CsvStructureViewElement implements StructureViewTreeElemen
         }
     }
 
-    private static class Header extends CsvStructureViewElement {
-        private CsvColumnInfo<PsiElement> columnInfo;
+    public static class Header extends CsvStructureViewElement {
+        private CsvColumnInfo<PsiElement> myColumnInfo;
 
         public Header(PsiElement element, CsvColumnInfo<PsiElement> columnInfo) {
             super(element);
-            this.columnInfo = columnInfo;
+            this.myColumnInfo = columnInfo;
         }
 
         @NotNull
         @Override
         public TreeElement[] getChildren() {
             int rowIndex = 0;
-            List<PsiElement> elements = columnInfo.getElements();
+            List<PsiElement> elements = myColumnInfo.getElements();
             TreeElement[] children = new TreeElement[elements.size() - 1];
             for (PsiElement element : elements) {
                 if (rowIndex > 0) {
-                    children[rowIndex - 1] = new Field(element == null ? CsvHelper.createEmptyCsvField(element.getProject()) : element, rowIndex - 1);
+                    children[rowIndex - 1] = new Field(element == null ? CsvHelper.createEmptyCsvField(this.myElement.getProject()) : element, rowIndex - 1);
                 }
                 ++rowIndex;
             }
@@ -134,22 +134,22 @@ public abstract class CsvStructureViewElement implements StructureViewTreeElemen
         @Nullable
         @Override
         public String getLocationString() {
-            return String.format("Header (%s entries)", columnInfo.getElements().size() - 1);
+            return String.format("Header (%s entries)", myColumnInfo.getSize() - 1);
         }
 
         @Nullable
         @Override
         public Icon getIcon(boolean unused) {
-            return CsvIconPovider.HEADER;
+            return CsvIconProvider.HEADER;
         }
     }
 
-    private static class Field extends CsvStructureViewElement {
-        private int rowIndex;
+    public static class Field extends CsvStructureViewElement {
+        private int myRowIndex;
 
         public Field(PsiElement element, int rowIndex) {
             super(element);
-            this.rowIndex = rowIndex;
+            this.myRowIndex = rowIndex;
         }
 
         @NotNull
@@ -161,7 +161,7 @@ public abstract class CsvStructureViewElement implements StructureViewTreeElemen
         @Nullable
         @Override
         public String getLocationString() {
-            return String.format("(%s)", rowIndex + 1);
+            return String.format("(%s)", myRowIndex + 1);
         }
     }
 }

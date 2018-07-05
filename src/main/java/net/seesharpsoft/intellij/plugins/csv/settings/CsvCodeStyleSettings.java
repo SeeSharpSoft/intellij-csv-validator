@@ -11,16 +11,22 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.regex.Pattern;
 
+@SuppressWarnings({"checkstyle:membername", "checkstyle:visibilitymodifier"})
 public class CsvCodeStyleSettings extends CustomCodeStyleSettings {
 
+    public boolean SPACE_BEFORE_SEPARATOR = false;
+    public boolean SPACE_AFTER_SEPARATOR = false;
+    public boolean TRIM_LEADING_WHITE_SPACES = false;
+    public boolean TRIM_TRAILING_WHITE_SPACES = false;
+    public boolean TABULARIZE = true;
+    public boolean WHITE_SPACES_OUTSIDE_QUOTES = true;
+    public boolean LEADING_WHITE_SPACES = false;
+    public int SEPARATOR_INDEX = 0;
+
     public static final String DEFAULT_SEPARATOR = ",";
-
     public static final String TAB_SEPARATOR = "\t";
-    
     public static final String[] SUPPORTED_SEPARATORS = new String[]{",", ";", "|", TAB_SEPARATOR};
-
     public static final String[] SUPPORTED_SEPARATORS_DISPLAY = new String[]{"Comma (,)", "Semicolon (;)", "Pipe (|)", "Tab (↹)"};
-
     public static final Pattern REPLACE_DEFAULT_SEPARATOR_PATTERN = Pattern.compile(CsvCodeStyleSettings.DEFAULT_SEPARATOR);
 
     public static String getCurrentSeparator(CodeStyleSettings codeStyleSettings) {
@@ -32,7 +38,7 @@ public class CsvCodeStyleSettings extends CustomCodeStyleSettings {
         }
         return DEFAULT_SEPARATOR;
     }
-    
+
     public static String getCurrentSeparator(@Nullable Project project) {
         if (!ApplicationManager.getApplication().isUnitTestMode() && project != null) {
             return getCurrentSeparator(CodeStyleSettingsManager.getInstance(project).getCurrentSettings());
@@ -50,22 +56,6 @@ public class CsvCodeStyleSettings extends CustomCodeStyleSettings {
     public CsvCodeStyleSettings(CodeStyleSettings settings) {
         super("CsvCodeStyleSettings", settings);
     }
-
-    public boolean SPACE_BEFORE_SEPARATOR = false;
-
-    public boolean SPACE_AFTER_SEPARATOR = false;
-
-    public boolean TRIM_LEADING_WHITE_SPACES = false;
-
-    public boolean TRIM_TRAILING_WHITE_SPACES = false;
-
-    public boolean TABULARIZE = true;
-
-    public boolean WHITE_SPACES_OUTSIDE_QUOTES = true;
-
-    public boolean LEADING_WHITE_SPACES = false;
-
-    public int SEPARATOR_INDEX = 0;
 
     public String getSeparator() {
         if (SEPARATOR_INDEX < 0 || SEPARATOR_INDEX >= SUPPORTED_SEPARATORS.length) {

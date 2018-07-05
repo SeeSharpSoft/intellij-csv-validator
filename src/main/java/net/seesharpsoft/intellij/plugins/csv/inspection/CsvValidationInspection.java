@@ -1,9 +1,6 @@
-package net.seesharpsoft.intellij.plugins.csv.intention;
+package net.seesharpsoft.intellij.plugins.csv.inspection;
 
-import com.intellij.codeInspection.LocalInspectionTool;
-import com.intellij.codeInspection.LocalQuickFix;
-import com.intellij.codeInspection.ProblemDescriptor;
-import com.intellij.codeInspection.ProblemsHolder;
+import com.intellij.codeInspection.*;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.project.Project;
@@ -15,6 +12,7 @@ import com.intellij.psi.tree.IElementType;
 import com.intellij.util.IncorrectOperationException;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
+import net.seesharpsoft.intellij.plugins.csv.intention.CsvIntentionHelper;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvCodeStyleSettings;
 import org.jetbrains.annotations.NonNls;
@@ -60,12 +58,12 @@ public class CsvValidationInspection extends LocalInspectionTool {
     public String getShortName() {
         return "CsvValidation";
     }
-    
+
     @Override
     public boolean isEnabledByDefault() {
         return true;
     }
-    
+
     @NotNull
     @Override
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
@@ -75,39 +73,46 @@ public class CsvValidationInspection extends LocalInspectionTool {
                 if (element == null || !holder.getFile().getLanguage().isKindOf(CsvLanguage.INSTANCE)) {
                     return;
                 }
-                
+
                 IElementType elementType = CsvHelper.getElementType(element);
                 PsiElement firstChild = element.getFirstChild();
                 PsiElement nextSibling = element.getNextSibling();
                 if (elementType == TokenType.ERROR_ELEMENT && CsvHelper.getElementType(firstChild) == TokenType.BAD_CHARACTER) {
-                    if (firstChild.getText().equals("\"")) {
-                        holder.registerProblem(element, UNESCAPED_SEQUENCE, fixUnescapedSequence);
-                    } else {
-                        holder.registerProblem(element, SEPARATOR_MISSING, fixSeparatorMissing);
-                        holder.registerProblem(element, UNESCAPED_SEQUENCE, fixUnescapedSequence);
+                    CsvValidationInspection.this.registerError(holder, element, UNESCAPED_SEQUENCE, fixUnescapedSequence);
+                    if (!"\"".equals(firstChild.getText())) {
+                        CsvValidationInspection.this.registerError(holder, element, SEPARATOR_MISSING, fixSeparatorMissing);
                     }
-                } else if ((elementType == CsvTypes.TEXT || elementType == CsvTypes.ESCAPED_TEXT)
-                        && CsvHelper.getElementType(nextSibling) == TokenType.ERROR_ELEMENT
-                        && nextSibling.getFirstChild() == null) {
-                    holder.registerProblem(element, CLOSING_QUOTE_MISSING, fixClosingQuoteMissing);
+                } else if ((elementType == CsvTypes.TEXT || elementType == CsvTypes.ESCAPED_TEXT) &&
+                        CsvHelper.getElementType(nextSibling) == TokenType.ERROR_ELEMENT &&
+                        nextSibling.getFirstChild() == null) {
+                    CsvValidationInspection.this.registerError(holder, element, CLOSING_QUOTE_MISSING, fixClosingQuoteMissing);
                 }
             }
         };
     }
-    
-    private static abstract class CsvLocalQuickFix implements LocalQuickFix {
+
+    private boolean registerError(@NotNull final ProblemsHolder holder, @NotNull PsiElement element, @NotNull String descriptionTemplate, @Nullable LocalQuickFix fix) {
+        if (element != null && this.isSuppressedFor(element)) {
+            return false;
+        }
+
+        holder.registerProblem(element, descriptionTemplate, fix);
+        return true;
+    }
+
+    private abstract static class CsvLocalQuickFix implements LocalQuickFix {
         @NotNull
         public String getName() {
             return this.getFamilyName();
         }
     }
-    
+
     private static class UnescapedSequenceFix extends CsvLocalQuickFix {
         @NotNull
         public String getFamilyName() {
             return "Surround with quotes";
         }
-        
+
         @Override
         public void applyFix(@NotNull Project project, @NotNull ProblemDescriptor descriptor) {
             try {
@@ -168,5 +173,5 @@ public class CsvValidationInspection extends LocalInspectionTool {
             }
         }
     }
-    
+
 }

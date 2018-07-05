@@ -17,13 +17,14 @@ public class CsvShiftColumnRightIntentionAction extends CsvShiftColumnIntentionA
     }
 
     @Override
-    public void invoke(@NotNull Project project, Editor editor, @NotNull PsiElement psiElement) throws IncorrectOperationException {
+    public void invoke(@NotNull Project project, Editor editor, @NotNull PsiElement psiElement)
+            throws IncorrectOperationException {
         CsvFile csvFile = (CsvFile)psiElement.getContainingFile();
 
-        psiElement = CsvHelper.getParentFieldElement(psiElement);
+        PsiElement element = CsvHelper.getParentFieldElement(psiElement);
 
         CsvColumnInfoMap<PsiElement> columnInfoMap = csvFile.getMyColumnInfoMap();
-        CsvColumnInfo<PsiElement> leftColumnInfo = columnInfoMap.getColumnInfo(psiElement);
+        CsvColumnInfo<PsiElement> leftColumnInfo = columnInfoMap.getColumnInfo(element);
 
         // column must be at least index 1 to be shifted left
         if (leftColumnInfo == null || leftColumnInfo.getColumnIndex() + 1 >= columnInfoMap.getColumnInfos().size()) {

@@ -15,7 +15,7 @@ public class CsvFile extends PsiFileBase {
     private final LanguageFileType myFileType;
     private CsvColumnInfoMap<PsiElement> myColumnInfoMap;
     private long myColumnInfoMapModifiedStamp;
-    
+
     public CsvFile(@NotNull FileViewProvider viewProvider, LanguageFileType fileType) {
         super(viewProvider, fileType.getLanguage());
         myFileType = fileType;

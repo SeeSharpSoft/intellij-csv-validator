@@ -2,7 +2,7 @@ package net.seesharpsoft.intellij.plugins.tsv.intention;
 
 import com.intellij.codeInsight.intention.IntentionAction;
 import com.intellij.testFramework.fixtures.LightCodeInsightFixtureTestCase;
-import net.seesharpsoft.intellij.plugins.csv.intention.CsvValidationInspection;
+import net.seesharpsoft.intellij.plugins.csv.inspection.CsvValidationInspection;
 
 public class TsvInspectionTest extends LightCodeInsightFixtureTestCase {
 

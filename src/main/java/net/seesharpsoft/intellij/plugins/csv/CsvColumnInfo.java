@@ -1,63 +1,134 @@
 package net.seesharpsoft.intellij.plugins.csv;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import com.intellij.openapi.util.TextRange;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.*;
 
 public class CsvColumnInfo<T> {
 
+    private int myColumnIndex;
+    private int myMaxLength;
+    private Map<T, RowInfo> myElementInfos;
+    private T myHeaderElement;
+    private int mySize;
+
     public CsvColumnInfo(int columnIndex, int maxLength) {
-        this.columnIndex = columnIndex;
-        this.maxLength = maxLength;
-        this.elements = new ArrayList<>();
+        this.myColumnIndex = columnIndex;
+        this.myMaxLength = maxLength;
+        this.myElementInfos = new HashMap<>();
+        this.myHeaderElement = null;
+        this.mySize = 0;
+    }
+
+    public RowInfo getRowInfo(T element) {
+        return myElementInfos.get(element);
     }
 
     public int getColumnIndex() {
-        return columnIndex;
+        return myColumnIndex;
     }
 
-    private int columnIndex;
-
-    private int maxLength;
-
     public int getMaxLength() {
-        return maxLength;
+        return myMaxLength;
     }
 
     public void setMaxLength(int maxLength) {
-        this.maxLength = maxLength;
+        this.myMaxLength = maxLength;
     }
 
-    private List<T> elements;
+    public int getSize() {
+        return this.mySize;
+    }
 
     public List<T> getElements() {
-        return Collections.unmodifiableList(elements);
+        List<T> result = new ArrayList<>(getSize());
+        result.addAll(Collections.nCopies(getSize(), null));
+        myElementInfos.values()
+                .forEach(rowInfo -> result.set(rowInfo.myRow, rowInfo.myElement));
+        return result;
     }
 
-    public boolean addElement(T element) {
-        return elements.add(element);
-    }
-
-    public void addElement(T element, int row) {
-        if (row == elements.size()) {
-            addElement(element);
-        } else if (row < elements.size()) {
-            elements.set(row, element);
-        } else {
-            elements.addAll(Collections.nCopies(row - elements.size(), null));
-            addElement(element);
+    protected void put(@NotNull T element, @NotNull RowInfo rowInfo) {
+        myElementInfos.put(element, rowInfo);
+        if (this.getSize() <= rowInfo.myRow) {
+            this.mySize = rowInfo.myRow + 1;
+        }
+        if (rowInfo.myRow == 0) {
+            this.myHeaderElement = element;
         }
     }
 
-    public boolean containsElement(T element) {
-        return elements.contains(element);
+    public void addElement(T element, int startIndex, int endIndex) {
+        this.put(element, new RowInfo(element, myElementInfos.size(), startIndex, endIndex));
     }
 
-    public boolean isHeaderElement(T element) {
-        return elements.indexOf(element) == 0;
+    public void addElement(T element) {
+        this.addElement(element, -1, -1);
+    }
+
+    public void addElement(T element, int row, int startIndex, int endIndex) {
+        this.put(element, new RowInfo(element, row, startIndex, endIndex));
+    }
+
+    public void addElement(T element, int row) {
+        this.addElement(element, row, -1, -1);
+    }
+
+    public boolean containsElement(T needle) {
+        return myElementInfos.containsKey(needle);
+    }
+
+    public boolean isHeaderElement(@NotNull T element) {
+        return element.equals(getHeaderElement());
     }
 
     public T getHeaderElement() {
-        return elements.size() > 0 ? elements.get(0) : null;
+        return this.myHeaderElement;
+    }
+
+    public class RowInfo {
+        private final T myElement;
+        private final int myRow;
+        private final TextRange myTextRange;
+
+        RowInfo(T element, int row) {
+            this(element, row, -1, -1);
+        }
+
+        RowInfo(@NotNull T element, @NotNull int row, int startIndex, int endIndex) {
+            this.myElement = element;
+            this.myRow = row;
+            if (startIndex <= endIndex && startIndex >= 0) {
+                this.myTextRange = TextRange.create(startIndex, endIndex);
+            } else {
+                this.myTextRange = null;
+            }
+        }
+
+        public T getElement() {
+            return myElement;
+        }
+
+        public int getRowIndex() {
+            return myRow;
+        }
+
+        public TextRange getTextRange() {
+            return myTextRange;
+        }
+
+        @Override
+        public int hashCode() {
+            return myElement.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            if (!(other instanceof CsvColumnInfo.RowInfo)) {
+                return false;
+            }
+            return this.myElement.equals(((RowInfo) other).myElement);
+        }
     }
 }

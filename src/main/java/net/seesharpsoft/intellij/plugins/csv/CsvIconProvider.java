@@ -10,7 +10,7 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 
-public class CsvIconPovider extends IconProvider {
+public class CsvIconProvider extends IconProvider {
 
     public static final Icon FILE = IconLoader.getIcon("/media/icons/csv-icon.png");
 
@@ -25,9 +25,9 @@ public class CsvIconPovider extends IconProvider {
             return FIELD;
         }
         if (element instanceof CsvFile) {
-            return ((CsvFile)element).getFileType().getIcon();
+            return ((CsvFile) element).getFileType().getIcon();
         }
-        
+
         return null;
     }
 }
