@@ -98,7 +98,6 @@ public final class CsvFormatHelper {
             );
         } catch (IOException e) {
             e.printStackTrace();
-            throw new RuntimeException(e);
         }
 
         WIDTH_DOUBLE_CHARCODE_RANGES = convertRangeTextToRangeArray(wideLines);
@@ -110,11 +109,7 @@ public final class CsvFormatHelper {
         for (int i = 0; i < targetArray.length; ++i) {
             String[] split = wideLines.get(i).split("\\.\\.");
             targetArray[i][0] = Integer.parseInt(split[0], HEX_RADIX);
-            if (split.length == 1) {
-                targetArray[i][1] = targetArray[i][0];
-            } else {
-                targetArray[i][1] = Integer.parseInt(split[1], HEX_RADIX);
-            }
+            targetArray[i][1] = split.length == 1 ? targetArray[i][0] : Integer.parseInt(split[1], HEX_RADIX);
         }
         return targetArray;
     }
