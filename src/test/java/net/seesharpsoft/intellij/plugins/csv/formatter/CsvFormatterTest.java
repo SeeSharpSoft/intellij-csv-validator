@@ -29,7 +29,9 @@ public class CsvFormatterTest extends LightCodeInsightFixtureTestCase {
                                           boolean TRIM_TRAILING_WHITE_SPACES,
                                           boolean TABULARIZE,
                                           boolean WHITE_SPACES_OUTSIDE_QUOTES,
-                                          boolean LEADING_WHITE_SPACES) {
+                                          boolean LEADING_WHITE_SPACES,
+                                          boolean ENABLE_WIDE_CHARACTER_DETECTION,
+                                          boolean TREAT_AMBIGUOUS_CHARACTERS_AS_WIDE) {
         CsvCodeStyleSettings csvCodeStyleSettings = CodeStyleSettingsManager.getSettings(getProject()).getCustomSettings(CsvCodeStyleSettings.class);
         csvCodeStyleSettings.SPACE_BEFORE_SEPARATOR = SPACE_BEFORE_SEPARATOR;
         csvCodeStyleSettings.SPACE_AFTER_SEPARATOR = SPACE_AFTER_SEPARATOR;
@@ -38,6 +40,8 @@ public class CsvFormatterTest extends LightCodeInsightFixtureTestCase {
         csvCodeStyleSettings.TABULARIZE = TABULARIZE;
         csvCodeStyleSettings.WHITE_SPACES_OUTSIDE_QUOTES = WHITE_SPACES_OUTSIDE_QUOTES;
         csvCodeStyleSettings.LEADING_WHITE_SPACES = LEADING_WHITE_SPACES;
+        csvCodeStyleSettings.ENABLE_WIDE_CHARACTER_DETECTION = ENABLE_WIDE_CHARACTER_DETECTION;
+        csvCodeStyleSettings.TREAT_AMBIGUOUS_CHARACTERS_AS_WIDE = TREAT_AMBIGUOUS_CHARACTERS_AS_WIDE;
     }
 
     private void initCsvCodeStyleSettings(int binarySettings) {
@@ -48,7 +52,9 @@ public class CsvFormatterTest extends LightCodeInsightFixtureTestCase {
                 (binarySettings & 8) != 0,
                 (binarySettings & 16) != 0,
                 (binarySettings & 32) != 0,
-                (binarySettings & 64) != 0);
+                (binarySettings & 64) != 0,
+                (binarySettings & 128) != 0,
+                (binarySettings & 256) != 0);
     }
 
     private void executeTestConfiguration(int binarySettings, String relativeTargetPath) {
@@ -102,6 +108,24 @@ public class CsvFormatterTest extends LightCodeInsightFixtureTestCase {
             tearDown();
             setUp();
             executeTestConfiguration(optionsToTest[i], "/special");
+        }
+    }
+
+    public void testWideCharacterFormattedFiles() throws Exception {
+        int[] optionsToTest = new int[]{128, 129, 144, 145, 146, 147, 176, 208, 240};
+        for (int i = 0; i < optionsToTest.length; ++i) {
+            tearDown();
+            setUp();
+            executeTestConfiguration(optionsToTest[i], "/widechar");
+        }
+    }
+
+    public void testWideCharacterAmbiguousFormattedFiles() throws Exception {
+        int[] optionsToTest = new int[]{384, 400, 496};
+        for (int i = 0; i < optionsToTest.length; ++i) {
+            tearDown();
+            setUp();
+            executeTestConfiguration(optionsToTest[i], "/widecharambiguous");
         }
     }
 

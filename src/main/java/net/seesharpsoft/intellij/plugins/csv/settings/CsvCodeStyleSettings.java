@@ -22,6 +22,8 @@ public class CsvCodeStyleSettings extends CustomCodeStyleSettings {
     public boolean WHITE_SPACES_OUTSIDE_QUOTES = true;
     public boolean LEADING_WHITE_SPACES = false;
     public int SEPARATOR_INDEX = 0;
+    public boolean ENABLE_WIDE_CHARACTER_DETECTION = false;
+    public boolean TREAT_AMBIGUOUS_CHARACTERS_AS_WIDE = false;
 
     public static final String DEFAULT_SEPARATOR = ",";
     public static final String TAB_SEPARATOR = "\t";

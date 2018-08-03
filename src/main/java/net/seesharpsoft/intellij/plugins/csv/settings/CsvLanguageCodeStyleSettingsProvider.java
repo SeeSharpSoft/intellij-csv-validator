@@ -56,6 +56,14 @@ public class CsvLanguageCodeStyleSettingsProvider extends LanguageCodeStyleSetti
                     "LEADING_WHITE_SPACES",
                     "Leading whitespaces",
                     "Tabularize (ignores Trimming settings)");
+            consumer.showCustomOption(CsvCodeStyleSettings.class,
+                    "ENABLE_WIDE_CHARACTER_DETECTION",
+                    "East Asian fullwidth character support (lowers performance)",
+                    "Tabularize (ignores Trimming settings)");
+            consumer.showCustomOption(CsvCodeStyleSettings.class,
+                    "TREAT_AMBIGUOUS_CHARACTERS_AS_WIDE",
+                    "EA fullwidth ambiguous characters treated as double wide",
+                    "Tabularize (ignores Trimming settings)");
         }
 
         if (settingsType == SettingsType.WRAPPING_AND_BRACES_SETTINGS) {
@@ -75,7 +83,7 @@ public class CsvLanguageCodeStyleSettingsProvider extends LanguageCodeStyleSetti
                 "3,\"Cardinal Slant-D® Ring Binder, Heavy Gauge Vinyl   \",Barry French, 293 ,46.71 ,8.69\n" +
                 "4   ,    R380 ,Clay Rozendal,483,  1198.97,195.99 \n" +
                 "3.1\n" +
-                "5 ,Holmes HEPA Air Purifier,Carlos Soltero,515,30.94,21.78";
+                "5 ,Holmes HEPA Air Purifier,Carlos Soltero,汉字宋,30.94,21.78";
     }
 
     @Override
