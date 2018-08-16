@@ -58,11 +58,11 @@ public class CsvLanguageCodeStyleSettingsProvider extends LanguageCodeStyleSetti
                     "Tabularize (ignores Trimming settings)");
             consumer.showCustomOption(CsvCodeStyleSettings.class,
                     "ENABLE_WIDE_CHARACTER_DETECTION",
-                    "East Asian fullwidth character support (lowers performance)",
+                    "East Asian charset support (slower!)",
                     "Tabularize (ignores Trimming settings)");
             consumer.showCustomOption(CsvCodeStyleSettings.class,
                     "TREAT_AMBIGUOUS_CHARACTERS_AS_WIDE",
-                    "EA fullwidth ambiguous characters treated as double wide",
+                    "Double wide EA ambiguous characters",
                     "Tabularize (ignores Trimming settings)");
         }
 
