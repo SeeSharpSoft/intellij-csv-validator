@@ -15,12 +15,23 @@ import net.seesharpsoft.intellij.plugins.csv.psi.CsvFile;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
 import org.jetbrains.annotations.NotNull;
 
+import java.awt.*;
+
 import static com.intellij.spellchecker.SpellCheckerSeveritiesProvider.TYPO;
 
 public class CsvAnnotator implements Annotator {
 
-    private static final TextAttributes EMPTY_TEXT_ATTRIBUTES =
-            TextAttributes.fromFlyweight(AttributesFlyweight.create(null, null, 0, null, null, null));
+    public static final TextAttributes[] COLUMNS = new TextAttributes[] {
+            TextAttributes.fromFlyweight(AttributesFlyweight.create(null, null, 0, null, null, null)),
+            TextAttributes.fromFlyweight(AttributesFlyweight.create(null, new Color(240, 240, 240), 0, null, null, null)),
+            TextAttributes.fromFlyweight(AttributesFlyweight.create(null, new Color(255, 240, 240), 0, null, null, null)),
+            TextAttributes.fromFlyweight(AttributesFlyweight.create(null, new Color(240, 255, 240), 0, null, null, null)),
+            TextAttributes.fromFlyweight(AttributesFlyweight.create(null, new Color(240, 240, 255), 0, null, null, null)),
+            TextAttributes.fromFlyweight(AttributesFlyweight.create(null, new Color(255, 255, 240), 0, null, null, null)),
+            TextAttributes.fromFlyweight(AttributesFlyweight.create(null, new Color(255, 240, 255), 0, null, null, null)),
+            TextAttributes.fromFlyweight(AttributesFlyweight.create(null, new Color(240, 255, 255), 0, null, null, null)),
+            TextAttributes.fromFlyweight(AttributesFlyweight.create(null, new Color(255, 255, 255), 0, null, null, null)),
+    };
 
     public static final HighlightSeverity CSV_COLUMN_INFO_SEVERITY =
             new HighlightSeverity("CSV_COLUMN_INFO_SEVERITY", TYPO.myVal + 5);
@@ -50,8 +61,12 @@ public class CsvAnnotator implements Annotator {
             }
 
             Annotation annotation = holder.createAnnotation(CSV_COLUMN_INFO_SEVERITY, textRange, message, tooltip);
-            annotation.setEnforcedTextAttributes(EMPTY_TEXT_ATTRIBUTES);
+            annotation.setEnforcedTextAttributes(getTextAttributes(columnInfo));
             annotation.setNeedsUpdateOnTyping(false);
         }
+    }
+
+    protected TextAttributes getTextAttributes(CsvColumnInfo<PsiElement> columnInfo) {
+        return COLUMNS[columnInfo.getColumnIndex() % COLUMNS.length];
     }
 }
