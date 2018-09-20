@@ -1,5 +1,6 @@
 package net.seesharpsoft.intellij.plugins.csv.settings;
 
+import com.intellij.openapi.editor.colors.EditorColors;
 import com.intellij.openapi.editor.colors.TextAttributesKey;
 import com.intellij.openapi.fileTypes.SyntaxHighlighter;
 import com.intellij.openapi.options.colors.AttributesDescriptor;
@@ -21,6 +22,10 @@ public class CsvColorSettingsPage implements ColorSettingsPage {
             new AttributesDescriptor("Quote", CsvSyntaxHighlighter.QUOTE),
             new AttributesDescriptor("Text", CsvSyntaxHighlighter.TEXT),
             new AttributesDescriptor("Escaped Text", CsvSyntaxHighlighter.ESCAPED_TEXT),
+    };
+
+    private static final ColorDescriptor[] COLOR_DESCRIPTORS = new ColorDescriptor[]{
+            new ColorDescriptor("Caret row", EditorColors.CARET_ROW_COLOR, ColorDescriptor.Kind.BACKGROUND),
     };
 
     @Nullable
@@ -60,7 +65,7 @@ public class CsvColorSettingsPage implements ColorSettingsPage {
     @NotNull
     @Override
     public ColorDescriptor[] getColorDescriptors() {
-        return ColorDescriptor.EMPTY_ARRAY;
+        return COLOR_DESCRIPTORS;
     }
 
     @NotNull
