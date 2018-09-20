@@ -18,6 +18,7 @@
         <li>structure view (header-entry layout)</li>
         <li>support for ',', ';', '|' or '&#8633;' as value separator</li>
         <li>highlight of active column values</li>
+        <li>customizable column coloring</li>
       </ul>
 
       <b>TSV file support:</b> <em>TSV files are recognized as such but treated as a variant of CSV files, the same syntax highlighting and code style settings are applied.</em>
@@ -37,15 +38,7 @@
     ]]></description>
 
     <change-notes><![CDATA[
-      <b>NEW:</b> Custom 'Wrapping' settings<br>
-      <b>NEW:</b> Column highlighter takes whitespaces into account<br>
-      <b>NEW:</b> East Asian full-width character support for 'Tabularize' (optional) - disabled by default due to lower performance<br>
-      <b>CHANGE:</b> Column highlighting only happens on selection<br>
-      <b>FIX:</b> CSV column info tooltip trumps spellchecker tooltip (but keeps the visualization of a typo)<br>
-      <b>FIX:</b> Show tooltip even when caret is at the last position withing the CSV file<br>
-      <b>FIX:</b> Support for suppressing inspections not relevant for CSV (e.g. 'Problematic Whitespace')<br>
-      <b>FIX:</b> Structure View: proper handling of <undefined> elements (instead of endless loading)<br>
-      + several code & performance improvements
+      <b>NEW:</b> Customizable column coloring (<i>File > Settings > Editor > Color Scheme > CSV</i><br>
       <br><br>
     ]]>
     </change-notes>
