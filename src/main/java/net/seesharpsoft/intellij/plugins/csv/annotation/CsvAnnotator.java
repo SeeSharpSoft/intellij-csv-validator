@@ -71,7 +71,7 @@ public class CsvAnnotator implements Annotator {
     }
 
     protected TextAttributes getTextAttributes(AnnotationSession annotationSession, CsvColumnInfo<PsiElement> columnInfo) {
-        EditorColorsScheme editorColorsScheme = EditorColorsManager.getInstance().getSchemeForCurrentUITheme();
+        EditorColorsScheme editorColorsScheme = EditorColorsManager.getInstance().getGlobalScheme();
         Integer maxNoOfDefinedColumnHighlightColors = annotationSession.getUserData(MAX_NO_OF_DEFINED_COLUMN_HIGHLIGHT_COLORS);
         if (maxNoOfDefinedColumnHighlightColors == null) {
             maxNoOfDefinedColumnHighlightColors = 0;
