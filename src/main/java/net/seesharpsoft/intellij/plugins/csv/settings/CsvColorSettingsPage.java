@@ -7,6 +7,7 @@ import com.intellij.openapi.options.colors.ColorDescriptor;
 import com.intellij.openapi.options.colors.ColorSettingsPage;
 import net.seesharpsoft.intellij.plugins.csv.CsvIconProvider;
 import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
+import net.seesharpsoft.intellij.plugins.csv.annotation.CsvAnnotator;
 import net.seesharpsoft.intellij.plugins.csv.highlighter.CsvSyntaxHighlighter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -60,7 +61,7 @@ public class CsvColorSettingsPage implements ColorSettingsPage {
     @NotNull
     @Override
     public ColorDescriptor[] getColorDescriptors() {
-        return ColorDescriptor.EMPTY_ARRAY;
+        return CsvAnnotator.COLOR_DESCRIPTORS;
     }
 
     @NotNull

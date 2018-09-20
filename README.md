@@ -21,6 +21,8 @@ This enables default editor features like syntax validation, highlighting and in
 - intentions (Alt+Enter), e.g. Quote/Unquote (all), Shift Column Left/Right
 - structure view (header-entry layout)
 - support for ',', ';', '|' and '&#8633;' as value separator
+- highlight of active column values
+- customizable column coloring
 
 ### Syntax parser & validation
 
@@ -38,16 +40,6 @@ Please note that if a document is syntactically incorrect, other features like c
 
 ![Editor with syntax validation and highlighting](./docs/editor.png)
 
-### Highlighting
-
-The different symbols of a CSV document, namely the separator (comma), the quotes, the escaped literals and the text elements itself, are highlighted by a coloring scheme that can be customized:
-
-- _File > Settings > Editor > Color Scheme > CSV_
-
-Preset colors are based on Jetbrains IDE defaults and support the different UI themes.
-
-![Color scheme settings](./docs/colorsettings.png)
-
 ### Separator
 
 CSV files provide a high degree of flexibility and can be used universally for all kind of data.
@@ -62,6 +54,21 @@ Tab (&#8633;) can be explicitly set as a separator for CSV files.
 Additionally the file type TSV was introduced as a kind of CSV language.
 For TSV files the same formatter and code style settings are applied as for CSV itself, but the separator is considered to be a tab.
 All functionality that is available for plain CSV files (inspections, intentions, structure view, etc.) can be used for TSV as well.   
+
+### Highlighting
+
+The different symbols of a CSV document, namely the separator (comma), the quotes, the escaped literals and the text elements itself, are highlighted by a coloring scheme that can be customized:
+
+- _File > Settings > Editor > Color Scheme > CSV_
+
+Preset colors are based on Jetbrains IDE defaults and support the different UI themes.
+
+![Color scheme settings](./docs/colorsettings.png)
+
+#### Column Highlighting Colors
+
+**NEW**
+Besides defining colors and font-style variants for the different CSV symbols, additionally up to 10 different column highlight colors can be defined. Those colors are applied to the columns round robin. Undefined column highlight colors will be skipped if they are not followed by any other color definition.
 
 ### Formatting
 
