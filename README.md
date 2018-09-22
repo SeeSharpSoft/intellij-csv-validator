@@ -14,15 +14,17 @@ This enables default editor features like syntax validation, highlighting and in
 ## Features
 
 - CSV/TSV file detection
+- customizable text editor
 - syntax validation
-- syntax highlighting (configurable)
-- content formatting (configurable)
+- syntax highlighting (customizable)
+- content formatting (customizable)
 - quick fix inspections
 - intentions (Alt+Enter), e.g. Quote/Unquote (all), Shift Column Left/Right
 - structure view (header-entry layout)
 - support for ',', ';', '|' and '&#8633;' as value separator
 - highlight of active column values
 - customizable column coloring
+- tab (&#8633;) separator highlighting
 
 ### Syntax parser & validation
 

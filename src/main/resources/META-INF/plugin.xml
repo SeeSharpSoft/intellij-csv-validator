@@ -10,6 +10,7 @@
       <b>Features:</b><br>
       <ul>
         <li>CSV/TSV file detection</li>
+        <li>customizable text editor</li>
         <li>syntax validation</li>
         <li>syntax highlighting (configurable)</li>
         <li>content formatting (configurable)</li>
@@ -19,8 +20,7 @@
         <li>support for ',', ';', '|' or '&#8633;' as value separator</li>
         <li>highlight of active column values</li>
         <li>customizable column coloring</li>
-        <li>TAB (separator) highlighting</li>
-        <li>enforced soft wrap enabling/disabling</li>
+        <li>tab (&#8633;) separator highlighting</li>
       </ul>
 
       <b>TSV file support:</b> <em>TSV files are recognized as such but treated as a variant of CSV files, the same syntax highlighting and code style settings are applied.</em>
