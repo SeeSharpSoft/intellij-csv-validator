@@ -55,7 +55,35 @@ Additionally the file type TSV was introduced as a kind of CSV language.
 For TSV files the same formatter and code style settings are applied as for CSV itself, but the separator is considered to be a tab.
 All functionality that is available for plain CSV files (inspections, intentions, structure view, etc.) can be used for TSV as well.   
 
-### Highlighting
+### \*NEW\* Editor Settings
+
+- _File > Settings > Editor > General > CSV/TSV Editor_
+
+The plugin introduces a new default editor, which is plain text editor supporting custom settings. Those settings can be adjusted in the corresponding CSV/TSV editor settings menu. 
+
+![Color scheme settings](./docs/editorsettings.png)
+
+#### Highlighting
+
+##### Highlight caret row
+
+The highlighting of the current caret row might interfere with custom background color settings and can be enabled/disabled for CSV/TSV files here.
+
+##### Enable column highlighting
+
+An easy way to switch the newly introduced *Column Highlighting* on or off.
+
+##### Highlight tab separator
+
+Enable/disable highlighting (and choose the highlight color) of tab characters (&#8633;) in their role as value separator (TSV). Tabs as part of a value are therefore not highlighted on purpose.
+
+#### Others
+
+##### Use soft wraps
+
+Set whether soft wrapping should be activated for CSV/TSV. It still can be changed file specific with right-click on the editors left outer margin. 
+
+### Color Scheme
 
 The different symbols of a CSV document, namely the separator (comma), the quotes, the escaped literals and the text elements itself, are highlighted by a coloring scheme that can be customized:
 
