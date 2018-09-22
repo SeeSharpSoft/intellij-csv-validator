@@ -19,6 +19,8 @@
         <li>support for ',', ';', '|' or '&#8633;' as value separator</li>
         <li>highlight of active column values</li>
         <li>customizable column coloring</li>
+        <li>TAB (separator) highlighting</li>
+        <li>enforced soft wrap enabling/disabling</li>
       </ul>
 
       <b>TSV file support:</b> <em>TSV files are recognized as such but treated as a variant of CSV files, the same syntax highlighting and code style settings are applied.</em>
@@ -38,7 +40,10 @@
     ]]></description>
 
     <change-notes><![CDATA[
-      <b>NEW:</b> Customizable column coloring (<i>File > Settings > Editor > Color Scheme > CSV</i><br>
+      <b>NEW:</b> CSV/TSV editor settings (<i>File > Settings > General > CSV/TSV Editor)</i><br>
+      <b>NEW:</b> TAB (separator) highlighting<br>
+      <b>NEW:</b> Soft wrap settings specific for CSV/TSV</li>
+      <b>NEW:</b> Customizable column coloring (<i>File > Settings > Editor > Color Scheme > CSV)</i><br>
       <br><br>
     ]]>
     </change-notes>
@@ -53,10 +58,10 @@
     <extensions defaultExtensionNs="com.intellij">
         <fileTypeFactory implementation="net.seesharpsoft.intellij.plugins.csv.CsvFileTypeFactory"/>
         <fileTypeFactory implementation="net.seesharpsoft.intellij.plugins.tsv.TsvFileTypeFactory"/>
-        
+
         <lang.parserDefinition language="csv" implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvParserDefinition"/>
         <lang.parserDefinition language="tsv" implementationClass="net.seesharpsoft.intellij.plugins.tsv.TsvParserDefinition"/>
-        
+
         <lang.syntaxHighlighterFactory language="csv"
                                        implementationClass="net.seesharpsoft.intellij.plugins.csv.highlighter.CsvSyntaxHighlighterFactory"/>
         <editorHighlighterProvider filetype="CSV"
@@ -64,6 +69,10 @@
         <highlightUsagesHandlerFactory implementation="net.seesharpsoft.intellij.plugins.csv.highlighter.CsvHighlightUsagesHandlerFactory"/>
 
         <colorSettingsPage implementation="net.seesharpsoft.intellij.plugins.csv.settings.CsvColorSettingsPage"/>
+
+        <applicationService serviceImplementation="net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettingsExternalizable" />
+        <editorOptionsProvider instance="net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettingsProvider" />
+        <fileEditorProvider implementation="net.seesharpsoft.intellij.plugins.csv.editor.CsvFileEditorProvider" />
 
         <annotator language="csv" implementationClass="net.seesharpsoft.intellij.plugins.csv.annotation.CsvAnnotator"/>
 
@@ -76,7 +85,7 @@
                 implementation="net.seesharpsoft.intellij.plugins.csv.settings.CsvCodeStyleSettingsProvider"/>
         <langCodeStyleSettingsProvider
                 implementation="net.seesharpsoft.intellij.plugins.csv.settings.CsvLanguageCodeStyleSettingsProvider"/>
-        
+
         <lang.psiStructureViewFactory language="csv"
                                       implementationClass="net.seesharpsoft.intellij.plugins.csv.structureview.CsvStructureViewFactory"/>
         <iconProvider implementation="net.seesharpsoft.intellij.plugins.csv.CsvIconProvider"/>
