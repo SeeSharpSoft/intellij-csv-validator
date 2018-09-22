@@ -72,6 +72,11 @@ public class CsvEditorSettingsPanel implements SearchableConfigurable {
         csvEditorSettingsExternalizable.setTabHighlightColor(cbTabHighlightColor.getColor());
     }
 
+    @Override
+    public String getHelpTopic() {
+        return null;
+    }
+
     private void createUIComponents() {
         cbTabHighlightColor = new CheckBoxWithColorChooser("Highlight tab separator   ");
         cbTabHighlightColor.setColor(Color.CYAN);
