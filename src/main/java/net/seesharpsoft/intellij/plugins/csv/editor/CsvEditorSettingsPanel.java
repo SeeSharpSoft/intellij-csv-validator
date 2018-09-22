@@ -16,6 +16,7 @@ public class CsvEditorSettingsPanel implements SearchableConfigurable {
     private JPanel myMainPanel;
     private JCheckBox cbUseSoftWraps;
     private JCheckBox cbColumnHighlighting;
+    private JPanel panelHighlighting;
     private CheckBoxWithColorChooser cbTabHighlightColor;
 
     @NotNull
@@ -37,7 +38,6 @@ public class CsvEditorSettingsPanel implements SearchableConfigurable {
     }
 
     // ensure downward compatibility
-    @Override
     public boolean isModified(@NotNull JToggleButton toggleButton, boolean value) {
         return toggleButton.isSelected() != value;
     }
