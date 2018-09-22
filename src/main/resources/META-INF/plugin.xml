@@ -74,7 +74,7 @@
         <editorOptionsProvider instance="net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettingsProvider" />
         <fileEditorProvider implementation="net.seesharpsoft.intellij.plugins.csv.editor.CsvFileEditorProvider" />
 
-        <annotator language="csv" implementationClass="net.seesharpsoft.intellij.plugins.csv.annotation.CsvAnnotator"/>
+        <annotator language="csv" implementationClass="net.seesharpsoft.intellij.plugins.csv.editor.CsvAnnotator"/>
 
         <spellchecker.support language="csv"
                               implementationClass="net.seesharpsoft.intellij.plugins.csv.spellchecker.CsvSpellCheckingStrategy" />

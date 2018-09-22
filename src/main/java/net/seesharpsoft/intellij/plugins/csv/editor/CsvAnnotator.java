@@ -1,4 +1,4 @@
-package net.seesharpsoft.intellij.plugins.csv.annotation;
+package net.seesharpsoft.intellij.plugins.csv.editor;
 
 import com.intellij.lang.annotation.*;
 import com.intellij.openapi.editor.colors.ColorKey;
@@ -13,7 +13,6 @@ import com.intellij.psi.tree.IElementType;
 import com.intellij.xml.util.XmlStringUtil;
 import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfo;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
-import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettingsExternalizable;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvFile;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvCodeStyleSettings;
