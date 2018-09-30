@@ -152,7 +152,27 @@ public final class CsvHelper {
             }
             ++row;
         }
-        return new CsvColumnInfoMap(columnInfoMap);
+        return new CsvColumnInfoMap(columnInfoMap, PsiTreeUtil.hasErrorElements(csvFile));
+    }
+
+    public static String unquoteCsvValue(String content) {
+        if (content == null) {
+            return "";
+        }
+        content = content.trim();
+        if (content.length() > 1 && content.startsWith("\"") && content.endsWith("\"")) {
+            content = content.substring(1, content.length() - 1);
+        }
+        content = content.replaceAll("(?:\")\"", "\"");
+        return content;
+    }
+
+    public static String quoteCsvField(String content) {
+        if (content == null) {
+            return "";
+        }
+        content = content.replaceAll("\"", "\"\"");
+        return "\"" + content + "\"";
     }
 
     private CsvHelper() {

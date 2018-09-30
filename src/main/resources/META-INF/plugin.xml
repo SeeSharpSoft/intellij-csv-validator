@@ -53,10 +53,10 @@
     <extensions defaultExtensionNs="com.intellij">
         <fileTypeFactory implementation="net.seesharpsoft.intellij.plugins.csv.CsvFileTypeFactory"/>
         <fileTypeFactory implementation="net.seesharpsoft.intellij.plugins.tsv.TsvFileTypeFactory"/>
-        
+
         <lang.parserDefinition language="csv" implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvParserDefinition"/>
         <lang.parserDefinition language="tsv" implementationClass="net.seesharpsoft.intellij.plugins.tsv.TsvParserDefinition"/>
-        
+
         <lang.syntaxHighlighterFactory language="csv"
                                        implementationClass="net.seesharpsoft.intellij.plugins.csv.highlighter.CsvSyntaxHighlighterFactory"/>
         <editorHighlighterProvider filetype="CSV"
@@ -64,6 +64,8 @@
         <highlightUsagesHandlerFactory implementation="net.seesharpsoft.intellij.plugins.csv.highlighter.CsvHighlightUsagesHandlerFactory"/>
 
         <colorSettingsPage implementation="net.seesharpsoft.intellij.plugins.csv.settings.CsvColorSettingsPage"/>
+
+        <fileEditorProvider implementation="net.seesharpsoft.intellij.plugins.csv.editor.CsvTableEditorProvider" />
 
         <annotator language="csv" implementationClass="net.seesharpsoft.intellij.plugins.csv.annotation.CsvAnnotator"/>
 
@@ -76,7 +78,7 @@
                 implementation="net.seesharpsoft.intellij.plugins.csv.settings.CsvCodeStyleSettingsProvider"/>
         <langCodeStyleSettingsProvider
                 implementation="net.seesharpsoft.intellij.plugins.csv.settings.CsvLanguageCodeStyleSettingsProvider"/>
-        
+
         <lang.psiStructureViewFactory language="csv"
                                       implementationClass="net.seesharpsoft.intellij.plugins.csv.structureview.CsvStructureViewFactory"/>
         <iconProvider implementation="net.seesharpsoft.intellij.plugins.csv.CsvIconProvider"/>

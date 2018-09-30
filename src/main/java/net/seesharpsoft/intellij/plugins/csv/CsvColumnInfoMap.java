@@ -9,10 +9,17 @@ public class CsvColumnInfoMap<T> {
     private final Map<Integer, CsvColumnInfo<T>> myInfoColumnMap;
     private final Map<T, CsvColumnInfo<T>> myReverseInfoColumnMap;
 
-    public CsvColumnInfoMap(Map<Integer, CsvColumnInfo<T>> infoColumnMap) {
+    private boolean hasErrors = false;
+
+    public CsvColumnInfoMap(Map<Integer, CsvColumnInfo<T>> infoColumnMap, boolean hasErrorsArg) {
         this.myInfoColumnMap = infoColumnMap;
         this.myReverseInfoColumnMap = new HashMap<>();
         buildReverseMap();
+        setHasErrors(hasErrorsArg);
+    }
+
+    public CsvColumnInfoMap(Map<Integer, CsvColumnInfo<T>> infoColumnMap) {
+        this(infoColumnMap, false);
     }
 
     private void buildReverseMap() {
@@ -38,5 +45,13 @@ public class CsvColumnInfoMap<T> {
 
     public Map<Integer, CsvColumnInfo<T>> getColumnInfos() {
         return Collections.unmodifiableMap(this.myInfoColumnMap);
+    }
+
+    public boolean hasErrors() {
+        return hasErrors;
+    }
+
+    public void setHasErrors(boolean hasErrorsArg) {
+        hasErrors = hasErrorsArg;
     }
 }
