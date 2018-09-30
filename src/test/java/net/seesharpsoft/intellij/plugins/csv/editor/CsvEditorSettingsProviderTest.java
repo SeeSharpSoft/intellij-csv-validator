@@ -5,7 +5,7 @@ import com.intellij.testFramework.fixtures.LightCodeInsightFixtureTestCase;
 
 import java.awt.*;
 
-public class CsvEditorSettingsPanelTest extends LightCodeInsightFixtureTestCase {
+public class CsvEditorSettingsProviderTest extends LightCodeInsightFixtureTestCase {
 
     @Override
     protected String getTestDataPath() {
@@ -18,7 +18,7 @@ public class CsvEditorSettingsPanelTest extends LightCodeInsightFixtureTestCase 
     }
 
     public void testId() {
-        CsvEditorSettingsPanel editorSettingsPanel = new CsvEditorSettingsPanel();
+        CsvEditorSettingsProvider editorSettingsPanel = new CsvEditorSettingsProvider();
 
         assertEquals("Csv.Editor.Settings", editorSettingsPanel.getId());
 
@@ -26,15 +26,23 @@ public class CsvEditorSettingsPanelTest extends LightCodeInsightFixtureTestCase 
     }
 
     public void testDisplayName() {
-        CsvEditorSettingsPanel editorSettingsPanel = new CsvEditorSettingsPanel();
+        CsvEditorSettingsProvider editorSettingsPanel = new CsvEditorSettingsProvider();
 
-        assertEquals("CSV/TSV Editor Settings", editorSettingsPanel.getDisplayName());
+        assertEquals("CSV/TSV Editor", editorSettingsPanel.getDisplayName());
+
+        editorSettingsPanel.disposeUIResources();
+    }
+
+    public void testHelpTopic() {
+        CsvEditorSettingsProvider editorSettingsPanel = new CsvEditorSettingsProvider();
+
+        assertEquals("Editor Options for CSV/TSV files", editorSettingsPanel.getHelpTopic());
 
         editorSettingsPanel.disposeUIResources();
     }
 
     public void testComponent() {
-        CsvEditorSettingsPanel editorSettingsPanel = new CsvEditorSettingsPanel();
+        CsvEditorSettingsProvider editorSettingsPanel = new CsvEditorSettingsProvider();
 
         assertNotNull(editorSettingsPanel.createComponent());
 
@@ -42,7 +50,7 @@ public class CsvEditorSettingsPanelTest extends LightCodeInsightFixtureTestCase 
     }
 
     public void testResetAndModified() throws ConfigurationException {
-        CsvEditorSettingsPanel editorSettingsPanel = new CsvEditorSettingsPanel();
+        CsvEditorSettingsProvider editorSettingsPanel = new CsvEditorSettingsProvider();
 
         CsvEditorSettingsExternalizable csvEditorSettingsExternalizable = CsvEditorSettingsExternalizable.getInstance();
         csvEditorSettingsExternalizable.setCaretRowShown(false);
@@ -66,7 +74,7 @@ public class CsvEditorSettingsPanelTest extends LightCodeInsightFixtureTestCase 
     }
 
     public void testApply() throws ConfigurationException {
-        CsvEditorSettingsPanel editorSettingsPanel = new CsvEditorSettingsPanel();
+        CsvEditorSettingsProvider editorSettingsPanel = new CsvEditorSettingsProvider();
 
         CsvEditorSettingsExternalizable csvEditorSettingsExternalizable = CsvEditorSettingsExternalizable.getInstance();
         csvEditorSettingsExternalizable.loadState(new CsvEditorSettingsExternalizable.OptionSet());
