@@ -1,4 +1,4 @@
-package net.seesharpsoft.intellij.plugins.csv.annotation;
+package net.seesharpsoft.intellij.plugins.csv.editor;
 
 import com.intellij.codeInsight.daemon.impl.HighlightInfo;
 import com.intellij.codeInsight.daemon.impl.HighlightInfoType;

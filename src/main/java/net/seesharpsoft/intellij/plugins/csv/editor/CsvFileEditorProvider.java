@@ -21,7 +21,7 @@ public class CsvFileEditorProvider implements FileEditorProvider {
 
     @Override
     public String getEditorTypeId() {
-        return "csv-editor";
+        return "csv-text-editor";
     }
 
     @Override
