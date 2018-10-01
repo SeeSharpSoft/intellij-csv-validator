@@ -81,6 +81,10 @@ Enable/disable highlighting (and choose the highlight color) of tab characters (
 
 #### Others
 
+##### Show info balloon
+
+Enable/disable the info balloon that appears at the caret position in the text editor.
+
 ##### Use soft wraps
 
 Set whether soft wrapping should be activated for CSV/TSV. It still can be changed file specific with right-click on the editors left outer margin. 

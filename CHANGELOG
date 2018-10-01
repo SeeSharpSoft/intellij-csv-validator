@@ -1,0 +1,119 @@
+1.9.0
+Oct 01, 2018
+
+NEW: CSV/TSV editor settings (File > Settings > General > CSV/TSV Editor)
+NEW: TAB (separator) highlighting
+NEW: Enable/disable balloon info
+NEW: Soft wrap settings specific for CSV/TSV
+
+1.8.2
+Sep 20, 2018
+
+NEW: Customizable column coloring (File > Settings > Editor > Color Scheme > CSV)
+
+1.8.1
+Aug 16, 2018
+
+NEW: East Asian full-width character support for 'Tabularize' (optional) - disabled by default due to lower performance
+
+1.8.0
+Jul 05, 2018
+
+NEW: Custom 'Wrapping' settings
+NEW: Column highlighter takes whitespaces into account
+CHANGE: Column highlighting only happens on selection
+FIX: CSV column info tooltip trumps spellchecker tooltip (but keeps the visualization of a typo)
+FIX: Show tooltip even when caret is at the last position withing the CSV file
+FIX: Support for suppressing inspections not relevant for CSV (e.g. 'Problematic Whitespace')
+FIX: Structure View: proper handling of elements (instead of endless loading)
++ several code & performance improvements
+
+1.7.0
+Jun 19, 2018
+
+NEW: Annotated values: tooltip shows the value itself, the header and the column index
+NEW: Active column (caret position) is colored differently
+FIX: 'Add separator' inspection is adding correct separator (e.g. tabs in TSV files)
++ several code & performance improvements
+
+1.6.1
+May 11, 2018
+
+New icons
+
+1.6.0
+Apr 02, 2018
+
+NEW: TSV file support
+    TSV files a recognized as such but treated as a variant of CSV files, the same syntax highlighting and code style settings are applied.
+NEW: tab (↹) and pipe (|) as separators added
+NEW: spellchecker enabled
+
+Note: For CSV Plugin v1.6.0+ it was necessary to increase the minimum IDE version from 2016.1.1 to 2016.3.2 due to a required fix in the formatting code. Previous versions of the plugin can still be downloaded directly from Jetbrains Plugin Repository.
+
+1.5.1
+Mar 21, 2018
+
+NEW: intentions to shift a whole column left/right
+  (includes bugfix for breaking intention functionality on previous IDE versions)
+
+1.5.0
+Feb 10, 2018
+
+NEW: intentions to shift a whole column left/right
+
+1.4.1
+Jan 19, 2018
+
+Handle tabs as 1-length character - fixes 'Tabularize' for csv files with tabs
+Fix default settings initialization
+
+1.4
+Jan 11, 2018
+
+Handle tabs as 1-length character - fixes 'Tabularize' for csv files with tabs
+
+1.3
+Oct 26, 2017
+
+Fixes issue java.lang.NoClassDefFoundError: com/intellij/psi/PsiElementFactory$SERVICE
+CodeInspection description added
+
+1.2
+Sep 30, 2017
+
+New: Intentions/Inspections added
+Improved formatter performance
+Several fixes
+
+1.0
+Sep 24, 2017
+
+New: Value separator - comma and semicolon supported
+
+0.9
+Sep 20, 2017
+
+Structure View: fix empty value handling ('' introduced) Settings: all settings now visible in IDE versions prior 2017.1
+
+0.7
+Sep 19, 2017
+
+New: Trimming/Spacing inside or outside quotes
+Fixed: White spaces will not added to empty line
+Default settings changed
+
+0.5
+Sep 16, 2017
+
+New: Structure view
+
+0.3
+Sep 16, 2017
+
+Setting added: White Space Before/After Comma Full support for tabularize with leading white spaces
+
+0.1
+Sep 16, 2017
+
+Initial release
