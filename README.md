@@ -26,6 +26,8 @@ This enables default editor features like syntax validation, highlighting and in
 - customizable column coloring
 - tab (&#8633;) separator highlighting
 
+(see [full changelog](./CHANGELOG))
+
 ### Syntax parser & validation
 
 The CSV syntax parser follows the standard defined in [IETF 4180](https://www.ietf.org/rfc/rfc4180.txt) but tolerates leading and trailing whitespaces of escaped text and accepts basically every literal as text data.
