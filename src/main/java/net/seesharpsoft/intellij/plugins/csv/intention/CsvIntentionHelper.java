@@ -189,10 +189,9 @@ public final class CsvIntentionHelper {
         }
         lastFieldElement = lastFieldElement.getLastChild();
         if (CsvHelper.getElementType(lastFieldElement) != CsvTypes.FIELD) {
-            throw new RuntimeException("Field element expected");
+            throw new IllegalArgumentException("Field element expected");
         }
         return getOpeningQuotePosition(lastFieldElement.getFirstChild(), lastFieldElement.getLastChild());
-
     }
 
     public static PsiElement findQuotePositionsUntilSeparator(final PsiElement element, List<Integer> quotePositions) {

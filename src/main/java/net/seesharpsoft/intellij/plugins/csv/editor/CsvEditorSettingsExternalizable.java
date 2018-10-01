@@ -24,6 +24,7 @@ public class CsvEditorSettingsExternalizable implements PersistentStateComponent
         public boolean USE_SOFT_WRAP;
         public boolean COLUMN_HIGHTLIGHTING;
         public boolean HIGHTLIGHT_TAB_SEPARATOR;
+        public boolean SHOW_INFO_BALLOON;
         public String TAB_HIGHLIGHT_COLOR;
 
         public OptionSet() {
@@ -32,6 +33,7 @@ public class CsvEditorSettingsExternalizable implements PersistentStateComponent
             USE_SOFT_WRAP = editorSettingsExternalizable.isUseSoftWraps();
             COLUMN_HIGHTLIGHTING = false;
             HIGHTLIGHT_TAB_SEPARATOR = true;
+            SHOW_INFO_BALLOON = true;
             TAB_HIGHLIGHT_COLOR = "-7984";
         }
     }
@@ -92,6 +94,13 @@ public class CsvEditorSettingsExternalizable implements PersistentStateComponent
     }
     public void setHighlightTabSeparator(boolean highlightTabSeparator) {
         getState().HIGHTLIGHT_TAB_SEPARATOR = highlightTabSeparator;
+    }
+
+    public boolean isShowInfoBalloon() {
+        return getState().SHOW_INFO_BALLOON;
+    }
+    public void setShowInfoBalloon(boolean showInfoBalloon) {
+        getState().SHOW_INFO_BALLOON = showInfoBalloon;
     }
 
     public Color getTabHighlightColor() {

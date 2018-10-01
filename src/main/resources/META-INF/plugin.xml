@@ -40,10 +40,11 @@
     ]]></description>
 
     <change-notes><![CDATA[
-      <b>NEW:</b> CSV/TSV editor settings (<i>File > Settings > General > CSV/TSV Editor)</i><br>
+      <b>NEW:</b> CSV/TSV editor settings (<i>File > Settings > General > CSV/TSV Editor</i>)<br>
       <b>NEW:</b> TAB (separator) highlighting<br>
-      <b>NEW:</b> Soft wrap settings specific for CSV/TSV</li>
-      <b>NEW:</b> Customizable column coloring (<i>File > Settings > Editor > Color Scheme > CSV)</i><br>
+      <b>NEW:</b> Enable/disable balloon info</li><br>
+      <b>NEW:</b> Soft wrap settings specific for CSV/TSV</li><br>
+      <b>NEW:</b> Customizable column coloring (<i>File > Settings > Editor > Color Scheme > CSV</i>)<br>
       <br><br>
     ]]>
     </change-notes>

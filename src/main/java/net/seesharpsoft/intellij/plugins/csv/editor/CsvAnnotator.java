@@ -28,9 +28,10 @@ import static com.intellij.spellchecker.SpellCheckerSeveritiesProvider.TYPO;
 public class CsvAnnotator implements Annotator {
 
     protected static final Integer MAX_COLUMN_HIGHLIGHT_COLORS = 10;
-    protected static final Key<Integer> MAX_NO_OF_DEFINED_COLUMN_HIGHLIGHT_COLORS = Key.create("CSV_LAST_DEFINED_COLOR_INDEX_KEY");
-    protected static final Key<TextAttributes> TAB_SEPARATOR_HIGHLIGHT_COLOR = Key.create("CSV_TAB_SEPARATOR_HIGHLIGHT_COLOR");
-    protected static final Key<Boolean> TAB_SEPARATOR_HIGHLIGHT_COLOR_DETERMINED = Key.create("CSV_TAB_SEPARATOR_HIGHLIGHT_COLOR_DETERMINED");
+    protected static final Key<Integer> MAX_NO_OF_DEFINED_COLUMN_HIGHLIGHT_COLORS = Key.create("CSV_PLUGIN_LAST_DEFINED_COLOR_INDEX_KEY");
+    protected static final Key<TextAttributes> TAB_SEPARATOR_HIGHLIGHT_COLOR = Key.create("CSV_PLUGIN_TAB_SEPARATOR_HIGHLIGHT_COLOR");
+    protected static final Key<Boolean> TAB_SEPARATOR_HIGHLIGHT_COLOR_DETERMINED = Key.create("CSV_PLUGIN_TAB_SEPARATOR_HIGHLIGHT_COLOR_DETERMINED");
+    protected static final Key<Boolean> SHOW_INFO_BALLOON = Key.create("CSV_PLUGIN_SHOW_INFO_BALLOON");
 
     public static final ColorDescriptor[] COLOR_DESCRIPTORS;
 
@@ -63,13 +64,16 @@ public class CsvAnnotator implements Annotator {
         if (columnInfo != null) {
             PsiElement headerElement = columnInfo.getHeaderElement();
             String message = XmlStringUtil.escapeString(headerElement == null ? "" : headerElement.getText(), true);
-            String tooltip = XmlStringUtil.wrapInHtml(
-                    String.format("%s<br /><br />Header: %s<br />Index: %d",
-                            XmlStringUtil.escapeString(element.getText(), true),
-                            message,
-                            columnInfo.getColumnIndex()
-                    )
-            );
+            String tooltip = null;
+            if (showInfoBalloon(holder.getCurrentAnnotationSession())) {
+                tooltip = XmlStringUtil.wrapInHtml(
+                        String.format("%s<br /><br />Header: %s<br />Index: %d",
+                                XmlStringUtil.escapeString(element.getText(), true),
+                                message,
+                                columnInfo.getColumnIndex()
+                        )
+                );
+            }
             TextRange textRange = columnInfo.getRowInfo(element).getTextRange();
             if (textRange.getStartOffset() - csvFile.getTextLength() == 0 && textRange.getStartOffset() > 0) {
                 textRange = TextRange.from(textRange.getStartOffset() - 1, 1);
@@ -79,6 +83,15 @@ public class CsvAnnotator implements Annotator {
             annotation.setEnforcedTextAttributes(getTextAttributes(holder.getCurrentAnnotationSession(), columnInfo));
             annotation.setNeedsUpdateOnTyping(false);
         }
+    }
+
+    protected boolean showInfoBalloon(@NotNull AnnotationSession annotationSession) {
+        Boolean showInfoBalloon = annotationSession.getUserData(SHOW_INFO_BALLOON);
+        if (showInfoBalloon == null) {
+            showInfoBalloon = CsvEditorSettingsExternalizable.getInstance().isShowInfoBalloon();
+            annotationSession.putUserData(SHOW_INFO_BALLOON, showInfoBalloon);
+        }
+        return showInfoBalloon;
     }
 
     protected boolean handleSeparatorElement(@NotNull PsiElement element, @NotNull AnnotationHolder holder, IElementType elementType, CsvFile csvFile) {

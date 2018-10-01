@@ -53,10 +53,12 @@ public class CsvEditorSettingsProviderTest extends LightCodeInsightFixtureTestCa
         CsvEditorSettingsProvider editorSettingsPanel = new CsvEditorSettingsProvider();
 
         CsvEditorSettingsExternalizable csvEditorSettingsExternalizable = CsvEditorSettingsExternalizable.getInstance();
+        csvEditorSettingsExternalizable.loadState(new CsvEditorSettingsExternalizable.OptionSet());
         csvEditorSettingsExternalizable.setCaretRowShown(false);
         csvEditorSettingsExternalizable.setUseSoftWraps(true);
         csvEditorSettingsExternalizable.setColumnHighlightingEnabled(true);
         csvEditorSettingsExternalizable.setHighlightTabSeparator(false);
+        csvEditorSettingsExternalizable.setShowInfoBalloon(false);
         csvEditorSettingsExternalizable.setTabHighlightColor(Color.BLACK);
 
         assertEquals(true, editorSettingsPanel.isModified());
@@ -68,6 +70,7 @@ public class CsvEditorSettingsProviderTest extends LightCodeInsightFixtureTestCa
         assertEquals(true, csvEditorSettingsExternalizable.isUseSoftWraps());
         assertEquals(true, csvEditorSettingsExternalizable.isColumnHighlightingEnabled());
         assertEquals(false, csvEditorSettingsExternalizable.isHighlightTabSeparator());
+        assertEquals(false, csvEditorSettingsExternalizable.isShowInfoBalloon());
         assertEquals(Color.BLACK, csvEditorSettingsExternalizable.getTabHighlightColor());
 
         editorSettingsPanel.disposeUIResources();
@@ -83,6 +86,7 @@ public class CsvEditorSettingsProviderTest extends LightCodeInsightFixtureTestCa
         csvEditorSettingsExternalizable.setUseSoftWraps(true);
         csvEditorSettingsExternalizable.setColumnHighlightingEnabled(true);
         csvEditorSettingsExternalizable.setHighlightTabSeparator(false);
+        csvEditorSettingsExternalizable.setShowInfoBalloon(false);
         csvEditorSettingsExternalizable.setTabHighlightColor(Color.BLACK);
 
         editorSettingsPanel.apply();
@@ -94,6 +98,7 @@ public class CsvEditorSettingsProviderTest extends LightCodeInsightFixtureTestCa
         assertEquals(freshOptionSet.USE_SOFT_WRAP, csvEditorSettingsExternalizable.isUseSoftWraps());
         assertEquals(freshOptionSet.COLUMN_HIGHTLIGHTING, csvEditorSettingsExternalizable.isColumnHighlightingEnabled());
         assertEquals(freshOptionSet.HIGHTLIGHT_TAB_SEPARATOR, csvEditorSettingsExternalizable.isHighlightTabSeparator());
+        assertEquals(freshOptionSet.SHOW_INFO_BALLOON, csvEditorSettingsExternalizable.isShowInfoBalloon());
         assertEquals(freshOptionSet.TAB_HIGHLIGHT_COLOR, "" + csvEditorSettingsExternalizable.getTabHighlightColor().getRGB());
 
         editorSettingsPanel.disposeUIResources();

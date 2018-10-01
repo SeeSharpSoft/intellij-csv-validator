@@ -15,8 +15,8 @@ public class CsvEditorSettingsProvider implements SearchableConfigurable {
     private JPanel myMainPanel;
     private JCheckBox cbUseSoftWraps;
     private JCheckBox cbColumnHighlighting;
-    private JPanel panelHighlighting;
     private CheckBoxWithColorChooser cbTabHighlightColor;
+    private JCheckBox cbShowInfoBalloonCheckBox;
 
     @NotNull
     @Override
@@ -52,6 +52,7 @@ public class CsvEditorSettingsProvider implements SearchableConfigurable {
                 isModified(cbUseSoftWraps, csvEditorSettingsExternalizable.isUseSoftWraps()) ||
                 isModified(cbColumnHighlighting, csvEditorSettingsExternalizable.isColumnHighlightingEnabled()) ||
                 cbTabHighlightColor.isSelected() != csvEditorSettingsExternalizable.isHighlightTabSeparator() ||
+                cbShowInfoBalloonCheckBox.isSelected() != csvEditorSettingsExternalizable.isShowInfoBalloon() ||
                 !Objects.equals(cbTabHighlightColor.getColor(), csvEditorSettingsExternalizable.getTabHighlightColor());
     }
 
@@ -62,6 +63,7 @@ public class CsvEditorSettingsProvider implements SearchableConfigurable {
         cbUseSoftWraps.setSelected(csvEditorSettingsExternalizable.isUseSoftWraps());
         cbColumnHighlighting.setSelected(csvEditorSettingsExternalizable.isColumnHighlightingEnabled());
         cbTabHighlightColor.setSelected(csvEditorSettingsExternalizable.isHighlightTabSeparator());
+        cbShowInfoBalloonCheckBox.setSelected(csvEditorSettingsExternalizable.isShowInfoBalloon());
         cbTabHighlightColor.setColor(csvEditorSettingsExternalizable.getTabHighlightColor());
     }
 
@@ -72,11 +74,11 @@ public class CsvEditorSettingsProvider implements SearchableConfigurable {
         csvEditorSettingsExternalizable.setUseSoftWraps(cbUseSoftWraps.isSelected());
         csvEditorSettingsExternalizable.setColumnHighlightingEnabled(cbColumnHighlighting.isSelected());
         csvEditorSettingsExternalizable.setHighlightTabSeparator(cbTabHighlightColor.isSelected());
+        csvEditorSettingsExternalizable.setShowInfoBalloon(cbShowInfoBalloonCheckBox.isSelected());
         csvEditorSettingsExternalizable.setTabHighlightColor(cbTabHighlightColor.getColor());
     }
 
-
-    private void createUIComponents() {
+    protected void createUIComponents() {
         cbTabHighlightColor = new CheckBoxWithColorChooser("Highlight tab separator   ");
         cbTabHighlightColor.setColor(Color.CYAN);
     }
