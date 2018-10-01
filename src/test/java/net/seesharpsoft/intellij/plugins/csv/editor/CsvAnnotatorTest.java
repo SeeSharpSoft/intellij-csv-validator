@@ -1,4 +1,4 @@
-package net.seesharpsoft.intellij.plugins.csv.annotation;
+package net.seesharpsoft.intellij.plugins.csv.editor;
 
 import com.intellij.codeInsight.daemon.impl.HighlightInfo;
 import com.intellij.codeInsight.daemon.impl.HighlightInfoType;
@@ -21,7 +21,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import static net.seesharpsoft.intellij.plugins.csv.annotation.CsvAnnotator.CSV_COLUMN_INFO_SEVERITY;
+import static net.seesharpsoft.intellij.plugins.csv.editor.CsvAnnotator.CSV_COLUMN_INFO_SEVERITY;
 
 public class CsvAnnotatorTest extends LightCodeInsightFixtureTestCase {
 
