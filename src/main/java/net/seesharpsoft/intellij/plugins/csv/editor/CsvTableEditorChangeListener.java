@@ -1,11 +1,13 @@
 package net.seesharpsoft.intellij.plugins.csv.editor;
 
+import javax.swing.*;
 import javax.swing.event.*;
 
 public class CsvTableEditorChangeListener extends CsvTableEditorUtilBase implements TableModelListener, TableColumnModelListener {
 
     private int movedColumnIndex = -1;
     private int targetColumnIndex = -1;
+    private boolean columnHeightWillBeCalculated = false;
 
     public CsvTableEditorChangeListener(CsvTableEditor csvTableEditor) {
         super(csvTableEditor);
@@ -19,12 +21,10 @@ public class CsvTableEditorChangeListener extends CsvTableEditorUtilBase impleme
 
     @Override
     public void columnAdded(TableColumnModelEvent e) {
-        System.out.println("Column added: " + e.getSource());
     }
 
     @Override
     public void columnRemoved(TableColumnModelEvent e) {
-        System.out.println("Column removed: " + e.getSource());
     }
 
     @Override
@@ -37,13 +37,27 @@ public class CsvTableEditorChangeListener extends CsvTableEditorUtilBase impleme
         }
         targetColumnIndex = e.getToIndex();
         csvTableEditor.requiresEditorUpdate();
-
-        System.out.println("Column MOVED: " + e.getFromIndex() + "=>" + e.getToIndex());
     }
 
     @Override
     public void columnMarginChanged(ChangeEvent e) {
-
+        JTable table = csvTableEditor.getTable();
+        if (!columnHeightWillBeCalculated && table.getTableHeader().getResizingColumn() != null) {
+            columnHeightWillBeCalculated = true;
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    // table.getTableHeader().getResizingColumn() is != null as long as the user still is holding the mouse down
+                    // To avoid going over all data every few milliseconds wait for user to release
+                    if (table.getTableHeader().getResizingColumn() != null) {
+                        SwingUtilities.invokeLater(this);
+                    } else {
+                        tableChanged(null);
+                        columnHeightWillBeCalculated = false;
+                    }
+                }
+            });
+        }
     }
 
     @Override
@@ -54,6 +68,5 @@ public class CsvTableEditorChangeListener extends CsvTableEditorUtilBase impleme
     @Override
     public void tableChanged(TableModelEvent e) {
         this.csvTableEditor.storeStateChange(true);
-        System.out.println("tableChanged: " + e.getSource());
     }
 }

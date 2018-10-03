@@ -19,6 +19,14 @@ import java.beans.PropertyChangeSupport;
 @SuppressWarnings("all")
 public class CsvEditorSettingsExternalizable implements PersistentStateComponent<CsvEditorSettingsExternalizable.OptionSet> {
 
+    public enum EditorPrio {
+        TEXT_FIRST,
+        TABLE_FIRST,
+        TEXT_ONLY
+// enable when table editor is a real alternative
+//        TABLE_ONLY
+    }
+
     public static final class OptionSet {
         public boolean CARET_ROW_SHOWN;
         public boolean USE_SOFT_WRAP;
@@ -26,6 +34,9 @@ public class CsvEditorSettingsExternalizable implements PersistentStateComponent
         public boolean HIGHTLIGHT_TAB_SEPARATOR;
         public boolean SHOW_INFO_BALLOON;
         public String TAB_HIGHLIGHT_COLOR;
+        public EditorPrio EDITOR_PRIO;
+
+        public boolean SHOW_TABLE_EDITOR_INFO_PANEL;
 
         public OptionSet() {
             EditorSettingsExternalizable editorSettingsExternalizable = EditorSettingsExternalizable.getInstance();
@@ -35,6 +46,8 @@ public class CsvEditorSettingsExternalizable implements PersistentStateComponent
             HIGHTLIGHT_TAB_SEPARATOR = true;
             SHOW_INFO_BALLOON = true;
             TAB_HIGHLIGHT_COLOR = "-7984";
+            EDITOR_PRIO = EditorPrio.TEXT_FIRST;
+            SHOW_TABLE_EDITOR_INFO_PANEL = true;
         }
     }
 
@@ -113,5 +126,19 @@ public class CsvEditorSettingsExternalizable implements PersistentStateComponent
     }
     public void setTabHighlightColor(Color color) {
         getState().TAB_HIGHLIGHT_COLOR = color == null ? "" : "" + color.getRGB();
+    }
+
+    public EditorPrio getEditorPrio() {
+        return getState().EDITOR_PRIO;
+    }
+    public void setEditorPrio(EditorPrio editorPrio) {
+        getState().EDITOR_PRIO = editorPrio;
+    }
+
+    public boolean showTableEditorInfoPanel() {
+        return getState().SHOW_TABLE_EDITOR_INFO_PANEL;
+    }
+    public void showTableEditorInfoPanel(boolean showInfoPanel) {
+        getState().SHOW_TABLE_EDITOR_INFO_PANEL = showInfoPanel;
     }
 }

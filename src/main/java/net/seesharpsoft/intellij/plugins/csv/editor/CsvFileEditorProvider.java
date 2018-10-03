@@ -15,23 +15,36 @@ import org.jetbrains.annotations.NotNull;
 
 public class CsvFileEditorProvider implements FileEditorProvider {
 
+    public static final String EDITOR_TYPE_ID = "csv-text-editor";
+
     protected static boolean isCsvFile(VirtualFile file) {
         return file.getFileType() instanceof LanguageFileType && ((LanguageFileType) file.getFileType()).getLanguage().isKindOf(CsvLanguage.INSTANCE);
     }
 
     @Override
     public String getEditorTypeId() {
-        return "csv-text-editor";
+        return EDITOR_TYPE_ID;
     }
 
     @Override
     public FileEditorPolicy getPolicy() {
-        return FileEditorPolicy.HIDE_DEFAULT_EDITOR;
+        switch (CsvEditorSettingsExternalizable.getInstance().getEditorPrio()) {
+            case TEXT_FIRST:
+            case TEXT_ONLY:
+                return FileEditorPolicy.HIDE_DEFAULT_EDITOR;
+//            case TABLE_ONLY:
+            case TABLE_FIRST:
+                return FileEditorPolicy.PLACE_AFTER_DEFAULT_EDITOR;
+            default:
+                throw new IllegalArgumentException("unhandled EditorPrio: " + CsvEditorSettingsExternalizable.getInstance().getEditorPrio());
+        }
     }
 
     @Override
     public boolean accept(@NotNull Project project, @NotNull VirtualFile file) {
         return isCsvFile(file) && !SingleRootFileViewProvider.isTooLargeForContentLoading(file);
+//                && CsvEditorSettingsExternalizable.getInstance().getEditorPrio() != CsvEditorSettingsExternalizable.EditorPrio.TABLE_ONLY;
+
     }
 
     protected void applySettings(EditorSettings editorSettings, CsvEditorSettingsExternalizable csvEditorSettingsExternalizable) {

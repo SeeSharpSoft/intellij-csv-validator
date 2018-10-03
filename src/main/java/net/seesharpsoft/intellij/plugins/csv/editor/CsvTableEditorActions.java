@@ -9,14 +9,21 @@ import com.intellij.ui.table.JBTable;
 
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
+import javax.swing.table.TableModel;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Vector;
 
 public class CsvTableEditorActions extends CsvTableEditorUtilBase {
+
+    protected ActionListener readOnly = new ReadOnlyAction();
+    protected ActionListener readWrite = new ReadWriteAction();
 
     protected ActionListener undo = new UndoAction();
     protected ActionListener redo = new RedoAction();
@@ -29,27 +36,61 @@ public class CsvTableEditorActions extends CsvTableEditorUtilBase {
     protected ActionListener deleteRow = new DeleteRowAction();
     protected ActionListener deleteColumn = new DeleteColumnAction();
     protected LinkListener openTextEditor = new OpenTextEditor();
+    protected LinkListener openCsvPluginLink = new OpenCsvPluginLink();
 
     public CsvTableEditorActions(CsvTableEditor tableEditor) {
         super(tableEditor);
     }
 
+    private Object[] generateColumnIdentifiers(TableModel tableModel) {
+        int columnCount = tableModel.getColumnCount();
+        Object[] identifiers = new Object[columnCount];
+        for (int i = 0; i < columnCount; ++i) {
+            identifiers[i] = tableModel.getColumnName(i);
+        }
+        return identifiers;
+    }
+
+    private class ReadOnlyAction implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            csvTableEditor.setEditable(false);
+        }
+    }
+
+    private class ReadWriteAction implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            csvTableEditor.setEditable(true);
+        }
+    }
+
     @Override
     protected void onEditorUpdated() {
-        // nothing to do
+        csvTableEditor.removeTableChangeListener();
+        try {
+            DefaultTableModel tableModel = csvTableEditor.getTableModel();
+            tableModel.setColumnIdentifiers(generateColumnIdentifiers(tableModel));
+        } finally {
+            csvTableEditor.applyTableChangeListener();
+        }
     }
 
     private class UndoAction implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            csvTableEditor.updateEditorTable(csvTableEditor.stateManagement.getLastState());
+            if (csvTableEditor.stateManagement.canGetLastState()) {
+                csvTableEditor.updateEditorTable(csvTableEditor.stateManagement.getLastState());
+            }
         }
     }
 
     private class RedoAction implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            csvTableEditor.updateEditorTable(csvTableEditor.stateManagement.getNextState());
+            if (csvTableEditor.stateManagement.canGetNextState()) {
+                csvTableEditor.updateEditorTable(csvTableEditor.stateManagement.getNextState());
+            }
         }
     }
 
@@ -67,12 +108,9 @@ public class CsvTableEditorActions extends CsvTableEditorUtilBase {
             }
 
             int currentRow = csvTableEditor.getTable().getSelectedRow();
-            if (currentRow == -1) {
-                currentRow = 0;
-            }
             DefaultTableModel tableModel = csvTableEditor.getTableModel();
             if (this.before != null) {
-                tableModel.insertRow(currentRow + (before ? 0 : 1), new Object[tableModel.getColumnCount()]);
+                tableModel.insertRow(currentRow + (before && currentRow != -1 ? 0 : 1), new Object[tableModel.getColumnCount()]);
             } else {
                 tableModel.addRow(new Object[tableModel.getColumnCount()]);
             }
@@ -122,13 +160,11 @@ public class CsvTableEditorActions extends CsvTableEditorUtilBase {
             csvTableEditor.removeTableChangeListener();
             try {
                 int currentColumn = csvTableEditor.getTable().getSelectedColumn();
-                if (currentColumn == -1) {
-                    currentColumn = 0;
-                }
                 JBTable table = csvTableEditor.getTable();
                 DefaultTableModel tableModel = csvTableEditor.getTableModel();
-                tableModel.addColumn("");
-                if (before != null) {
+                int columnCount = tableModel.getColumnCount();
+                tableModel.addColumn(tableModel.getColumnName(columnCount));
+                if (before != null && currentColumn != -1 && columnCount > 0 && currentColumn < columnCount - 1) {
                     table.moveColumn(tableModel.getColumnCount() - 1, currentColumn + (before ? 0 : 1));
                 }
 
@@ -191,7 +227,25 @@ public class CsvTableEditorActions extends CsvTableEditorUtilBase {
     private final class OpenTextEditor implements LinkListener {
         @Override
         public void linkSelected(LinkLabel linkLabel, Object o) {
-            FileEditorManager.getInstance(csvTableEditor.project).navigateToTextEditor(new OpenFileDescriptor(csvTableEditor.project, csvTableEditor.file), true);
+            FileEditorManager.getInstance(csvTableEditor.project).openTextEditor(new OpenFileDescriptor(csvTableEditor.project, csvTableEditor.file), true);
+            // this line is for legacy reasons (https://youtrack.jetbrains.com/issue/IDEA-199790)
+            FileEditorManager.getInstance(csvTableEditor.project).setSelectedEditor(csvTableEditor.file, CsvFileEditorProvider.EDITOR_TYPE_ID);
+        }
+    }
+
+    private final class OpenCsvPluginLink implements LinkListener {
+        @Override
+        public void linkSelected(LinkLabel linkLabel, Object o) {
+            if (Desktop.isDesktopSupported()) {
+                Desktop desktop = Desktop.getDesktop();
+                if (desktop.isSupported(Desktop.Action.BROWSE)) {
+                    try {
+                        desktop.browse(URI.create("https://github.com/SeeSharpSoft/intellij-csv-validator"));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
         }
     }
 }

@@ -23,6 +23,7 @@ import com.intellij.ui.table.JBTable;
 import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfo;
 import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfoMap;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
+import net.seesharpsoft.intellij.plugins.csv.editor.components.MultiLineCellRenderer;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvFile;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvCodeStyleSettings;
 import org.jetbrains.annotations.NotNull;
@@ -31,6 +32,10 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.List;
@@ -40,6 +45,8 @@ import java.util.stream.Collectors;
 public final class CsvTableEditor implements FileEditor, FileEditorLocation {
 
     public static final String CHANGE_EVENT_TABLE_UPDATE = "tableUpdated";
+
+    private static final int INITIAL_ROW_HEIGHT = 20;
 
     private JBTable tblEditor;
     private JPanel panelMain;
@@ -53,6 +60,11 @@ public final class CsvTableEditor implements FileEditor, FileEditorLocation {
     private JButton btnRemoveColumn;
     private JButton btnAddRowBefore;
     private JButton btnAddColumnBefore;
+    private LinkLabel lnkPlugin;
+    private JButton btnCloseInfoPanel;
+    private JPanel panelInfo;
+    private JButton btnSetReadOnly;
+    private JButton btnSetReadWrite;
 
     protected final Project project;
     protected final VirtualFile file;
@@ -65,6 +77,7 @@ public final class CsvTableEditor implements FileEditor, FileEditorLocation {
     protected final CsvTableEditorActions tableEditorActions;
     protected final CsvTableEditorChangeListener tableEditorListener;
     protected final CsvTableEditorMouseListener tableEditorMouseListener;
+    protected final CsvTableEditorKeyListener tableEditorKeyListener;
 
     protected CsvColumnInfoMap<PsiElement> columnInfoMap;
 
@@ -73,6 +86,7 @@ public final class CsvTableEditor implements FileEditor, FileEditorLocation {
     private boolean listenerApplied = false;
 
     protected boolean requiresEditorUpdate = false;
+    protected boolean tableIsEditable = false;
 
     private Object[][] initialState = null;
 
@@ -89,23 +103,65 @@ public final class CsvTableEditor implements FileEditor, FileEditorLocation {
 
         this.tableEditorListener = new CsvTableEditorChangeListener(this);
         this.tableEditorMouseListener = new CsvTableEditorMouseListener(this);
-
+        this.tableEditorKeyListener = new CsvTableEditorKeyListener(this);
         this.tableEditorActions = new CsvTableEditorActions(this);
+
+        initializedUIComponents();
+    }
+
+    private void createUIComponents() {
+        tblEditor = new JBTable(new DefaultTableModel(0, 0));
+        lnkTextEditor = new LinkLabel("Open file in text editor", null);
+    }
+
+    private void initializedUIComponents() {
         btnRedo.addActionListener(tableEditorActions.redo);
         btnUndo.addActionListener(tableEditorActions.undo);
         btnAddRow.addActionListener(tableEditorActions.addRow);
         btnRemoveRow.addActionListener(tableEditorActions.deleteRow);
         btnAddColumn.addActionListener(tableEditorActions.addColumn);
         btnRemoveColumn.addActionListener(tableEditorActions.deleteColumn);
+        btnSetReadOnly.addActionListener(tableEditorActions.readOnly);
+        btnSetReadWrite.addActionListener(tableEditorActions.readWrite);
         lnkTextEditor.setListener(this.tableEditorActions.openTextEditor, null);
+        lnkPlugin.setListener(this.tableEditorActions.openCsvPluginLink, null);
+
+        panelInfo.setVisible(CsvEditorSettingsExternalizable.getInstance().showTableEditorInfoPanel());
+        btnCloseInfoPanel.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                panelInfo.setVisible(false);
+            }
+        });
+
+        tblEditor.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        tblEditor.setShowColumns(true);
+        tblEditor.setRowHeight(INITIAL_ROW_HEIGHT);
+        tblEditor.setDefaultRenderer(String.class, new MultiLineCellRenderer());
+        tblEditor.setDefaultRenderer(Object.class, new MultiLineCellRenderer());
+        tblEditor.setDefaultEditor(String.class, new MultiLineCellRenderer());
+        tblEditor.setDefaultEditor(Object.class, new MultiLineCellRenderer());
+        tblEditor.registerKeyboardAction(this.tableEditorActions.undo, KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_MASK), JComponent.WHEN_FOCUSED);
+        tblEditor.registerKeyboardAction(this.tableEditorActions.redo, KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK), JComponent.WHEN_FOCUSED);
+        tblEditor.registerKeyboardAction(this.tableEditorActions.redo, KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_MASK), JComponent.WHEN_FOCUSED);
+    }
+
+    public void setEditable(boolean editable) {
+        this.tableIsEditable = editable;
+        this.updateReadOnlyUI();
+    }
+
+    public boolean isEditable() {
+        return this.tableIsEditable && !this.hasErrors();
     }
 
     protected void applyTableChangeListener() {
-        if (!listenerApplied && !columnInfoMap.hasErrors()) {
+        if (!listenerApplied && isEditable()) {
             tblEditor.getColumnModel().addColumnModelListener(tableEditorListener);
             tblEditor.getModel().addTableModelListener(tableEditorListener);
             tblEditor.addMouseListener(this.tableEditorMouseListener);
             tblEditor.getTableHeader().addMouseListener(this.tableEditorMouseListener);
+            tblEditor.addKeyListener(this.tableEditorKeyListener);
             listenerApplied = true;
         }
     }
@@ -116,6 +172,7 @@ public final class CsvTableEditor implements FileEditor, FileEditorLocation {
             tblEditor.getModel().removeTableModelListener(tableEditorListener);
             tblEditor.removeMouseListener(this.tableEditorMouseListener);
             tblEditor.getTableHeader().removeMouseListener(this.tableEditorMouseListener);
+            tblEditor.removeKeyListener(this.tableEditorKeyListener);
             listenerApplied = false;
         }
     }
@@ -162,14 +219,27 @@ public final class CsvTableEditor implements FileEditor, FileEditorLocation {
         return columnInfoMap.hasErrors();
     }
 
-    protected void applyErrorUI(boolean hasErrors) {
-        lblErrorText.setVisible(hasErrors);
-        tblEditor.setEnabled(!hasErrors);
-        tblEditor.setDragEnabled(!hasErrors);
-        btnUndo.setVisible(!hasErrors);
-        btnRedo.setVisible(!hasErrors);
-        btnAddColumn.setVisible(!hasErrors);
-        btnAddRow.setVisible(!hasErrors);
+    public void updateReadOnlyUI() {
+        updateReadOnlyUI(!isEditable());
+    }
+
+    protected void updateReadOnlyUI(boolean isReadOnly) {
+        lblErrorText.setVisible(hasErrors());
+        tblEditor.setEnabled(!isReadOnly);
+        tblEditor.setDragEnabled(!isReadOnly);
+        tblEditor.getTableHeader().setReorderingAllowed(!isReadOnly);
+        btnUndo.setVisible(!isReadOnly);
+        btnRedo.setVisible(!isReadOnly);
+        btnAddColumn.setVisible(!isReadOnly);
+        btnAddRow.setVisible(!isReadOnly);
+        btnSetReadOnly.setVisible(!isReadOnly);
+        btnSetReadWrite.setVisible(isReadOnly);
+        btnSetReadWrite.setEnabled(!hasErrors());
+        if (isReadOnly) {
+            this.removeTableChangeListener();
+        } else {
+            this.applyTableChangeListener();
+        }
     }
 
     protected void updateUIComponents() {
@@ -180,7 +250,7 @@ public final class CsvTableEditor implements FileEditor, FileEditorLocation {
         }
 
         columnInfoMap = csvFile.getMyColumnInfoMap();
-        applyErrorUI(columnInfoMap.hasErrors());
+        updateReadOnlyUI();
         DefaultTableModel tableModel = new DefaultTableModel(0, 0);
         if (!columnInfoMap.hasErrors()) {
             for (int i = 0; i < columnInfoMap.getColumnInfos().size(); ++i) {
@@ -193,13 +263,6 @@ public final class CsvTableEditor implements FileEditor, FileEditorLocation {
         }
         Object[][] state = getTableData(tableModel, true);
         updateEditorTable(stateManagement.addState(state));
-    }
-
-    private void createUIComponents() {
-        tblEditor = new JBTable(new DefaultTableModel(0, 0));
-        tblEditor.setShowColumns(true);
-
-        lnkTextEditor = new LinkLabel("Open file in text editor", null);
     }
 
     protected JBTable getTable() {
@@ -387,13 +450,13 @@ public final class CsvTableEditor implements FileEditor, FileEditorLocation {
     protected JBPopupMenu getRowPopupMenu() {
         if (rowPopupMenu == null) {
             rowPopupMenu = new JBPopupMenu();
-            JMenuItem menuItem = new JMenuItem("New row before (Strg+Shift+Enter)", btnAddRowBefore.getIcon());
+            JMenuItem menuItem = new JMenuItem("New row before (Ctrl+Shift+Enter)", btnAddRowBefore.getIcon());
             menuItem.addActionListener(tableEditorActions.addRowBefore);
             rowPopupMenu.add(menuItem);
-            menuItem = new JMenuItem("New row after (Strg+Enter)", btnAddRow.getIcon());
+            menuItem = new JMenuItem("New row after (Ctrl+Enter)", btnAddRow.getIcon());
             menuItem.addActionListener(tableEditorActions.addRowAfter);
             rowPopupMenu.add(menuItem);
-            menuItem = new JMenuItem("Delete selected row(s)", btnRemoveRow.getIcon());
+            menuItem = new JMenuItem("Delete selected row(s) (Ctrl+Del)", btnRemoveRow.getIcon());
             menuItem.addActionListener(tableEditorActions.deleteRow);
             rowPopupMenu.add(menuItem);
         }
@@ -403,13 +466,13 @@ public final class CsvTableEditor implements FileEditor, FileEditorLocation {
     protected JBPopupMenu getColumnPopupMenu() {
         if (columnPopupMenu == null) {
             columnPopupMenu = new JBPopupMenu();
-            JMenuItem menuItem = new JMenuItem("New column before (Strg+Shift+Space)", btnAddColumnBefore.getIcon());
+            JMenuItem menuItem = new JMenuItem("New column before (Alt+Shift+Enter)", btnAddColumnBefore.getIcon());
             menuItem.addActionListener(tableEditorActions.addColumnBefore);
             columnPopupMenu.add(menuItem);
-            menuItem = new JMenuItem("New column after (Strg+Space)", btnAddColumn.getIcon());
+            menuItem = new JMenuItem("New column after (Alt+Enter)", btnAddColumn.getIcon());
             menuItem.addActionListener(tableEditorActions.addColumnAfter);
             columnPopupMenu.add(menuItem);
-            menuItem = new JMenuItem("Delete selected column", btnRemoveColumn.getIcon());
+            menuItem = new JMenuItem("Delete selected column (Alt+Del)", btnRemoveColumn.getIcon());
             menuItem.addActionListener(tableEditorActions.deleteColumn);
             columnPopupMenu.add(menuItem);
         }
