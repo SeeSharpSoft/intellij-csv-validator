@@ -1,4 +1,4 @@
-package net.seesharpsoft.intellij.plugins.csv.editor.components;
+package net.seesharpsoft.intellij.plugins.csv.editor.table;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -25,7 +25,7 @@ public class MultiLineCellRenderer extends JTextArea implements TableCellRendere
         setLineWrap(true);
         setWrapStyleWord(true);
         setOpaque(true);
-        registerKeyboardAction(new StopCellEditingActionListener(), KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, InputEvent.CTRL_MASK), WHEN_FOCUSED);
+        registerKeyboardAction(new StopCellEditingActionListener(), KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.CTRL_MASK), WHEN_FOCUSED);
     }
 
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
@@ -59,7 +59,6 @@ public class MultiLineCellRenderer extends JTextArea implements TableCellRendere
     @Override
     public Dimension getPreferredSize() {
         try {
-            // Get Rectangle for position after last text-character
             final Rectangle rectangle = this.modelToView(getDocument().getLength());
             if (rectangle != null) {
                 return new Dimension(this.getWidth(),
@@ -67,7 +66,7 @@ public class MultiLineCellRenderer extends JTextArea implements TableCellRendere
                                 this.getInsets().bottom);
             }
         } catch (BadLocationException e) {
-            e.printStackTrace();  // TODO: implement catch
+            e.printStackTrace();
         }
 
         return super.getPreferredSize();
@@ -125,7 +124,6 @@ public class MultiLineCellRenderer extends JTextArea implements TableCellRendere
     }
 
     private class StopCellEditingActionListener implements ActionListener {
-
         @Override
         public void actionPerformed(ActionEvent e) {
             MultiLineCellRenderer.this.stopCellEditing();

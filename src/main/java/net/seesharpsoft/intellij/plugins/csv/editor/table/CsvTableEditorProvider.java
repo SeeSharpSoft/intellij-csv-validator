@@ -1,4 +1,4 @@
-package net.seesharpsoft.intellij.plugins.csv.editor;
+package net.seesharpsoft.intellij.plugins.csv.editor.table;
 
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorPolicy;
@@ -8,6 +8,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.SingleRootFileViewProvider;
 import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
+import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettingsExternalizable;
 import org.jetbrains.annotations.NotNull;
 
 public class CsvTableEditorProvider implements FileEditorProvider {

@@ -1,4 +1,4 @@
-package net.seesharpsoft.intellij.plugins.csv.editor;
+package net.seesharpsoft.intellij.plugins.csv.editor.table;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -6,14 +6,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class CsvTableEditorStatesHolder extends CsvTableEditorUtilBase {
+public class CsvTableEditorDataHolder extends CsvTableEditorUtilBase {
     public static final int MAX_SIZE = 100;
 
-    private int maxSize = MAX_SIZE;
+    private int maxSize;
     private List<Object[][]> states;
     private int currentStateIndex = -1;
 
-    public CsvTableEditorStatesHolder(CsvTableEditor csvTableEditor, int maxSizeArg) {
+    public CsvTableEditorDataHolder(CsvTableEditor csvTableEditor, int maxSizeArg) {
         super(csvTableEditor);
         states = new ArrayList<>();
         this.maxSize = maxSizeArg;
@@ -79,8 +79,4 @@ public class CsvTableEditorStatesHolder extends CsvTableEditorUtilBase {
         csvTableEditor.updateUndoRedoButtonsEnabled();
     }
 
-    @Override
-    protected void onEditorUpdated() {
-
-    }
 }

@@ -1,4 +1,4 @@
-package net.seesharpsoft.intellij.plugins.csv.editor;
+package net.seesharpsoft.intellij.plugins.csv.editor.table;
 
 import com.intellij.openapi.ui.JBPopupMenu;
 
@@ -11,12 +11,6 @@ public class CsvTableEditorMouseListener extends CsvTableEditorUtilBase implemen
     public CsvTableEditorMouseListener(CsvTableEditor csvTableEditorArg) {
         super(csvTableEditorArg);
     }
-
-    @Override
-    protected void onEditorUpdated() {
-
-    }
-
 
     @Override
     public void mouseClicked(MouseEvent e) {
@@ -53,7 +47,6 @@ public class CsvTableEditorMouseListener extends CsvTableEditorUtilBase implemen
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        csvTableEditor.syncTableModelWithUI();
         JBPopupMenu menu;
         if (e.getSource() instanceof JTableHeader) {
             menu = csvTableEditor.getColumnPopupMenu();

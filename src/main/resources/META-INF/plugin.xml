@@ -74,7 +74,7 @@ NEW: Soft wrap settings specific for CSV/TSV
         <applicationService serviceImplementation="net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettingsExternalizable" />
         <editorOptionsProvider instance="net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettingsProvider" />
         <fileEditorProvider implementation="net.seesharpsoft.intellij.plugins.csv.editor.CsvFileEditorProvider" />
-        <fileEditorProvider implementation="net.seesharpsoft.intellij.plugins.csv.editor.CsvTableEditorProvider" />
+        <fileEditorProvider implementation="net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditorProvider" />
 
         <annotator language="csv" implementationClass="net.seesharpsoft.intellij.plugins.csv.editor.CsvAnnotator"/>
 
