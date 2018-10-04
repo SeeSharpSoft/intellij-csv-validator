@@ -45,8 +45,6 @@ import java.util.stream.Collectors;
 
 public final class CsvTableEditor implements FileEditor, FileEditorLocation {
 
-    public static final String CHANGE_EVENT_TABLE_UPDATE = "tableUpdated";
-
     public static final int ROW_LINE_HEIGHT = 20;
     public static final int INITIAL_COLUMN_WIDTH = 100;
 
@@ -473,8 +471,10 @@ public final class CsvTableEditor implements FileEditor, FileEditorLocation {
         return this.file;
     }
 
-
     public void saveChanges(final String content) {
+        if (hasErrors()) {
+            return;
+        }
         ApplicationManager.getApplication().invokeLater(() -> {
             if (!this.document.isWritable() && ReadonlyStatusHandler.getInstance(this.project).ensureFilesWritable(this.file).hasReadonlyFiles()) {
                 return;
