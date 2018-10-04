@@ -24,11 +24,11 @@ public class CsvFileEditorTest extends LightCodeInsightFixtureTestCase {
         myFixture.configureByFiles("AnyFile.csv");
 
         FileEditorProvider[] fileEditorProviders = FileEditorProviderManager.getInstance().getProviders(myFixture.getProject(), myFixture.getFile().getVirtualFile());
-        assertEquals(1, fileEditorProviders.length);
+        assertEquals(2, fileEditorProviders.length);
         assertInstanceOf(fileEditorProviders[0], CsvFileEditorProvider.class);
 
         FileEditorProvider fileEditorProvider = fileEditorProviders[0];
-        assertEquals("csv-text-editor", fileEditorProvider.getEditorTypeId());
+        assertEquals(CsvFileEditorProvider.EDITOR_TYPE_ID, fileEditorProvider.getEditorTypeId());
         assertEquals(FileEditorPolicy.HIDE_DEFAULT_EDITOR, fileEditorProvider.getPolicy());
     }
 

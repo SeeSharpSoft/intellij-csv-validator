@@ -11,6 +11,9 @@ import java.awt.*;
 import java.util.Objects;
 
 public class CsvEditorSettingsProvider implements SearchableConfigurable {
+
+    public static final String CSV_EDITOR_SETTINGS_ID = "Csv.Editor.Settings";
+
     private JCheckBox cbCaretRowShown;
     private JPanel myMainPanel;
     private JCheckBox cbUseSoftWraps;
@@ -22,7 +25,7 @@ public class CsvEditorSettingsProvider implements SearchableConfigurable {
     @NotNull
     @Override
     public String getId() {
-        return "Csv.Editor.Settings";
+        return CSV_EDITOR_SETTINGS_ID;
     }
 
     @Override

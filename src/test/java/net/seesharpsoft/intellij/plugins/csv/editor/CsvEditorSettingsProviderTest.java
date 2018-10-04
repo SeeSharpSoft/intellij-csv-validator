@@ -20,7 +20,7 @@ public class CsvEditorSettingsProviderTest extends LightCodeInsightFixtureTestCa
     public void testId() {
         CsvEditorSettingsProvider editorSettingsPanel = new CsvEditorSettingsProvider();
 
-        assertEquals("Csv.Editor.Settings", editorSettingsPanel.getId());
+        assertEquals(CsvEditorSettingsProvider.CSV_EDITOR_SETTINGS_ID, editorSettingsPanel.getId());
 
         editorSettingsPanel.disposeUIResources();
     }
