@@ -9,6 +9,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.SingleRootFileViewProvider;
 import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
 import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettingsExternalizable;
+import net.seesharpsoft.intellij.plugins.csv.editor.table.swing.CsvTableEditorSwing;
 import org.jetbrains.annotations.NotNull;
 
 public class CsvTableEditorProvider implements FileEditorProvider {
@@ -44,11 +45,10 @@ public class CsvTableEditorProvider implements FileEditorProvider {
                 isCsvFile(file) && !SingleRootFileViewProvider.isTooLargeForContentLoading(file);
     }
 
-
     @NotNull
     @Override
     public FileEditor createEditor(@NotNull Project project, @NotNull VirtualFile virtualFile) {
-        return new CsvTableEditor(project, virtualFile);
+        return new CsvTableEditorSwing(project, virtualFile);
     }
 
 }

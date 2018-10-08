@@ -17,6 +17,12 @@ public class CsvEditorSettingsProviderTest extends LightCodeInsightFixtureTestCa
         super.setUp();
     }
 
+    @Override
+    protected void tearDown() throws Exception {
+        CsvEditorSettingsExternalizable.getInstance().loadState(new CsvEditorSettingsExternalizable.OptionSet());
+        super.tearDown();
+    }
+
     public void testId() {
         CsvEditorSettingsProvider editorSettingsPanel = new CsvEditorSettingsProvider();
 

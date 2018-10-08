@@ -1,4 +1,4 @@
-package net.seesharpsoft.intellij.plugins.csv.editor.table;
+package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
 import com.google.common.primitives.Ints;
 import com.intellij.openapi.fileEditor.FileEditorManager;
@@ -34,15 +34,15 @@ public class CsvTableEditorActions extends CsvTableEditorUtilBase {
     protected LinkListener openTextEditor = new OpenTextEditor();
     protected LinkListener openCsvPluginLink = new OpenCsvPluginLink();
 
-    public CsvTableEditorActions(CsvTableEditor tableEditor) {
+    public CsvTableEditorActions(CsvTableEditorSwing tableEditor) {
         super(tableEditor);
     }
 
     private class UndoAction implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            if (csvTableEditor.dataManagement.canGetLastState()) {
-                csvTableEditor.updateTableData(csvTableEditor.dataManagement.getLastState());
+            if (csvTableEditor.getDataHandler().canGetLastState()) {
+                csvTableEditor.updateTableComponentData(csvTableEditor.getDataHandler().getLastState());
             }
         }
     }
@@ -50,8 +50,8 @@ public class CsvTableEditorActions extends CsvTableEditorUtilBase {
     private class RedoAction implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            if (csvTableEditor.dataManagement.canGetNextState()) {
-                csvTableEditor.updateTableData(csvTableEditor.dataManagement.getNextState());
+            if (csvTableEditor.getDataHandler().canGetNextState()) {
+                csvTableEditor.updateTableComponentData(csvTableEditor.getDataHandler().getNextState());
             }
         }
     }
@@ -91,6 +91,9 @@ public class CsvTableEditorActions extends CsvTableEditorUtilBase {
     }
 
     private void selectCell(JTable table, int row, int column) {
+        if (row == -1 || column == -1) {
+            return;
+        }
         row = Math.min(row, table.getRowCount());
         column = Math.min(column, table.getColumnCount());
         table.setRowSelectionInterval(row, row);
@@ -216,9 +219,9 @@ public class CsvTableEditorActions extends CsvTableEditorUtilBase {
     private final class OpenTextEditor implements LinkListener {
         @Override
         public void linkSelected(LinkLabel linkLabel, Object o) {
-            FileEditorManager.getInstance(csvTableEditor.project).openTextEditor(new OpenFileDescriptor(csvTableEditor.project, csvTableEditor.file), true);
+            FileEditorManager.getInstance(csvTableEditor.getProject()).openTextEditor(new OpenFileDescriptor(csvTableEditor.getProject(), csvTableEditor.getFile()), true);
             // this line is for legacy reasons (https://youtrack.jetbrains.com/issue/IDEA-199790)
-            FileEditorManager.getInstance(csvTableEditor.project).setSelectedEditor(csvTableEditor.file, CsvFileEditorProvider.EDITOR_TYPE_ID);
+            FileEditorManager.getInstance(csvTableEditor.getProject()).setSelectedEditor(csvTableEditor.getFile(), CsvFileEditorProvider.EDITOR_TYPE_ID);
         }
     }
 

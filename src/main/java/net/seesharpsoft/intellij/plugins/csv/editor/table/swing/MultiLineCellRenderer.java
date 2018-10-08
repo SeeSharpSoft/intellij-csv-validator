@@ -1,4 +1,4 @@
-package net.seesharpsoft.intellij.plugins.csv.editor.table;
+package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;

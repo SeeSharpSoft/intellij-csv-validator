@@ -1,4 +1,4 @@
-package net.seesharpsoft.intellij.plugins.csv.editor.table;
+package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -10,7 +10,7 @@ public class CsvTableEditorKeyListener extends CsvTableEditorUtilBase implements
 
     private final ActionListener startEditing = new StartCellEditingActionListener();
 
-    public CsvTableEditorKeyListener(CsvTableEditor csvTableEditorArg) {
+    public CsvTableEditorKeyListener(CsvTableEditorSwing csvTableEditorArg) {
         super(csvTableEditorArg);
     }
 
@@ -31,22 +31,22 @@ public class CsvTableEditorKeyListener extends CsvTableEditorUtilBase implements
         }
         switch (e.getKeyCode()) {
             case KeyEvent.VK_LEFT:
-                if (e.isAltDown() || e.isControlDown()) {
+                if (e.isControlDown()) {
                     csvTableEditor.tableEditorActions.addColumnBefore.actionPerformed(null);
                 }
                 break;
             case KeyEvent.VK_RIGHT:
-                if (e.isAltDown() || e.isControlDown()) {
+                if (e.isControlDown()) {
                     csvTableEditor.tableEditorActions.addColumnAfter.actionPerformed(null);
                 }
                 break;
             case KeyEvent.VK_UP:
-                if (e.isAltDown() || e.isControlDown()) {
+                if (e.isControlDown()) {
                     csvTableEditor.tableEditorActions.addRowBefore.actionPerformed(null);
                 }
                 break;
             case KeyEvent.VK_DOWN:
-                if (e.isAltDown() || e.isControlDown()) {
+                if (e.isControlDown()) {
                     csvTableEditor.tableEditorActions.addRowAfter.actionPerformed(null);
                 }
                 break;
@@ -55,7 +55,7 @@ public class CsvTableEditorKeyListener extends CsvTableEditorUtilBase implements
                 break;
             case KeyEvent.VK_DELETE:
             case KeyEvent.VK_BACK_SPACE:
-                if (e.isAltDown()) {
+                if (e.isControlDown() && e.isShiftDown()) {
                     csvTableEditor.tableEditorActions.deleteColumn.actionPerformed(null);
                 } else if (e.isControlDown()) {
                     csvTableEditor.tableEditorActions.deleteRow.actionPerformed(null);
