@@ -157,8 +157,10 @@ public class CsvTableEditorActions extends CsvTableEditorUtilBase {
                 DefaultTableModel tableModel = csvTableEditor.getTableModel();
                 int columnCount = tableModel.getColumnCount();
                 tableModel.addColumn(tableModel.getColumnName(columnCount));
-                if (before != null && currentColumn != -1 && columnCount > 0) {
-                    table.moveColumn(tableModel.getColumnCount() - 1, currentColumn + (before || currentColumn == columnCount - 1 ? 0 : 1));
+                if (before != null) {
+                    if (currentColumn != -1 && columnCount > 0 && (before || currentColumn < columnCount - 1)) {
+                        table.moveColumn(tableModel.getColumnCount() - 1, currentColumn + (before ? 0 : 1));
+                    }
                     if (before) {
                         ++currentColumn;
                     }

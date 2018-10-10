@@ -4,9 +4,10 @@ import com.intellij.testFramework.fixtures.LightCodeInsightFixtureTestCase;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditor;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.swing.CsvTableEditorSwing;
 
-import static org.fest.assertions.Assertions.assertThat;
+import java.util.Arrays;
 
-public class TableDataHandlerTest  extends LightCodeInsightFixtureTestCase {
+
+public class TableDataHandlerTest extends LightCodeInsightFixtureTestCase {
 
     @Override
     protected String getTestDataPath() {
@@ -23,8 +24,8 @@ public class TableDataHandlerTest  extends LightCodeInsightFixtureTestCase {
         CsvTableEditor csvTableEditor = new CsvTableEditorSwing(this.getProject(), this.getFile().getVirtualFile());
         TableDataHandler handler = new TableDataHandler(csvTableEditor, 2);
 
-        assertThat(handler.tableEditor).isEqualTo(csvTableEditor);
-        assertThat(handler.maxSize).isEqualTo(2);
+        assertEquals(handler.tableEditor, csvTableEditor);
+        assertEquals(2, handler.maxSize);
     }
 
     public void testAddState() {
@@ -34,18 +35,18 @@ public class TableDataHandlerTest  extends LightCodeInsightFixtureTestCase {
         Object[][] values = { { "Test", 1 }, { 2, 5} };
         handler.addState(values);
 
-        assertThat(handler.getCurrentState()).isEqualTo(values);
+        assertTrue(handler.equalsCurrentState(values));
 
         handler.addState(values);
 
-        assertThat(handler.states.size()).isEqualTo(1);
+        assertEquals(1, handler.states.size());
 
         Object[][] otherValues = { { 3, 4 }, { "Test", 0} };
         handler.addState(otherValues);
         Object[][] otherValues2 = { { null } };
         handler.addState(otherValues2);
 
-        assertThat(handler.states.size()).isEqualTo(3);
+        assertEquals(3, handler.states.size());
 
         handler.getLastState();
         handler.getLastState();
@@ -53,7 +54,7 @@ public class TableDataHandlerTest  extends LightCodeInsightFixtureTestCase {
         Object[][] otherValues3 = { { "dummy", 7, 9, 11 } };
         handler.addState(otherValues3);
 
-        assertThat(handler.states.size()).isEqualTo(2);
+        assertEquals(2, handler.states.size());
     }
 
     public void testGetCurrentState() {
@@ -63,7 +64,7 @@ public class TableDataHandlerTest  extends LightCodeInsightFixtureTestCase {
         Object[][] values = { { "Test", 1 }, { 2, 5} };
         handler.addState(values);
 
-        assertThat(handler.getCurrentState()).isNotSameAs(values);
+        assertNotSame(values, handler.getCurrentState());
     }
 
     public void testEqualsCurrentState() {
@@ -73,70 +74,70 @@ public class TableDataHandlerTest  extends LightCodeInsightFixtureTestCase {
         Object[][] values = { { "Test", 1 }, { 2, 5} };
         handler.addState(values);
 
-        assertThat(handler.equalsCurrentState(values)).isEqualTo(true);
+        assertTrue(handler.equalsCurrentState(values));
         Object[][] otherValues = { { 3, 4 }, { "Test", 0} };
-        assertThat(handler.equalsCurrentState(otherValues)).isEqualTo(false);
+        assertFalse(handler.equalsCurrentState(otherValues));
     }
 
     public void testGetLastState() {
         CsvTableEditor csvTableEditor = new CsvTableEditorSwing(this.getProject(), this.getFile().getVirtualFile());
         TableDataHandler handler = new TableDataHandler(csvTableEditor, 2);
 
-        assertThat(handler.getLastState()).isNull();
+        assertNull(handler.getLastState());
 
         Object[][] values = { { "Test", 1 }, { 2, 5} };
         handler.addState(values);
 
-        assertThat(handler.getLastState()).isNull();
+        assertNull(handler.getLastState());
 
         Object[][] otherValues = { { 3, 4 }, { "Test", 0} };
         handler.addState(otherValues);
 
-        assertThat(handler.getLastState()).isEqualTo(values);
-        assertThat(handler.getLastState()).isNull();
+        assertTrue(Arrays.deepEquals(values, handler.getLastState()));
+        assertNull(handler.getLastState());
     }
 
     public void testCanGetLastState() {
         CsvTableEditor csvTableEditor = new CsvTableEditorSwing(this.getProject(), this.getFile().getVirtualFile());
         TableDataHandler handler = new TableDataHandler(csvTableEditor, 2);
 
-        assertThat(handler.canGetLastState()).isEqualTo(false);
+        assertFalse(handler.canGetLastState());
 
         Object[][] values = { { "Test", 1 }, { 2, 5} };
         handler.addState(values);
 
-        assertThat(handler.canGetLastState()).isEqualTo(false);
+        assertFalse(handler.canGetLastState());
 
         Object[][] otherValues = { { 3, 4 }, { "Test", 0} };
         handler.addState(otherValues);
 
-        assertThat(handler.canGetLastState()).isEqualTo(true);
+        assertTrue(handler.canGetLastState());
 
         handler.getLastState();
 
-        assertThat(handler.canGetLastState()).isEqualTo(false);
+        assertFalse(handler.canGetLastState());
     }
 
     public void testGetNextState() {
         CsvTableEditor csvTableEditor = new CsvTableEditorSwing(this.getProject(), this.getFile().getVirtualFile());
         TableDataHandler handler = new TableDataHandler(csvTableEditor, 2);
 
-        assertThat(handler.getNextState()).isNull();
+        assertNull(handler.getNextState());
 
         Object[][] values = { { "Test", 1 }, { 2, 5} };
         handler.addState(values);
 
-        assertThat(handler.getNextState()).isNull();
+        assertNull(handler.getNextState());
 
         Object[][] otherValues = { { 3, 4 }, { "Test", 0} };
         handler.addState(otherValues);
 
-        assertThat(handler.getNextState()).isNull();
+        assertNull(handler.getNextState());
 
         handler.getLastState();
 
-        assertThat(handler.getNextState()).isEqualTo(otherValues);
-        assertThat(handler.getNextState()).isNull();
+        assertTrue(Arrays.deepEquals(otherValues, handler.getNextState()));
+        assertNull(handler.getNextState());
     }
 
     public void testMaxSize() {
@@ -150,8 +151,8 @@ public class TableDataHandlerTest  extends LightCodeInsightFixtureTestCase {
         Object[][] otherValues2 = { { null } };
         handler.addState(otherValues2);
 
-        assertThat(handler.getLastState()).isEqualTo(otherValues);
-        assertThat(handler.getLastState()).isNull();
+        assertTrue(Arrays.deepEquals(otherValues, handler.getLastState()));
+        assertNull(handler.getLastState());
     }
 
     public void testDataChangeListener() {
@@ -163,34 +164,34 @@ public class TableDataHandlerTest  extends LightCodeInsightFixtureTestCase {
 
         Object[][] values = { { "Test", 1 }, { 2, 5} };
         handler.addState(values);
-        assertThat(listener.noOfCalls).isEqualTo(1);
+        assertEquals(1, listener.noOfCalls);
 
         handler.addState(values);
-        assertThat(listener.noOfCalls).isEqualTo(1);
+        assertEquals(1, listener.noOfCalls);
 
         Object[][] otherValues = { { 3, 4 }, { "Test", 0} };
         handler.addState(otherValues);
         Object[][] otherValues2 = { { null } };
         handler.addState(otherValues2);
-        assertThat(listener.noOfCalls).isEqualTo(3);
+        assertEquals(3, listener.noOfCalls);
 
         handler.getNextState();
-        assertThat(listener.noOfCalls).isEqualTo(3);
+        assertEquals(3, listener.noOfCalls);
 
         handler.getLastState();
-        assertThat(listener.noOfCalls).isEqualTo(4);
+        assertEquals(4, listener.noOfCalls);
 
         handler.getLastState();
-        assertThat(listener.noOfCalls).isEqualTo(4);
+        assertEquals(4, listener.noOfCalls);
 
         handler.getNextState();
-        assertThat(listener.noOfCalls).isEqualTo(5);
+        assertEquals(5, listener.noOfCalls);
 
         handler.removeDataChangeListener(listener);
         handler.addState(values);
         handler.getNextState();
         handler.getLastState();
-        assertThat(listener.noOfCalls).isEqualTo(5);
+        assertEquals(5, listener.noOfCalls);
     }
 
     private class Listener implements TableDataChangeEvent.Listener {

@@ -1,25 +1,37 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.api;
 
+import com.intellij.testFramework.fixtures.LightCodeInsightFixtureTestCase;
 import org.junit.Test;
 
-import static org.fest.assertions.Assertions.assertThat;
+import java.util.Arrays;
 
-public class TableDataChangeEventTest {
 
+public class TableDataChangeEventTest extends LightCodeInsightFixtureTestCase {
+
+    @Override
+    protected String getTestDataPath() {
+        return "./src/test/resources/editor";
+    }
+
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        myFixture.configureByFiles("AnyFile.csv");
+    }
     @Test
-    public void instance_should_be_created_with_given_values() {
+    public void testInstanceShouldBeCreatedWithGivenValues() {
         Object[][] values = { { "Test", 1 }, { 2, 5} };
         TableDataChangeEvent event = new TableDataChangeEvent(this, values);
 
-        assertThat(event.getSource()).isEqualTo(this);
-        assertThat(event.getValue()).isEqualTo(values);
+        assertEquals(this, event.getSource());
+        assertTrue(Arrays.deepEquals(values, event.getValue()));
     }
 
     @Test
-    public void getValue_should_return_copy_of_values() {
+    public void testGetValueShouldReturnCopyOfValues() {
         Object[][] values = { { "Test", 1 }, { 2, 5} };
         TableDataChangeEvent event = new TableDataChangeEvent(this, values);
 
-        assertThat(event.getValue()).isNotSameAs(values);
+        assertNotSame(values, event.getValue());
     }
 }
