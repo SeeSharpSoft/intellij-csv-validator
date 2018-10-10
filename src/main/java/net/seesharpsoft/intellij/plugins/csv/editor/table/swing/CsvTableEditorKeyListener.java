@@ -61,6 +61,8 @@ public class CsvTableEditorKeyListener extends CsvTableEditorUtilBase implements
                     csvTableEditor.tableEditorActions.deleteRow.actionPerformed(null);
                 }
                 break;
+            default:
+                break;
         }
     }
 

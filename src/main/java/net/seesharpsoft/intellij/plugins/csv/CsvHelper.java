@@ -175,6 +175,10 @@ public final class CsvHelper {
         return "\"" + content + "\"";
     }
 
+    public static <T> T[][] deepCopy(T[][] matrix) {
+        return java.util.Arrays.stream(matrix).map(el -> el.clone()).toArray($ -> matrix.clone());
+    }
+
     private CsvHelper() {
         // static utility class
     }

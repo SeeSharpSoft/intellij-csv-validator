@@ -28,6 +28,8 @@ import java.beans.PropertyChangeSupport;
 
 public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
 
+    public static final String EDITOR_NAME = "Table View";
+
     public static final int ROW_LINE_HEIGHT = 20;
     public static final int INITIAL_COLUMN_WIDTH = 100;
 
@@ -147,7 +149,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
     @NotNull
     @Override
     public String getName() {
-        return "Table View";
+        return EDITOR_NAME;
     }
 
     protected <T extends CsvTableEditorState> T getFileEditorState() {

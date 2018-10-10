@@ -17,13 +17,8 @@ public class CsvTableEditorProviderTest extends LightCodeInsightFixtureTestCase 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        myFixture.configureByFiles("AnyFile.csv");
-    }
-
-    @Override
-    protected void tearDown() throws Exception {
         CsvEditorSettingsExternalizable.getInstance().loadState(new CsvEditorSettingsExternalizable.OptionSet());
-        super.tearDown();
+        myFixture.configureByFiles("AnyFile.csv");
     }
 
     public void testCsvTableEditorProviderIsAvailableAndHasCorrectNameAndPolicy() {

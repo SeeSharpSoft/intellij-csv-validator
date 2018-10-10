@@ -1,6 +1,6 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.api;
 
-import com.intellij.util.ArrayUtil;
+import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditor;
 import org.jetbrains.annotations.NotNull;
 
@@ -50,7 +50,7 @@ public class TableDataHandler {
         if (currentStateIndex == -1) {
             return null;
         }
-        return ArrayUtil.copyOf(states.get(currentStateIndex));
+        return CsvHelper.deepCopy(states.get(currentStateIndex));
     }
 
     public boolean canGetLastState() {
