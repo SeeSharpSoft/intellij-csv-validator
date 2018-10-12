@@ -1,13 +1,11 @@
 package net.seesharpsoft.intellij.plugins.csv.editor;
 
-import com.intellij.ide.impl.convert.JDomConvertingUtil;
 import com.intellij.openapi.editor.EditorSettings;
 import com.intellij.openapi.fileEditor.*;
 import com.intellij.openapi.fileEditor.ex.FileEditorProviderManager;
 import com.intellij.openapi.fileEditor.impl.text.TextEditorState;
-import com.intellij.openapi.util.JDOMUtil;
 import com.intellij.testFramework.fixtures.LightCodeInsightFixtureTestCase;
-import org.jetbrains.jps.model.serialization.JDomSerializationUtil;
+import org.jdom.Element;
 
 public class CsvFileEditorTest extends LightCodeInsightFixtureTestCase {
 
@@ -77,11 +75,12 @@ public class CsvFileEditorTest extends LightCodeInsightFixtureTestCase {
 
         FileEditorProvider[] fileEditorProviders = FileEditorProviderManager.getInstance().getProviders(myFixture.getProject(), myFixture.getFile().getVirtualFile());
         CsvFileEditorProvider fileEditorProvider = (CsvFileEditorProvider)fileEditorProviders[0];
-
-        FileEditorState state = fileEditorProvider.readState(JDomConvertingUtil.createComponentElement(JDomSerializationUtil.COMPONENT_ELEMENT), this.getProject(), this.getFile().getVirtualFile());
+        Element dummy = new Element("dummy");
+        
+        FileEditorState state = fileEditorProvider.readState(dummy, this.getProject(), this.getFile().getVirtualFile());
         assertInstanceOf(state, TextEditorState.class);
         textEditor.setState(state);
-        fileEditorProvider.writeState(state, this.getProject(), JDomConvertingUtil.createComponentElement(JDomSerializationUtil.COMPONENT_ELEMENT));
+        fileEditorProvider.writeState(state, this.getProject(), dummy);
         
         disposeTextEditor(textEditor);
     }
