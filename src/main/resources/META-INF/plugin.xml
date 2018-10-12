@@ -41,10 +41,7 @@
 
     <change-notes><![CDATA[
         <pre style="font-family: sans-serif">
-NEW: CSV/TSV editor settings (File > Settings > General > CSV/TSV Editor)
-NEW: TAB (separator) highlighting
-NEW: Enable/disable balloon info
-NEW: Soft wrap settings specific for CSV/TSV
+FIX: reading/writing CSV editor states 
       </pre>
     ]]>
     </change-notes>
