@@ -108,7 +108,7 @@ public class CsvAnnotator implements Annotator {
                 }
             }
             if (textAttributes != null) {
-                Annotation annotation = holder.createAnnotation(CSV_COLUMN_INFO_SEVERITY, element.getTextRange(), "<TAB>");
+                Annotation annotation = holder.createAnnotation(CSV_COLUMN_INFO_SEVERITY, element.getTextRange(), showInfoBalloon(holder.getCurrentAnnotationSession()) ? "↹" : null);
                 annotation.setEnforcedTextAttributes(textAttributes);
                 annotation.setNeedsUpdateOnTyping(false);
             }
