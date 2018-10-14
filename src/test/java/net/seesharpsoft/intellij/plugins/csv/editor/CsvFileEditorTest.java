@@ -1,12 +1,11 @@
 package net.seesharpsoft.intellij.plugins.csv.editor;
 
 import com.intellij.openapi.editor.EditorSettings;
-import com.intellij.openapi.fileEditor.FileEditor;
-import com.intellij.openapi.fileEditor.FileEditorPolicy;
-import com.intellij.openapi.fileEditor.FileEditorProvider;
-import com.intellij.openapi.fileEditor.TextEditor;
+import com.intellij.openapi.fileEditor.*;
 import com.intellij.openapi.fileEditor.ex.FileEditorProviderManager;
+import com.intellij.openapi.fileEditor.impl.text.TextEditorState;
 import com.intellij.testFramework.fixtures.LightCodeInsightFixtureTestCase;
+import org.jdom.Element;
 
 public class CsvFileEditorTest extends LightCodeInsightFixtureTestCase {
 
@@ -77,5 +76,20 @@ public class CsvFileEditorTest extends LightCodeInsightFixtureTestCase {
 
         disposeTextEditor(textEditor);
     }
+    
+    public void testCsvEditorStateReadsAndWritesStates() {
+        TextEditor textEditor = getCurrentTextEditor();
 
+        FileEditorProvider[] fileEditorProviders = FileEditorProviderManager.getInstance().getProviders(myFixture.getProject(), myFixture.getFile().getVirtualFile());
+        CsvFileEditorProvider fileEditorProvider = (CsvFileEditorProvider)fileEditorProviders[0];
+        Element dummy = new Element("dummy");
+        
+        FileEditorState state = fileEditorProvider.readState(dummy, this.getProject(), this.getFile().getVirtualFile());
+        assertInstanceOf(state, TextEditorState.class);
+        textEditor.setState(state);
+        fileEditorProvider.writeState(state, this.getProject(), dummy);
+        
+        disposeTextEditor(textEditor);
+    }
+    
 }

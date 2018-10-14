@@ -1,16 +1,15 @@
 package net.seesharpsoft.intellij.plugins.csv.editor;
 
 import com.intellij.openapi.editor.EditorSettings;
-import com.intellij.openapi.fileEditor.FileEditor;
-import com.intellij.openapi.fileEditor.FileEditorPolicy;
-import com.intellij.openapi.fileEditor.FileEditorProvider;
-import com.intellij.openapi.fileEditor.TextEditor;
+import com.intellij.openapi.fileEditor.*;
 import com.intellij.openapi.fileEditor.impl.text.TextEditorProvider;
 import com.intellij.openapi.fileTypes.LanguageFileType;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.SingleRootFileViewProvider;
 import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
+import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
 
 public class CsvFileEditorProvider implements FileEditorProvider {
@@ -63,4 +62,19 @@ public class CsvFileEditorProvider implements FileEditorProvider {
         return textEditor;
     }
 
+    @Override
+    public FileEditorState readState(@NotNull Element sourceElement, @NotNull Project project, @NotNull VirtualFile file) {
+        return TextEditorProvider.getInstance().readState(sourceElement, project, file);
+    }
+
+    @Override
+    public void writeState(@NotNull FileEditorState state, @NotNull Project project, @NotNull Element targetElement) {
+        TextEditorProvider.getInstance().writeState(state, project, targetElement);
+    }
+
+    @Override
+    public void disposeEditor(@NotNull FileEditor editor) {
+        TextEditorProvider.getInstance().disposeEditor(editor);
+    }
+    
 }
