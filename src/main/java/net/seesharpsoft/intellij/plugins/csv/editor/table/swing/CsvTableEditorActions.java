@@ -97,10 +97,10 @@ public class CsvTableEditorActions extends CsvTableEditorUtilBase {
         if (row == -1 || column == -1) {
             return;
         }
-        row = Math.min(row, table.getRowCount());
-        column = Math.min(column, table.getColumnCount());
-        table.setRowSelectionInterval(row, row);
-        table.setColumnSelectionInterval(column, column);
+        int actualRow = Math.min(row, table.getRowCount());
+        int actualColumn = Math.min(column, table.getColumnCount());
+        table.setRowSelectionInterval(actualRow, actualRow);
+        table.setColumnSelectionInterval(actualColumn, actualColumn);
     }
 
     private final class DeleteRowAction implements ActionListener {

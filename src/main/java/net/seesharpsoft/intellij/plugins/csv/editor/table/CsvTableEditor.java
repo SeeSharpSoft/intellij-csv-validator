@@ -219,7 +219,9 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
     }
 
     @Override
-    public void dispose() { }
+    public void dispose() {
+        // disposable objects
+    }
 
     @Nullable
     @Override

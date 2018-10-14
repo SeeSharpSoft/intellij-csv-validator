@@ -4,6 +4,7 @@ import com.intellij.openapi.ui.JBPopupMenu;
 
 import javax.swing.*;
 import javax.swing.table.JTableHeader;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
@@ -18,9 +19,8 @@ public class CsvTableEditorMouseListener extends CsvTableEditorUtilBase implemen
 
     @Override
     public void mouseClicked(MouseEvent e) {
-
+        // mouseClicked
     }
-
 
     protected JBPopupMenu getRowPopupMenu() {
         if (rowPopupMenu == null) {
@@ -54,6 +54,12 @@ public class CsvTableEditorMouseListener extends CsvTableEditorUtilBase implemen
         return columnPopupMenu;
     }
 
+    protected void showPopupMenu(JBPopupMenu popupMenu, Component component, int x, int y) {
+        if (!popupMenu.isShowing()) {
+            popupMenu.show(component, x, y);
+        }
+    }
+
     @Override
     public void mousePressed(MouseEvent e) {
         int currentColumn = csvTableEditor.getTable().columnAtPoint(e.getPoint());
@@ -66,8 +72,8 @@ public class CsvTableEditorMouseListener extends CsvTableEditorUtilBase implemen
         } else {
             menu = this.getRowPopupMenu();
         }
-        if (e.isPopupTrigger() && !menu.isShowing()) {
-            menu.show(e.getComponent(), e.getX(), e.getY());
+        if (e.isPopupTrigger()) {
+            showPopupMenu(menu, e.getComponent(), e.getX(), e.getY());
         }
     }
 
@@ -79,18 +85,18 @@ public class CsvTableEditorMouseListener extends CsvTableEditorUtilBase implemen
         } else {
             menu = this.getRowPopupMenu();
         }
-        if (e.isPopupTrigger() && !menu.isShowing()) {
-            menu.show(e.getComponent(), e.getX(), e.getY());
+        if (e.isPopupTrigger()) {
+            showPopupMenu(menu, e.getComponent(), e.getX(), e.getY());
         }
     }
 
     @Override
     public void mouseEntered(MouseEvent e) {
-
+        // mouseEntered
     }
 
     @Override
     public void mouseExited(MouseEvent e) {
-
+        // mouseExited
     }
 }

@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public final class CsvTableEditorSwing extends CsvTableEditor implements TableDataChangeEvent.Listener {
+public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChangeEvent.Listener {
 
     private JBTable tblEditor;
     private JPanel panelMain;
@@ -69,7 +69,7 @@ public final class CsvTableEditorSwing extends CsvTableEditor implements TableDa
         initializedUIComponents();
     }
 
-    private void createUIComponents() {
+    protected void createUIComponents() {
         tblEditor = new JBTable(new DefaultTableModel(0, 0));
         lnkTextEditor = new LinkLabel("Open file in text editor", null);
     }
@@ -106,9 +106,12 @@ public final class CsvTableEditorSwing extends CsvTableEditor implements TableDa
         tblEditor.setDefaultRenderer(Object.class, new MultiLineCellRenderer());
         tblEditor.setDefaultEditor(String.class, new MultiLineCellRenderer());
         tblEditor.setDefaultEditor(Object.class, new MultiLineCellRenderer());
-        tblEditor.registerKeyboardAction(this.tableEditorActions.undo, KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_MASK), JComponent.WHEN_FOCUSED);
-        tblEditor.registerKeyboardAction(this.tableEditorActions.redo, KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK), JComponent.WHEN_FOCUSED);
-        tblEditor.registerKeyboardAction(this.tableEditorActions.redo, KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_MASK), JComponent.WHEN_FOCUSED);
+        tblEditor.registerKeyboardAction(this.tableEditorActions.undo,
+                KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_MASK), JComponent.WHEN_FOCUSED);
+        tblEditor.registerKeyboardAction(this.tableEditorActions.redo,
+                KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK), JComponent.WHEN_FOCUSED);
+        tblEditor.registerKeyboardAction(this.tableEditorActions.redo,
+                KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_MASK), JComponent.WHEN_FOCUSED);
     }
 
 
@@ -192,9 +195,9 @@ public final class CsvTableEditorSwing extends CsvTableEditor implements TableDa
         removeTableChangeListener();
         try {
             JTable table = getTable();
-            first = Math.min(first, table.getRowCount());
-            last = Math.min(last, table.getRowCount());
-            for (int row = first; row < last; row++) {
+            int actualFirst = Math.min(first, table.getRowCount());
+            int actualLast = Math.min(last, table.getRowCount());
+            for (int row = actualFirst; row < actualLast; row++) {
                 int rowHeight = getPreferredRowHeight();
                 if (rowHeight == 0) {
                     for (int column = 0; column < table.getColumnCount(); column++) {

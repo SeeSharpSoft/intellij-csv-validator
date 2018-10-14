@@ -15,10 +15,12 @@ public class CsvTableEditorChangeListener extends CsvTableEditorUtilBase impleme
 
     @Override
     public void columnAdded(TableColumnModelEvent e) {
+        // on column added
     }
 
     @Override
     public void columnRemoved(TableColumnModelEvent e) {
+        // on column removed
     }
 
     @Override
@@ -62,7 +64,7 @@ public class CsvTableEditorChangeListener extends CsvTableEditorUtilBase impleme
 
     @Override
     public void columnSelectionChanged(ListSelectionEvent e) {
-
+        // on column selection changed
     }
 
     @Override

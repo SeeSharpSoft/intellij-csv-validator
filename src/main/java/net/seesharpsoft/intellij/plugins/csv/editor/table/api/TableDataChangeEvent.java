@@ -1,6 +1,5 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.api;
 
-import com.intellij.util.ArrayUtil;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 
 import java.util.EventListener;
@@ -8,11 +7,11 @@ import java.util.EventObject;
 
 public class TableDataChangeEvent extends EventObject {
 
+    private Object[][] value;
+
     public interface Listener extends EventListener {
         void onTableDataChanged(TableDataChangeEvent event);
     }
-
-    private Object[][] value;
 
     /**
      * Constructs a prototypical Event.

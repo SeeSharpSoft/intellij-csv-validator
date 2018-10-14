@@ -159,20 +159,20 @@ public final class CsvHelper {
         if (content == null) {
             return "";
         }
-        content = content.trim();
-        if (content.length() > 1 && content.startsWith("\"") && content.endsWith("\"")) {
-            content = content.substring(1, content.length() - 1);
+        String result = content.trim();
+        if (result.length() > 1 && result.startsWith("\"") && result.endsWith("\"")) {
+            result = result.substring(1, result.length() - 1);
         }
-        content = content.replaceAll("(?:\")\"", "\"");
-        return content;
+        result = result.replaceAll("(?:\")\"", "\"");
+        return result;
     }
 
     public static String quoteCsvField(String content) {
         if (content == null) {
             return "";
         }
-        content = content.replaceAll("\"", "\"\"");
-        return "\"" + content + "\"";
+        String result = content.replaceAll("\"", "\"\"");
+        return "\"" + result + "\"";
     }
 
     public static <T> T[][] deepCopy(T[][] matrix) {
