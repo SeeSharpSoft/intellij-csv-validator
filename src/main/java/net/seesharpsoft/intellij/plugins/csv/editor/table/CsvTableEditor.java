@@ -95,7 +95,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
     }
 
     public boolean hasErrors() {
-        return columnInfoMap.hasErrors();
+        return columnInfoMap != null && columnInfoMap.hasErrors();
     }
 
     public void saveChanges(final String content) {
@@ -106,11 +106,8 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
             if (!this.document.isWritable() && ReadonlyStatusHandler.getInstance(this.project).ensureFilesWritable(this.file).hasReadonlyFiles()) {
                 return;
             }
-
-            ApplicationManager.getApplication()
-                    .runWriteAction(() -> CommandProcessor.getInstance().executeCommand(this.project, () -> {
-                        this.document.setText(content);
-                    }, "Csv Table Editor changes", null));
+            ApplicationManager.getApplication().runWriteAction(() ->
+                    CommandProcessor.getInstance().executeCommand(this.project, () -> this.document.setText(content), "Csv Table Editor changes", null));
         });
     }
 
@@ -156,7 +153,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
         if (storedState == null) {
             storedState = new CsvTableEditorState();
         }
-        return (T)storedState;
+        return (T) storedState;
     }
 
     @Override
@@ -166,7 +163,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
 
     @Override
     public void setState(@NotNull FileEditorState fileEditorState) {
-        CsvTableEditorState tableEditorState = (CsvTableEditorState) fileEditorState;
+        CsvTableEditorState tableEditorState = fileEditorState instanceof CsvTableEditorState ? (CsvTableEditorState) fileEditorState : new CsvTableEditorState();
         this.storedState = tableEditorState;
 
         applyRowLines(getFileEditorState().getRowLines());

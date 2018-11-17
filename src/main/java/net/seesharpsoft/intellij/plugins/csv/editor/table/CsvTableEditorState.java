@@ -8,11 +8,11 @@ public class CsvTableEditorState implements FileEditorState {
 
     private int[] columnWidths;
     private Boolean showInfoPanel;
-    private int rowLines;
+    private Integer rowLines;
 
     public CsvTableEditorState() {
-        this.columnWidths = new int[0];
-        rowLines = 0;
+        columnWidths = new int[0];
+
     }
 
     public int[] getColumnWidths() {
@@ -33,10 +33,13 @@ public class CsvTableEditorState implements FileEditorState {
     }
 
     public int getRowLines() {
-        return this.rowLines;
+        if (rowLines == null) {
+            rowLines = CsvEditorSettingsExternalizable.getInstance().getTableEditorRowHeight();
+        }
+        return rowLines;
     }
     public void setRowLines(int rowLinesArg) {
-        this.rowLines = rowLinesArg;
+        rowLines = rowLinesArg;
     }
 
     @Override

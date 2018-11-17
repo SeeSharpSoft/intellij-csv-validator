@@ -136,7 +136,7 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
     }
 
     protected void applyRowLines(int rowLines) {
-        comboRowHeight.setSelectedIndex(getFileEditorState().getRowLines());
+        comboRowHeight.setSelectedIndex(rowLines);
         setTableRowHeight(getPreferredRowHeight());
     }
 
@@ -367,5 +367,10 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
     public void onTableDataChanged(TableDataChangeEvent event) {
         btnUndo.setEnabled(this.dataManagement.canGetLastState());
         btnRedo.setEnabled(this.dataManagement.canGetNextState());
+    }
+
+    @Override
+    protected String generateCsv(Object[][] data) {
+        return super.generateCsv(data);
     }
 }

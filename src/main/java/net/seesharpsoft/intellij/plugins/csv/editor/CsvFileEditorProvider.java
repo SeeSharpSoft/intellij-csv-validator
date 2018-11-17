@@ -5,7 +5,6 @@ import com.intellij.openapi.fileEditor.*;
 import com.intellij.openapi.fileEditor.impl.text.TextEditorProvider;
 import com.intellij.openapi.fileTypes.LanguageFileType;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.SingleRootFileViewProvider;
 import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
@@ -31,7 +30,6 @@ public class CsvFileEditorProvider implements FileEditorProvider {
             case TEXT_FIRST:
             case TEXT_ONLY:
                 return FileEditorPolicy.HIDE_DEFAULT_EDITOR;
-//            case TABLE_ONLY:
             case TABLE_FIRST:
                 return FileEditorPolicy.PLACE_AFTER_DEFAULT_EDITOR;
             default:
@@ -42,8 +40,6 @@ public class CsvFileEditorProvider implements FileEditorProvider {
     @Override
     public boolean accept(@NotNull Project project, @NotNull VirtualFile file) {
         return isCsvFile(file) && !SingleRootFileViewProvider.isTooLargeForContentLoading(file);
-//                && CsvEditorSettingsExternalizable.getInstance().getEditorPrio() != CsvEditorSettingsExternalizable.EditorPrio.TABLE_ONLY;
-
     }
 
     protected void applySettings(EditorSettings editorSettings, CsvEditorSettingsExternalizable csvEditorSettingsExternalizable) {
@@ -76,5 +72,5 @@ public class CsvFileEditorProvider implements FileEditorProvider {
     public void disposeEditor(@NotNull FileEditor editor) {
         TextEditorProvider.getInstance().disposeEditor(editor);
     }
-    
+
 }

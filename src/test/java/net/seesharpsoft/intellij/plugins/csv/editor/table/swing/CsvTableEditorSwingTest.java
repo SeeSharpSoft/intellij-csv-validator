@@ -7,6 +7,12 @@ import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditor;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditorState;
 
 import javax.swing.table.DefaultTableModel;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.util.Vector;
 
 public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
@@ -34,6 +40,20 @@ public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
         assertNotNull(fileEditor.getDataHandler());
         assertNotNull(fileEditor.getComponent());
         assertEquals(fileEditor.getTable(), fileEditor.getPreferredFocusedComponent());
+    }
+
+    public void testAddRemovePropertyChangeListener() {
+        assertThrows(IllegalArgumentException.class, () -> fileEditor.addPropertyChangeListener(null));
+        assertThrows(IllegalArgumentException.class, () -> fileEditor.removePropertyChangeListener(null));
+
+        PropertyChangeListener listener = new PropertyChangeListener() {
+            @Override
+            public void propertyChange(PropertyChangeEvent evt) { }
+        };
+        fileEditor.removePropertyChangeListener(listener);
+        fileEditor.addPropertyChangeListener(listener);
+        fileEditor.removePropertyChangeListener(listener);
+        assertTrue(true);
     }
 
     public void testEditable() {
@@ -77,4 +97,15 @@ public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
         assertFalse(fileEditor.getDataHandler().equalsCurrentState(initialState));
         assertTrue(fileEditor.getDataHandler().equalsCurrentState(newState));
     }
+
+    public void testTableCsvGeneration() throws FileNotFoundException {
+        changeValue("new value", 2, 1);
+        String generatedCsv = fileEditor.generateCsv(fileEditor.getDataHandler().getCurrentState());
+
+        File resultFile = new File(this.getTestDataPath(), "TableEditorFileChanged.csv");
+        String expectedContent = new BufferedReader(new FileReader(resultFile)).lines().reduce(null, (prev, line) -> prev == null ? line : prev + "\n" + line);
+
+        assertEquals(expectedContent, generatedCsv);
+    }
+
 }

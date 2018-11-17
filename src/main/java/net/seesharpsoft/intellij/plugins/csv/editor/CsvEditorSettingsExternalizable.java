@@ -19,12 +19,14 @@ import java.beans.PropertyChangeSupport;
 @SuppressWarnings("all")
 public class CsvEditorSettingsExternalizable implements PersistentStateComponent<CsvEditorSettingsExternalizable.OptionSet> {
 
+    public static final int TABLE_EDITOR_MIN_ROW_HEIGHT = 0;
+    public static final int TABLE_EDITOR_MAX_ROW_HEIGHT = 10;
+    public static final int TABLE_EDITOR_DEFAULT_ROW_HEIGHT = 3;
+
     public enum EditorPrio {
         TEXT_FIRST,
         TABLE_FIRST,
         TEXT_ONLY
-// enable when table editor is a real alternative
-//        TABLE_ONLY
     }
 
     public static final class OptionSet {
@@ -35,6 +37,7 @@ public class CsvEditorSettingsExternalizable implements PersistentStateComponent
         public boolean SHOW_INFO_BALLOON;
         public String TAB_HIGHLIGHT_COLOR;
         public EditorPrio EDITOR_PRIO;
+        public int TABLE_EDITOR_ROW_HEIGHT;
 
         public boolean SHOW_TABLE_EDITOR_INFO_PANEL;
 
@@ -48,6 +51,7 @@ public class CsvEditorSettingsExternalizable implements PersistentStateComponent
             TAB_HIGHLIGHT_COLOR = "-7984";
             EDITOR_PRIO = EditorPrio.TEXT_FIRST;
             SHOW_TABLE_EDITOR_INFO_PANEL = true;
+            TABLE_EDITOR_ROW_HEIGHT = TABLE_EDITOR_DEFAULT_ROW_HEIGHT;
         }
     }
 
@@ -140,5 +144,15 @@ public class CsvEditorSettingsExternalizable implements PersistentStateComponent
     }
     public void showTableEditorInfoPanel(boolean showInfoPanel) {
         getState().SHOW_TABLE_EDITOR_INFO_PANEL = showInfoPanel;
+    }
+
+    public int getTableEditorRowHeight() {
+        return getState().TABLE_EDITOR_ROW_HEIGHT;
+    }
+    public void setTableEditorRowHeight(int rowHeight) {
+        int finalRowHeight = rowHeight;
+        if (finalRowHeight > TABLE_EDITOR_MAX_ROW_HEIGHT) finalRowHeight = TABLE_EDITOR_MAX_ROW_HEIGHT;
+        if (finalRowHeight < TABLE_EDITOR_MIN_ROW_HEIGHT) finalRowHeight = TABLE_EDITOR_MIN_ROW_HEIGHT;
+        getState().TABLE_EDITOR_ROW_HEIGHT = finalRowHeight;
     }
 }

@@ -159,4 +159,20 @@ public class CsvTableEditorKeyListenerTest extends CsvTableEditorSwingTestBase {
         assertEquals("this is column \"Header1\"", newState[1][0]);
     }
 
+    public void testStartEditingActionByEnter() {
+        KeyEvent keyEvent = new KeyEvent(fileEditor.getTable(), KeyEvent.KEY_RELEASED, JComponent.WHEN_FOCUSED,
+                0, KeyEvent.VK_ENTER, KeyEvent.CHAR_UNDEFINED);
+
+        fileEditor.tableEditorKeyListener.keyReleased(keyEvent);
+        assertEquals(-1, fileEditor.getTable().getEditingColumn());
+        assertEquals(-1, fileEditor.getTable().getEditingRow());
+
+        fileEditor.getTable().setRowSelectionInterval(1, 1);
+        fileEditor.getTable().setColumnSelectionInterval(1, 1);
+        fileEditor.tableEditorKeyListener.keyReleased(keyEvent);
+
+        assertEquals(1, fileEditor.getTable().getEditingColumn());
+        assertEquals(1, fileEditor.getTable().getEditingRow());
+    }
+
 }

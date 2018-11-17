@@ -21,6 +21,7 @@ public class CsvEditorSettingsProvider implements SearchableConfigurable {
     private CheckBoxWithColorChooser cbTabHighlightColor;
     private JCheckBox cbShowInfoBalloonCheckBox;
     private JCheckBox cbShowInfoPanel;
+    private JComboBox cbRowHeight;
 
     @NotNull
     @Override
@@ -58,7 +59,8 @@ public class CsvEditorSettingsProvider implements SearchableConfigurable {
                 isModified(cbShowInfoBalloonCheckBox, csvEditorSettingsExternalizable.isShowInfoBalloon()) ||
                 isModified(cbShowInfoPanel, csvEditorSettingsExternalizable.showTableEditorInfoPanel()) ||
                 cbTabHighlightColor.isSelected() != csvEditorSettingsExternalizable.isHighlightTabSeparator() ||
-                !Objects.equals(cbTabHighlightColor.getColor(), csvEditorSettingsExternalizable.getTabHighlightColor());
+                !Objects.equals(cbTabHighlightColor.getColor(), csvEditorSettingsExternalizable.getTabHighlightColor()) ||
+                !Objects.equals(cbRowHeight.getSelectedIndex(), csvEditorSettingsExternalizable.getTableEditorRowHeight());
     }
 
     @Override
@@ -71,6 +73,7 @@ public class CsvEditorSettingsProvider implements SearchableConfigurable {
         cbShowInfoPanel.setSelected(csvEditorSettingsExternalizable.showTableEditorInfoPanel());
         cbTabHighlightColor.setSelected(csvEditorSettingsExternalizable.isHighlightTabSeparator());
         cbTabHighlightColor.setColor(csvEditorSettingsExternalizable.getTabHighlightColor());
+        cbRowHeight.setSelectedIndex(csvEditorSettingsExternalizable.getTableEditorRowHeight());
     }
 
     @Override
@@ -83,6 +86,7 @@ public class CsvEditorSettingsProvider implements SearchableConfigurable {
         csvEditorSettingsExternalizable.showTableEditorInfoPanel(cbShowInfoPanel.isSelected());
         csvEditorSettingsExternalizable.setHighlightTabSeparator(cbTabHighlightColor.isSelected());
         csvEditorSettingsExternalizable.setTabHighlightColor(cbTabHighlightColor.getColor());
+        csvEditorSettingsExternalizable.setTableEditorRowHeight(cbRowHeight.getSelectedIndex());
     }
 
     protected void createUIComponents() {
