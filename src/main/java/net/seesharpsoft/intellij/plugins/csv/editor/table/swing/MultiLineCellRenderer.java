@@ -26,6 +26,7 @@ public class MultiLineCellRenderer extends JTextArea implements TableCellRendere
         setWrapStyleWord(true);
         setOpaque(true);
         registerKeyboardAction(new StopCellEditingActionListener(), KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.CTRL_MASK), WHEN_FOCUSED);
+        registerKeyboardAction(new StopCellEditingActionListener(), KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, InputEvent.CTRL_MASK), WHEN_IN_FOCUSED_WINDOW);
     }
 
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {

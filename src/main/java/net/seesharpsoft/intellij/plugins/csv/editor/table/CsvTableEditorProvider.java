@@ -3,6 +3,7 @@ package net.seesharpsoft.intellij.plugins.csv.editor.table;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorPolicy;
 import com.intellij.openapi.fileEditor.FileEditorProvider;
+import com.intellij.openapi.fileEditor.FileEditorState;
 import com.intellij.openapi.fileTypes.LanguageFileType;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -10,6 +11,7 @@ import com.intellij.psi.SingleRootFileViewProvider;
 import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
 import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettingsExternalizable;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.swing.CsvTableEditorSwing;
+import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
 
 public class CsvTableEditorProvider implements FileEditorProvider {
@@ -31,7 +33,6 @@ public class CsvTableEditorProvider implements FileEditorProvider {
             case TEXT_FIRST:
             case TEXT_ONLY:
                 return FileEditorPolicy.PLACE_AFTER_DEFAULT_EDITOR;
-//            case TABLE_ONLY:
             case TABLE_FIRST:
                 return FileEditorPolicy.HIDE_DEFAULT_EDITOR;
             default:
@@ -49,6 +50,20 @@ public class CsvTableEditorProvider implements FileEditorProvider {
     @Override
     public FileEditor createEditor(@NotNull Project project, @NotNull VirtualFile virtualFile) {
         return new CsvTableEditorSwing(project, virtualFile);
+    }
+
+    @Override
+    public FileEditorState readState(@NotNull Element sourceElement, @NotNull Project project, @NotNull VirtualFile file) {
+        return CsvTableEditorState.create(sourceElement, project, file);
+    }
+
+    @Override
+    public void writeState(@NotNull FileEditorState state, @NotNull Project project, @NotNull Element targetElement) {
+        if (!(state instanceof CsvTableEditorState)) {
+            return;
+        }
+        CsvTableEditorState csvTableEditorState = (CsvTableEditorState)state;
+        csvTableEditorState.write(project, targetElement);
     }
 
 }

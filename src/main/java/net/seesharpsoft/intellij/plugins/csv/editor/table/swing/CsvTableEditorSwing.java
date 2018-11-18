@@ -47,6 +47,7 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
     private JButton btnCloseInfoPanel;
     private JPanel panelInfo;
     private JComboBox comboRowHeight;
+    private JLabel lblTextlines;
 
     protected final CsvTableEditorActions tableEditorActions;
     protected final CsvTableEditorChangeListener tableEditorListener;
@@ -251,22 +252,25 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
     }
 
     @Override
-    protected void updateReadOnlyUI() {
-        updateReadOnlyUI(!isEditable());
-    }
+    protected void updateInteractionElements() {
+        updateEditActionElements(isEditable());
 
-    protected void updateReadOnlyUI(boolean isReadOnly) {
         lblErrorText.setVisible(hasErrors());
-        tblEditor.setEnabled(!isReadOnly);
-        tblEditor.setDragEnabled(!isReadOnly);
-        tblEditor.getTableHeader().setReorderingAllowed(!isReadOnly);
-        btnUndo.setVisible(!isReadOnly);
-        btnRedo.setVisible(!isReadOnly);
-        btnAddColumn.setVisible(!isReadOnly);
-        btnAddRow.setVisible(!isReadOnly);
+        lblTextlines.setVisible(!hasErrors());
+        comboRowHeight.setVisible(!hasErrors());
 
         this.removeTableChangeListener();
         this.applyTableChangeListener();
+    }
+
+    private void updateEditActionElements(boolean isEditable) {
+        tblEditor.setEnabled(isEditable);
+        tblEditor.setDragEnabled(isEditable);
+        tblEditor.getTableHeader().setReorderingAllowed(isEditable);
+        btnUndo.setVisible(isEditable);
+        btnRedo.setVisible(isEditable);
+        btnAddColumn.setVisible(isEditable);
+        btnAddRow.setVisible(isEditable);
     }
 
 
@@ -286,7 +290,7 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
         }
 
         columnInfoMap = csvFile.getMyColumnInfoMap();
-        updateReadOnlyUI();
+        updateInteractionElements();
         DefaultTableModel tableModel = new DefaultTableModel(0, 0);
         if (!columnInfoMap.hasErrors()) {
             for (int i = 0; i < columnInfoMap.getColumnInfos().size(); ++i) {

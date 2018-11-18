@@ -42,9 +42,9 @@ public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
         assertEquals(fileEditor.getTable(), fileEditor.getPreferredFocusedComponent());
     }
 
-    public void testAddRemovePropertyChangeListener() {
-        assertThrows(IllegalArgumentException.class, () -> fileEditor.addPropertyChangeListener(null));
-        assertThrows(IllegalArgumentException.class, () -> fileEditor.removePropertyChangeListener(null));
+    public void testAddRemovePropertyChangeListener() throws Throwable {
+        assertException(IllegalArgumentException.class, null, () -> fileEditor.addPropertyChangeListener(null));
+        assertException(IllegalArgumentException.class, null, () -> fileEditor.removePropertyChangeListener(null));
 
         PropertyChangeListener listener = new PropertyChangeListener() {
             @Override

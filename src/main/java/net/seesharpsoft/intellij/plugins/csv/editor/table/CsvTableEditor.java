@@ -62,7 +62,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
 
     protected abstract void updateUIComponents();
 
-    protected abstract void updateReadOnlyUI();
+    protected abstract void updateInteractionElements();
 
     protected abstract void applyRowLines(int rowLines);
 
@@ -87,7 +87,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
 
     public void setEditable(boolean editable) {
         this.tableIsEditable = editable;
-        this.updateReadOnlyUI();
+        this.updateInteractionElements();
     }
 
     public boolean isEditable() {
@@ -107,7 +107,10 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
                 return;
             }
             ApplicationManager.getApplication().runWriteAction(() ->
-                    CommandProcessor.getInstance().executeCommand(this.project, () -> this.document.setText(content), "Csv Table Editor changes", null));
+                    CommandProcessor.getInstance().executeCommand(this.project, () -> {
+                        this.document.setText(content);
+                        this.initialState = dataManagement.getCurrentState();
+                    }, "Csv Table Editor changes", null));
         });
     }
 
@@ -217,6 +220,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
 
     @Override
     public void dispose() {
+        this.deselectNotify();
         // disposable objects
     }
 

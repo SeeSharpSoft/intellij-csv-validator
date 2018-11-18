@@ -58,7 +58,7 @@
                   <visible value="false"/>
                 </properties>
               </component>
-              <component id="9bf69" class="javax.swing.JLabel">
+              <component id="9bf69" class="javax.swing.JLabel" binding="lblTextlines">
                 <constraints/>
                 <properties>
                   <text value="Textlines per row:"/>
