@@ -1,6 +1,5 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table;
 
-import com.intellij.openapi.editor.CaretState;
 import com.intellij.openapi.fileEditor.FileEditorState;
 import com.intellij.openapi.fileEditor.FileEditorStateLevel;
 import com.intellij.openapi.project.Project;

@@ -169,10 +169,18 @@ public class CsvTableEditorKeyListenerTest extends CsvTableEditorSwingTestBase {
 
         fileEditor.getTable().setRowSelectionInterval(1, 1);
         fileEditor.getTable().setColumnSelectionInterval(1, 1);
-        fileEditor.tableEditorKeyListener.keyReleased(keyEvent);
 
+        fileEditor.tableEditorKeyListener.keyReleased(keyEvent);
         assertEquals(1, fileEditor.getTable().getEditingColumn());
         assertEquals(1, fileEditor.getTable().getEditingRow());
+
+        // stop editing
+        keyEvent = new KeyEvent(fileEditor.getTable(), KeyEvent.KEY_RELEASED, JComponent.WHEN_FOCUSED,
+                KeyEvent.CTRL_DOWN_MASK, KeyEvent.VK_ENTER, KeyEvent.CHAR_UNDEFINED);
+
+        fileEditor.tableEditorKeyListener.keyReleased(keyEvent);
+        assertEquals(-1, fileEditor.getTable().getEditingColumn());
+        assertEquals(-1, fileEditor.getTable().getEditingRow());
     }
 
 }

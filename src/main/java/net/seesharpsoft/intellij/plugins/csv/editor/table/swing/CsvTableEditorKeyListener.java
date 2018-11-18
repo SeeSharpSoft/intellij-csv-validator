@@ -9,6 +9,7 @@ import java.awt.event.KeyListener;
 public class CsvTableEditorKeyListener extends CsvTableEditorUtilBase implements KeyListener {
 
     private final ActionListener startEditing = new StartCellEditingActionListener();
+    private final ActionListener stopEditing = new StopCellEditingActionListener();
 
     public CsvTableEditorKeyListener(CsvTableEditorSwing csvTableEditorArg) {
         super(csvTableEditorArg);
@@ -26,9 +27,9 @@ public class CsvTableEditorKeyListener extends CsvTableEditorUtilBase implements
 
     @Override
     public void keyReleased(KeyEvent e) {
-        if (csvTableEditor.getTable().isEditing()) {
-            return;
-        }
+//        if (csvTableEditor.getTable().isEditing()) {
+//            return;
+//        }
         switch (e.getKeyCode()) {
             case KeyEvent.VK_LEFT:
                 if (e.isControlDown()) {
@@ -51,7 +52,11 @@ public class CsvTableEditorKeyListener extends CsvTableEditorUtilBase implements
                 }
                 break;
             case KeyEvent.VK_ENTER:
-                startEditing.actionPerformed(null);
+                if (e.isControlDown()) {
+                    stopEditing.actionPerformed(null);
+                } else {
+                    startEditing.actionPerformed(null);
+                }
                 break;
             case KeyEvent.VK_DELETE:
             case KeyEvent.VK_BACK_SPACE:
@@ -72,6 +77,16 @@ public class CsvTableEditorKeyListener extends CsvTableEditorUtilBase implements
             JTable table = CsvTableEditorKeyListener.this.csvTableEditor.getTable();
             if (table.getSelectedRow() != -1 && table.getSelectedRow() != -1) {
                 table.editCellAt(table.getSelectedRow(), table.getSelectedColumn());
+            }
+        }
+    }
+
+    private class StopCellEditingActionListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            CellEditor editor = CsvTableEditorKeyListener.this.csvTableEditor.getTable().getCellEditor();
+            if (editor != null) {
+                CsvTableEditorKeyListener.this.csvTableEditor.getTable().getCellEditor().stopCellEditing();
             }
         }
     }

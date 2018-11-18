@@ -97,8 +97,8 @@ public class CsvTableEditorActions extends CsvTableEditorUtilBase {
         if (row == -1 || column == -1) {
             return;
         }
-        int actualRow = Math.min(row, table.getRowCount());
-        int actualColumn = Math.min(column, table.getColumnCount());
+        int actualRow = Math.min(row, table.getRowCount() - 1);
+        int actualColumn = Math.min(column, table.getColumnCount() - 1);
         table.setRowSelectionInterval(actualRow, actualRow);
         table.setColumnSelectionInterval(actualColumn, actualColumn);
     }
@@ -196,11 +196,12 @@ public class CsvTableEditorActions extends CsvTableEditorUtilBase {
 
             csvTableEditor.removeTableChangeListener();
             try {
-                List<Integer> currentColumns = Ints.asList(csvTableEditor.getTable().getSelectedColumns());
+                JBTable table = csvTableEditor.getTable();
+                List<Integer> currentColumns = Ints.asList(table.getSelectedColumns());
                 if (currentColumns == null || currentColumns.size() == 0) {
                     return;
                 }
-                JBTable table = csvTableEditor.getTable();
+                int currentRow = table.getSelectedRow();
                 TableColumnModel tableColumnModel = table.getColumnModel();
 
                 List<Integer> tableModelIndices = new ArrayList<>();
@@ -218,6 +219,9 @@ public class CsvTableEditorActions extends CsvTableEditorUtilBase {
                 }
 
                 csvTableEditor.syncTableModelWithUI();
+
+                currentColumns.sort(Comparator.naturalOrder());
+                selectCell(table, currentRow, currentColumns.get(0));
             } finally {
                 csvTableEditor.applyTableChangeListener();
             }

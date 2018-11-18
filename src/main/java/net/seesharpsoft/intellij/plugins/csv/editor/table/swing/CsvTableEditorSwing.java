@@ -103,10 +103,10 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
 
         tblEditor.getColumnModel().addColumnModelListener(tableEditorListener);
 
-        tblEditor.setDefaultRenderer(String.class, new MultiLineCellRenderer());
-        tblEditor.setDefaultRenderer(Object.class, new MultiLineCellRenderer());
-        tblEditor.setDefaultEditor(String.class, new MultiLineCellRenderer());
-        tblEditor.setDefaultEditor(Object.class, new MultiLineCellRenderer());
+        tblEditor.setDefaultRenderer(String.class, new MultiLineCellRenderer(this.tableEditorKeyListener));
+        tblEditor.setDefaultRenderer(Object.class, new MultiLineCellRenderer(this.tableEditorKeyListener));
+        tblEditor.setDefaultEditor(String.class, new MultiLineCellRenderer(this.tableEditorKeyListener));
+        tblEditor.setDefaultEditor(Object.class, new MultiLineCellRenderer(this.tableEditorKeyListener));
         tblEditor.registerKeyboardAction(this.tableEditorActions.undo,
                 KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_MASK), JComponent.WHEN_FOCUSED);
         tblEditor.registerKeyboardAction(this.tableEditorActions.redo,
@@ -339,7 +339,7 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
     }
 
     protected Object[][] storeStateChange(boolean tableModelIsLeading) {
-        return this.dataManagement.addState(getTableComponentData(this.getTableModel(), tableModelIsLeading));
+        return super.storeStateChange(getTableComponentData(this.getTableModel(), tableModelIsLeading));
     }
 
     protected int[] getCurrentColumnsWidths() {

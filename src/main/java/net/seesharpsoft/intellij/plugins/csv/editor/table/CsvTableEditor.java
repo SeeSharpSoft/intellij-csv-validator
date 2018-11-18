@@ -98,6 +98,18 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
         return columnInfoMap != null && columnInfoMap.hasErrors();
     }
 
+    protected Object[][] storeStateChange(Object[][] data) {
+        Object[][] result = this.dataManagement.addState(data);
+        saveChanges();
+        return result;
+    }
+
+    public void saveChanges() {
+        if (isModified() && !ApplicationManager.getApplication().isUnitTestMode()) {
+            saveChanges(generateCsv(this.dataManagement.getCurrentState()));
+        }
+    }
+
     public void saveChanges(final String content) {
         if (hasErrors()) {
             return;
@@ -188,12 +200,8 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
         this.initialState = dataManagement.getCurrentState();
     }
 
-
     @Override
     public void deselectNotify() {
-        if (isModified()) {
-            saveChanges(generateCsv(this.dataManagement.getCurrentState()));
-        }
     }
 
     @Override
@@ -221,7 +229,6 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
     @Override
     public void dispose() {
         this.deselectNotify();
-        // disposable objects
     }
 
     @Nullable

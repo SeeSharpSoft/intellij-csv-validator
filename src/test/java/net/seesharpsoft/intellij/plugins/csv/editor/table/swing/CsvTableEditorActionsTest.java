@@ -125,6 +125,8 @@ public class CsvTableEditorActionsTest extends CsvTableEditorSwingTestBase {
         assertEquals(3, newState.length);
         assertEquals("just another line with leading and trailing whitespaces", newState[1][0]);
         assertEquals("  and one more value  ", newState[1][1]);
+        assertEquals(1, fileEditor.getTable().getSelectedRow());
+        assertEquals(1, fileEditor.getTable().getSelectedColumn());
     }
 
     public void testDeleteColumnAction() {
@@ -139,6 +141,8 @@ public class CsvTableEditorActionsTest extends CsvTableEditorSwingTestBase {
         assertEquals(1, newState[1].length);
         assertEquals("Header1", newState[0][0]);
         assertEquals("this is column \"Header1\"", newState[1][0]);
+        assertEquals(1, fileEditor.getTable().getSelectedRow());
+        assertEquals(0, fileEditor.getTable().getSelectedColumn());
     }
 
     public void testOpenTextEditor() {

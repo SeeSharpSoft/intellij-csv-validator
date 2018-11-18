@@ -21,12 +21,12 @@ public class MultiLineCellRenderer extends JTextArea implements TableCellRendere
 
     private Set<CellEditorListener> cellEditorListenerSet = new HashSet<>();
 
-    public MultiLineCellRenderer() {
+    public MultiLineCellRenderer(CsvTableEditorKeyListener keyListener) {
         setLineWrap(true);
         setWrapStyleWord(true);
         setOpaque(true);
-        registerKeyboardAction(new StopCellEditingActionListener(), KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.CTRL_MASK), WHEN_FOCUSED);
-        registerKeyboardAction(new StopCellEditingActionListener(), KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, InputEvent.CTRL_MASK), WHEN_IN_FOCUSED_WINDOW);
+        addKeyListener(keyListener);
+//        registerKeyboardAction(new StopCellEditingActionListener(), KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.CTRL_MASK), WHEN_FOCUSED);
     }
 
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
