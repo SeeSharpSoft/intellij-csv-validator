@@ -6,6 +6,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.text.StringUtilRt;
 import com.intellij.openapi.vfs.VirtualFile;
 import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettingsExternalizable;
+import org.jdom.Attribute;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
 
@@ -74,8 +75,9 @@ public class CsvTableEditorState implements FileEditorState {
     public static CsvTableEditorState create(@NotNull Element element, @NotNull Project project, @NotNull VirtualFile file) {
         CsvTableEditorState state = new CsvTableEditorState();
 
+        Attribute attribute = element.getAttribute("showInfoPanel");
         state.setShowInfoPanel(
-                StringUtilRt.parseBoolean(element.getAttributeValue("showInfoPanel"), CsvEditorSettingsExternalizable.getInstance().showTableEditorInfoPanel())
+                attribute == null ? CsvEditorSettingsExternalizable.getInstance().showTableEditorInfoPanel() : Boolean.parseBoolean(attribute.getValue())
         );
         state.setRowLines(
                 StringUtilRt.parseInt(element.getAttributeValue("rowLines"), CsvEditorSettingsExternalizable.getInstance().getTableEditorRowHeight())
