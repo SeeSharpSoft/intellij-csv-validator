@@ -1,5 +1,6 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
+import javax.swing.*;
 import javax.swing.event.CellEditorListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.table.TableCellRenderer;
@@ -10,6 +11,12 @@ public class MultiLineCellRendererTest extends CsvTableEditorSwingTestBase {
         TableCellRenderer cellRenderer = fileEditor.getTable().getCellRenderer(0, 0);
 
         assertInstanceOf(cellRenderer, MultiLineCellRenderer.class);
+    }
+
+    public void testPreferredSize() {
+        JTextArea jTextArea = (JTextArea)fileEditor.getTable().getCellRenderer(0, 0);
+
+        assertNotNull(jTextArea.getPreferredSize());
     }
 
     public void testCellEditorComponent() {

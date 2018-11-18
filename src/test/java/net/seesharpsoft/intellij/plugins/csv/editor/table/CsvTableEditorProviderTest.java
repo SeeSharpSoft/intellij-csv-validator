@@ -3,9 +3,13 @@ package net.seesharpsoft.intellij.plugins.csv.editor.table;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorPolicy;
 import com.intellij.openapi.fileEditor.FileEditorProvider;
+import com.intellij.openapi.fileEditor.FileEditorState;
 import com.intellij.openapi.fileEditor.ex.FileEditorProviderManager;
 import com.intellij.testFramework.fixtures.LightCodeInsightFixtureTestCase;
 import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettingsExternalizable;
+import org.jdom.Element;
+
+import java.util.Objects;
 
 public class CsvTableEditorProviderTest extends LightCodeInsightFixtureTestCase {
 
@@ -49,5 +53,27 @@ public class CsvTableEditorProviderTest extends LightCodeInsightFixtureTestCase 
         assertInstanceOf(fileEditor, CsvTableEditor.class);
 
         fileEditorProvider.disposeEditor(fileEditor);
+    }
+
+    public void testWriteAndReadTableEditorState() {
+        FileEditorProvider[] fileEditorProviders = FileEditorProviderManager.getInstance().getProviders(getProject(), getFile().getVirtualFile());
+        FileEditorProvider fileEditorProvider = fileEditorProviders[1];
+
+        CsvTableEditorState editorState = new CsvTableEditorState();
+        editorState.setColumnWidths(new int[]{ 120, 32, 9});
+        editorState.setRowLines(5);
+        editorState.setShowInfoPanel(false);
+
+        Element element = new Element("state");
+        fileEditorProvider.writeState(editorState, getProject(), element);
+
+        FileEditorState readState = fileEditorProvider.readState(element, getProject(), getFile().getVirtualFile());
+
+        assertInstanceOf(readState, CsvTableEditorState.class);
+
+        CsvTableEditorState editorStateRead = (CsvTableEditorState)readState;
+        assertTrue(Objects.deepEquals(editorState.getColumnWidths(), editorStateRead.getColumnWidths()));
+        assertEquals(editorState.getRowLines(), editorStateRead.getRowLines());
+        assertEquals(editorState.showInfoPanel(), editorStateRead.showInfoPanel());
     }
 }

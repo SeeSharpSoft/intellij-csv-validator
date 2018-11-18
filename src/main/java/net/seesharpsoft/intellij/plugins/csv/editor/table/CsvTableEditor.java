@@ -202,6 +202,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
 
     @Override
     public void deselectNotify() {
+        // auto save on change - nothing to do here
     }
 
     @Override

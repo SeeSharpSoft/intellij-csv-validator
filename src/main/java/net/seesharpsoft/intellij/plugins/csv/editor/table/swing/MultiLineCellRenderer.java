@@ -8,10 +8,6 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.text.BadLocationException;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
 import java.util.Collections;
 import java.util.EventObject;
 import java.util.HashSet;
@@ -26,7 +22,6 @@ public class MultiLineCellRenderer extends JTextArea implements TableCellRendere
         setWrapStyleWord(true);
         setOpaque(true);
         addKeyListener(keyListener);
-//        registerKeyboardAction(new StopCellEditingActionListener(), KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.CTRL_MASK), WHEN_FOCUSED);
     }
 
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
@@ -122,12 +117,5 @@ public class MultiLineCellRenderer extends JTextArea implements TableCellRendere
     @Override
     public void removeCellEditorListener(CellEditorListener cellEditorListener) {
         cellEditorListenerSet.remove(cellEditorListener);
-    }
-
-    private class StopCellEditingActionListener implements ActionListener {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            MultiLineCellRenderer.this.stopCellEditing();
-        }
     }
 }
