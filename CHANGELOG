@@ -1,7 +1,12 @@
+2.0.0
+Nov 20, 2018
+
+NEW: CSV/TSV table editor!!!
+
 1.9.1
 Oct 12, 2018
 
-FIX: reading/writing CSV editor states 
+FIX: reading/writing CSV editor states
 FIX: tooltip for tab separator if disabled
 
 1.9.0

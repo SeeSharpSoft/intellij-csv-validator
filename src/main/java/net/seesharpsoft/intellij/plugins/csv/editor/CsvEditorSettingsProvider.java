@@ -11,17 +11,23 @@ import java.awt.*;
 import java.util.Objects;
 
 public class CsvEditorSettingsProvider implements SearchableConfigurable {
+
+    public static final String CSV_EDITOR_SETTINGS_ID = "Csv.Editor.Settings";
+
     private JCheckBox cbCaretRowShown;
     private JPanel myMainPanel;
     private JCheckBox cbUseSoftWraps;
     private JCheckBox cbColumnHighlighting;
     private CheckBoxWithColorChooser cbTabHighlightColor;
     private JCheckBox cbShowInfoBalloonCheckBox;
+    private JCheckBox cbShowInfoPanel;
+    private JComboBox cbRowHeight;
+    private JComboBox cbEditorUsage;
 
     @NotNull
     @Override
     public String getId() {
-        return "Csv.Editor.Settings";
+        return CSV_EDITOR_SETTINGS_ID;
     }
 
     @Override
@@ -51,9 +57,12 @@ public class CsvEditorSettingsProvider implements SearchableConfigurable {
         return isModified(cbCaretRowShown, csvEditorSettingsExternalizable.isCaretRowShown()) ||
                 isModified(cbUseSoftWraps, csvEditorSettingsExternalizable.isUseSoftWraps()) ||
                 isModified(cbColumnHighlighting, csvEditorSettingsExternalizable.isColumnHighlightingEnabled()) ||
+                isModified(cbShowInfoBalloonCheckBox, csvEditorSettingsExternalizable.isShowInfoBalloon()) ||
+                isModified(cbShowInfoPanel, csvEditorSettingsExternalizable.showTableEditorInfoPanel()) ||
                 cbTabHighlightColor.isSelected() != csvEditorSettingsExternalizable.isHighlightTabSeparator() ||
-                cbShowInfoBalloonCheckBox.isSelected() != csvEditorSettingsExternalizable.isShowInfoBalloon() ||
-                !Objects.equals(cbTabHighlightColor.getColor(), csvEditorSettingsExternalizable.getTabHighlightColor());
+                !Objects.equals(cbTabHighlightColor.getColor(), csvEditorSettingsExternalizable.getTabHighlightColor()) ||
+                !Objects.equals(cbRowHeight.getSelectedIndex(), csvEditorSettingsExternalizable.getTableEditorRowHeight()) ||
+                !Objects.equals(cbEditorUsage.getSelectedIndex(), csvEditorSettingsExternalizable.getEditorPrio().ordinal());
     }
 
     @Override
@@ -62,9 +71,12 @@ public class CsvEditorSettingsProvider implements SearchableConfigurable {
         cbCaretRowShown.setSelected(csvEditorSettingsExternalizable.isCaretRowShown());
         cbUseSoftWraps.setSelected(csvEditorSettingsExternalizable.isUseSoftWraps());
         cbColumnHighlighting.setSelected(csvEditorSettingsExternalizable.isColumnHighlightingEnabled());
-        cbTabHighlightColor.setSelected(csvEditorSettingsExternalizable.isHighlightTabSeparator());
         cbShowInfoBalloonCheckBox.setSelected(csvEditorSettingsExternalizable.isShowInfoBalloon());
+        cbShowInfoPanel.setSelected(csvEditorSettingsExternalizable.showTableEditorInfoPanel());
+        cbTabHighlightColor.setSelected(csvEditorSettingsExternalizable.isHighlightTabSeparator());
         cbTabHighlightColor.setColor(csvEditorSettingsExternalizable.getTabHighlightColor());
+        cbRowHeight.setSelectedIndex(csvEditorSettingsExternalizable.getTableEditorRowHeight());
+        cbEditorUsage.setSelectedIndex(csvEditorSettingsExternalizable.getEditorPrio().ordinal());
     }
 
     @Override
@@ -73,9 +85,12 @@ public class CsvEditorSettingsProvider implements SearchableConfigurable {
         csvEditorSettingsExternalizable.setCaretRowShown(cbCaretRowShown.isSelected());
         csvEditorSettingsExternalizable.setUseSoftWraps(cbUseSoftWraps.isSelected());
         csvEditorSettingsExternalizable.setColumnHighlightingEnabled(cbColumnHighlighting.isSelected());
-        csvEditorSettingsExternalizable.setHighlightTabSeparator(cbTabHighlightColor.isSelected());
         csvEditorSettingsExternalizable.setShowInfoBalloon(cbShowInfoBalloonCheckBox.isSelected());
+        csvEditorSettingsExternalizable.showTableEditorInfoPanel(cbShowInfoPanel.isSelected());
+        csvEditorSettingsExternalizable.setHighlightTabSeparator(cbTabHighlightColor.isSelected());
         csvEditorSettingsExternalizable.setTabHighlightColor(cbTabHighlightColor.getColor());
+        csvEditorSettingsExternalizable.setTableEditorRowHeight(cbRowHeight.getSelectedIndex());
+        csvEditorSettingsExternalizable.setEditorPrio(CsvEditorSettingsExternalizable.EditorPrio.values()[cbEditorUsage.getSelectedIndex()]);
     }
 
     protected void createUIComponents() {
