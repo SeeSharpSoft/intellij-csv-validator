@@ -62,7 +62,13 @@ All functionality that is available for plain CSV files (inspections, intentions
 
 ### \*NEW\* Table Editor 
 
-The plugin provides editing of CSV files via a table editor since version 2.0.0. This editor is NOT related to the _Edit as table..._ functionality of [IntelliJ IDEA Ultimate/PhpStorm/DataGrip/etc.](https://www.jetbrains.com/help/phpstorm/editing-csv-and-tsv-files.html) and does not share any of its features or settings. It is a an alternative to the CSV text editor and not meant to replace or mirror the capabilities of the Jetbrains _"Data"_ tab. 
+The plugin provides editing of CSV files via a table editor since version 2.0.0. This editor is NOT related to the _Edit as table..._ functionality of [IntelliJ IDEA Ultimate/PhpStorm/DataGrip/etc.](https://www.jetbrains.com/help/phpstorm/editing-csv-and-tsv-files.html) and does not share any of its features or settings. It is a an alternative to the CSV text editor and not meant to replace or mirror the capabilities of the Jetbrains _"Data"_ tab.
+
+**!!! IMPORTANT !!!**
+
+The table editor requires a syntactically correct formatted CSV file. If the file can't be parsed, the table editor will be not available. The file needs to be fixed first via a text editor before it can be viewed and edited in the table editor.
+
+**Using the table editor might change the format of the CSV file:** All fields will be surrounded by double quotes and any spaces that are not part of the content will be removed!
 
 ![Table editor](./docs/tableeditor.png)
 
@@ -102,12 +108,6 @@ The plugin introduces an enhanced text editor supporting custom settings - and a
 #### Editor Usage
 
 The preferred editor usage can be switched between "Text Editor first", "Table Editor first" or "Text Editor only", which has an effect on the editor tab order (or whether the table editor is shown at all). A "Table Editor only" option is not available (mainly due to the table editor restrictions when handling erroneous CSV files).
-
-**!!! IMPORTANT !!!**
-
-The table editor requires a syntactically correct formatted CSV file. If the file can't be parsed, the table editor will be not available. The file needs to be fixed first via a text editor before it can be viewed and edited in the table editor.
-
-**Using the table editor might change the format of the CSV file:** All fields will be surrounded by double quotes and any spaces that are not part of the content will be removed!
 
 #### Text Editor
 
