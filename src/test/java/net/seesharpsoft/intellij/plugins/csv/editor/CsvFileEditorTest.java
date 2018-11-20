@@ -17,18 +17,25 @@ public class CsvFileEditorTest extends LightCodeInsightFixtureTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-
+        CsvEditorSettingsExternalizable.getInstance().loadState(new CsvEditorSettingsExternalizable.OptionSet());
         myFixture.configureByFiles("AnyFile.csv");
     }
 
     public void testCsvFileEditorProviderIsAvailableAndHasCorrectNameAndPolicy() {
         FileEditorProvider[] fileEditorProviders = FileEditorProviderManager.getInstance().getProviders(myFixture.getProject(), myFixture.getFile().getVirtualFile());
-        assertEquals(1, fileEditorProviders.length);
+        assertEquals(2, fileEditorProviders.length);
         assertInstanceOf(fileEditorProviders[0], CsvFileEditorProvider.class);
 
         FileEditorProvider fileEditorProvider = fileEditorProviders[0];
-        assertEquals("csv-text-editor", fileEditorProvider.getEditorTypeId());
+        assertEquals(CsvFileEditorProvider.EDITOR_TYPE_ID, fileEditorProvider.getEditorTypeId());
         assertEquals(FileEditorPolicy.HIDE_DEFAULT_EDITOR, fileEditorProvider.getPolicy());
+
+        CsvEditorSettingsExternalizable csvEditorSettingsExternalizable = CsvEditorSettingsExternalizable.getInstance();
+        csvEditorSettingsExternalizable.setEditorPrio(CsvEditorSettingsExternalizable.EditorPrio.TEXT_ONLY);
+        assertEquals(FileEditorPolicy.HIDE_DEFAULT_EDITOR, fileEditorProvider.getPolicy());
+
+        csvEditorSettingsExternalizable.setEditorPrio(CsvEditorSettingsExternalizable.EditorPrio.TABLE_FIRST);
+        assertEquals(FileEditorPolicy.PLACE_AFTER_DEFAULT_EDITOR, fileEditorProvider.getPolicy());
     }
 
     private void disposeTextEditor(FileEditor fileEditor) {

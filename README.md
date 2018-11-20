@@ -14,6 +14,7 @@ This enables default editor features like syntax validation, highlighting and in
 ## Features
 
 - CSV/TSV file detection
+- table editor
 - customizable text editor
 - syntax validation
 - syntax highlighting (customizable)
@@ -59,37 +60,90 @@ Additionally the file type TSV was introduced as a kind of CSV language.
 For TSV files the same formatter and code style settings are applied as for CSV itself, but the separator is considered to be a tab.
 All functionality that is available for plain CSV files (inspections, intentions, structure view, etc.) can be used for TSV as well.   
 
-### \*NEW\* Editor Settings
+### \*NEW\* Table Editor 
+
+The plugin provides editing of CSV files via a table editor since version 2.0.0. This editor is NOT related to the _Edit as table..._ functionality of [IntelliJ IDEA Ultimate/PhpStorm/DataGrip/etc.](https://www.jetbrains.com/help/phpstorm/editing-csv-and-tsv-files.html) and does not share any of its features or settings. It is a an alternative to the CSV text editor and not meant to replace or mirror the capabilities of the Jetbrains _"Data"_ tab.
+
+**!!! IMPORTANT !!!**
+
+The table editor requires a syntactically correct formatted CSV file. If the file can't be parsed, the table editor will be not available. The file needs to be fixed first via a text editor before it can be viewed and edited in the table editor.
+
+**Using the table editor might change the format of the CSV file:** All fields will be surrounded by double quotes and any spaces that are not part of the content will be removed!
+
+![Table editor](./docs/tableeditor.png)
+
+#### Undo/Redo
+
+The table editor comes with a custom undo/redo feature (the arrows in the upper right corner) to keep general track of changes to the table (add, remove, edit rows/columns). For text changes within a single cell, the default undo/redo functionality can be used.
+
+#### Context menu
+
+A right-click within the table provides a context menu to add/remove rows, right-click on the table header to add/remove columns.
+
+Please note that the actions within the context menu are meant for the current selection of row(s) and column(s), not necessarily for the cell or header where the context menu appears! A right-click does not trigger a selection change by default.  
+
+#### Key bindings
+
+To support working with the table editor fluently, a set of key bindings are available for manipulating and navigating the table view:
+
+- **_ARROW KEYS_** navigate through the table
+- **_ENTER_** start editing current cell (NOTE: mostly any default key triggers an edit)
+- **_CTRL+ENTER_** stop editing current cell
+- **_CTRL+LEFT_** adds a new column before the current cell
+- **_CTRL+RIGHT_** adds a new column after the current cell
+- **_CTRL+UP_** adds a new row before the current cell
+- **_CTRL+DOWN_** adds a new row after the current cell
+- **_CTRL+DELETE/BACKSPACE_** deletes the current selected row(s)
+- **_CTRL+SHIFT+DELETE/BACKSPACE_** deletes the current selected column(s)
+- **_DELETE/BACKSPACE_** clear content of selected cell(s)
+
+### Editor Settings
 
 - _File > Settings > Editor > General > CSV/TSV Editor_
 
-The plugin introduces a new default editor, which is plain text editor supporting custom settings. Those settings can be adjusted in the corresponding CSV/TSV editor settings menu. 
+The plugin introduces an enhanced text editor supporting custom settings - and a table editor. The settings for those can be adjusted in the corresponding CSV/TSV editor settings menu. 
 
-![Color scheme settings](./docs/editorsettings.png)
+![Editor settings](./docs/editorsettings.png)
 
-#### Highlighting
+#### Editor Usage
 
-##### Highlight caret row
+The preferred editor usage can be switched between "Text Editor first", "Table Editor first" or "Text Editor only", which has an effect on the editor tab order (or whether the table editor is shown at all). A "Table Editor only" option is not available (mainly due to the table editor restrictions when handling erroneous CSV files).
+
+#### Text Editor
+
+##### Highlighting
+
+###### Highlight caret row
 
 The highlighting of the current caret row might interfere with custom background color settings and can be enabled/disabled for CSV/TSV files here.
 
-##### Enable column highlighting
+###### Enable column highlighting
 
 An easy way to switch the newly introduced *Column Highlighting* on or off.
 
-##### Highlight tab separator
+###### Highlight tab separator
 
 Enable/disable highlighting (and choose the highlight color) of tab characters (&#8633;) in their role as value separator (TSV). Tabs as part of a value are therefore not highlighted on purpose.
 
-#### Others
+##### Others
 
-##### Show info balloon
+###### Show info balloon
 
 Enable/disable the info balloon that appears at the caret position in the text editor.
 
-##### Use soft wraps
+###### Use soft wraps
 
 Set whether soft wrapping should be activated for CSV/TSV. It still can be changed file specific with right-click on the editors left outer margin. 
+
+#### Table Editor
+
+##### Textlines per row (default)
+
+Defines how many lines of text are shown in one editor cell by default. *Auto* does recalculate the height on the fly that can cause some flickering while editing. This setting can be changed in the table editor itself per file.
+
+##### Show info panel
+
+Enables/disables the info panel at the bottom of the table editor.
 
 ### Color Scheme
 
@@ -103,7 +157,6 @@ Preset colors are based on Jetbrains IDE defaults and support the different UI t
 
 #### Column Highlighting Colors
 
-**NEW**
 Besides defining colors and font-style variants for the different CSV symbols, additionally up to 10 different column highlight colors can be defined. Those colors are applied to the columns round robin. Undefined column highlight colors will be skipped if they are not followed by any other color definition.
 
 ### Formatting
@@ -260,17 +313,6 @@ Contributions are welcome. Please check [CONTRIBUTING.md](./CONTRIBUTING.md) for
 Besides source code contributions, feel free to open bug reports or just suggest new features [here](https://github.com/SeeSharpSoft/intellij-csv-validator/issues).
 
 ## FAQ
-
-> Where is the table editor?
-
-The initial intention of this plugin was the usage of the built-in text-editor features (e.g. validation, highlighting, formatting, etc) for CSV files.
-Providing an own editor was not planned at all.
-Still, it's just a matter of time and effort that needs to be invested for the implementation.
-Feel free to contribute to [make this dream come true](https://github.com/SeeSharpSoft/intellij-csv-validator/issues/2).
-
-Please note that there is a table like editor available in [IntelliJ IDEA Ultimate/PhpStorm/DataGrip/etc.](https://www.jetbrains.com/help/phpstorm/editing-csv-and-tsv-files.html)
-It is a well thought-through component and worth giving it a try if a CSV table editor is a necessity in your daily work.
-This plugin is fully compatible with this feature.
 
 > Why can't I choose the separator freely?
 

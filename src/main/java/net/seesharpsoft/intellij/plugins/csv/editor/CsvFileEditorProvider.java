@@ -4,28 +4,38 @@ import com.intellij.openapi.editor.EditorSettings;
 import com.intellij.openapi.fileEditor.*;
 import com.intellij.openapi.fileEditor.impl.text.TextEditorProvider;
 import com.intellij.openapi.fileTypes.LanguageFileType;
+import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.SingleRootFileViewProvider;
 import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
 
-public class CsvFileEditorProvider implements FileEditorProvider {
+public class CsvFileEditorProvider implements AsyncFileEditorProvider, DumbAware {
 
-    protected static boolean isCsvFile(VirtualFile file) {
+    public static final String EDITOR_TYPE_ID = "csv-text-editor";
+
+    public static boolean isCsvFile(VirtualFile file) {
         return file.getFileType() instanceof LanguageFileType && ((LanguageFileType) file.getFileType()).getLanguage().isKindOf(CsvLanguage.INSTANCE);
     }
 
     @Override
     public String getEditorTypeId() {
-        return "csv-text-editor";
+        return EDITOR_TYPE_ID;
     }
 
     @Override
     public FileEditorPolicy getPolicy() {
-        return FileEditorPolicy.HIDE_DEFAULT_EDITOR;
+        switch (CsvEditorSettingsExternalizable.getInstance().getEditorPrio()) {
+            case TEXT_FIRST:
+            case TEXT_ONLY:
+                return FileEditorPolicy.HIDE_DEFAULT_EDITOR;
+            case TABLE_FIRST:
+                return FileEditorPolicy.PLACE_AFTER_DEFAULT_EDITOR;
+            default:
+                throw new IllegalArgumentException("unhandled EditorPrio: " + CsvEditorSettingsExternalizable.getInstance().getEditorPrio());
+        }
     }
 
     @Override
@@ -44,9 +54,7 @@ public class CsvFileEditorProvider implements FileEditorProvider {
     @NotNull
     @Override
     public FileEditor createEditor(@NotNull Project project, @NotNull VirtualFile virtualFile) {
-        TextEditor textEditor = (TextEditor) TextEditorProvider.getInstance().createEditor(project, virtualFile);
-        applySettings(textEditor.getEditor().getSettings(), CsvEditorSettingsExternalizable.getInstance());
-        return textEditor;
+        return createEditorAsync(project, virtualFile).build();
     }
 
     @Override
@@ -63,5 +71,17 @@ public class CsvFileEditorProvider implements FileEditorProvider {
     public void disposeEditor(@NotNull FileEditor editor) {
         TextEditorProvider.getInstance().disposeEditor(editor);
     }
-    
+
+    @NotNull
+    @Override
+    public Builder createEditorAsync(@NotNull Project project, @NotNull VirtualFile virtualFile) {
+        return new Builder() {
+            @Override
+            public FileEditor build() {
+                TextEditor textEditor = (TextEditor) TextEditorProvider.getInstance().createEditor(project, virtualFile);
+                applySettings(textEditor.getEditor().getSettings(), CsvEditorSettingsExternalizable.getInstance());
+                return textEditor;
+            }
+        };
+    }
 }

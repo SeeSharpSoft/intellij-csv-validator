@@ -6,6 +6,8 @@ env:
   - IDEA_VERSION=IC-2016.3.2 GRAMMAR_KIT_VERSION=1.4.3
   - IDEA_VERSION=IC-2017.3.2 GRAMMAR_KIT_VERSION=2017.1.2
 
+script: xvfb-run gradle check
+
 after_success:
   - gradle jacocoTestReport coveralls
 
@@ -13,8 +15,8 @@ jobs:
   include:
     - if: (branch = master AND type = push) OR (type = pull_request)
       env: IDEA_VERSION=LATEST-EAP-SNAPSHOT GRAMMAR_KIT_VERSION=2017.1.2
-      script: gradle check verifyPlugin
+      script: xvfb-run gradle check verifyPlugin
     - stage: deploy
       if: branch IN (Testing, Staging, Stable) AND type = push
       env: IDEA_VERSION=IC-2017.3.2 GRAMMAR_KIT_VERSION=2017.1.2 JI_CHANNELS=$TRAVIS_BRANCH
-      script: gradle publishPlugin
+      script: xvfb-run gradle publishPlugin
