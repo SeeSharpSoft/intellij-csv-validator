@@ -202,7 +202,7 @@
           <component id="c0dc0" class="javax.swing.JLabel">
             <constraints/>
             <properties>
-              <text value="This editor is a new feature of the CSV plugin. Please follow the link to address issues and suggestions:"/>
+              <text value="Editing via Table Editor might change the format of the CSV file. Follow the link for more infos, addressing issues and providing suggestions:"/>
             </properties>
           </component>
           <component id="7fcf0" class="com.intellij.ui.components.labels.LinkLabel" binding="lnkPlugin">

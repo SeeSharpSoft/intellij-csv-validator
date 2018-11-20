@@ -31,6 +31,7 @@ public class CsvTableEditorActions extends CsvTableEditorUtilBase {
     protected ActionListener addColumnAfter = new AddColumnAction(false);
     protected ActionListener deleteRow = new DeleteRowAction();
     protected ActionListener deleteColumn = new DeleteColumnAction();
+    protected ActionListener clearCells = new ClearCellsAction();
     protected LinkListener openTextEditor = new OpenTextEditor();
     protected LinkListener openCsvPluginLink = new OpenCsvPluginLink();
 
@@ -222,6 +223,45 @@ public class CsvTableEditorActions extends CsvTableEditorUtilBase {
 
                 currentColumns.sort(Comparator.naturalOrder());
                 selectCell(table, currentRow, currentColumns.get(0));
+            } finally {
+                csvTableEditor.applyTableChangeListener();
+            }
+        }
+    }
+
+    private final class ClearCellsAction implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if (csvTableEditor.hasErrors()) {
+                return;
+            }
+
+            csvTableEditor.removeTableChangeListener();
+            try {
+                JBTable table = csvTableEditor.getTable();
+                int[] selectedRows = table.getSelectedRows();
+                if (selectedRows == null || selectedRows.length == 0) {
+                    return;
+                }
+                int[] selectedColumns = table.getSelectedColumns();
+                if (selectedColumns == null || selectedColumns.length == 0) {
+                    return;
+                }
+
+                int focusedRow = table.getSelectedRow();
+                int focusedColumn = table.getSelectedColumn();
+
+                DefaultTableModel tableModel = csvTableEditor.getTableModel();
+
+                for (int row : selectedRows) {
+                    for (int column : selectedColumns) {
+                        tableModel.setValueAt("", row, column);
+                    }
+                }
+
+                csvTableEditor.syncTableModelWithUI();
+
+                selectCell(table, focusedRow, focusedColumn);
             } finally {
                 csvTableEditor.applyTableChangeListener();
             }

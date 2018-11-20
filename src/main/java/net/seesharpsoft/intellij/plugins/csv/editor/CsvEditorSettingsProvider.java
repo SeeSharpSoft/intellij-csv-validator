@@ -22,6 +22,7 @@ public class CsvEditorSettingsProvider implements SearchableConfigurable {
     private JCheckBox cbShowInfoBalloonCheckBox;
     private JCheckBox cbShowInfoPanel;
     private JComboBox cbRowHeight;
+    private JComboBox cbEditorUsage;
 
     @NotNull
     @Override
@@ -60,7 +61,8 @@ public class CsvEditorSettingsProvider implements SearchableConfigurable {
                 isModified(cbShowInfoPanel, csvEditorSettingsExternalizable.showTableEditorInfoPanel()) ||
                 cbTabHighlightColor.isSelected() != csvEditorSettingsExternalizable.isHighlightTabSeparator() ||
                 !Objects.equals(cbTabHighlightColor.getColor(), csvEditorSettingsExternalizable.getTabHighlightColor()) ||
-                !Objects.equals(cbRowHeight.getSelectedIndex(), csvEditorSettingsExternalizable.getTableEditorRowHeight());
+                !Objects.equals(cbRowHeight.getSelectedIndex(), csvEditorSettingsExternalizable.getTableEditorRowHeight()) ||
+                !Objects.equals(cbEditorUsage.getSelectedIndex(), csvEditorSettingsExternalizable.getEditorPrio().ordinal());
     }
 
     @Override
@@ -74,6 +76,7 @@ public class CsvEditorSettingsProvider implements SearchableConfigurable {
         cbTabHighlightColor.setSelected(csvEditorSettingsExternalizable.isHighlightTabSeparator());
         cbTabHighlightColor.setColor(csvEditorSettingsExternalizable.getTabHighlightColor());
         cbRowHeight.setSelectedIndex(csvEditorSettingsExternalizable.getTableEditorRowHeight());
+        cbEditorUsage.setSelectedIndex(csvEditorSettingsExternalizable.getEditorPrio().ordinal());
     }
 
     @Override
@@ -87,6 +90,7 @@ public class CsvEditorSettingsProvider implements SearchableConfigurable {
         csvEditorSettingsExternalizable.setHighlightTabSeparator(cbTabHighlightColor.isSelected());
         csvEditorSettingsExternalizable.setTabHighlightColor(cbTabHighlightColor.getColor());
         csvEditorSettingsExternalizable.setTableEditorRowHeight(cbRowHeight.getSelectedIndex());
+        csvEditorSettingsExternalizable.setEditorPrio(CsvEditorSettingsExternalizable.EditorPrio.values()[cbEditorUsage.getSelectedIndex()]);
     }
 
     protected void createUIComponents() {

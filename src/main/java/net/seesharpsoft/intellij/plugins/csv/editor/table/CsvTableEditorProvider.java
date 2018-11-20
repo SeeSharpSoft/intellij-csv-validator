@@ -1,26 +1,22 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table;
 
+import com.intellij.openapi.fileEditor.AsyncFileEditorProvider;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorPolicy;
-import com.intellij.openapi.fileEditor.FileEditorProvider;
 import com.intellij.openapi.fileEditor.FileEditorState;
-import com.intellij.openapi.fileTypes.LanguageFileType;
+import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.SingleRootFileViewProvider;
-import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
 import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettingsExternalizable;
+import net.seesharpsoft.intellij.plugins.csv.editor.CsvFileEditorProvider;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.swing.CsvTableEditorSwing;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
 
-public class CsvTableEditorProvider implements FileEditorProvider {
+public class CsvTableEditorProvider implements AsyncFileEditorProvider, DumbAware {
 
     public static final String EDITOR_TYPE_ID = "csv-table-editor";
-
-    protected static boolean isCsvFile(VirtualFile file) {
-        return file.getFileType() instanceof LanguageFileType && ((LanguageFileType) file.getFileType()).getLanguage().isKindOf(CsvLanguage.INSTANCE);
-    }
 
     @Override
     public String getEditorTypeId() {
@@ -43,13 +39,13 @@ public class CsvTableEditorProvider implements FileEditorProvider {
     @Override
     public boolean accept(@NotNull Project project, @NotNull VirtualFile file) {
         return CsvEditorSettingsExternalizable.getInstance().getEditorPrio() != CsvEditorSettingsExternalizable.EditorPrio.TEXT_ONLY &&
-                isCsvFile(file) && !SingleRootFileViewProvider.isTooLargeForContentLoading(file);
+                CsvFileEditorProvider.isCsvFile(file) && !SingleRootFileViewProvider.isTooLargeForContentLoading(file);
     }
 
     @NotNull
     @Override
     public FileEditor createEditor(@NotNull Project project, @NotNull VirtualFile virtualFile) {
-        return new CsvTableEditorSwing(project, virtualFile);
+        return createEditorAsync(project, virtualFile).build();
     }
 
     @Override
@@ -66,4 +62,14 @@ public class CsvTableEditorProvider implements FileEditorProvider {
         csvTableEditorState.write(project, targetElement);
     }
 
+    @NotNull
+    @Override
+    public Builder createEditorAsync(@NotNull Project project, @NotNull VirtualFile virtualFile) {
+        return new Builder() {
+            @Override
+            public FileEditor build() {
+                return new CsvTableEditorSwing(project, virtualFile);
+            }
+        };
+    }
 }

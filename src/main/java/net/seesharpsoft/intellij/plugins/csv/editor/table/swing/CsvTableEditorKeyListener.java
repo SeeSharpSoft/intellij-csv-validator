@@ -27,9 +27,6 @@ public class CsvTableEditorKeyListener extends CsvTableEditorUtilBase implements
 
     @Override
     public void keyReleased(KeyEvent e) {
-//        if (csvTableEditor.getTable().isEditing()) {
-//            return;
-//        }
         switch (e.getKeyCode()) {
             case KeyEvent.VK_LEFT:
                 if (e.isControlDown()) {
@@ -64,6 +61,8 @@ public class CsvTableEditorKeyListener extends CsvTableEditorUtilBase implements
                     csvTableEditor.tableEditorActions.deleteColumn.actionPerformed(null);
                 } else if (e.isControlDown()) {
                     csvTableEditor.tableEditorActions.deleteRow.actionPerformed(null);
+                } else {
+                    csvTableEditor.tableEditorActions.clearCells.actionPerformed(null);
                 }
                 break;
             default:

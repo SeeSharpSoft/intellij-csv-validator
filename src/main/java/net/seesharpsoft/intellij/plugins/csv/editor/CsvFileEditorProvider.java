@@ -4,6 +4,7 @@ import com.intellij.openapi.editor.EditorSettings;
 import com.intellij.openapi.fileEditor.*;
 import com.intellij.openapi.fileEditor.impl.text.TextEditorProvider;
 import com.intellij.openapi.fileTypes.LanguageFileType;
+import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.SingleRootFileViewProvider;
@@ -11,11 +12,11 @@ import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
 
-public class CsvFileEditorProvider implements FileEditorProvider {
+public class CsvFileEditorProvider implements AsyncFileEditorProvider, DumbAware {
 
     public static final String EDITOR_TYPE_ID = "csv-text-editor";
 
-    protected static boolean isCsvFile(VirtualFile file) {
+    public static boolean isCsvFile(VirtualFile file) {
         return file.getFileType() instanceof LanguageFileType && ((LanguageFileType) file.getFileType()).getLanguage().isKindOf(CsvLanguage.INSTANCE);
     }
 
@@ -53,9 +54,7 @@ public class CsvFileEditorProvider implements FileEditorProvider {
     @NotNull
     @Override
     public FileEditor createEditor(@NotNull Project project, @NotNull VirtualFile virtualFile) {
-        TextEditor textEditor = (TextEditor) TextEditorProvider.getInstance().createEditor(project, virtualFile);
-        applySettings(textEditor.getEditor().getSettings(), CsvEditorSettingsExternalizable.getInstance());
-        return textEditor;
+        return createEditorAsync(project, virtualFile).build();
     }
 
     @Override
@@ -73,4 +72,16 @@ public class CsvFileEditorProvider implements FileEditorProvider {
         TextEditorProvider.getInstance().disposeEditor(editor);
     }
 
+    @NotNull
+    @Override
+    public Builder createEditorAsync(@NotNull Project project, @NotNull VirtualFile virtualFile) {
+        return new Builder() {
+            @Override
+            public FileEditor build() {
+                TextEditor textEditor = (TextEditor) TextEditorProvider.getInstance().createEditor(project, virtualFile);
+                applySettings(textEditor.getEditor().getSettings(), CsvEditorSettingsExternalizable.getInstance());
+                return textEditor;
+            }
+        };
+    }
 }

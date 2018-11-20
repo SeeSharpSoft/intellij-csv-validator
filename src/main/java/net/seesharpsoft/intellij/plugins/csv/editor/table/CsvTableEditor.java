@@ -28,7 +28,7 @@ import java.beans.PropertyChangeSupport;
 
 public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
 
-    public static final String EDITOR_NAME = "Table View";
+    public static final String EDITOR_NAME = "Table Editor";
 
     public static final int ROW_LINE_HEIGHT = 20;
     public static final int INITIAL_COLUMN_WIDTH = 100;
@@ -76,6 +76,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
         beforeTableComponentUpdate();
         try {
             setTableComponentData(values);
+            saveChanges();
         } finally {
             afterTableComponentUpdate();
         }
@@ -186,7 +187,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
 
     @Override
     public boolean isModified() {
-        return !this.dataManagement.equalsCurrentState(initialState);
+        return this.dataManagement != null && initialState != null && !this.dataManagement.equalsCurrentState(initialState);
     }
 
     @Override

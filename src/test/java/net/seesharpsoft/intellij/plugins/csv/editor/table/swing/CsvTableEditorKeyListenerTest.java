@@ -183,4 +183,41 @@ public class CsvTableEditorKeyListenerTest extends CsvTableEditorSwingTestBase {
         assertEquals(-1, fileEditor.getTable().getEditingRow());
     }
 
+    public void testClearCellActionByDelete() {
+        KeyEvent keyEvent = new KeyEvent(fileEditor.getTable(), KeyEvent.KEY_RELEASED, JComponent.WHEN_FOCUSED,
+                0, KeyEvent.VK_DELETE, KeyEvent.CHAR_UNDEFINED);
+
+        fileEditor.tableEditorKeyListener.keyReleased(keyEvent);
+        assertTrue(fileEditor.getDataHandler().equalsCurrentState(initialState));
+
+        fileEditor.getTable().setRowSelectionInterval(1, 1);
+        fileEditor.getTable().setColumnSelectionInterval(1, 1);
+        fileEditor.tableEditorKeyListener.keyReleased(keyEvent);
+        Object[][] newState = fileEditor.getDataHandler().getCurrentState();
+        assertEquals(2, newState[0].length);
+        assertEquals(2, newState[1].length);
+        assertEquals("", newState[1][1]);
+        assertEquals(1, fileEditor.getTable().getSelectedRow());
+        assertEquals(1, fileEditor.getTable().getSelectedColumn());
+    }
+
+    public void testClearCellActionByBackspace() {
+        KeyEvent keyEvent = new KeyEvent(fileEditor.getTable(), KeyEvent.KEY_RELEASED, JComponent.WHEN_FOCUSED,
+                0, KeyEvent.VK_BACK_SPACE, KeyEvent.CHAR_UNDEFINED);
+
+        fileEditor.tableEditorKeyListener.keyReleased(keyEvent);
+        assertTrue(fileEditor.getDataHandler().equalsCurrentState(initialState));
+
+        fileEditor.getTable().setRowSelectionInterval(1, 1);
+        fileEditor.getTable().setColumnSelectionInterval(1, 1);
+        fileEditor.tableEditorKeyListener.keyReleased(keyEvent);
+        Object[][] newState = fileEditor.getDataHandler().getCurrentState();
+        assertEquals(2, newState[0].length);
+        assertEquals(2, newState[1].length);
+        assertEquals("", newState[1][1]);
+        assertEquals(1, fileEditor.getTable().getSelectedRow());
+        assertEquals(1, fileEditor.getTable().getSelectedColumn());
+    }
+
+
 }
