@@ -12,6 +12,7 @@ import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettingsExternalizable;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.*;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.api.TableDataChangeEvent;
+import net.seesharpsoft.intellij.plugins.csv.psi.CsvFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -284,6 +285,11 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
 
     @Override
     protected void updateUIComponents() {
+        CsvFile csvFile = getCsvFile();
+        if (csvFile == null) {
+            return;
+        }
+
         CsvColumnInfoMap<PsiElement> newColumnInfoMap = csvFile.getMyColumnInfoMap();
         if (Objects.equals(columnInfoMap, newColumnInfoMap)) {
             return;
