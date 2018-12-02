@@ -12,6 +12,7 @@ import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettingsExternalizable;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.*;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.api.TableDataChangeEvent;
+import net.seesharpsoft.intellij.plugins.csv.psi.CsvFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -113,6 +114,8 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
                 KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK), JComponent.WHEN_FOCUSED);
         tblEditor.registerKeyboardAction(this.tableEditorActions.redo,
                 KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_MASK), JComponent.WHEN_FOCUSED);
+
+        applyRowLines(getFileEditorState().getRowLines());
     }
 
 
@@ -284,6 +287,11 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
 
     @Override
     protected void updateUIComponents() {
+        CsvFile csvFile = getCsvFile();
+        if (csvFile == null) {
+            return;
+        }
+
         CsvColumnInfoMap<PsiElement> newColumnInfoMap = csvFile.getMyColumnInfoMap();
         if (Objects.equals(columnInfoMap, newColumnInfoMap)) {
             return;

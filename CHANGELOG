@@ -1,3 +1,9 @@
+2.0.1
+Dec 02, 2018
+
+FIX: disabling table editor for large files
+FIX: applying row height for newly opened files
+
 2.0.0
 Nov 20, 2018
 

@@ -14,6 +14,7 @@ import com.intellij.openapi.vfs.ReadonlyStatusHandler;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiFile;
 import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfoMap;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.api.TableDataHandler;
@@ -38,7 +39,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
     protected final UserDataHolder userDataHolder;
     protected final Document document;
     protected final PropertyChangeSupport changeSupport;
-    protected final CsvFile csvFile;
+    protected final PsiFile psiFile;
     protected final String currentSeparator;
     protected final TableDataHandler dataManagement;
 
@@ -54,9 +55,9 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
         this.userDataHolder = new UserDataHolderBase();
         this.document = FileDocumentManager.getInstance().getDocument(this.file);
         PsiDocumentManager documentManager = PsiDocumentManager.getInstance(project);
-        this.csvFile = (CsvFile) documentManager.getPsiFile(this.document);
+        this.psiFile = documentManager.getPsiFile(this.document);
         this.changeSupport = new PropertyChangeSupport(this);
-        this.currentSeparator = CsvCodeStyleSettings.getCurrentSeparator(this.project, this.csvFile.getLanguage());
+        this.currentSeparator = CsvCodeStyleSettings.getCurrentSeparator(this.project, this.psiFile.getLanguage());
         this.dataManagement = new TableDataHandler(this, TableDataHandler.MAX_SIZE);
     }
 
@@ -96,7 +97,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
     }
 
     public boolean hasErrors() {
-        return columnInfoMap != null && columnInfoMap.hasErrors();
+        return !isValid() || (columnInfoMap != null && columnInfoMap.hasErrors());
     }
 
     protected Object[][] storeStateChange(Object[][] data) {
@@ -192,7 +193,8 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
 
     @Override
     public boolean isValid() {
-        return this.csvFile.isValid();
+        CsvFile csvFile = this.getCsvFile();
+        return csvFile != null && csvFile.isValid();
     }
 
     @Override
@@ -268,6 +270,11 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
     @Nullable
     public Project getProject() {
         return this.project;
+    }
+
+    @Nullable
+    public CsvFile getCsvFile() {
+        return this.psiFile instanceof CsvFile ? (CsvFile)psiFile : null;
     }
 
     public TableDataHandler getDataHandler() {

@@ -5,6 +5,7 @@ jdk:
 env:
   - IDEA_VERSION=IC-2016.3.2 GRAMMAR_KIT_VERSION=1.4.3
   - IDEA_VERSION=IC-2017.3.2 GRAMMAR_KIT_VERSION=2017.1.2
+  - IDEA_VERSION=IC-2018.2.3 GRAMMAR_KIT_VERSION=2017.1.6
 
 script: xvfb-run gradle check
 
@@ -14,9 +15,9 @@ after_success:
 jobs:
   include:
     - if: (branch = master AND type = push) OR (type = pull_request)
-      env: IDEA_VERSION=LATEST-EAP-SNAPSHOT GRAMMAR_KIT_VERSION=2017.1.2
+      env: IDEA_VERSION=LATEST-EAP-SNAPSHOT GRAMMAR_KIT_VERSION=2017.1.6
       script: xvfb-run gradle check verifyPlugin
     - stage: deploy
       if: branch IN (Testing, Staging, Stable) AND type = push
-      env: IDEA_VERSION=IC-2017.3.2 GRAMMAR_KIT_VERSION=2017.1.2 JI_CHANNELS=$TRAVIS_BRANCH
+      env: IDEA_VERSION=IC-2018.2.3 GRAMMAR_KIT_VERSION=2017.1.6 JI_CHANNELS=$TRAVIS_BRANCH
       script: xvfb-run gradle publishPlugin
