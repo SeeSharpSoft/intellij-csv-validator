@@ -114,6 +114,8 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
                 KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK), JComponent.WHEN_FOCUSED);
         tblEditor.registerKeyboardAction(this.tableEditorActions.redo,
                 KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_MASK), JComponent.WHEN_FOCUSED);
+
+        applyRowLines(getFileEditorState().getRowLines());
     }
 
 
