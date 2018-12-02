@@ -48,7 +48,8 @@
 
     <change-notes><![CDATA[
         <pre style="font-family: sans-serif">
-NEW: !!! Table Editor !!!
+FIX: disabling table editor for large files
+FIX: applying row height for newly opened files
       </pre>
     ]]>
     </change-notes>
