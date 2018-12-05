@@ -46,7 +46,7 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
     protected JButton btnAddColumnBefore;
     private LinkLabel lnkPlugin;
     private JButton btnCloseInfoPanel;
-    private JPanel panelInfo;
+    private JComponent panelInfo;
     private JComboBox comboRowHeight;
     private JLabel lblTextlines;
 
@@ -272,8 +272,6 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
         tblEditor.getTableHeader().setReorderingAllowed(isEditable);
         btnUndo.setVisible(isEditable);
         btnRedo.setVisible(isEditable);
-        btnAddColumn.setVisible(isEditable);
-        btnAddRow.setVisible(isEditable);
     }
 
 
