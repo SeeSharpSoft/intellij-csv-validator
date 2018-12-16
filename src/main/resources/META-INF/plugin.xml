@@ -48,8 +48,7 @@
 
     <change-notes><![CDATA[
         <pre style="font-family: sans-serif">
-FIX: disabling table editor for large files
-FIX: applying row height for newly opened files
+FIX: top and bottom panel scrollable & add column/row buttons removed
       </pre>
     ]]>
     </change-notes>
