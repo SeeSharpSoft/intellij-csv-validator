@@ -73,7 +73,7 @@ FIX: top and bottom panel scrollable & add column/row buttons removed
                                    implementationClass="net.seesharpsoft.intellij.plugins.csv.highlighter.CsvEditorHighlighterProvider"/>
         <highlightUsagesHandlerFactory implementation="net.seesharpsoft.intellij.plugins.csv.highlighter.CsvHighlightUsagesHandlerFactory"/>
 
-        <colorSettingsPage implementation="net.seesharpsoft.intellij.plugins.csv.settings.CsvColorSettingsPage"/>
+        <colorSettingsPage implementation="net.seesharpsoft.intellij.plugins.csv.settings.CsvColorSettings"/>
 
         <applicationService serviceImplementation="net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettingsExternalizable" />
         <editorOptionsProvider instance="net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettingsProvider" />

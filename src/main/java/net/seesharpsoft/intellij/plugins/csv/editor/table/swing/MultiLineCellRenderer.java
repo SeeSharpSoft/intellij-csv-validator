@@ -2,8 +2,8 @@ package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
 import com.intellij.openapi.editor.markup.TextAttributes;
 import com.intellij.openapi.util.UserDataHolder;
-import net.seesharpsoft.intellij.plugins.csv.editor.CsvAnnotator;
 import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettingsExternalizable;
+import net.seesharpsoft.intellij.plugins.csv.settings.CsvColorSettings;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -33,7 +33,7 @@ public class MultiLineCellRenderer extends JTextArea implements TableCellRendere
 
     private TextAttributes getColumnTextAttributes(int column) {
         if (CsvEditorSettingsExternalizable.getInstance().isTableColumnHighlightingEnabled()) {
-            return CsvAnnotator.getTextAttributes(userDataHolder, column);
+            return CsvColorSettings.getTextAttributesOfColumn(column, userDataHolder);
         }
         return null;
     }

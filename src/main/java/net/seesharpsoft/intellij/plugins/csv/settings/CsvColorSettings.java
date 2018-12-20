@@ -1,13 +1,18 @@
 package net.seesharpsoft.intellij.plugins.csv.settings;
 
+import com.intellij.openapi.editor.DefaultLanguageHighlighterColors;
+import com.intellij.openapi.editor.colors.EditorColorsManager;
+import com.intellij.openapi.editor.colors.EditorColorsScheme;
 import com.intellij.openapi.editor.colors.TextAttributesKey;
+import com.intellij.openapi.editor.markup.TextAttributes;
 import com.intellij.openapi.fileTypes.SyntaxHighlighter;
 import com.intellij.openapi.options.colors.AttributesDescriptor;
 import com.intellij.openapi.options.colors.ColorDescriptor;
 import com.intellij.openapi.options.colors.ColorSettingsPage;
+import com.intellij.openapi.util.Key;
+import com.intellij.openapi.util.UserDataHolder;
 import net.seesharpsoft.intellij.plugins.csv.CsvIconProvider;
 import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
-import net.seesharpsoft.intellij.plugins.csv.editor.CsvAnnotator;
 import net.seesharpsoft.intellij.plugins.csv.highlighter.CsvSyntaxHighlighter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -18,9 +23,16 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-public class CsvColorSettingsPage implements ColorSettingsPage {
+import static com.intellij.openapi.editor.colors.TextAttributesKey.createTextAttributesKey;
+
+public class CsvColorSettings implements ColorSettingsPage {
 
     private static final AttributesDescriptor[] DESCRIPTORS;
+
+    private static final Integer MAX_COLUMN_HIGHLIGHT_COLORS = 10;
+    private static final List<TextAttributesKey> COLUMN_HIGHLIGHT_ATTRIBUTES;
+
+    private static final Key<List<TextAttributes>> COLUMN_HIGHLIGHT_TEXT_ATTRIBUTES_KEY = Key.create("CSV_PLUGIN_COLUMN_HIGHLIGHT_ATTRIBUTES");
 
     static {
         List<AttributesDescriptor> attributesDescriptors = new ArrayList(Arrays.asList(
@@ -30,11 +42,32 @@ public class CsvColorSettingsPage implements ColorSettingsPage {
                 new AttributesDescriptor("Escaped Text", CsvSyntaxHighlighter.ESCAPED_TEXT)
         ));
 
-        List<TextAttributesKey> columnHighlightAttributes = CsvAnnotator.COLUMN_HIGHLIGHT_ATTRIBUTES;
-        for (int i = 0; i < columnHighlightAttributes.size(); ++i) {
-            attributesDescriptors.add(new AttributesDescriptor(String.format("Column Highlighting Color %d", i + 1), columnHighlightAttributes.get(i)));
+        COLUMN_HIGHLIGHT_ATTRIBUTES = new ArrayList<>();
+        for (int i = 0; i < MAX_COLUMN_HIGHLIGHT_COLORS; ++i) {
+            TextAttributesKey textAttributesKey = createTextAttributesKey(String.format("CSV_COLUMN_HIGHLIGHT_ATTRIBUTE_%d", i + 1), DefaultLanguageHighlighterColors.STRING);
+            COLUMN_HIGHLIGHT_ATTRIBUTES.add(textAttributesKey);
+            attributesDescriptors.add(new AttributesDescriptor(String.format("Column Highlighting Color %d", i + 1), textAttributesKey));
         }
         DESCRIPTORS = attributesDescriptors.toArray(new AttributesDescriptor[attributesDescriptors.size()]);
+    }
+
+    public static TextAttributes getTextAttributesOfColumn(int columnIndex, UserDataHolder userDataHolder) {
+        List<TextAttributes> textAttributeList = userDataHolder.getUserData(COLUMN_HIGHLIGHT_TEXT_ATTRIBUTES_KEY);
+        if (textAttributeList == null) {
+            EditorColorsScheme editorColorsScheme = EditorColorsManager.getInstance().getGlobalScheme();
+            textAttributeList = new ArrayList<>();
+            int maxIndex = 0;
+            for (int colorDescriptorIndex = 0; colorDescriptorIndex < MAX_COLUMN_HIGHLIGHT_COLORS; ++colorDescriptorIndex) {
+                TextAttributesKey textAttributesKey = COLUMN_HIGHLIGHT_ATTRIBUTES.get(colorDescriptorIndex);
+                TextAttributes textAttributes = editorColorsScheme.getAttributes(textAttributesKey);
+                textAttributeList.add(textAttributes);
+                if (!textAttributesKey.getDefaultAttributes().equals(textAttributes)) {
+                    maxIndex = colorDescriptorIndex;
+                }
+            }
+            userDataHolder.putUserData(COLUMN_HIGHLIGHT_TEXT_ATTRIBUTES_KEY, textAttributeList.subList(0, maxIndex + 1));
+        }
+        return textAttributeList.isEmpty() ? null : textAttributeList.get(columnIndex % textAttributeList.size());
     }
 
     @Nullable
