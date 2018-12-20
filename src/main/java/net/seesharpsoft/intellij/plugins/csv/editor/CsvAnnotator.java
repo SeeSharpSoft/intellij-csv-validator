@@ -128,7 +128,7 @@ public class CsvAnnotator implements Annotator {
     public static TextAttributes getTextAttributes(UserDataHolder userDataHolder, int columnIndex) {
         List<TextAttributes> textAttributeList = userDataHolder.getUserData(COLUMN_HIGHLIGHT_TEXT_ATTRIBUTES_KEY);
         if (textAttributeList == null) {
-            EditorColorsScheme editorColorsScheme = EditorColorsManager.getInstance().getSchemeForCurrentUITheme();
+            EditorColorsScheme editorColorsScheme = EditorColorsManager.getInstance().getGlobalScheme();
             textAttributeList = new ArrayList<>();
             int maxIndex = 0;
             for (int colorDescriptorIndex = 0; colorDescriptorIndex < MAX_COLUMN_HIGHLIGHT_COLORS; ++colorDescriptorIndex) {
