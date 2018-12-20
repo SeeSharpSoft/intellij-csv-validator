@@ -1,13 +1,14 @@
 package net.seesharpsoft.intellij.plugins.csv.editor;
 
 import com.intellij.lang.annotation.*;
-import com.intellij.openapi.editor.colors.ColorKey;
+import com.intellij.openapi.editor.DefaultLanguageHighlighterColors;
 import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.editor.colors.EditorColorsScheme;
+import com.intellij.openapi.editor.colors.TextAttributesKey;
 import com.intellij.openapi.editor.markup.TextAttributes;
-import com.intellij.openapi.options.colors.ColorDescriptor;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.TextRange;
+import com.intellij.openapi.util.UserDataHolder;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.xml.util.XmlStringUtil;
@@ -18,30 +19,29 @@ import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvCodeStyleSettings;
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.intellij.openapi.editor.colors.TextAttributesKey.createTextAttributesKey;
 import static com.intellij.spellchecker.SpellCheckerSeveritiesProvider.TYPO;
 
 @SuppressWarnings("MagicNumber")
 public class CsvAnnotator implements Annotator {
 
     protected static final Integer MAX_COLUMN_HIGHLIGHT_COLORS = 10;
-    protected static final Key<Integer> MAX_NO_OF_DEFINED_COLUMN_HIGHLIGHT_COLORS = Key.create("CSV_PLUGIN_LAST_DEFINED_COLOR_INDEX_KEY");
-    protected static final Key<TextAttributes> TAB_SEPARATOR_HIGHLIGHT_COLOR = Key.create("CSV_PLUGIN_TAB_SEPARATOR_HIGHLIGHT_COLOR");
-    protected static final Key<Boolean> TAB_SEPARATOR_HIGHLIGHT_COLOR_DETERMINED = Key.create("CSV_PLUGIN_TAB_SEPARATOR_HIGHLIGHT_COLOR_DETERMINED");
-    protected static final Key<Boolean> SHOW_INFO_BALLOON = Key.create("CSV_PLUGIN_SHOW_INFO_BALLOON");
+    protected static final Key<List<TextAttributes>> COLUMN_HIGHLIGHT_TEXT_ATTRIBUTES_KEY = Key.create("CSV_PLUGIN_COLUMN_HIGHLIGHT_ATTRIBUTES");
+    protected static final Key<TextAttributes> TAB_SEPARATOR_HIGHLIGHT_COLOR_KEY = Key.create("CSV_PLUGIN_TAB_SEPARATOR_HIGHLIGHT_COLOR");
+    protected static final Key<Boolean> TAB_SEPARATOR_HIGHLIGHT_COLOR_DETERMINED_KEY = Key.create("CSV_PLUGIN_TAB_SEPARATOR_HIGHLIGHT_COLOR_DETERMINED");
+    protected static final Key<Boolean> SHOW_INFO_BALLOON_KEY = Key.create("CSV_PLUGIN_SHOW_INFO_BALLOON");
 
-    public static final ColorDescriptor[] COLOR_DESCRIPTORS;
+    public static final List<TextAttributesKey> COLUMN_HIGHLIGHT_ATTRIBUTES;
 
     static {
-        List<ColorDescriptor> colorDescriptorList = new ArrayList();
+        COLUMN_HIGHLIGHT_ATTRIBUTES = new ArrayList<>();
         for (int i = 0; i < MAX_COLUMN_HIGHLIGHT_COLORS; ++i) {
-            colorDescriptorList.add(new ColorDescriptor(String.format("Column Highlighting Color %d", i + 1),
-                    ColorKey.createColorKey(String.format("CSV_COLUMN_COLOR_%d", i + 1), (Color) null), ColorDescriptor.Kind.BACKGROUND));
+            TextAttributesKey textAttributesKey = createTextAttributesKey(String.format("CSV_COLUMN_HIGHLIGHT_ATTRIBUTE_%d", i + 1), DefaultLanguageHighlighterColors.STRING);
+            COLUMN_HIGHLIGHT_ATTRIBUTES.add(textAttributesKey);
         }
-        COLOR_DESCRIPTORS = colorDescriptorList.toArray(new ColorDescriptor[MAX_COLUMN_HIGHLIGHT_COLORS]);
     }
 
     public static final HighlightSeverity CSV_COLUMN_INFO_SEVERITY =
@@ -86,25 +86,25 @@ public class CsvAnnotator implements Annotator {
     }
 
     protected boolean showInfoBalloon(@NotNull AnnotationSession annotationSession) {
-        Boolean showInfoBalloon = annotationSession.getUserData(SHOW_INFO_BALLOON);
+        Boolean showInfoBalloon = annotationSession.getUserData(SHOW_INFO_BALLOON_KEY);
         if (showInfoBalloon == null) {
             showInfoBalloon = CsvEditorSettingsExternalizable.getInstance().isShowInfoBalloon();
-            annotationSession.putUserData(SHOW_INFO_BALLOON, showInfoBalloon);
+            annotationSession.putUserData(SHOW_INFO_BALLOON_KEY, showInfoBalloon);
         }
         return showInfoBalloon;
     }
 
     protected boolean handleSeparatorElement(@NotNull PsiElement element, @NotNull AnnotationHolder holder, IElementType elementType, CsvFile csvFile) {
         if (elementType == CsvTypes.COMMA) {
-            TextAttributes textAttributes = holder.getCurrentAnnotationSession().getUserData(TAB_SEPARATOR_HIGHLIGHT_COLOR);
-            if (!Boolean.TRUE.equals(holder.getCurrentAnnotationSession().getUserData(TAB_SEPARATOR_HIGHLIGHT_COLOR_DETERMINED))) {
+            TextAttributes textAttributes = holder.getCurrentAnnotationSession().getUserData(TAB_SEPARATOR_HIGHLIGHT_COLOR_KEY);
+            if (!Boolean.TRUE.equals(holder.getCurrentAnnotationSession().getUserData(TAB_SEPARATOR_HIGHLIGHT_COLOR_DETERMINED_KEY))) {
                 String separator = CsvCodeStyleSettings.getCurrentSeparator(csvFile.getProject(), csvFile.getLanguage());
                 if (CsvEditorSettingsExternalizable.getInstance().isHighlightTabSeparator() && separator.equals(CsvCodeStyleSettings.TAB_SEPARATOR)) {
                     textAttributes = new TextAttributes(null,
                             CsvEditorSettingsExternalizable.getInstance().getTabHighlightColor(),
                             null, null, 0);
-                    holder.getCurrentAnnotationSession().putUserData(TAB_SEPARATOR_HIGHLIGHT_COLOR, textAttributes);
-                    holder.getCurrentAnnotationSession().putUserData(TAB_SEPARATOR_HIGHLIGHT_COLOR_DETERMINED, Boolean.TRUE);
+                    holder.getCurrentAnnotationSession().putUserData(TAB_SEPARATOR_HIGHLIGHT_COLOR_KEY, textAttributes);
+                    holder.getCurrentAnnotationSession().putUserData(TAB_SEPARATOR_HIGHLIGHT_COLOR_DETERMINED_KEY, Boolean.TRUE);
                 }
             }
             if (textAttributes != null) {
@@ -121,23 +121,24 @@ public class CsvAnnotator implements Annotator {
         return false;
     }
 
-    protected TextAttributes getTextAttributes(AnnotationSession annotationSession, CsvColumnInfo<PsiElement> columnInfo) {
-        EditorColorsScheme editorColorsScheme = EditorColorsManager.getInstance().getGlobalScheme();
-        Integer maxNoOfDefinedColumnHighlightColors = annotationSession.getUserData(MAX_NO_OF_DEFINED_COLUMN_HIGHLIGHT_COLORS);
-        if (maxNoOfDefinedColumnHighlightColors == null) {
-            maxNoOfDefinedColumnHighlightColors = 0;
+    public static TextAttributes getTextAttributes(UserDataHolder userDataHolder, CsvColumnInfo<PsiElement> columnInfo) {
+        EditorColorsScheme editorColorsScheme = EditorColorsManager.getInstance().getSchemeForCurrentUITheme();
+        List<TextAttributes> textAttributeList = userDataHolder.getUserData(COLUMN_HIGHLIGHT_TEXT_ATTRIBUTES_KEY);
+        if (textAttributeList == null) {
+            textAttributeList = new ArrayList<>();
+            int maxIndex = 0;
             if (CsvEditorSettingsExternalizable.getInstance().isColumnHighlightingEnabled()) {
-                for (int colorDescriptorIndex = 0; colorDescriptorIndex < COLOR_DESCRIPTORS.length; ++colorDescriptorIndex) {
-                    if (editorColorsScheme.getColor(COLOR_DESCRIPTORS[colorDescriptorIndex].getKey()) != null) {
-                        maxNoOfDefinedColumnHighlightColors = colorDescriptorIndex + 1;
+                for (int colorDescriptorIndex = 0; colorDescriptorIndex < MAX_COLUMN_HIGHLIGHT_COLORS; ++colorDescriptorIndex) {
+                    TextAttributesKey textAttributesKey = COLUMN_HIGHLIGHT_ATTRIBUTES.get(colorDescriptorIndex);
+                    TextAttributes textAttributes = editorColorsScheme.getAttributes(textAttributesKey);
+                    textAttributeList.add(textAttributes);
+                    if (!textAttributesKey.getDefaultAttributes().equals(textAttributes)) {
+                        maxIndex = colorDescriptorIndex;
                     }
                 }
             }
-            annotationSession.putUserData(MAX_NO_OF_DEFINED_COLUMN_HIGHLIGHT_COLORS, maxNoOfDefinedColumnHighlightColors);
+            userDataHolder.putUserData(COLUMN_HIGHLIGHT_TEXT_ATTRIBUTES_KEY, textAttributeList.subList(0, maxIndex + 1));
         }
-        return maxNoOfDefinedColumnHighlightColors == 0 ? null :
-                new TextAttributes(null,
-                        editorColorsScheme.getColor(COLOR_DESCRIPTORS[columnInfo.getColumnIndex() % maxNoOfDefinedColumnHighlightColors].getKey()),
-                        null, null, 0);
+        return textAttributeList.isEmpty() ? null : textAttributeList.get(columnInfo.getColumnIndex() % textAttributeList.size());
     }
 }

@@ -13,16 +13,29 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 public class CsvColorSettingsPage implements ColorSettingsPage {
 
-    private static final AttributesDescriptor[] DESCRIPTORS = new AttributesDescriptor[]{
-            new AttributesDescriptor("Separator", CsvSyntaxHighlighter.COMMA),
-            new AttributesDescriptor("Quote", CsvSyntaxHighlighter.QUOTE),
-            new AttributesDescriptor("Text", CsvSyntaxHighlighter.TEXT),
-            new AttributesDescriptor("Escaped Text", CsvSyntaxHighlighter.ESCAPED_TEXT),
-    };
+    private static final AttributesDescriptor[] DESCRIPTORS;
+
+    static {
+        List<AttributesDescriptor> attributesDescriptors = new ArrayList(Arrays.asList(
+                new AttributesDescriptor("Separator", CsvSyntaxHighlighter.COMMA),
+                new AttributesDescriptor("Quote", CsvSyntaxHighlighter.QUOTE),
+                new AttributesDescriptor("Text", CsvSyntaxHighlighter.TEXT),
+                new AttributesDescriptor("Escaped Text", CsvSyntaxHighlighter.ESCAPED_TEXT)
+        ));
+
+        List<TextAttributesKey> columnHighlightAttributes = CsvAnnotator.COLUMN_HIGHLIGHT_ATTRIBUTES;
+        for (int i = 0; i < columnHighlightAttributes.size(); ++i) {
+            attributesDescriptors.add(new AttributesDescriptor(String.format("Column Highlighting Color %d", i + 1), columnHighlightAttributes.get(i)));
+        }
+        DESCRIPTORS = attributesDescriptors.toArray(new AttributesDescriptor[attributesDescriptors.size()]);
+    }
 
     @Nullable
     @Override
@@ -61,7 +74,7 @@ public class CsvColorSettingsPage implements ColorSettingsPage {
     @NotNull
     @Override
     public ColorDescriptor[] getColorDescriptors() {
-        return CsvAnnotator.COLOR_DESCRIPTORS;
+        return new ColorDescriptor[0];
     }
 
     @NotNull
