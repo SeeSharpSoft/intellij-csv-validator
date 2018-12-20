@@ -80,7 +80,11 @@ public class CsvAnnotator implements Annotator {
             }
 
             Annotation annotation = holder.createAnnotation(CSV_COLUMN_INFO_SEVERITY, textRange, message, tooltip);
-            annotation.setEnforcedTextAttributes(getTextAttributes(holder.getCurrentAnnotationSession(), columnInfo));
+            annotation.setEnforcedTextAttributes(
+                    CsvEditorSettingsExternalizable.getInstance().isColumnHighlightingEnabled() ?
+                            getTextAttributes(holder.getCurrentAnnotationSession(), columnInfo.getColumnIndex()) :
+                            null
+            );
             annotation.setNeedsUpdateOnTyping(false);
         }
     }
@@ -121,24 +125,22 @@ public class CsvAnnotator implements Annotator {
         return false;
     }
 
-    public static TextAttributes getTextAttributes(UserDataHolder userDataHolder, CsvColumnInfo<PsiElement> columnInfo) {
-        EditorColorsScheme editorColorsScheme = EditorColorsManager.getInstance().getSchemeForCurrentUITheme();
+    public static TextAttributes getTextAttributes(UserDataHolder userDataHolder, int columnIndex) {
         List<TextAttributes> textAttributeList = userDataHolder.getUserData(COLUMN_HIGHLIGHT_TEXT_ATTRIBUTES_KEY);
         if (textAttributeList == null) {
+            EditorColorsScheme editorColorsScheme = EditorColorsManager.getInstance().getSchemeForCurrentUITheme();
             textAttributeList = new ArrayList<>();
             int maxIndex = 0;
-            if (CsvEditorSettingsExternalizable.getInstance().isColumnHighlightingEnabled()) {
-                for (int colorDescriptorIndex = 0; colorDescriptorIndex < MAX_COLUMN_HIGHLIGHT_COLORS; ++colorDescriptorIndex) {
-                    TextAttributesKey textAttributesKey = COLUMN_HIGHLIGHT_ATTRIBUTES.get(colorDescriptorIndex);
-                    TextAttributes textAttributes = editorColorsScheme.getAttributes(textAttributesKey);
-                    textAttributeList.add(textAttributes);
-                    if (!textAttributesKey.getDefaultAttributes().equals(textAttributes)) {
-                        maxIndex = colorDescriptorIndex;
-                    }
+            for (int colorDescriptorIndex = 0; colorDescriptorIndex < MAX_COLUMN_HIGHLIGHT_COLORS; ++colorDescriptorIndex) {
+                TextAttributesKey textAttributesKey = COLUMN_HIGHLIGHT_ATTRIBUTES.get(colorDescriptorIndex);
+                TextAttributes textAttributes = editorColorsScheme.getAttributes(textAttributesKey);
+                textAttributeList.add(textAttributes);
+                if (!textAttributesKey.getDefaultAttributes().equals(textAttributes)) {
+                    maxIndex = colorDescriptorIndex;
                 }
             }
             userDataHolder.putUserData(COLUMN_HIGHLIGHT_TEXT_ATTRIBUTES_KEY, textAttributeList.subList(0, maxIndex + 1));
         }
-        return textAttributeList.isEmpty() ? null : textAttributeList.get(columnInfo.getColumnIndex() % textAttributeList.size());
+        return textAttributeList.isEmpty() ? null : textAttributeList.get(columnIndex % textAttributeList.size());
     }
 }

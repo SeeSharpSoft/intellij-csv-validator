@@ -38,6 +38,7 @@ public class CsvEditorSettingsExternalizable implements PersistentStateComponent
         public String TAB_HIGHLIGHT_COLOR;
         public EditorPrio EDITOR_PRIO;
         public int TABLE_EDITOR_ROW_HEIGHT;
+        public boolean TABLE_COLUMN_HIGHTLIGHTING;
 
         public boolean SHOW_TABLE_EDITOR_INFO_PANEL;
 
@@ -52,6 +53,7 @@ public class CsvEditorSettingsExternalizable implements PersistentStateComponent
             EDITOR_PRIO = EditorPrio.TEXT_FIRST;
             SHOW_TABLE_EDITOR_INFO_PANEL = true;
             TABLE_EDITOR_ROW_HEIGHT = TABLE_EDITOR_DEFAULT_ROW_HEIGHT;
+            TABLE_COLUMN_HIGHTLIGHTING = true;
         }
     }
 
@@ -154,5 +156,12 @@ public class CsvEditorSettingsExternalizable implements PersistentStateComponent
         if (finalRowHeight > TABLE_EDITOR_MAX_ROW_HEIGHT) finalRowHeight = TABLE_EDITOR_MAX_ROW_HEIGHT;
         if (finalRowHeight < TABLE_EDITOR_MIN_ROW_HEIGHT) finalRowHeight = TABLE_EDITOR_MIN_ROW_HEIGHT;
         getState().TABLE_EDITOR_ROW_HEIGHT = finalRowHeight;
+    }
+
+    public boolean isTableColumnHighlightingEnabled() {
+        return getState().TABLE_COLUMN_HIGHTLIGHTING;
+    }
+    public void setTableColumnHighlightingEnabled(boolean columnHighlightingEnabled) {
+        getState().TABLE_COLUMN_HIGHTLIGHTING = columnHighlightingEnabled;
     }
 }
