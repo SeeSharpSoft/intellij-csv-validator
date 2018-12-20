@@ -47,7 +47,7 @@ public class CsvEditorSettingsExternalizable implements PersistentStateComponent
             EditorSettingsExternalizable editorSettingsExternalizable = EditorSettingsExternalizable.getInstance();
             CARET_ROW_SHOWN = editorSettingsExternalizable.isCaretRowShown();
             USE_SOFT_WRAP = editorSettingsExternalizable.isUseSoftWraps();
-            COLUMN_HIGHTLIGHTING = false;
+            COLUMN_HIGHTLIGHTING = true;
             HIGHTLIGHT_TAB_SEPARATOR = true;
             SHOW_INFO_BALLOON = true;
             TAB_HIGHLIGHT_COLOR = "-7984";
