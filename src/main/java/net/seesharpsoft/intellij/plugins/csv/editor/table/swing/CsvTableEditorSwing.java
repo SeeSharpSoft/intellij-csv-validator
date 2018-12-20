@@ -223,6 +223,11 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
     }
 
     @Override
+    protected boolean isInCellEditMode() {
+        return getTable() != null && getTable().getCellEditor() != null;
+    }
+
+    @Override
     protected void beforeTableComponentUpdate() {
         removeTableChangeListener();
     }
