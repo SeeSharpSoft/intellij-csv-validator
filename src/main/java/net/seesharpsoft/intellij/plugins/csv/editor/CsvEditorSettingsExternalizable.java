@@ -40,6 +40,7 @@ public class CsvEditorSettingsExternalizable implements PersistentStateComponent
         public int TABLE_EDITOR_ROW_HEIGHT;
 
         public boolean SHOW_TABLE_EDITOR_INFO_PANEL;
+        public boolean QUOTING_ENFORCED;
 
         public OptionSet() {
             EditorSettingsExternalizable editorSettingsExternalizable = EditorSettingsExternalizable.getInstance();
@@ -52,6 +53,7 @@ public class CsvEditorSettingsExternalizable implements PersistentStateComponent
             EDITOR_PRIO = EditorPrio.TEXT_FIRST;
             SHOW_TABLE_EDITOR_INFO_PANEL = true;
             TABLE_EDITOR_ROW_HEIGHT = TABLE_EDITOR_DEFAULT_ROW_HEIGHT;
+            QUOTING_ENFORCED = false;
         }
     }
 
@@ -154,5 +156,12 @@ public class CsvEditorSettingsExternalizable implements PersistentStateComponent
         if (finalRowHeight > TABLE_EDITOR_MAX_ROW_HEIGHT) finalRowHeight = TABLE_EDITOR_MAX_ROW_HEIGHT;
         if (finalRowHeight < TABLE_EDITOR_MIN_ROW_HEIGHT) finalRowHeight = TABLE_EDITOR_MIN_ROW_HEIGHT;
         getState().TABLE_EDITOR_ROW_HEIGHT = finalRowHeight;
+    }
+
+    public boolean isQuotingEnforced() {
+        return getState().QUOTING_ENFORCED;
+    }
+    public void setQuotingEnforced(boolean quotingEnforced) {
+        getState().QUOTING_ENFORCED = quotingEnforced;
     }
 }
