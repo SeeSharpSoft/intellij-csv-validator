@@ -17,6 +17,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfoMap;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
+import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettingsExternalizable;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.api.TableDataHandler;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvFile;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvCodeStyleSettings;
@@ -132,7 +133,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
         if (value == null) {
             return "";
         }
-        return CsvHelper.quoteCsvField(value.toString());
+        return CsvHelper.quoteCsvField(value.toString(), this.currentSeparator, CsvEditorSettingsExternalizable.getInstance().isQuotingEnforced());
     }
 
     protected String generateCsv(Object[][] data) {

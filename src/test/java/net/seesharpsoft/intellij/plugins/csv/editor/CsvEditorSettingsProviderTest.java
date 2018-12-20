@@ -61,6 +61,7 @@ public class CsvEditorSettingsProviderTest extends LightCodeInsightFixtureTestCa
         csvEditorSettingsExternalizable.setHighlightTabSeparator(false);
         csvEditorSettingsExternalizable.setShowInfoBalloon(false);
         csvEditorSettingsExternalizable.setTabHighlightColor(Color.BLACK);
+        csvEditorSettingsExternalizable.setQuotingEnforced(true);
         csvEditorSettingsExternalizable.setTableColumnHighlightingEnabled(false);
 
         assertEquals(true, editorSettingsPanel.isModified());
@@ -74,6 +75,7 @@ public class CsvEditorSettingsProviderTest extends LightCodeInsightFixtureTestCa
         assertEquals(false, csvEditorSettingsExternalizable.isHighlightTabSeparator());
         assertEquals(false, csvEditorSettingsExternalizable.isShowInfoBalloon());
         assertEquals(Color.BLACK, csvEditorSettingsExternalizable.getTabHighlightColor());
+        assertEquals(true, csvEditorSettingsExternalizable.isQuotingEnforced());
         assertEquals(false, csvEditorSettingsExternalizable.isTableColumnHighlightingEnabled());
 
         editorSettingsPanel.disposeUIResources();
@@ -91,6 +93,7 @@ public class CsvEditorSettingsProviderTest extends LightCodeInsightFixtureTestCa
         csvEditorSettingsExternalizable.setHighlightTabSeparator(false);
         csvEditorSettingsExternalizable.setShowInfoBalloon(false);
         csvEditorSettingsExternalizable.setTabHighlightColor(Color.BLACK);
+        csvEditorSettingsExternalizable.setQuotingEnforced(true);
         csvEditorSettingsExternalizable.setTableColumnHighlightingEnabled(false);
 
         editorSettingsPanel.apply();
@@ -104,6 +107,7 @@ public class CsvEditorSettingsProviderTest extends LightCodeInsightFixtureTestCa
         assertEquals(freshOptionSet.HIGHTLIGHT_TAB_SEPARATOR, csvEditorSettingsExternalizable.isHighlightTabSeparator());
         assertEquals(freshOptionSet.SHOW_INFO_BALLOON, csvEditorSettingsExternalizable.isShowInfoBalloon());
         assertEquals(freshOptionSet.TAB_HIGHLIGHT_COLOR, "" + csvEditorSettingsExternalizable.getTabHighlightColor().getRGB());
+        assertEquals(freshOptionSet.QUOTING_ENFORCED, csvEditorSettingsExternalizable.isQuotingEnforced());
         assertEquals(freshOptionSet.TABLE_COLUMN_HIGHTLIGHTING, csvEditorSettingsExternalizable.isTableColumnHighlightingEnabled());
 
         editorSettingsPanel.disposeUIResources();

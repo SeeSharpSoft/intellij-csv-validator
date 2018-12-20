@@ -167,12 +167,19 @@ public final class CsvHelper {
         return result;
     }
 
-    public static String quoteCsvField(String content) {
+    private static boolean isQuotingRequired(String content, String separator) {
+        return content != null && (content.contains(separator) || content.contains("\"") || content.contains("\n"));
+    }
+
+    public static String quoteCsvField(String content, String separator, boolean quotingEnforced) {
         if (content == null) {
             return "";
         }
-        String result = content.replaceAll("\"", "\"\"");
-        return "\"" + result + "\"";
+        if (quotingEnforced || isQuotingRequired(content, separator)) {
+            String result = content.replaceAll("\"", "\"\"");
+            return "\"" + result + "\"";
+        }
+        return content;
     }
 
     public static <T> T[][] deepCopy(T[][] matrix) {
