@@ -219,5 +219,19 @@ public class CsvTableEditorKeyListenerTest extends CsvTableEditorSwingTestBase {
         assertEquals(1, fileEditor.getTable().getSelectedColumn());
     }
 
+    public void testNotClearCellActionByDeleteWhenEditing() {
+        KeyEvent enterKeyEvent = new KeyEvent(fileEditor.getTable(), KeyEvent.KEY_RELEASED, JComponent.WHEN_FOCUSED,
+                0, KeyEvent.VK_ENTER, KeyEvent.CHAR_UNDEFINED);
+        KeyEvent deleteKeyEvent = new KeyEvent(fileEditor.getTable(), KeyEvent.KEY_RELEASED, JComponent.WHEN_FOCUSED,
+                0, KeyEvent.VK_DELETE, KeyEvent.CHAR_UNDEFINED);
 
+        fileEditor.getTable().setRowSelectionInterval(1, 1);
+        fileEditor.getTable().setColumnSelectionInterval(1, 1);
+
+        fileEditor.tableEditorKeyListener.keyReleased(enterKeyEvent);
+        fileEditor.tableEditorKeyListener.keyReleased(deleteKeyEvent);
+
+        Object[][] newState = fileEditor.getDataHandler().getCurrentState();
+        assertEquals("this is column header 2", newState[1][1]);
+    }
 }
