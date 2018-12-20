@@ -61,6 +61,8 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
         this.dataManagement = new TableDataHandler(this, TableDataHandler.MAX_SIZE);
     }
 
+    protected abstract boolean isInCellEditMode();
+
     protected abstract void updateUIComponents();
 
     protected abstract void updateInteractionElements();
