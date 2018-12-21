@@ -48,7 +48,10 @@
 
     <change-notes><![CDATA[
         <pre style="font-family: sans-serif">
-FIX: top and bottom panel scrollable & add column/row buttons removed
+NEW: support column highlighting for table editor
+NEW: support all kind of text attributes for column highlighting
+NEW: table editor values not longer enforced to be quoted on save (customizable)
+FIX: prevent backspace/delete erasing cell value while editing (table editor)
       </pre>
     ]]>
     </change-notes>

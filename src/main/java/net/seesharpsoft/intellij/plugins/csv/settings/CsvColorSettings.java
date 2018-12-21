@@ -19,7 +19,6 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -27,20 +26,17 @@ import static com.intellij.openapi.editor.colors.TextAttributesKey.createTextAtt
 
 public class CsvColorSettings implements ColorSettingsPage {
 
-    private static final AttributesDescriptor[] DESCRIPTORS;
-
     private static final Integer MAX_COLUMN_HIGHLIGHT_COLORS = 10;
+    private static final AttributesDescriptor[] DESCRIPTORS;
     private static final List<TextAttributesKey> COLUMN_HIGHLIGHT_ATTRIBUTES;
-
     private static final Key<List<TextAttributes>> COLUMN_HIGHLIGHT_TEXT_ATTRIBUTES_KEY = Key.create("CSV_PLUGIN_COLUMN_HIGHLIGHT_ATTRIBUTES");
 
     static {
-        List<AttributesDescriptor> attributesDescriptors = new ArrayList(Arrays.asList(
-                new AttributesDescriptor("Separator", CsvSyntaxHighlighter.COMMA),
-                new AttributesDescriptor("Quote", CsvSyntaxHighlighter.QUOTE),
-                new AttributesDescriptor("Text", CsvSyntaxHighlighter.TEXT),
-                new AttributesDescriptor("Escaped Text", CsvSyntaxHighlighter.ESCAPED_TEXT)
-        ));
+        List<AttributesDescriptor> attributesDescriptors = new ArrayList();
+        attributesDescriptors.add(new AttributesDescriptor("Separator", CsvSyntaxHighlighter.COMMA));
+        attributesDescriptors.add(new AttributesDescriptor("Quote", CsvSyntaxHighlighter.QUOTE));
+        attributesDescriptors.add(new AttributesDescriptor("Text", CsvSyntaxHighlighter.TEXT));
+        attributesDescriptors.add(new AttributesDescriptor("Escaped Text", CsvSyntaxHighlighter.ESCAPED_TEXT));
 
         COLUMN_HIGHLIGHT_ATTRIBUTES = new ArrayList<>();
         for (int i = 0; i < MAX_COLUMN_HIGHLIGHT_COLORS; ++i) {
@@ -65,7 +61,8 @@ public class CsvColorSettings implements ColorSettingsPage {
                     maxIndex = colorDescriptorIndex;
                 }
             }
-            userDataHolder.putUserData(COLUMN_HIGHLIGHT_TEXT_ATTRIBUTES_KEY, textAttributeList.subList(0, maxIndex + 1));
+            textAttributeList = textAttributeList.subList(0, maxIndex + 1);
+            userDataHolder.putUserData(COLUMN_HIGHLIGHT_TEXT_ATTRIBUTES_KEY, textAttributeList);
         }
         return textAttributeList.isEmpty() ? null : textAttributeList.get(columnIndex % textAttributeList.size());
     }

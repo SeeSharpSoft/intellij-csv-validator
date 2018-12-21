@@ -62,13 +62,13 @@ All functionality that is available for plain CSV files (inspections, intentions
 
 ### \*NEW\* Table Editor 
 
-The plugin provides editing of CSV files via a table editor since version 2.0.0. This editor is NOT related to the _Edit as table..._ functionality of [IntelliJ IDEA Ultimate/PhpStorm/DataGrip/etc.](https://www.jetbrains.com/help/phpstorm/editing-csv-and-tsv-files.html) and does not share any of its features or settings. It is a an alternative to the CSV text editor and not meant to replace or mirror the capabilities of the Jetbrains _"Data"_ tab.
+The plugin provides editing of CSV files via a table editor since version 2.0.0. This editor is NOT related to the _Edit as table..._ functionality of [IntelliJ IDEA Ultimate/PhpStorm/DataGrip/etc.](https://www.jetbrains.com/help/phpstorm/editing-csv-and-tsv-files.html) and does not share any implementation or settings. It is a an alternative to the CSV text editor and not meant to replace or mirror the capabilities of the Jetbrains _"Data"_ tab.
 
 **!!! IMPORTANT !!!**
 
 The table editor requires a syntactically correct formatted CSV file. If the file can't be parsed, the table editor will be not available. The file needs to be fixed first via a text editor before it can be viewed and edited in the table editor.
 
-**Using the table editor might change the format of the CSV file:** All fields will be surrounded by double quotes and any spaces that are not part of the content will be removed!
+**Using the table editor might change the format of the CSV file:** Until version 2.1.0 all fields were surrounded by double quotes and any spaces that are not part of the content was removed! Since version 2.1.0 the default changed but the described behavior can still be enabled (see *Editor Settings -> Enforce value quoting*).
 
 ![Table editor](./docs/tableeditor.png)
 
@@ -119,7 +119,7 @@ The highlighting of the current caret row might interfere with custom background
 
 ###### Enable column highlighting
 
-An easy way to switch the newly introduced *Column Highlighting* on or off.
+An easy way to switch *Column Highlighting* on or off (in text editor).
 
 ###### Highlight tab separator
 
@@ -144,6 +144,14 @@ Defines how many lines of text are shown in one editor cell by default. *Auto* d
 ##### Show info panel
 
 Enables/disables the info panel at the bottom of the table editor.
+
+##### **NEW** Enforce value quoting
+
+Always quotes a single value on save - even if not required.
+
+##### **NEW** Enable column highlighting
+
+An easy way to switch *Column Highlighting* on or off (in table editor).
 
 ### Color Scheme
 
