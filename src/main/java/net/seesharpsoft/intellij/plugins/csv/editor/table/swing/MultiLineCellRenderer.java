@@ -1,5 +1,10 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
+import com.intellij.openapi.editor.markup.TextAttributes;
+import com.intellij.openapi.util.UserDataHolder;
+import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettingsExternalizable;
+import net.seesharpsoft.intellij.plugins.csv.settings.CsvColorSettings;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.CellEditorListener;
@@ -16,12 +21,31 @@ import java.util.Set;
 public class MultiLineCellRenderer extends JTextArea implements TableCellRenderer, TableCellEditor {
 
     private Set<CellEditorListener> cellEditorListenerSet = new HashSet<>();
+    private final UserDataHolder userDataHolder;
 
-    public MultiLineCellRenderer(CsvTableEditorKeyListener keyListener) {
+    public MultiLineCellRenderer(CsvTableEditorKeyListener keyListener, UserDataHolder userDataHolderParam) {
         setLineWrap(true);
         setWrapStyleWord(true);
         setOpaque(true);
         addKeyListener(keyListener);
+        this.userDataHolder = userDataHolderParam;
+    }
+
+    private TextAttributes getColumnTextAttributes(int column) {
+        if (CsvEditorSettingsExternalizable.getInstance().isTableColumnHighlightingEnabled()) {
+            return CsvColorSettings.getTextAttributesOfColumn(column, userDataHolder);
+        }
+        return null;
+    }
+
+    private Color getColumnForegroundColor(int column, Color fallback) {
+        TextAttributes textAttributes = getColumnTextAttributes(column);
+        return textAttributes == null || textAttributes.getForegroundColor() == null ? fallback : textAttributes.getForegroundColor();
+    }
+
+    private Color getColumnBackgroundColor(int column, Color fallback) {
+        TextAttributes textAttributes = getColumnTextAttributes(column);
+        return textAttributes == null || textAttributes.getBackgroundColor() == null ? fallback : textAttributes.getBackgroundColor();
     }
 
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
@@ -29,8 +53,8 @@ public class MultiLineCellRenderer extends JTextArea implements TableCellRendere
             setForeground(table.getSelectionForeground());
             setBackground(table.getSelectionBackground());
         } else {
-            setForeground(table.getForeground());
-            setBackground(table.getBackground());
+            setForeground(getColumnForegroundColor(column, table.getForeground()));
+            setBackground(getColumnBackgroundColor(column, table.getBackground()));
         }
         setFont(table.getFont());
         if (hasFocus) {

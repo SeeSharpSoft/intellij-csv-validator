@@ -1,3 +1,11 @@
+2.1.0
+Jan 01, 2019
+
+NEW: support column highlighting for table editor
+NEW: support all kind of text attributes for column highlighting
+NEW: table editor values not longer enforced to be quoted on save (customizable)
+FIX: prevent backspace/delete erasing cell value while editing (table editor)
+
 2.0.2
 Dec 16, 2018
 
