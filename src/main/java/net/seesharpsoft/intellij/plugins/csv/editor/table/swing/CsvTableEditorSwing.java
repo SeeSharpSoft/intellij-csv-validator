@@ -104,10 +104,10 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
 
         tblEditor.getColumnModel().addColumnModelListener(tableEditorListener);
 
-        tblEditor.setDefaultRenderer(String.class, new MultiLineCellRenderer(this.tableEditorKeyListener));
-        tblEditor.setDefaultRenderer(Object.class, new MultiLineCellRenderer(this.tableEditorKeyListener));
-        tblEditor.setDefaultEditor(String.class, new MultiLineCellRenderer(this.tableEditorKeyListener));
-        tblEditor.setDefaultEditor(Object.class, new MultiLineCellRenderer(this.tableEditorKeyListener));
+        tblEditor.setDefaultRenderer(String.class, new MultiLineCellRenderer(this.tableEditorKeyListener, this));
+        tblEditor.setDefaultRenderer(Object.class, new MultiLineCellRenderer(this.tableEditorKeyListener, this));
+        tblEditor.setDefaultEditor(String.class, new MultiLineCellRenderer(this.tableEditorKeyListener, this));
+        tblEditor.setDefaultEditor(Object.class, new MultiLineCellRenderer(this.tableEditorKeyListener, this));
         tblEditor.registerKeyboardAction(this.tableEditorActions.undo,
                 KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_MASK), JComponent.WHEN_FOCUSED);
         tblEditor.registerKeyboardAction(this.tableEditorActions.redo,
@@ -220,6 +220,11 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
 
     public void syncTableModelWithUI() {
         updateTableComponentData(this.storeCurrentState());
+    }
+
+    @Override
+    protected boolean isInCellEditMode() {
+        return getTable() != null && getTable().getCellEditor() != null;
     }
 
     @Override

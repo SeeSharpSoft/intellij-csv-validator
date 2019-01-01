@@ -38,20 +38,24 @@ public class CsvEditorSettingsExternalizable implements PersistentStateComponent
         public String TAB_HIGHLIGHT_COLOR;
         public EditorPrio EDITOR_PRIO;
         public int TABLE_EDITOR_ROW_HEIGHT;
+        public boolean TABLE_COLUMN_HIGHTLIGHTING;
 
         public boolean SHOW_TABLE_EDITOR_INFO_PANEL;
+        public boolean QUOTING_ENFORCED;
 
         public OptionSet() {
             EditorSettingsExternalizable editorSettingsExternalizable = EditorSettingsExternalizable.getInstance();
             CARET_ROW_SHOWN = editorSettingsExternalizable.isCaretRowShown();
             USE_SOFT_WRAP = editorSettingsExternalizable.isUseSoftWraps();
-            COLUMN_HIGHTLIGHTING = false;
+            COLUMN_HIGHTLIGHTING = true;
             HIGHTLIGHT_TAB_SEPARATOR = true;
             SHOW_INFO_BALLOON = true;
             TAB_HIGHLIGHT_COLOR = "-7984";
             EDITOR_PRIO = EditorPrio.TEXT_FIRST;
             SHOW_TABLE_EDITOR_INFO_PANEL = true;
             TABLE_EDITOR_ROW_HEIGHT = TABLE_EDITOR_DEFAULT_ROW_HEIGHT;
+            QUOTING_ENFORCED = false;
+            TABLE_COLUMN_HIGHTLIGHTING = true;
         }
     }
 
@@ -154,5 +158,19 @@ public class CsvEditorSettingsExternalizable implements PersistentStateComponent
         if (finalRowHeight > TABLE_EDITOR_MAX_ROW_HEIGHT) finalRowHeight = TABLE_EDITOR_MAX_ROW_HEIGHT;
         if (finalRowHeight < TABLE_EDITOR_MIN_ROW_HEIGHT) finalRowHeight = TABLE_EDITOR_MIN_ROW_HEIGHT;
         getState().TABLE_EDITOR_ROW_HEIGHT = finalRowHeight;
+    }
+
+    public boolean isQuotingEnforced() {
+        return getState().QUOTING_ENFORCED;
+    }
+    public void setQuotingEnforced(boolean quotingEnforced) {
+        getState().QUOTING_ENFORCED = quotingEnforced;
+    }
+
+    public boolean isTableColumnHighlightingEnabled() {
+        return getState().TABLE_COLUMN_HIGHTLIGHTING;
+    }
+    public void setTableColumnHighlightingEnabled(boolean columnHighlightingEnabled) {
+        getState().TABLE_COLUMN_HIGHTLIGHTING = columnHighlightingEnabled;
     }
 }

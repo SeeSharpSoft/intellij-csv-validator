@@ -49,9 +49,9 @@ public class CsvTableEditorKeyListener extends CsvTableEditorUtilBase implements
                 }
                 break;
             case KeyEvent.VK_ENTER:
-                if (e.isControlDown()) {
+                if (e.isControlDown() && csvTableEditor.isInCellEditMode()) {
                     stopEditing.actionPerformed(null);
-                } else {
+                } else if (!csvTableEditor.isInCellEditMode()) {
                     startEditing.actionPerformed(null);
                 }
                 break;
@@ -61,7 +61,7 @@ public class CsvTableEditorKeyListener extends CsvTableEditorUtilBase implements
                     csvTableEditor.tableEditorActions.deleteColumn.actionPerformed(null);
                 } else if (e.isControlDown()) {
                     csvTableEditor.tableEditorActions.deleteRow.actionPerformed(null);
-                } else {
+                } else if (!csvTableEditor.isInCellEditMode()) {
                     csvTableEditor.tableEditorActions.clearCells.actionPerformed(null);
                 }
                 break;
