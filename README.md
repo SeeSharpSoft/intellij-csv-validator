@@ -105,9 +105,15 @@ The plugin introduces an enhanced text editor supporting custom settings - and a
 
 ![Editor settings](./docs/editorsettings.png)
 
-#### Editor Usage
+#### General
+
+##### Editor Usage
 
 The preferred editor usage can be switched between "Text Editor first", "Table Editor first" or "Text Editor only", which has an effect on the editor tab order (or whether the table editor is shown at all). A "Table Editor only" option is not available (mainly due to the table editor restrictions when handling erroneous CSV files).
+
+##### Column numbering
+
+Enable zero-based column numbering. This affects the tooltip info of the text editor as well as column numbering of the table editor.
 
 #### Text Editor
 
