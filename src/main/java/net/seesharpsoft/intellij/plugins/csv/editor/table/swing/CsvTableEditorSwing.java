@@ -10,7 +10,7 @@ import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfo;
 import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfoMap;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettingsExternalizable;
-import net.seesharpsoft.intellij.plugins.csv.editor.table.*;
+import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditor;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.api.TableDataChangeEvent;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvFile;
 import org.jetbrains.annotations.NotNull;
@@ -50,11 +50,12 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
     private JComboBox comboRowHeight;
     private JLabel lblTextlines;
 
+    private JTable rowHeadersTable;
+
     protected final CsvTableEditorActions tableEditorActions;
     protected final CsvTableEditorChangeListener tableEditorListener;
     protected final CsvTableEditorMouseListener tableEditorMouseListener;
     protected final CsvTableEditorKeyListener tableEditorKeyListener;
-
 
     private boolean listenerApplied = false;
 
@@ -116,8 +117,9 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
                 KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_MASK), JComponent.WHEN_FOCUSED);
 
         applyRowLines(getFileEditorState().getRowLines());
-    }
 
+        rowHeadersTable = TableRowUtilities.addNumberColumn(tblEditor, 1, true);
+    }
 
     protected void applyTableChangeListener() {
         if (!listenerApplied && isEditable()) {
@@ -199,19 +201,19 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
         removeTableChangeListener();
         try {
             JTable table = getTable();
+            int columnCount = table.getColumnCount();
             int actualFirst = Math.min(first, table.getRowCount());
             int actualLast = Math.min(last, table.getRowCount());
             for (int row = actualFirst; row < actualLast; row++) {
                 int rowHeight = getPreferredRowHeight();
                 if (rowHeight == 0) {
-                    for (int column = 0; column < table.getColumnCount(); column++) {
+                    for (int column = 0; column < columnCount; column++) {
                         Component comp = table.prepareRenderer(table.getCellRenderer(row, column), row, column);
                         rowHeight = Math.max(rowHeight, comp.getPreferredSize().height);
                     }
                 }
-                if (rowHeight != table.getRowHeight(row)) {
-                    table.setRowHeight(row, rowHeight);
-                }
+                table.setRowHeight(row, rowHeight);
+                rowHeadersTable.setRowHeight(row, rowHeight);
             }
         } finally {
             applyTableChangeListener();
