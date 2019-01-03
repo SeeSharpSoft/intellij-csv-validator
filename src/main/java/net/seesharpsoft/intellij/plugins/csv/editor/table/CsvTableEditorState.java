@@ -18,6 +18,7 @@ public class CsvTableEditorState implements FileEditorState {
 
     private int[] columnWidths;
     private Boolean showInfoPanel;
+    private Boolean fixedHeaders;
     private Integer rowLines;
 
     public CsvTableEditorState() {
@@ -43,6 +44,14 @@ public class CsvTableEditorState implements FileEditorState {
         showInfoPanel = showInfoPanelArg;
     }
 
+    public boolean getFixedHeaders() {
+        return fixedHeaders == null ? false : fixedHeaders;
+    }
+
+    public void setFixedHeaders(boolean fixedHeadersArg) {
+        fixedHeaders = fixedHeadersArg;
+    }
+
     public int getRowLines() {
         if (rowLines == null) {
             rowLines = CsvEditorSettingsExternalizable.getInstance().getTableEditorRowHeight();
@@ -61,6 +70,7 @@ public class CsvTableEditorState implements FileEditorState {
 
     public void write(@NotNull Project project, @NotNull Element element) {
         element.setAttribute("showInfoPanel", "" + showInfoPanel());
+        element.setAttribute("fixedHeaders", "" + getFixedHeaders());
         element.setAttribute("rowLines", "" + getRowLines());
         for (int i = 0; i < columnWidths.length; ++i) {
             Element cwElement = new Element("column");
@@ -78,6 +88,10 @@ public class CsvTableEditorState implements FileEditorState {
         Attribute attribute = element.getAttribute("showInfoPanel");
         state.setShowInfoPanel(
                 attribute == null ? CsvEditorSettingsExternalizable.getInstance().showTableEditorInfoPanel() : Boolean.parseBoolean(attribute.getValue())
+        );
+        attribute = element.getAttribute("fixedHeaders");
+        state.setFixedHeaders(
+                attribute == null ? false : Boolean.parseBoolean(attribute.getValue())
         );
         state.setRowLines(
                 StringUtilRt.parseInt(element.getAttributeValue("rowLines"), CsvEditorSettingsExternalizable.getInstance().getTableEditorRowHeight())

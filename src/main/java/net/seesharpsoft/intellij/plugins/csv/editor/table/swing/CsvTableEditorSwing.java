@@ -11,6 +11,7 @@ import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfoMap;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettingsExternalizable;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditor;
+import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditorState;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.api.TableDataChangeEvent;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvFile;
 import org.jetbrains.annotations.NotNull;
@@ -49,6 +50,7 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
     private JComponent panelInfo;
     private JComboBox comboRowHeight;
     private JLabel lblTextlines;
+    private JCheckBox cbFixedHeaders;
 
     private JTable rowHeadersTable;
 
@@ -99,6 +101,11 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
             updateRowHeights(null);
         });
 
+        cbFixedHeaders.addActionListener(e -> {
+            getFileEditorState().setFixedHeaders(cbFixedHeaders.isSelected());
+            updateTableComponentData(getDataHandler().getCurrentState());
+        });
+
         tblEditor.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         tblEditor.setShowColumns(true);
         setTableRowHeight(0);
@@ -116,7 +123,7 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
         tblEditor.registerKeyboardAction(this.tableEditorActions.redo,
                 KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_MASK), JComponent.WHEN_FOCUSED);
 
-        applyRowLines(getFileEditorState().getRowLines());
+        applyEditorState(getFileEditorState());
 
         rowHeadersTable = TableRowUtilities.addNumberColumn(tblEditor, 1, true);
     }
@@ -141,8 +148,10 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
         }
     }
 
-    protected void applyRowLines(int rowLines) {
-        comboRowHeight.setSelectedIndex(rowLines);
+    @Override
+    protected void applyEditorState(CsvTableEditorState editorState) {
+        cbFixedHeaders.setSelected(editorState.getFixedHeaders());
+        comboRowHeight.setSelectedIndex(editorState.getRowLines());
         setTableRowHeight(getPreferredRowHeight());
     }
 
@@ -151,10 +160,15 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
     }
 
     private Object[] generateColumnIdentifiers(TableModel tableModel) {
+        if (getFileEditorState().getFixedHeaders()) {
+            return getFixedHeaderValues();
+        }
+
         int columnCount = tableModel.getColumnCount();
+        int columnOffset = CsvEditorSettingsExternalizable.getInstance().isZeroBasedColumnNumbering() ? 0 : 1;
         Object[] identifiers = new Object[columnCount];
         for (int i = 0; i < columnCount; ++i) {
-            identifiers[i] = tableModel.getColumnName(i);
+            identifiers[i] = i + columnOffset;
         }
         return identifiers;
     }
@@ -249,14 +263,16 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
     protected void setTableComponentData(Object[][] values) {
         DefaultTableModel tableModel = getTableModel();
 
-        int rowCount = values.length;
+        boolean fixedHeader = getFileEditorState().getFixedHeaders();
+        int firstRow = fixedHeader ? 1 : 0;
+        int rowCount = values.length - firstRow;
         int columnCount = values.length == 0 ? 0 : values[0].length;
         tableModel.setRowCount(rowCount);
         tableModel.setColumnCount(columnCount);
 
         for (int row = 0; row < rowCount; ++row) {
             for (int column = 0; column < columnCount; ++column) {
-                tableModel.setValueAt(values[row][column], row, column);
+                tableModel.setValueAt(values[row + firstRow][column], row, column);
             }
         }
     }
@@ -268,6 +284,7 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
         lblErrorText.setVisible(hasErrors());
         lblTextlines.setVisible(!hasErrors());
         comboRowHeight.setVisible(!hasErrors());
+        cbFixedHeaders.setVisible(!hasErrors());
 
         this.removeTableChangeListener();
         this.applyTableChangeListener();
@@ -302,16 +319,18 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
             return;
         }
 
-        columnInfoMap = csvFile.getMyColumnInfoMap();
+        columnInfoMap = newColumnInfoMap;
         updateInteractionElements();
         DefaultTableModel tableModel = new DefaultTableModel(0, 0);
         if (!columnInfoMap.hasErrors()) {
+            int startRow = getFileEditorState().getFixedHeaders() ? 1 : 0;
             for (int i = 0; i < columnInfoMap.getColumnInfos().size(); ++i) {
                 CsvColumnInfo<PsiElement> columnInfo = columnInfoMap.getColumnInfo(i);
                 List<PsiElement> elements = columnInfo.getElements();
 
                 tableModel.addColumn(String.format("Column %s (%s entries)", i + 1, elements.size()),
                         elements.stream()
+                                .skip(startRow)
                                 .map(psiElement -> psiElement == null ? "" : CsvHelper.unquoteCsvValue(psiElement.getText()))
                                 .collect(Collectors.toList()).toArray(new String[0]));
             }
@@ -365,19 +384,39 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
         return width;
     }
 
-    protected Object[][] getTableComponentData(TableModel tableModel, boolean tableModelIsLeading) {
-        int rowCount = tableModel.getRowCount();
-        int columnCount = tableModel.getColumnCount();
-        Object[][] result = new Object[rowCount][];
-        for (int row = 0; row < rowCount; ++row) {
-            int modelRow = tableModelIsLeading ? row : tblEditor.convertRowIndexToModel(row);
-            result[row] = new Object[columnCount];
-            for (int column = 0; column < columnCount; ++column) {
-                int modelColumn = tableModelIsLeading ? column : tblEditor.convertColumnIndexToModel(column);
-                result[row][column] = tableModel.getValueAt(modelRow, modelColumn);
+    private Object[] getFixedHeaderValues() {
+        Object[] headerValues = new Object[columnInfoMap.getColumnInfos().size()];
+        if (!columnInfoMap.hasErrors()) {
+            for (int i = 0; i < columnInfoMap.getColumnInfos().size(); ++i) {
+                CsvColumnInfo<PsiElement> columnInfo = columnInfoMap.getColumnInfo(i);
+                PsiElement psiElement = columnInfo.getHeaderElement();
+                headerValues[i] = psiElement == null ? "" : CsvHelper.unquoteCsvValue(psiElement.getText());
             }
         }
-        return result;
+        return headerValues;
+    }
+
+    protected Object[][] getTableComponentData(TableModel tableModel, boolean tableModelIsLeading) {
+        boolean fixedHeader = getFileEditorState().getFixedHeaders();
+        int rowCount = tableModel.getRowCount();
+        int columnCount = tableModel.getColumnCount();
+        Object[][] values;
+        if (fixedHeader) {
+            values = new Object[rowCount + 1][];
+            values[0] = getFixedHeaderValues();
+        } else {
+            values = new Object[rowCount][];
+        }
+        for (int row = 0; row < rowCount; ++row) {
+            int valuesRowIndex = row + (fixedHeader ? 1 : 0);
+            int modelRow = tableModelIsLeading ? row : tblEditor.convertRowIndexToModel(row);
+            values[valuesRowIndex] = new Object[columnCount];
+            for (int column = 0; column < columnCount; ++column) {
+                int modelColumn = tableModelIsLeading ? column : tblEditor.convertColumnIndexToModel(column);
+                values[valuesRowIndex][column] = tableModel.getValueAt(modelRow, modelColumn);
+            }
+        }
+        return values;
     }
 
     @Override

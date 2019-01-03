@@ -68,7 +68,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
 
     protected abstract void updateInteractionElements();
 
-    protected abstract void applyRowLines(int rowLines);
+    protected abstract void applyEditorState(CsvTableEditorState editorState);
 
     protected abstract void setTableComponentData(Object[][] values);
 
@@ -186,7 +186,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
         CsvTableEditorState tableEditorState = fileEditorState instanceof CsvTableEditorState ? (CsvTableEditorState) fileEditorState : new CsvTableEditorState();
         this.storedState = tableEditorState;
 
-        applyRowLines(getFileEditorState().getRowLines());
+        applyEditorState(getFileEditorState());
     }
 
     @Override

@@ -25,6 +25,7 @@ public class CsvEditorSettingsProvider implements SearchableConfigurable {
     private JComboBox cbEditorUsage;
     private JCheckBox cbQuotingEnforced;
     private JCheckBox cbTableColumnHighlighting;
+    private JCheckBox cbZeroBasedColumnNumbering;
 
     @NotNull
     @Override
@@ -67,7 +68,8 @@ public class CsvEditorSettingsProvider implements SearchableConfigurable {
                 !Objects.equals(cbEditorUsage.getSelectedIndex(), csvEditorSettingsExternalizable.getEditorPrio().ordinal()) ||
                 isModified(cbQuotingEnforced, csvEditorSettingsExternalizable.isQuotingEnforced()) ||
                 !Objects.equals(cbEditorUsage.getSelectedIndex(), csvEditorSettingsExternalizable.getEditorPrio().ordinal()) ||
-                isModified(cbTableColumnHighlighting, csvEditorSettingsExternalizable.isTableColumnHighlightingEnabled());
+                isModified(cbTableColumnHighlighting, csvEditorSettingsExternalizable.isTableColumnHighlightingEnabled()) ||
+                isModified(cbZeroBasedColumnNumbering, csvEditorSettingsExternalizable.isZeroBasedColumnNumbering());
     }
 
     @Override
@@ -84,6 +86,7 @@ public class CsvEditorSettingsProvider implements SearchableConfigurable {
         cbEditorUsage.setSelectedIndex(csvEditorSettingsExternalizable.getEditorPrio().ordinal());
         cbQuotingEnforced.setSelected(csvEditorSettingsExternalizable.isQuotingEnforced());
         cbTableColumnHighlighting.setSelected(csvEditorSettingsExternalizable.isTableColumnHighlightingEnabled());
+        cbZeroBasedColumnNumbering.setSelected(csvEditorSettingsExternalizable.isZeroBasedColumnNumbering());
     }
 
     @Override
@@ -100,6 +103,7 @@ public class CsvEditorSettingsProvider implements SearchableConfigurable {
         csvEditorSettingsExternalizable.setEditorPrio(CsvEditorSettingsExternalizable.EditorPrio.values()[cbEditorUsage.getSelectedIndex()]);
         csvEditorSettingsExternalizable.setQuotingEnforced(cbQuotingEnforced.isSelected());
         csvEditorSettingsExternalizable.setTableColumnHighlightingEnabled(cbTableColumnHighlighting.isSelected());
+        csvEditorSettingsExternalizable.setZeroBasedColumnNumbering(cbZeroBasedColumnNumbering.isSelected());
     }
 
     protected void createUIComponents() {
