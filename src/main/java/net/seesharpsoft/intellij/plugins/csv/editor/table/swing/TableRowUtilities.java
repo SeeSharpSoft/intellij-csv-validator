@@ -62,6 +62,77 @@ public final class TableRowUtilities {
         // static helper
     }
 
+    private static JTable createRowHeadersTable(final JScrollPane scrollPane, final JTable userTable, int startingNumber) {
+        final JTable rowHeadersTable = new JBTable(new RowHeadersTableModel(userTable.getModel().getRowCount(), startingNumber));
+
+        // this is where you set the width of the row headers
+        rowHeadersTable.createDefaultColumnsFromModel();
+
+        // make the rows look and behave like headers
+        rowHeadersTable.setBackground(rowHeadersTable.getTableHeader().getBackground());
+        rowHeadersTable.setForeground(rowHeadersTable.getTableHeader().getForeground());
+        rowHeadersTable.setFont(rowHeadersTable.getTableHeader().getFont());
+        rowHeadersTable.setRowHeight(userTable.getRowHeight());
+        rowHeadersTable.getTableHeader().setReorderingAllowed(false);
+        rowHeadersTable.setRowSelectionAllowed(true);
+        rowHeadersTable.setCellSelectionEnabled(true);
+        rowHeadersTable.setFocusable(true);
+        rowHeadersTable.setDragEnabled(true);
+        rowHeadersTable.setSelectionMode(userTable.getSelectionModel().getSelectionMode());
+
+        return rowHeadersTable;
+    }
+
+    private static void adjustComponents(final JScrollPane scrollPane, final JTable userTable, final JTable rowHeadersTable) {
+        scrollPane.setRowHeaderView(rowHeadersTable);
+        // set the row header name into the top left corner
+        scrollPane.setCorner(JScrollPane.UPPER_LEFT_CORNER, rowHeadersTable.getTableHeader());
+        Border border = scrollPane.getBorder();
+        if (border == null || border instanceof UIResource) {
+            scrollPane.setBorder(UIManager.getBorder("Table.scrollPaneBorder"));
+        }
+
+        // label used for rendering
+        final JLabel label = new JLabel();
+
+        scrollPane.getVerticalScrollBar().addAdjustmentListener(new AdjustmentListener() {
+            public void adjustmentValueChanged(AdjustmentEvent e) {
+                int scrollBarValue = e.getValue();
+
+                adjustColumnWidth(rowHeadersTable, label, scrollBarValue);
+            }
+        });
+
+        rowHeadersTable.getColumnModel().getColumn(0).setCellRenderer(new TableCellRenderer() {
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
+                                                           boolean hasFocus, int row, int column) {
+                label.setText("" + value);
+
+                if (isSelected) {
+                    label.setForeground(rowHeadersTable.getSelectionForeground());
+                    label.setBackground(rowHeadersTable.getSelectionBackground());
+                } else {
+                    label.setBackground(rowHeadersTable.getBackground());
+                    label.setForeground(rowHeadersTable.getForeground());
+                }
+                return label;
+            }
+        });
+
+        scrollPane.addComponentListener(new ComponentAdapter() {
+            /**
+             * Whenever the component is resized need to re-adjust the
+             * column width if necessary. This method is also called
+             * when the screen is first layed out.
+             */
+            public void componentResized(ComponentEvent e) {
+                adjustColumnWidth(rowHeadersTable, label, scrollPane.getVerticalScrollBar().getValue());
+            }
+        });
+
+        new TableSynchronizer(rowHeadersTable, userTable);
+    }
+
     /**
      * Adds a number column in the row header of the scrollpane, to match rows
      * in the table. Assumes that table has already been added to a scollpane.
@@ -70,7 +141,7 @@ public final class TableRowUtilities {
      * @param userTable - Table to have column added to (if it is in a scrollpane)
      * @param startingNumber - Number to start number column with, typically 0 or 1.
      */
-    public static JTable addNumberColumn(final JTable userTable, int startingNumber, boolean isRowSelectable) {
+    public static JTable addNumberColumn(final JTable userTable, int startingNumber) {
         Container parentContainer = userTable.getParent();
 
         if (parentContainer instanceof JViewport) {
@@ -89,107 +160,8 @@ public final class TableRowUtilities {
                 JTableHeader tableHeader = userTable.getTableHeader();
                 scrollPane.setColumnHeaderView(tableHeader);
 
-                final JTable rowHeadersTable = new JBTable(new RowHeadersTableModel(userTable.getModel().getRowCount(), startingNumber));
-
-                // rowHeadersTable.getModel().addTableModelListener()
-                userTable.getModel().addTableModelListener(new TableModelListener() {
-                    public void tableChanged(TableModelEvent e) {
-                        RowHeadersTableModel m = (RowHeadersTableModel) rowHeadersTable.getModel();
-
-                        if (userTable.getRowCount() != m.getRowCount()) {
-                            if (userTable.getRowCount() > m.getRowCount()) {
-
-                                int rowDiff = userTable.getRowCount() - m.getRowCount();
-
-                                for (int i = 0; i < rowDiff; i++) {
-                                    m.addNumber();
-                                }
-                            } else if (userTable.getRowCount() < m.getRowCount()) {
-
-                                int rowDiff = m.getRowCount() - userTable.getRowCount();
-
-                                for (int i = 0; i < rowDiff; i++) {
-                                    m.removeNumber();
-                                }
-                            }
-                            m.fireTableDataChanged();
-                        }
-                    }
-                });
-
-                // label used for rendering and for
-                final JLabel label = new JLabel();
-
-                scrollPane.getVerticalScrollBar().addAdjustmentListener(new AdjustmentListener() {
-                    public void adjustmentValueChanged(AdjustmentEvent e) {
-                        int scrollBarValue = e.getValue();
-
-                        adjustColumnWidth(rowHeadersTable, label, scrollBarValue);
-                    }
-                });
-
-                // this is where you set the width of the row headers
-                rowHeadersTable.createDefaultColumnsFromModel();
-
-                // make the rows look like headers
-                rowHeadersTable.setBackground(rowHeadersTable.getTableHeader().getBackground());
-                rowHeadersTable.setForeground(rowHeadersTable.getTableHeader().getForeground());
-                rowHeadersTable.setFont(rowHeadersTable.getTableHeader().getFont());
-
-                rowHeadersTable.setRowHeight(userTable.getRowHeight());
-
-                rowHeadersTable.getTableHeader().setReorderingAllowed(false);
-
-                // If selectable then change the colouring in the renderer
-                if (isRowSelectable) {
-                    // adding a renderer
-                    rowHeadersTable.getColumnModel().getColumn(0).setCellRenderer(new TableCellRenderer() {
-                        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
-                                                                       boolean hasFocus, int row, int column) {
-                            label.setText("" + value);
-
-                            if (isSelected) {
-                                label.setForeground(rowHeadersTable.getSelectionForeground());
-                                label.setBackground(rowHeadersTable.getSelectionBackground());
-                            } else {
-                                label.setBackground(rowHeadersTable.getBackground());
-                                label.setForeground(rowHeadersTable.getForeground());
-                            }
-                            return label;
-                        }
-                    });
-
-                    rowHeadersTable.setRowSelectionAllowed(true);
-                    rowHeadersTable.setCellSelectionEnabled(true);
-                    rowHeadersTable.setFocusable(true);
-                    rowHeadersTable.setDragEnabled(true);
-
-                }
-                scrollPane.setRowHeaderView(rowHeadersTable);
-
-                // set the row header name into the top left corner
-                scrollPane.setCorner(JScrollPane.UPPER_LEFT_CORNER, rowHeadersTable.getTableHeader());
-
-                Border border = scrollPane.getBorder();
-                if (border == null || border instanceof UIResource) {
-                    scrollPane.setBorder(UIManager.getBorder("Table.scrollPaneBorder"));
-                }
-
-                scrollPane.addComponentListener(new ComponentAdapter() {
-                    /**
-                     * Whenever the component is resized need to re-adjust the
-                     * column width if necessary. This method is also called
-                     * when the screen is first layed out.
-                     */
-                    public void componentResized(ComponentEvent e) {
-                        adjustColumnWidth(rowHeadersTable, label, scrollPane.getVerticalScrollBar().getValue());
-                    }
-                });
-
-                rowHeadersTable.setSelectionMode(userTable.getSelectionModel().getSelectionMode());
-
-                TableListener.create(rowHeadersTable, userTable);
-
+                final JTable rowHeadersTable = createRowHeadersTable(scrollPane, userTable, startingNumber);
+                adjustComponents(scrollPane, userTable, rowHeadersTable);
                 return rowHeadersTable;
             }
         }
@@ -202,7 +174,6 @@ public final class TableRowUtilities {
     private static final class RowHeadersTableModel extends AbstractTableModel {
         private ArrayList<Integer> numbersList = new ArrayList<Integer>();
         private int startNumber;
-
 
         /**
          * Initialize model
@@ -266,17 +237,10 @@ public final class TableRowUtilities {
             numbersList.remove(numbersList.size() - 1);
         }
 
+        @Override
         public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+            // value is generated and should not be manipulated
         }
-
-        public void addTableModelListener(TableModelListener l) {
-            super.addTableModelListener(l);
-        }
-
-        public void removeTableModelListener(TableModelListener l) {
-            super.removeTableModelListener(l);
-        }
-
     }
 
     /**
@@ -327,18 +291,14 @@ public final class TableRowUtilities {
      * Listener that joins the two tables; the main table, and the single column row number table. When either
      * are moved or selected, then the affect is passed on to the other table.
      */
-    private static final class TableListener implements ListSelectionListener {
+    private static final class TableSynchronizer implements ListSelectionListener, TableModelListener {
 
         private JTable rowHeadersTable;
         private JTable userTable;
         private JViewport userTableViewPort;
         private JViewport rowHeadersViewPort;
 
-        public static TableListener create(JTable rowHeadersTableArg, JTable userTableArg) {
-            return new TableListener(rowHeadersTableArg, userTableArg);
-        }
-
-        private TableListener(JTable rowHeadersTableArg, JTable userTableArg) {
+        private TableSynchronizer(JTable rowHeadersTableArg, JTable userTableArg) {
             this.userTable = userTableArg;
             this.rowHeadersTable = rowHeadersTableArg;
 
@@ -353,7 +313,7 @@ public final class TableRowUtilities {
 
             rowHeadersTable.getSelectionModel().addListSelectionListener(this);
             userTable.getSelectionModel().addListSelectionListener(this);
-
+            userTable.getModel().addTableModelListener(this);
         }
 
         public void valueChanged(ListSelectionEvent e) {
@@ -402,6 +362,31 @@ public final class TableRowUtilities {
                 }
                 // re-adding the listener to the user table
                 userTable.getSelectionModel().addListSelectionListener(this);
+            }
+        }
+
+        @Override
+        public void tableChanged(TableModelEvent e) {
+
+            RowHeadersTableModel m = (RowHeadersTableModel) rowHeadersTable.getModel();
+
+            if (userTable.getRowCount() != m.getRowCount()) {
+                if (userTable.getRowCount() > m.getRowCount()) {
+
+                    int rowDiff = userTable.getRowCount() - m.getRowCount();
+
+                    for (int i = 0; i < rowDiff; i++) {
+                        m.addNumber();
+                    }
+                } else if (userTable.getRowCount() < m.getRowCount()) {
+
+                    int rowDiff = m.getRowCount() - userTable.getRowCount();
+
+                    for (int i = 0; i < rowDiff; i++) {
+                        m.removeNumber();
+                    }
+                }
+                m.fireTableDataChanged();
             }
         }
     }
