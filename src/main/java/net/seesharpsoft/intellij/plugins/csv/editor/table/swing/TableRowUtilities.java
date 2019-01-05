@@ -62,7 +62,7 @@ public final class TableRowUtilities {
         // static helper
     }
 
-    private static JTable createRowHeadersTable(final JScrollPane scrollPane, final JTable userTable, int startingNumber) {
+    private static JTable createRowHeadersTable(final JTable userTable, int startingNumber) {
         final JTable rowHeadersTable = new JBTable(new RowHeadersTableModel(userTable.getModel().getRowCount(), startingNumber));
 
         // this is where you set the width of the row headers
@@ -160,7 +160,7 @@ public final class TableRowUtilities {
                 JTableHeader tableHeader = userTable.getTableHeader();
                 scrollPane.setColumnHeaderView(tableHeader);
 
-                final JTable rowHeadersTable = createRowHeadersTable(scrollPane, userTable, startingNumber);
+                final JTable rowHeadersTable = createRowHeadersTable(userTable, startingNumber);
                 adjustComponents(scrollPane, userTable, rowHeadersTable);
                 return rowHeadersTable;
             }
