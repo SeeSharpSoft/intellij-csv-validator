@@ -61,6 +61,8 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
 
     private boolean listenerApplied = false;
 
+    private CsvColumnInfoMap lastColumnInfoMap;
+
     public CsvTableEditorSwing(@NotNull Project projectArg, @NotNull VirtualFile fileArg) {
         super(projectArg, fileArg);
 
@@ -102,8 +104,9 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
         });
 
         cbFixedHeaders.addActionListener(e -> {
+            Object[][] values = storeCurrentState();
             getFileEditorState().setFixedHeaders(cbFixedHeaders.isSelected());
-            updateTableComponentData(getDataHandler().getCurrentState());
+            updateTableComponentData(values);
         });
 
         tblEditor.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
@@ -159,12 +162,12 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
         this.getTable().setRowHeight(rowHeight == 0 ? ROW_LINE_HEIGHT : rowHeight);
     }
 
-    private Object[] generateColumnIdentifiers(TableModel tableModel) {
+    private Object[] generateColumnIdentifiers(Object[][] values) {
         if (getFileEditorState().getFixedHeaders()) {
-            return getFixedHeaderValues();
+            return values[0];
         }
 
-        int columnCount = tableModel.getColumnCount();
+        int columnCount = values[0].length;
         int columnOffset = CsvEditorSettingsExternalizable.getInstance().isZeroBasedColumnNumbering() ? 0 : 1;
         Object[] identifiers = new Object[columnCount];
         for (int i = 0; i < columnCount; ++i) {
@@ -249,10 +252,10 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
     }
 
     @Override
-    protected void afterTableComponentUpdate() {
+    protected void afterTableComponentUpdate(Object[][] values) {
         try {
             DefaultTableModel tableModel = this.getTableModel();
-            tableModel.setColumnIdentifiers(generateColumnIdentifiers(tableModel));
+            tableModel.setColumnIdentifiers(generateColumnIdentifiers(values));
             this.updateEditorLayout();
         } finally {
             this.applyTableChangeListener();
@@ -314,12 +317,12 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
             return;
         }
 
-        CsvColumnInfoMap<PsiElement> newColumnInfoMap = csvFile.getMyColumnInfoMap();
-        if (Objects.equals(columnInfoMap, newColumnInfoMap)) {
+        CsvColumnInfoMap<PsiElement> columnInfoMap = csvFile.getMyColumnInfoMap();
+        if (Objects.equals(lastColumnInfoMap, columnInfoMap)) {
             return;
         }
 
-        columnInfoMap = newColumnInfoMap;
+        lastColumnInfoMap = columnInfoMap;
         updateInteractionElements();
         DefaultTableModel tableModel = new DefaultTableModel(0, 0);
         if (!columnInfoMap.hasErrors()) {
@@ -385,6 +388,7 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
     }
 
     private Object[] getFixedHeaderValues() {
+        CsvColumnInfoMap columnInfoMap = getColumnInfoMap();
         Object[] headerValues = new Object[columnInfoMap.getColumnInfos().size()];
         if (!columnInfoMap.hasErrors()) {
             for (int i = 0; i < columnInfoMap.getColumnInfos().size(); ++i) {

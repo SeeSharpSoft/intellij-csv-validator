@@ -47,7 +47,6 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
     private Object[][] initialState = null;
     private CsvTableEditorState storedState = null;
 
-    protected CsvColumnInfoMap<PsiElement> columnInfoMap;
     protected boolean tableIsEditable = true;
 
     public CsvTableEditor(@NotNull Project projectArg, @NotNull VirtualFile fileArg) {
@@ -74,7 +73,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
 
     protected abstract void beforeTableComponentUpdate();
 
-    protected abstract void afterTableComponentUpdate();
+    protected abstract void afterTableComponentUpdate(Object[][] values);
 
     public final void updateTableComponentData(Object[][] values) {
         beforeTableComponentUpdate();
@@ -82,7 +81,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
             setTableComponentData(values);
             saveChanges();
         } finally {
-            afterTableComponentUpdate();
+            afterTableComponentUpdate(values);
         }
     }
 
@@ -99,7 +98,13 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
         return this.tableIsEditable && !this.hasErrors();
     }
 
+    public CsvColumnInfoMap<PsiElement> getColumnInfoMap() {
+        CsvFile csvFile = getCsvFile();
+        return csvFile == null ? null : csvFile.getMyColumnInfoMap();
+    }
+
     public boolean hasErrors() {
+        CsvColumnInfoMap columnInfoMap = getColumnInfoMap();
         return !isValid() || (columnInfoMap != null && columnInfoMap.hasErrors());
     }
 
