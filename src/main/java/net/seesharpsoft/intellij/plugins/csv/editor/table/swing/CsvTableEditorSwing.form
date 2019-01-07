@@ -53,6 +53,19 @@
                   <visible value="false"/>
                 </properties>
               </component>
+              <component id="83d80" class="javax.swing.JCheckBox" binding="cbFixedHeaders">
+                <constraints/>
+                <properties>
+                  <contentAreaFilled value="false"/>
+                  <horizontalTextPosition value="10"/>
+                  <label value="Header row fixed:"/>
+                  <text value="Header row fixed:"/>
+                </properties>
+              </component>
+              <component id="af7be" class="javax.swing.JToolBar$Separator">
+                <constraints/>
+                <properties/>
+              </component>
               <component id="9bf69" class="javax.swing.JLabel" binding="lblTextlines">
                 <constraints/>
                 <properties>
