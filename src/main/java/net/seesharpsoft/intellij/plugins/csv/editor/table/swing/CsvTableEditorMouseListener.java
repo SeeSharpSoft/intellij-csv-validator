@@ -63,6 +63,9 @@ public class CsvTableEditorMouseListener extends CsvTableEditorUtilBase implemen
     @Override
     public void mousePressed(MouseEvent e) {
         int currentColumn = csvTableEditor.getTable().columnAtPoint(e.getPoint());
+        if (currentColumn == -1) {
+            return;
+        }
         JBPopupMenu menu;
         if (e.getSource() instanceof JTableHeader) {
             if (e.getButton() == MouseEvent.BUTTON1) {
