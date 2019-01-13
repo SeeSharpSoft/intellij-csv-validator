@@ -69,7 +69,7 @@ idea {
 apply plugin: 'org.jetbrains.intellij'
 intellij {
     // IDE version - https://www.jetbrains.com/intellij-repository/releases
-    version = System.getenv().getOrDefault('IDEA_VERSION', 'IC-2018.2.3')
+    version = System.getenv().getOrDefault('IDEA_VERSION', 'IC-2018.3.2')
     pluginName = 'CSV Plugin'
     instrumentCode = true
     updateSinceUntilBuild = false

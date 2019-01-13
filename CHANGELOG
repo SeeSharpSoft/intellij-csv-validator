@@ -1,3 +1,11 @@
+2.2.0
+Jan 13, 2019
+
+NEW: option to fixate first row as header (table editor)
+NEW: row numbers (table editor)
+FIX: exception when clicking to right of populated columns (table editor)
+FIX: keep leading/trailing whitespaces (table editor)
+
 2.1.0
 Jan 01, 2019
 
