@@ -39,6 +39,7 @@ public class CsvEditorSettingsExternalizable implements PersistentStateComponent
         public EditorPrio EDITOR_PRIO;
         public int TABLE_EDITOR_ROW_HEIGHT;
         public boolean TABLE_COLUMN_HIGHTLIGHTING;
+        public boolean ZERO_BASED_COLUMN_NUMBERING;
 
         public boolean SHOW_TABLE_EDITOR_INFO_PANEL;
         public boolean QUOTING_ENFORCED;
@@ -56,6 +57,7 @@ public class CsvEditorSettingsExternalizable implements PersistentStateComponent
             TABLE_EDITOR_ROW_HEIGHT = TABLE_EDITOR_DEFAULT_ROW_HEIGHT;
             QUOTING_ENFORCED = false;
             TABLE_COLUMN_HIGHTLIGHTING = true;
+            ZERO_BASED_COLUMN_NUMBERING = false;
         }
     }
 
@@ -172,5 +174,12 @@ public class CsvEditorSettingsExternalizable implements PersistentStateComponent
     }
     public void setTableColumnHighlightingEnabled(boolean columnHighlightingEnabled) {
         getState().TABLE_COLUMN_HIGHTLIGHTING = columnHighlightingEnabled;
+    }
+
+    public boolean isZeroBasedColumnNumbering() {
+        return getState().ZERO_BASED_COLUMN_NUMBERING;
+    }
+    public void setZeroBasedColumnNumbering(boolean zeroBasedColumnNumbering) {
+        getState().ZERO_BASED_COLUMN_NUMBERING = zeroBasedColumnNumbering;
     }
 }

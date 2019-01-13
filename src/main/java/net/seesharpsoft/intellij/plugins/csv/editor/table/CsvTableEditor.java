@@ -47,7 +47,6 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
     private Object[][] initialState = null;
     private CsvTableEditorState storedState = null;
 
-    protected CsvColumnInfoMap<PsiElement> columnInfoMap;
     protected boolean tableIsEditable = true;
 
     public CsvTableEditor(@NotNull Project projectArg, @NotNull VirtualFile fileArg) {
@@ -68,13 +67,13 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
 
     protected abstract void updateInteractionElements();
 
-    protected abstract void applyRowLines(int rowLines);
+    protected abstract void applyEditorState(CsvTableEditorState editorState);
 
     protected abstract void setTableComponentData(Object[][] values);
 
     protected abstract void beforeTableComponentUpdate();
 
-    protected abstract void afterTableComponentUpdate();
+    protected abstract void afterTableComponentUpdate(Object[][] values);
 
     public final void updateTableComponentData(Object[][] values) {
         beforeTableComponentUpdate();
@@ -82,7 +81,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
             setTableComponentData(values);
             saveChanges();
         } finally {
-            afterTableComponentUpdate();
+            afterTableComponentUpdate(values);
         }
     }
 
@@ -99,7 +98,13 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
         return this.tableIsEditable && !this.hasErrors();
     }
 
+    public CsvColumnInfoMap<PsiElement> getColumnInfoMap() {
+        CsvFile csvFile = getCsvFile();
+        return csvFile == null ? null : csvFile.getMyColumnInfoMap();
+    }
+
     public boolean hasErrors() {
+        CsvColumnInfoMap columnInfoMap = getColumnInfoMap();
         return !isValid() || (columnInfoMap != null && columnInfoMap.hasErrors());
     }
 
@@ -186,7 +191,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
         CsvTableEditorState tableEditorState = fileEditorState instanceof CsvTableEditorState ? (CsvTableEditorState) fileEditorState : new CsvTableEditorState();
         this.storedState = tableEditorState;
 
-        applyRowLines(getFileEditorState().getRowLines());
+        applyEditorState(getFileEditorState());
     }
 
     @Override

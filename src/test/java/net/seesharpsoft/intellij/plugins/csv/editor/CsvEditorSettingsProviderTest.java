@@ -63,6 +63,7 @@ public class CsvEditorSettingsProviderTest extends LightCodeInsightFixtureTestCa
         csvEditorSettingsExternalizable.setTabHighlightColor(Color.BLACK);
         csvEditorSettingsExternalizable.setQuotingEnforced(true);
         csvEditorSettingsExternalizable.setTableColumnHighlightingEnabled(false);
+        csvEditorSettingsExternalizable.setZeroBasedColumnNumbering(true);
 
         assertEquals(true, editorSettingsPanel.isModified());
 
@@ -77,6 +78,7 @@ public class CsvEditorSettingsProviderTest extends LightCodeInsightFixtureTestCa
         assertEquals(Color.BLACK, csvEditorSettingsExternalizable.getTabHighlightColor());
         assertEquals(true, csvEditorSettingsExternalizable.isQuotingEnforced());
         assertEquals(false, csvEditorSettingsExternalizable.isTableColumnHighlightingEnabled());
+        assertEquals(true, csvEditorSettingsExternalizable.isZeroBasedColumnNumbering());
 
         editorSettingsPanel.disposeUIResources();
     }
@@ -95,6 +97,7 @@ public class CsvEditorSettingsProviderTest extends LightCodeInsightFixtureTestCa
         csvEditorSettingsExternalizable.setTabHighlightColor(Color.BLACK);
         csvEditorSettingsExternalizable.setQuotingEnforced(true);
         csvEditorSettingsExternalizable.setTableColumnHighlightingEnabled(false);
+        csvEditorSettingsExternalizable.setZeroBasedColumnNumbering(true);
 
         editorSettingsPanel.apply();
 
@@ -109,6 +112,7 @@ public class CsvEditorSettingsProviderTest extends LightCodeInsightFixtureTestCa
         assertEquals(freshOptionSet.TAB_HIGHLIGHT_COLOR, "" + csvEditorSettingsExternalizable.getTabHighlightColor().getRGB());
         assertEquals(freshOptionSet.QUOTING_ENFORCED, csvEditorSettingsExternalizable.isQuotingEnforced());
         assertEquals(freshOptionSet.TABLE_COLUMN_HIGHTLIGHTING, csvEditorSettingsExternalizable.isTableColumnHighlightingEnabled());
+        assertEquals(freshOptionSet.ZERO_BASED_COLUMN_NUMBERING, csvEditorSettingsExternalizable.isZeroBasedColumnNumbering());
 
         editorSettingsPanel.disposeUIResources();
     }
