@@ -48,10 +48,10 @@
 
     <change-notes><![CDATA[
         <pre style="font-family: sans-serif">
-NEW: support column highlighting for table editor
-NEW: support all kind of text attributes for column highlighting
-NEW: table editor values not longer enforced to be quoted on save (customizable)
-FIX: prevent backspace/delete erasing cell value while editing (table editor)
+NEW: option to fixate first row as header (table editor)
+NEW: row numbers (table editor)
+FIX: exception when clicking to right of populated columns (table editor)
+FIX: keep leading/trailing whitespaces (table editor)
       </pre>
     ]]>
     </change-notes>

@@ -168,7 +168,7 @@ public final class CsvHelper {
     }
 
     private static boolean isQuotingRequired(String content, String separator) {
-        return content != null && (content.contains(separator) || content.contains("\"") || content.contains("\n"));
+        return content != null && (content.contains(separator) || content.contains("\"") || content.contains("\n") || content.startsWith(" ") || content.endsWith(" "));
     }
 
     public static String quoteCsvField(String content, String separator, boolean quotingEnforced) {

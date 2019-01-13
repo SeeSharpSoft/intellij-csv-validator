@@ -50,7 +50,7 @@ public class CsvAnnotator implements Annotator {
                         String.format("%s<br /><br />Header: %s<br />Index: %d",
                                 XmlStringUtil.escapeString(element.getText(), true),
                                 message,
-                                columnInfo.getColumnIndex()
+                                columnInfo.getColumnIndex() + (CsvEditorSettingsExternalizable.getInstance().isZeroBasedColumnNumbering() ? 0 : 1)
                         )
                 );
             }
