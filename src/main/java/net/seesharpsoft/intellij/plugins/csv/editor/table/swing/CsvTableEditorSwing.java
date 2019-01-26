@@ -162,12 +162,11 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
         this.getTable().setRowHeight(rowHeight == 0 ? ROW_LINE_HEIGHT : rowHeight);
     }
 
-    private Object[] generateColumnIdentifiers(Object[][] values) {
+    private Object[] generateColumnIdentifiers(Object[][] values, int columnCount) {
         if (getFileEditorState().getFixedHeaders()) {
-            return values[0];
+            return values != null && values.length > 0 ? values[0] : new Object[columnCount];
         }
 
-        int columnCount = values[0].length;
         int columnOffset = CsvEditorSettingsExternalizable.getInstance().isZeroBasedColumnNumbering() ? 0 : 1;
         Object[] identifiers = new Object[columnCount];
         for (int i = 0; i < columnCount; ++i) {
@@ -255,7 +254,7 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
     protected void afterTableComponentUpdate(Object[][] values) {
         try {
             DefaultTableModel tableModel = this.getTableModel();
-            tableModel.setColumnIdentifiers(generateColumnIdentifiers(values));
+            tableModel.setColumnIdentifiers(generateColumnIdentifiers(values, tableModel.getColumnCount()));
             this.updateEditorLayout();
         } finally {
             this.applyTableChangeListener();

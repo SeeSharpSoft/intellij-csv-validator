@@ -1,3 +1,9 @@
+2.2.1
+Jan 26, 2019
+
+FIX: ArrayIndexOutOfBoundsException when opening a CSV file with an unexpected separator (table editor)
+FIX: ConcurrentModificationException during event handling (table editor)
+
 2.2.0
 Jan 13, 2019
 
