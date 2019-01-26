@@ -48,10 +48,8 @@
 
     <change-notes><![CDATA[
         <pre style="font-family: sans-serif">
-NEW: option to fixate first row as header (table editor)
-NEW: row numbers (table editor)
-FIX: exception when clicking to right of populated columns (table editor)
-FIX: keep leading/trailing whitespaces (table editor)
+FIX: ArrayIndexOutOfBoundsException when opening a CSV file with an unexpected separator (table editor)
+FIX: ConcurrentModificationException during event handling (table editor)
       </pre>
     ]]>
     </change-notes>
