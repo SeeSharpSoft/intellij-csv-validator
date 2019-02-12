@@ -48,6 +48,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
     private CsvTableEditorState storedState = null;
 
     protected boolean tableIsEditable = true;
+    protected int rowLineHeight = ROW_LINE_HEIGHT;
 
     public CsvTableEditor(@NotNull Project projectArg, @NotNull VirtualFile fileArg) {
         this.project = projectArg;
@@ -86,7 +87,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
     }
 
     public int getPreferredRowHeight() {
-        return ROW_LINE_HEIGHT * getFileEditorState().getRowLines();
+        return rowLineHeight* getFileEditorState().getRowLines();
     }
 
     public void setEditable(boolean editable) {

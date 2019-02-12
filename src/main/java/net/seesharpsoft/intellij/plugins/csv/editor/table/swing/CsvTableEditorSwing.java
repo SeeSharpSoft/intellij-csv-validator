@@ -58,6 +58,7 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
     protected final CsvTableEditorChangeListener tableEditorListener;
     protected final CsvTableEditorMouseListener tableEditorMouseListener;
     protected final CsvTableEditorKeyListener tableEditorKeyListener;
+    protected final CsvTableEditorMouseWheelListener tableEditorMouseWheelListener;
 
     private boolean listenerApplied = false;
 
@@ -72,6 +73,7 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
         this.tableEditorMouseListener = new CsvTableEditorMouseListener(this);
         this.tableEditorKeyListener = new CsvTableEditorKeyListener(this);
         this.tableEditorActions = new CsvTableEditorActions(this);
+        this.tableEditorMouseWheelListener = new CsvTableEditorMouseWheelListener(this);
 
         initializedUIComponents();
     }
@@ -138,6 +140,7 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
             tblEditor.addMouseListener(this.tableEditorMouseListener);
             tblEditor.getTableHeader().addMouseListener(this.tableEditorMouseListener);
             tblEditor.addKeyListener(this.tableEditorKeyListener);
+            tblEditor.addMouseWheelListener(tableEditorMouseWheelListener);
         }
     }
 
@@ -147,6 +150,7 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
             tblEditor.removeMouseListener(this.tableEditorMouseListener);
             tblEditor.getTableHeader().removeMouseListener(this.tableEditorMouseListener);
             tblEditor.removeKeyListener(this.tableEditorKeyListener);
+            tblEditor.removeMouseWheelListener(tableEditorMouseWheelListener);
             listenerApplied = false;
         }
     }
@@ -189,8 +193,10 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
 
         for (int i = 0; i < currentColumnCount; ++i) {
             TableColumn column = this.tblEditor.getColumnModel().getColumn(i);
-            column.setPreferredWidth(columnWidths[i]);
-            column.setWidth(columnWidths[i]);
+            int width = columnWidths[i];
+            width = width * rowLineHeight / ROW_LINE_HEIGHT;
+            column.setPreferredWidth(width);
+            column.setWidth(width);
         }
 
         this.updateRowHeights(null);
@@ -431,5 +437,15 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
     @Override
     protected String generateCsv(Object[][] data) {
         return super.generateCsv(data);
+    }
+
+    public void changeFontSize(int changeAmount){
+        Font font=this.getTable().getFont();
+        float newSize = font.getSize() + changeAmount;
+        Font newFont=font.deriveFont(newSize);
+        this.getTable().setFont(newFont);
+        rowLineHeight = Math.round((float)(newSize*1.2));
+        setTableRowHeight(getPreferredRowHeight());
+        updateEditorLayout();
     }
 }
