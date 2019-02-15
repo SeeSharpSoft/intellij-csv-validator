@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
 
 public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChangeEvent.Listener {
 
+    public static final double LINE_HEIGHT_PADDING_FACTOR = 1.2;
     private JBTable tblEditor;
     private JPanel panelMain;
     private JButton btnUndo;
@@ -439,12 +440,12 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
         return super.generateCsv(data);
     }
 
-    public void changeFontSize(int changeAmount){
-        Font font=this.getTable().getFont();
+    public void changeFontSize(int changeAmount) {
+        Font font = this.getTable().getFont();
         float newSize = font.getSize() + changeAmount;
-        Font newFont=font.deriveFont(newSize);
+        Font newFont = font.deriveFont(newSize);
         this.getTable().setFont(newFont);
-        rowLineHeight = Math.round((float)(newSize*1.2));
+        rowLineHeight = Math.round((float)(newSize * LINE_HEIGHT_PADDING_FACTOR));
         setTableRowHeight(getPreferredRowHeight());
         updateEditorLayout();
     }

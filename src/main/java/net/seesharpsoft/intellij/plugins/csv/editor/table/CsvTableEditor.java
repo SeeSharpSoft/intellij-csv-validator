@@ -87,7 +87,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
     }
 
     public int getPreferredRowHeight() {
-        return rowLineHeight* getFileEditorState().getRowLines();
+        return rowLineHeight * getFileEditorState().getRowLines();
     }
 
     public void setEditable(boolean editable) {
