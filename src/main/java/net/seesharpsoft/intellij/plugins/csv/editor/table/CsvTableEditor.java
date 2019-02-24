@@ -34,6 +34,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
 
     public static final int BASE_ROW_LINE_HEIGHT = 20;
     public static final int INITIAL_COLUMN_WIDTH = 100;
+    public static final double LINE_HEIGHT_RATIO = 1.2;
 
     protected final Project project;
     protected final VirtualFile file;
@@ -48,7 +49,6 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
     private CsvTableEditorState storedState = null;
 
     protected boolean tableIsEditable = true;
-    protected double lineHeightRatio = 1.2;
 
     public CsvTableEditor(@NotNull Project projectArg, @NotNull VirtualFile fileArg) {
         this.project = projectArg;
@@ -87,7 +87,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
     }
 
     public int getRowLineHeight() {
-        return Math.round((float)(getFileEditorState().getFontSize() * lineHeightRatio));
+        return Math.round((float)(getFileEditorState().getFontSize() * LINE_HEIGHT_RATIO));
     }
 
     public int getPreferredRowHeight() {

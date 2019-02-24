@@ -128,10 +128,6 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
         tblEditor.registerKeyboardAction(this.tableEditorActions.redo,
                 KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_MASK), JComponent.WHEN_FOCUSED);
 
-        Font font = tblEditor.getFont();
-        font.deriveFont((float)getFileEditorState().getFontSize());
-        tblEditor.setFont(font);
-        
         applyEditorState(getFileEditorState());
 
         rowHeadersTable = TableRowUtilities.addNumberColumn(tblEditor, 1);
@@ -184,6 +180,11 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
     }
 
     public void updateEditorLayout() {
+        Font font = getTable().getFont();
+        if (font.getSize() != getFileEditorState().getFontSize()) {
+            Font newFont = font.deriveFont((float)getFileEditorState().getFontSize());
+            getTable().setFont(newFont);
+        }
         int currentColumnCount = this.getTableModel().getColumnCount();
         int[] columnWidths = getFileEditorState().getColumnWidths();
         int prevColumnCount = columnWidths.length;
@@ -444,10 +445,7 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
     }
 
     public void changeFontSize(int changeAmount) {
-        Font font = this.getTable().getFont();
         float newSize = getFileEditorState().getFontSize() + changeAmount;
-        Font newFont = font.deriveFont(newSize);
-        this.getTable().setFont(newFont);
         getFileEditorState().setFontSize((int)newSize);
         setTableRowHeight(getPreferredRowHeight());
         updateEditorLayout();
