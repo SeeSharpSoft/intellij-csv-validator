@@ -13,9 +13,12 @@ public class CsvTableEditorMouseWheelListener extends  CsvTableEditorUtilBase im
 
     @Override
     public void mouseWheelMoved(MouseWheelEvent mouseWheelEvent) {
+
         if (mouseWheelEvent.isControlDown()) {
             int scrolled = mouseWheelEvent.getUnitsToScroll();
             int amount = -(scrolled / SCROLL_FACTOR);
+            if (amount==0)
+                return;
             csvTableEditor.changeFontSize(amount);
         }
     }

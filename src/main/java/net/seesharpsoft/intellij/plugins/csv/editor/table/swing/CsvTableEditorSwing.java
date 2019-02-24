@@ -33,7 +33,6 @@ import java.util.stream.Collectors;
 
 public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChangeEvent.Listener {
 
-    public static final double LINE_HEIGHT_PADDING_FACTOR = 1.2;
     private JBTable tblEditor;
     private JPanel panelMain;
     private JButton btnUndo;
@@ -129,6 +128,10 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
         tblEditor.registerKeyboardAction(this.tableEditorActions.redo,
                 KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_MASK), JComponent.WHEN_FOCUSED);
 
+        Font font = tblEditor.getFont();
+        font.deriveFont((float)getFileEditorState().getFontSize());
+        tblEditor.setFont(font);
+        
         applyEditorState(getFileEditorState());
 
         rowHeadersTable = TableRowUtilities.addNumberColumn(tblEditor, 1);
@@ -164,7 +167,7 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
     }
 
     public void setTableRowHeight(int rowHeight) {
-        this.getTable().setRowHeight(rowHeight == 0 ? ROW_LINE_HEIGHT : rowHeight);
+        this.getTable().setRowHeight(rowHeight == 0 ? getRowLineHeight() : rowHeight);
     }
 
     private Object[] generateColumnIdentifiers(Object[][] values, int columnCount) {
@@ -195,7 +198,7 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
         for (int i = 0; i < currentColumnCount; ++i) {
             TableColumn column = this.tblEditor.getColumnModel().getColumn(i);
             int width = columnWidths[i];
-            width = width * rowLineHeight / ROW_LINE_HEIGHT;
+            width = width * getRowLineHeight() / BASE_ROW_LINE_HEIGHT;
             column.setPreferredWidth(width);
             column.setWidth(width);
         }
@@ -442,10 +445,10 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
 
     public void changeFontSize(int changeAmount) {
         Font font = this.getTable().getFont();
-        float newSize = font.getSize() + changeAmount;
+        float newSize = getFileEditorState().getFontSize() + changeAmount;
         Font newFont = font.deriveFont(newSize);
         this.getTable().setFont(newFont);
-        rowLineHeight = Math.round((float)(newSize * LINE_HEIGHT_PADDING_FACTOR));
+        getFileEditorState().setFontSize((int)newSize);
         setTableRowHeight(getPreferredRowHeight());
         updateEditorLayout();
     }

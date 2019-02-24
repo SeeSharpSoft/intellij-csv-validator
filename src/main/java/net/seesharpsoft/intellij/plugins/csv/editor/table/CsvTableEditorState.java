@@ -1,5 +1,8 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table;
 
+import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.editor.colors.EditorColorsManager;
+import com.intellij.openapi.editor.colors.EditorColorsScheme;
 import com.intellij.openapi.fileEditor.FileEditorState;
 import com.intellij.openapi.fileEditor.FileEditorStateLevel;
 import com.intellij.openapi.project.Project;
@@ -20,6 +23,7 @@ public class CsvTableEditorState implements FileEditorState {
     private Boolean showInfoPanel;
     private Boolean fixedHeaders;
     private Integer rowLines;
+    private Integer fontSize;
 
     public CsvTableEditorState() {
         columnWidths = new int[0];
@@ -31,6 +35,17 @@ public class CsvTableEditorState implements FileEditorState {
 
     public void setColumnWidths(int[] widths) {
         this.columnWidths = widths;
+    }
+
+    public int getFontSize(){
+        if (fontSize == null){
+            fontSize = EditorColorsManager.getInstance().getGlobalScheme().getEditorFontSize();
+        }
+        return fontSize;
+    }
+
+    public void setFontSize(int fontSize){
+        this.fontSize = fontSize;
     }
 
     public boolean showInfoPanel() {
