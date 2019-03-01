@@ -1,5 +1,6 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table;
 
+import com.google.common.primitives.Ints;
 import com.intellij.codeHighlighting.BackgroundEditorHighlighter;
 import com.intellij.ide.structureView.StructureViewBuilder;
 import com.intellij.openapi.application.ApplicationManager;
@@ -15,6 +16,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
+import com.intellij.util.ArrayUtil;
 import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfoMap;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettingsExternalizable;
@@ -27,6 +29,8 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.util.Collections;
+import java.util.List;
 
 public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
 
@@ -282,10 +286,67 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
 
     @Nullable
     public CsvFile getCsvFile() {
-        return this.psiFile instanceof CsvFile ? (CsvFile)psiFile : null;
+        return this.psiFile instanceof CsvFile ? (CsvFile) psiFile : null;
     }
 
     public TableDataHandler getDataHandler() {
         return this.dataManagement;
+    }
+
+    public int getRowCount() {
+        return getDataHandler().getCurrentState().length;
+    }
+
+    public int getColumnCount() {
+        Object[][] currentData = getDataHandler().getCurrentState();
+        return currentData.length > 0 ? currentData[0].length : 0;
+    }
+
+    public Object[][] addRow(int index, boolean before) {
+        index = (before ? (index == -1 ? 0 : index) : (index == -1 ? getRowCount() : index + 1)) + (getFileEditorState().getFixedHeaders() ? 1 : 0);
+        TableDataHandler dataHandler = getDataHandler();
+        Object[][] currentData = ArrayUtil.insert(dataHandler.getCurrentState(), index, new Object[getColumnCount()]);
+        updateTableComponentData(dataHandler.addState(currentData));
+        return currentData;
+    }
+
+    public Object[][] removeRows(int[] indices) {
+        List<Integer> currentRows = Ints.asList(indices);
+        currentRows.sort(Collections.reverseOrder());
+        TableDataHandler dataHandler = getDataHandler();
+        Object[][] currentData = dataHandler.getCurrentState();
+        for (int currentRow : currentRows) {
+            currentData = ArrayUtil.remove(currentData, currentRow + (getFileEditorState().getFixedHeaders() ? 1 : 0));
+        }
+        updateTableComponentData(dataHandler.addState(currentData));
+        return currentData;
+    }
+
+    public Object[][] addColumn(int index, boolean before) {
+        index = before ? (index == -1 ? 0 : index) : (index == -1 ? getColumnCount() : index + 1);
+        boolean fixedHeaders = getFileEditorState().getFixedHeaders();
+        TableDataHandler dataHandler = getDataHandler();
+        Object[][] currentData = dataHandler.getCurrentState();
+        for (int i = 0; i < currentData.length; ++i) {
+            currentData[i] = ArrayUtil.insert(currentData[i], index, fixedHeaders && i == 0 ? "" : null);
+        }
+        updateTableComponentData(dataHandler.addState(currentData));
+        return currentData;
+    }
+
+    public Object[][] removeColumns(int[] indices) {
+        List<Integer> currentColumns = Ints.asList(indices);
+        currentColumns.sort(Collections.reverseOrder());
+
+        TableDataHandler dataHandler = getDataHandler();
+        Object[][] currentData = dataHandler.getCurrentState();
+
+        for (int currentColumn : currentColumns) {
+            for (int i = 0; i < currentData.length; ++i) {
+                currentData[i] = ArrayUtil.remove(currentData[i], currentColumn);
+            }
+        }
+        updateTableComponentData(dataHandler.addState(currentData));
+        return currentData;
     }
 }
