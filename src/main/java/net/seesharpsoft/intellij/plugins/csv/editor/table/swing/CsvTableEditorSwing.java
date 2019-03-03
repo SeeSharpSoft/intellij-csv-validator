@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChangeEvent.Listener {
 
     private static final int TOTAL_CELL_HEIGHT_SPACING = 3;
-    
+
     private JBTable tblEditor;
     private JPanel panelMain;
     private JButton btnUndo;
@@ -469,9 +469,9 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
     @Override
     public int getPreferredRowHeight() {
         if (getFileEditorState().getRowLines() == 0) {
-            return getFontHeight() + TOTAL_CELL_HEIGHT_SPACING ;
+            return getFontHeight() + TOTAL_CELL_HEIGHT_SPACING;
         }
-        return getFileEditorState().getRowLines() * getFontHeight() + TOTAL_CELL_HEIGHT_SPACING ;
+        return getFileEditorState().getRowLines() * getFontHeight() + TOTAL_CELL_HEIGHT_SPACING;
 
     }
 
