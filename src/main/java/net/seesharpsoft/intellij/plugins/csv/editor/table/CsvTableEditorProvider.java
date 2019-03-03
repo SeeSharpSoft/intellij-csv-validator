@@ -38,7 +38,7 @@ public class CsvTableEditorProvider implements AsyncFileEditorProvider, DumbAwar
 
     @Override
     public boolean accept(@NotNull Project project, @NotNull VirtualFile file) {
-        return CsvEditorSettingsExternalizable.getInstance().getEditorPrio() != CsvEditorSettingsExternalizable.EditorPrio.TEXT_ONLY && CsvFileEditorProvider.isCsvFile(file) &&
+        return CsvEditorSettingsExternalizable.getInstance().getEditorPrio() != CsvEditorSettingsExternalizable.EditorPrio.TEXT_ONLY && CsvFileEditorProvider.isCsvFile(project, file) &&
                 !SingleRootFileViewProvider.isTooLargeForIntelligence(file);
     }
 
