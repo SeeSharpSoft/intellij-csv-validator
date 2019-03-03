@@ -53,8 +53,10 @@ public class CsvTableEditorActionsTest extends CsvTableEditorSwingTestBase {
         fileEditor.tableEditorActions.addRowAfter.actionPerformed(null);
         Object[][] newState = fileEditor.getDataHandler().getCurrentState();
         assertEquals(initialState.length + 1, newState.length);
-        assertEquals(null, newState[0][0]);
-        assertEquals(null, newState[0][1]);
+        assertEquals("Header1", newState[0][0]);
+        assertEquals("header 2", newState[0][1]);
+        assertEquals(null, newState[4][0]);
+        assertEquals(null, newState[4][1]);
 
         fileEditor.tableEditorActions.undo.actionPerformed(null);
 
@@ -81,8 +83,10 @@ public class CsvTableEditorActionsTest extends CsvTableEditorSwingTestBase {
     public void testAddColumnBeforeAction() {
         fileEditor.tableEditorActions.addColumnBefore.actionPerformed(null);
         Object[][] newState = fileEditor.getDataHandler().getCurrentState();
-        assertEquals(null, newState[0][2]);
-        assertEquals(null, newState[1][2]);
+        assertEquals("header 2", newState[0][2]);
+        assertEquals("this is column header 2", newState[1][2]);
+        assertEquals(null, newState[0][0]);
+        assertEquals(null, newState[1][0]);
 
         fileEditor.tableEditorActions.undo.actionPerformed(null);
 

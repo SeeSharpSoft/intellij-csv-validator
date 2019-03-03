@@ -1,6 +1,5 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
-import com.google.common.primitives.Ints;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.ui.components.labels.LinkLabel;
@@ -10,14 +9,12 @@ import net.seesharpsoft.intellij.plugins.csv.editor.CsvFileEditorProvider;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableColumnModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.net.URI;
-import java.util.*;
-import java.util.List;
+import java.util.Vector;
 
 public class CsvTableEditorActions extends CsvTableEditorUtilBase {
 
@@ -75,19 +72,10 @@ public class CsvTableEditorActions extends CsvTableEditorUtilBase {
                 JTable table = csvTableEditor.getTable();
                 int currentColumn = table.getSelectedColumn();
                 int currentRow = table.getSelectedRow();
-                DefaultTableModel tableModel = csvTableEditor.getTableModel();
-                if (this.before != null) {
-                    tableModel.insertRow(currentRow + (before && currentRow != -1 ? 0 : 1), new Object[tableModel.getColumnCount()]);
-                    if (this.before) {
-                        ++currentRow;
-                    }
-                } else {
-                    tableModel.addRow(new Object[tableModel.getColumnCount()]);
-                }
 
-                csvTableEditor.syncTableModelWithUI();
+                csvTableEditor.addRow(this.before == null ? -1 : currentRow, Boolean.TRUE.equals(this.before));
 
-                selectCell(table, currentRow, currentColumn);
+                selectCell(csvTableEditor.getTable(), Boolean.TRUE.equals(this.before) ? currentRow + 1 : currentRow, currentColumn);
             } finally {
                 csvTableEditor.applyTableChangeListener();
             }
@@ -114,23 +102,15 @@ public class CsvTableEditorActions extends CsvTableEditorUtilBase {
             csvTableEditor.removeTableChangeListener();
             try {
                 JTable table = csvTableEditor.getTable();
-                int currentColumn = table.getSelectedColumn();
-
-                List<Integer> currentRows = Ints.asList(csvTableEditor.getTable().getSelectedRows());
-                if (currentRows == null || currentRows.size() == 0) {
+                int[] currentRows = csvTableEditor.getTable().getSelectedRows();
+                if (currentRows == null || currentRows.length == 0) {
                     return;
                 }
+                int currentColumn = table.getSelectedColumn();
 
-                DefaultTableModel tableModel = csvTableEditor.getTableModel();
-                currentRows.sort(Collections.reverseOrder());
-                for (int currentRow : currentRows) {
-                    tableModel.removeRow(currentRow);
-                }
+                csvTableEditor.removeRows(currentRows);
 
-                csvTableEditor.syncTableModelWithUI();
-
-                currentRows.sort(Comparator.naturalOrder());
-                selectCell(table, currentRows.get(0), currentColumn);
+                selectCell(table, currentRows[0], currentColumn);
             } finally {
                 csvTableEditor.applyTableChangeListener();
             }
@@ -155,21 +135,10 @@ public class CsvTableEditorActions extends CsvTableEditorUtilBase {
                 JBTable table = csvTableEditor.getTable();
                 int currentColumn = table.getSelectedColumn();
                 int currentRow = table.getSelectedRow();
-                DefaultTableModel tableModel = csvTableEditor.getTableModel();
-                int columnCount = tableModel.getColumnCount();
-                tableModel.addColumn(tableModel.getColumnName(columnCount));
-                if (before != null) {
-                    if (currentColumn != -1 && columnCount > 0 && (before || currentColumn < columnCount - 1)) {
-                        table.moveColumn(tableModel.getColumnCount() - 1, currentColumn + (before ? 0 : 1));
-                    }
-                    if (before) {
-                        ++currentColumn;
-                    }
-                }
 
-                csvTableEditor.syncTableModelWithUI();
+                csvTableEditor.addColumn(currentColumn, Boolean.TRUE.equals(before));
 
-                selectCell(table, currentRow, currentColumn);
+                selectCell(table, currentRow, Boolean.TRUE.equals(before) ? currentColumn + 1 : currentColumn);
             } finally {
                 csvTableEditor.applyTableChangeListener();
             }
@@ -198,31 +167,15 @@ public class CsvTableEditorActions extends CsvTableEditorUtilBase {
             csvTableEditor.removeTableChangeListener();
             try {
                 JBTable table = csvTableEditor.getTable();
-                List<Integer> currentColumns = Ints.asList(table.getSelectedColumns());
-                if (currentColumns == null || currentColumns.size() == 0) {
+                int[] selectedColumns = table.getSelectedColumns();
+                if (selectedColumns == null || selectedColumns.length == 0) {
                     return;
                 }
-                int currentRow = table.getSelectedRow();
-                TableColumnModel tableColumnModel = table.getColumnModel();
+                int focusedRow = table.getSelectedRow();
 
-                List<Integer> tableModelIndices = new ArrayList<>();
-                currentColumns.forEach(currentColumn -> tableModelIndices.add(table.convertColumnIndexToModel(currentColumn)));
+                csvTableEditor.removeColumns(selectedColumns);
 
-                currentColumns.sort(Collections.reverseOrder());
-                for (int currentColumn : currentColumns) {
-                    tableColumnModel.removeColumn(tableColumnModel.getColumn(currentColumn));
-                }
-
-                DefaultTableModel tableModel = csvTableEditor.getTableModel();
-                tableModelIndices.sort(Collections.reverseOrder());
-                for (int currentColumn : tableModelIndices) {
-                    removeColumn(tableModel, currentColumn);
-                }
-
-                csvTableEditor.syncTableModelWithUI();
-
-                currentColumns.sort(Comparator.naturalOrder());
-                selectCell(table, currentRow, currentColumns.get(0));
+                selectCell(table, focusedRow, selectedColumns[0]);
             } finally {
                 csvTableEditor.applyTableChangeListener();
             }
@@ -247,7 +200,6 @@ public class CsvTableEditorActions extends CsvTableEditorUtilBase {
                 if (selectedColumns == null || selectedColumns.length == 0) {
                     return;
                 }
-
                 int focusedRow = table.getSelectedRow();
                 int focusedColumn = table.getSelectedColumn();
 
