@@ -21,7 +21,6 @@ public class CsvTableEditorState implements FileEditorState {
     private Boolean showInfoPanel;
     private Boolean fixedHeaders;
     private Integer rowLines;
-    private Integer fontSize;
 
     public CsvTableEditorState() {
         columnWidths = new int[0];
@@ -33,17 +32,6 @@ public class CsvTableEditorState implements FileEditorState {
 
     public void setColumnWidths(int[] widths) {
         this.columnWidths = widths;
-    }
-
-    public int getFontSize() {
-        if (fontSize == null) {
-            fontSize = EditorColorsManager.getInstance().getGlobalScheme().getEditorFontSize();
-        }
-        return fontSize;
-    }
-
-    public void setFontSize(int size) {
-        fontSize = size;
     }
 
     public boolean showInfoPanel() {
@@ -66,7 +54,7 @@ public class CsvTableEditorState implements FileEditorState {
     }
 
     public int getRowLines() {
-        if (rowLines == null) {
+        if (rowLines == null ) {
             rowLines = CsvEditorSettingsExternalizable.getInstance().getTableEditorRowHeight();
         }
         return rowLines;

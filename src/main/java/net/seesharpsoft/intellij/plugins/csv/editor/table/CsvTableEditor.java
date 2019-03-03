@@ -76,6 +76,9 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
 
     protected abstract void afterTableComponentUpdate(Object[][] values);
 
+    public abstract int getPreferredRowHeight();
+
+
     public final void updateTableComponentData(Object[][] values) {
         beforeTableComponentUpdate();
         try {
@@ -84,14 +87,6 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
         } finally {
             afterTableComponentUpdate(values);
         }
-    }
-
-    public int getRowLineHeight() {
-        return Math.round((float)(getFileEditorState().getFontSize() * LINE_HEIGHT_RATIO));
-    }
-
-    public int getPreferredRowHeight() {
-        return getRowLineHeight() * getFileEditorState().getRowLines();
     }
 
     public void setEditable(boolean editable) {

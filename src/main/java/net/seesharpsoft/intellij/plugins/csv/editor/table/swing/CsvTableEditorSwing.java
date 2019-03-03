@@ -1,5 +1,6 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
+import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
@@ -33,6 +34,8 @@ import java.util.stream.Collectors;
 
 public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChangeEvent.Listener {
 
+    private static final int TOTAL_CELL_HEIGHT_SPACING = 3;
+    
     private JBTable tblEditor;
     private JPanel panelMain;
     private JButton btnUndo;
@@ -53,6 +56,9 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
     private JCheckBox cbFixedHeaders;
 
     private JTable rowHeadersTable;
+
+    private int baseFontSize;
+    private int baseFontHeight;
 
     protected final CsvTableEditorActions tableEditorActions;
     protected final CsvTableEditorChangeListener tableEditorListener;
@@ -163,7 +169,7 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
     }
 
     public void setTableRowHeight(int rowHeight) {
-        this.getTable().setRowHeight(rowHeight == 0 ? getRowLineHeight() : rowHeight);
+        this.getTable().setRowHeight(rowHeight == 0 ? getPreferredRowHeight() : rowHeight);
     }
 
     private Object[] generateColumnIdentifiers(Object[][] values, int columnCount) {
@@ -180,11 +186,6 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
     }
 
     public void updateEditorLayout() {
-        Font font = getTable().getFont();
-        if (font.getSize() != getFileEditorState().getFontSize()) {
-            Font newFont = font.deriveFont((float)getFileEditorState().getFontSize());
-            getTable().setFont(newFont);
-        }
         int currentColumnCount = this.getTableModel().getColumnCount();
         int[] columnWidths = getFileEditorState().getColumnWidths();
         int prevColumnCount = columnWidths.length;
@@ -196,12 +197,12 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
             getFileEditorState().setColumnWidths(columnWidths);
         }
 
+        float fontHeight = getFontHeight();
+        float zoomFactor = fontHeight / baseFontHeight;
         for (int i = 0; i < currentColumnCount; ++i) {
             TableColumn column = this.tblEditor.getColumnModel().getColumn(i);
-            int width = columnWidths[i];
-            width = width * getRowLineHeight() / BASE_ROW_LINE_HEIGHT;
-            column.setPreferredWidth(width);
-            column.setWidth(width);
+            column.setPreferredWidth(Math.round(columnWidths[i] * zoomFactor));
+            column.setWidth(Math.round(columnWidths[i] * zoomFactor));
         }
 
         this.updateRowHeights(null);
@@ -266,6 +267,9 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
         try {
             DefaultTableModel tableModel = this.getTableModel();
             tableModel.setColumnIdentifiers(generateColumnIdentifiers(values, tableModel.getColumnCount()));
+            baseFontSize = getGlobalFontSize();
+            setFontSize(baseFontSize);
+            baseFontHeight = getFontHeight();
             this.updateEditorLayout();
         } finally {
             this.applyTableChangeListener();
@@ -444,10 +448,39 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
         return super.generateCsv(data);
     }
 
+    private int getGlobalFontSize() {
+        return  EditorColorsManager.getInstance().getGlobalScheme().getEditorFontSize();
+    }
+
+    private int getFontHeight() {
+        return getTable().getFontMetrics(getTable().getFont()).getHeight();
+    }
+
     public void changeFontSize(int changeAmount) {
-        float newSize = getFileEditorState().getFontSize() + changeAmount;
-        getFileEditorState().setFontSize((int)newSize);
+        if (changeAmount == 0) {
+            return;
+        }
+        int oldSize = getTable().getFont().getSize();
+        int newSize = oldSize + changeAmount;
+        setFontSize(newSize);
         setTableRowHeight(getPreferredRowHeight());
         updateEditorLayout();
+    }
+
+    @Override
+    public int getPreferredRowHeight() {
+        if (getFileEditorState().getRowLines() == 0) {
+            return getFontHeight() + TOTAL_CELL_HEIGHT_SPACING ;
+        }
+        return getFileEditorState().getRowLines() * getFontHeight() + TOTAL_CELL_HEIGHT_SPACING ;
+
+    }
+
+    private void setFontSize(int size) {
+        Font font = getTable().getFont();
+        if (font.getSize() != size) {
+            Font newFont = font.deriveFont((float)size);
+            getTable().setFont(newFont);
+        }
     }
 }

@@ -21,12 +21,8 @@ public class CsvTableEditorMouseWheelListenerTest extends CsvTableEditorSwingTes
         CsvTableEditorMouseWheelListener spiedMouseWheelListener = fileEditor.tableEditorMouseWheelListener;
 
         int size=fileEditor.getTable().getFont().getSize();
-        System.out.println(size);
-
         spiedMouseWheelListener.mouseWheelMoved(wheelEvent);
-
         int new_size=fileEditor.getTable().getFont().getSize();
-        System.out.println(new_size);
 
         assertTrue(new_size == size + 1);
     }
