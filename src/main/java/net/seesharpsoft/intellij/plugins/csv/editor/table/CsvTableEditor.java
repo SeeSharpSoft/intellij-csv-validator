@@ -32,9 +32,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
 
     public static final String EDITOR_NAME = "Table Editor";
 
-    public static final int BASE_ROW_LINE_HEIGHT = 20;
     public static final int INITIAL_COLUMN_WIDTH = 100;
-    public static final double LINE_HEIGHT_RATIO = 1.2;
 
     protected final Project project;
     protected final VirtualFile file;

@@ -1,6 +1,5 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table;
 
-import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.fileEditor.FileEditorState;
 import com.intellij.openapi.fileEditor.FileEditorStateLevel;
 import com.intellij.openapi.project.Project;
@@ -54,7 +53,7 @@ public class CsvTableEditorState implements FileEditorState {
     }
 
     public int getRowLines() {
-        if (rowLines == null ) {
+        if (rowLines == null) {
             rowLines = CsvEditorSettingsExternalizable.getInstance().getTableEditorRowHeight();
         }
         return rowLines;
