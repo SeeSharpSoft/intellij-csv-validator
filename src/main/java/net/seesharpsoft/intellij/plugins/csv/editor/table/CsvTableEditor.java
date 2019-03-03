@@ -302,8 +302,9 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
         return currentData.length > 0 ? currentData[0].length : 0;
     }
 
-    public Object[][] addRow(int index, boolean before) {
-        index = (before ? (index == -1 ? 0 : index) : (index == -1 ? getRowCount() : index + 1)) + (getFileEditorState().getFixedHeaders() ? 1 : 0);
+    public Object[][] addRow(int focusedRowIndex, boolean before) {
+        int index = (before ? (focusedRowIndex == -1 ? 0 : focusedRowIndex) : (focusedRowIndex == -1 ? getRowCount() : focusedRowIndex + 1)) +
+                (getFileEditorState().getFixedHeaders() ? 1 : 0);
         TableDataHandler dataHandler = getDataHandler();
         Object[][] currentData = ArrayUtil.insert(dataHandler.getCurrentState(), index, new Object[getColumnCount()]);
         updateTableComponentData(dataHandler.addState(currentData));
@@ -322,8 +323,8 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
         return currentData;
     }
 
-    public Object[][] addColumn(int index, boolean before) {
-        index = before ? (index == -1 ? 0 : index) : (index == -1 ? getColumnCount() : index + 1);
+    public Object[][] addColumn(int focusedColumnIndex, boolean before) {
+        int index = before ? (focusedColumnIndex == -1 ? 0 : focusedColumnIndex) : (focusedColumnIndex == -1 ? getColumnCount() : focusedColumnIndex + 1);
         boolean fixedHeaders = getFileEditorState().getFixedHeaders();
         TableDataHandler dataHandler = getDataHandler();
         Object[][] currentData = dataHandler.getCurrentState();
