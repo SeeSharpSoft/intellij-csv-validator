@@ -1,29 +1,19 @@
 package net.seesharpsoft.intellij.plugins.csv.editor;
 
-import com.intellij.ide.scratch.ScratchFileType;
-import com.intellij.lang.LanguageUtil;
 import com.intellij.openapi.editor.EditorSettings;
 import com.intellij.openapi.fileEditor.*;
 import com.intellij.openapi.fileEditor.impl.text.TextEditorProvider;
-import com.intellij.openapi.fileTypes.FileType;
-import com.intellij.openapi.fileTypes.LanguageFileType;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.SingleRootFileViewProvider;
-import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
+import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
 
 public class CsvFileEditorProvider implements AsyncFileEditorProvider, DumbAware {
 
     public static final String EDITOR_TYPE_ID = "csv-text-editor";
-
-    public static boolean isCsvFile(Project project, VirtualFile file) {
-        final FileType fileType = file.getFileType();
-        return (fileType instanceof LanguageFileType && ((LanguageFileType) fileType).getLanguage().isKindOf(CsvLanguage.INSTANCE)) ||
-                (fileType == ScratchFileType.INSTANCE && LanguageUtil.getLanguageForPsi(project, file) == CsvLanguage.INSTANCE);
-    }
 
     @Override
     public String getEditorTypeId() {
@@ -45,7 +35,7 @@ public class CsvFileEditorProvider implements AsyncFileEditorProvider, DumbAware
 
     @Override
     public boolean accept(@NotNull Project project, @NotNull VirtualFile file) {
-        return isCsvFile(project, file) && !SingleRootFileViewProvider.isTooLargeForContentLoading(file);
+        return CsvHelper.isCsvFile(project, file) && !SingleRootFileViewProvider.isTooLargeForContentLoading(file);
     }
 
     protected void applySettings(EditorSettings editorSettings, CsvEditorSettingsExternalizable csvEditorSettingsExternalizable) {
