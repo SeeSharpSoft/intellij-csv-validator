@@ -8,8 +8,8 @@ import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.SingleRootFileViewProvider;
+import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettingsExternalizable;
-import net.seesharpsoft.intellij.plugins.csv.editor.CsvFileEditorProvider;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.swing.CsvTableEditorSwing;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
@@ -38,7 +38,8 @@ public class CsvTableEditorProvider implements AsyncFileEditorProvider, DumbAwar
 
     @Override
     public boolean accept(@NotNull Project project, @NotNull VirtualFile file) {
-        return CsvEditorSettingsExternalizable.getInstance().getEditorPrio() != CsvEditorSettingsExternalizable.EditorPrio.TEXT_ONLY && CsvFileEditorProvider.isCsvFile(file) &&
+        return CsvEditorSettingsExternalizable.getInstance().getEditorPrio() != CsvEditorSettingsExternalizable.EditorPrio.TEXT_ONLY &&
+                CsvHelper.isCsvFile(project, file) &&
                 !SingleRootFileViewProvider.isTooLargeForIntelligence(file);
     }
 
