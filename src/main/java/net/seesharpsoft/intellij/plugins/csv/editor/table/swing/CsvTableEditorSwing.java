@@ -57,7 +57,6 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
 
     private JTable rowHeadersTable;
 
-    private int baseFontSize;
     private int baseFontHeight;
 
     protected final CsvTableEditorActions tableEditorActions;
@@ -267,7 +266,7 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
         try {
             DefaultTableModel tableModel = this.getTableModel();
             tableModel.setColumnIdentifiers(generateColumnIdentifiers(values, tableModel.getColumnCount()));
-            baseFontSize = getGlobalFontSize();
+            int baseFontSize = getGlobalFontSize();
             setFontSize(baseFontSize);
             baseFontHeight = getFontHeight();
             this.updateEditorLayout();
