@@ -385,7 +385,7 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
     }
 
     public void storeCurrentTableLayout() {
-        int[] widths=getCurrentColumnsWidths();
+        int[] widths = getCurrentColumnsWidths();
         float zoomFactor = calcuateZoomFactor();
         for (int i = 0; i < widths.length; i++) {
             widths[i] /= zoomFactor;
