@@ -60,7 +60,7 @@ Additionally the file type TSV was introduced as a kind of CSV language.
 For TSV files the same formatter and code style settings are applied as for CSV itself, but the separator is considered to be a tab.
 All functionality that is available for plain CSV files (inspections, intentions, structure view, etc.) can be used for TSV as well.   
 
-### \*NEW\* Table Editor 
+### Table Editor 
 
 The plugin provides editing of CSV files via a table editor since version 2.0.0. This editor is NOT related to the _Edit as table..._ functionality of [IntelliJ IDEA Ultimate/PhpStorm/DataGrip/etc.](https://www.jetbrains.com/help/phpstorm/editing-csv-and-tsv-files.html) and does not share any implementation or settings. It is a an alternative to the CSV text editor and not meant to replace or mirror the capabilities of the Jetbrains _"Data"_ tab.
 
@@ -143,7 +143,7 @@ Set whether soft wrapping should be activated for CSV/TSV. It still can be chang
 
 #### Table Editor
 
-##### Textlines per row (default)
+##### Text-lines per row (default)
 
 Defines how many lines of text are shown in one editor cell by default. *Auto* does recalculate the height on the fly that can cause some flickering while editing. This setting can be changed in the table editor itself per file.
 
@@ -151,11 +151,11 @@ Defines how many lines of text are shown in one editor cell by default. *Auto* d
 
 Enables/disables the info panel at the bottom of the table editor.
 
-##### **NEW** Enforce value quoting
+##### Enforce value quoting
 
 Always quotes a single value on save - even if not required.
 
-##### **NEW** Enable column highlighting
+##### Enable column highlighting
 
 An easy way to switch *Column Highlighting* on or off (in table editor).
 
@@ -325,6 +325,10 @@ You can also download the JAR package from the [Jetbrains plugin repository](htt
 Contributions are welcome. Please check [CONTRIBUTING.md](./CONTRIBUTING.md) for more information.
 
 Besides source code contributions, feel free to open bug reports or just suggest new features [here](https://github.com/SeeSharpSoft/intellij-csv-validator/issues).
+
+### Code/feature contributors
+
+- zoom table-editor cells with Ctrl+Mouse Wheel @royqh1979
 
 ## FAQ
 
