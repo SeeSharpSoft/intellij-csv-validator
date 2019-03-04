@@ -69,7 +69,7 @@
               <component id="9bf69" class="javax.swing.JLabel" binding="lblTextlines">
                 <constraints/>
                 <properties>
-                  <text value="Textlines per row:  "/>
+                  <text value="Text-lines per row:  "/>
                 </properties>
               </component>
               <component id="65e44" class="javax.swing.JComboBox" binding="comboRowHeight">
