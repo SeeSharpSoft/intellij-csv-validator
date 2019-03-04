@@ -1,5 +1,6 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
+import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
@@ -33,6 +34,8 @@ import java.util.stream.Collectors;
 
 public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChangeEvent.Listener {
 
+    private static final int TOTAL_CELL_HEIGHT_SPACING = 3;
+
     private JBTable tblEditor;
     private JPanel panelMain;
     private JButton btnUndo;
@@ -54,10 +57,13 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
 
     private JTable rowHeadersTable;
 
+    private int baseFontHeight;
+
     protected final CsvTableEditorActions tableEditorActions;
     protected final CsvTableEditorChangeListener tableEditorListener;
     protected final CsvTableEditorMouseListener tableEditorMouseListener;
     protected final CsvTableEditorKeyListener tableEditorKeyListener;
+    protected final CsvTableEditorMouseWheelListener tableEditorMouseWheelListener;
 
     private boolean listenerApplied = false;
 
@@ -72,6 +78,7 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
         this.tableEditorMouseListener = new CsvTableEditorMouseListener(this);
         this.tableEditorKeyListener = new CsvTableEditorKeyListener(this);
         this.tableEditorActions = new CsvTableEditorActions(this);
+        this.tableEditorMouseWheelListener = new CsvTableEditorMouseWheelListener(this);
 
         initializedUIComponents();
     }
@@ -126,9 +133,14 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
         tblEditor.registerKeyboardAction(this.tableEditorActions.redo,
                 KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_MASK), JComponent.WHEN_FOCUSED);
 
+        int baseFontSize = getGlobalFontSize();
+        setFontSize(baseFontSize);
+        baseFontHeight = getFontHeight();
+
         applyEditorState(getFileEditorState());
 
         rowHeadersTable = TableRowUtilities.addNumberColumn(tblEditor, 1);
+
     }
 
     protected void applyTableChangeListener() {
@@ -138,6 +150,7 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
             tblEditor.addMouseListener(this.tableEditorMouseListener);
             tblEditor.getTableHeader().addMouseListener(this.tableEditorMouseListener);
             tblEditor.addKeyListener(this.tableEditorKeyListener);
+            tblEditor.addMouseWheelListener(tableEditorMouseWheelListener);
         }
     }
 
@@ -147,6 +160,7 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
             tblEditor.removeMouseListener(this.tableEditorMouseListener);
             tblEditor.getTableHeader().removeMouseListener(this.tableEditorMouseListener);
             tblEditor.removeKeyListener(this.tableEditorKeyListener);
+            tblEditor.removeMouseWheelListener(tableEditorMouseWheelListener);
             listenerApplied = false;
         }
     }
@@ -159,7 +173,7 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
     }
 
     public void setTableRowHeight(int rowHeight) {
-        this.getTable().setRowHeight(rowHeight == 0 ? ROW_LINE_HEIGHT : rowHeight);
+        this.getTable().setRowHeight(rowHeight == 0 ? getPreferredRowHeight() : rowHeight);
     }
 
     private Object[] generateColumnIdentifiers(Object[][] values, int columnCount) {
@@ -187,14 +201,20 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
             getFileEditorState().setColumnWidths(columnWidths);
         }
 
+        float zoomFactor = calcuateZoomFactor();
         for (int i = 0; i < currentColumnCount; ++i) {
             TableColumn column = this.tblEditor.getColumnModel().getColumn(i);
-            column.setPreferredWidth(columnWidths[i]);
-            column.setWidth(columnWidths[i]);
+            column.setPreferredWidth(Math.round(columnWidths[i] * zoomFactor));
+            column.setWidth(Math.round(columnWidths[i] * zoomFactor));
         }
 
         this.updateRowHeights(null);
         panelInfo.setVisible(getFileEditorState().showInfoPanel());
+    }
+
+    private float calcuateZoomFactor() {
+        float fontHeight = getFontHeight();
+        return fontHeight / baseFontHeight;
     }
 
     public void updateRowHeights(TableModelEvent e) {
@@ -365,7 +385,12 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
     }
 
     public void storeCurrentTableLayout() {
-        getFileEditorState().setColumnWidths(getCurrentColumnsWidths());
+        int[] widths = getCurrentColumnsWidths();
+        float zoomFactor = calcuateZoomFactor();
+        for (int i = 0; i < widths.length; i++) {
+            widths[i] /= zoomFactor;
+        }
+        getFileEditorState().setColumnWidths(widths);
     }
 
     protected Object[][] storeCurrentState() {
@@ -431,5 +456,41 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
     @Override
     protected String generateCsv(Object[][] data) {
         return super.generateCsv(data);
+    }
+
+    private int getGlobalFontSize() {
+        return  EditorColorsManager.getInstance().getGlobalScheme().getEditorFontSize();
+    }
+
+    private int getFontHeight() {
+        return getTable().getFontMetrics(getTable().getFont()).getHeight();
+    }
+
+    public void changeFontSize(int changeAmount) {
+        if (changeAmount == 0) {
+            return;
+        }
+        int oldSize = getTable().getFont().getSize();
+        int newSize = oldSize + changeAmount;
+        setFontSize(newSize);
+        setTableRowHeight(getPreferredRowHeight());
+        updateEditorLayout();
+    }
+
+    @Override
+    public int getPreferredRowHeight() {
+        if (getFileEditorState().getRowLines() == 0) {
+            return getFontHeight() + TOTAL_CELL_HEIGHT_SPACING;
+        }
+        return getFileEditorState().getRowLines() * getFontHeight() + TOTAL_CELL_HEIGHT_SPACING;
+
+    }
+
+    private void setFontSize(int size) {
+        Font font = getTable().getFont();
+        if (font.getSize() != size) {
+            Font newFont = font.deriveFont((float)size);
+            getTable().setFont(newFont);
+        }
     }
 }

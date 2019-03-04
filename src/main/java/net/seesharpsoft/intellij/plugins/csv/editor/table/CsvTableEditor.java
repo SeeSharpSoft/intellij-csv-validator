@@ -36,7 +36,6 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
 
     public static final String EDITOR_NAME = "Table Editor";
 
-    public static final int ROW_LINE_HEIGHT = 20;
     public static final int INITIAL_COLUMN_WIDTH = 100;
 
     protected final Project project;
@@ -79,6 +78,9 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
 
     protected abstract void afterTableComponentUpdate(Object[][] values);
 
+    public abstract int getPreferredRowHeight();
+
+
     public final void updateTableComponentData(Object[][] values) {
         beforeTableComponentUpdate();
         try {
@@ -87,10 +89,6 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
         } finally {
             afterTableComponentUpdate(values);
         }
-    }
-
-    public int getPreferredRowHeight() {
-        return ROW_LINE_HEIGHT * getFileEditorState().getRowLines();
     }
 
     public void setEditable(boolean editable) {
