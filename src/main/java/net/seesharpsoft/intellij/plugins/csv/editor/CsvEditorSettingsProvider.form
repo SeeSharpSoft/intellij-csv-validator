@@ -109,7 +109,7 @@
               <component id="bfa35" class="javax.swing.JLabel">
                 <constraints/>
                 <properties>
-                  <text value="Textlines per row (default):"/>
+                  <text value="Text-lines per row (default):"/>
                 </properties>
               </component>
               <component id="d6ab5" class="javax.swing.JComboBox" binding="cbRowHeight">

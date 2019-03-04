@@ -7,8 +7,6 @@
 
     <description><![CDATA[
 
-        <p style="color: #885555">NEW: !!! Table Editor !!!</p>
-        <br>
         <p>The <em>Table Editor</em> is a newly introduced feature of CSV Plugin v2.*. Support its ongoing development by <a href="https://github.com/SeeSharpSoft/intellij-csv-validator/issues">reporting issues, providing suggestions, contributing ideas/features</a> or by just <a href="https://plugins.jetbrains.com/plugin/10037-csv-plugin">giving it a thumbs up.</a></p>
         <br><hr/><br>
 
@@ -36,7 +34,7 @@
         <br><br>
         For more detailed information please have a look at the <a href="https://github.com/SeeSharpSoft/intellij-csv-validator/blob/master/README.md">README</a>.
         <br><br><br>
-        <em>Thanks to @egoisticalgoat, @sabi0, @ptahchiev, @ghost, @MarkJeronimus and others for supporting me and the project!</em>
+        <em>Thanks to @royqh1979, @egoisticalgoat, @sabi0, @ptahchiev, @ghost, @MarkJeronimus and others for supporting me and the project!</em>
         <br><br><br>
 
         <hr /><br>
@@ -48,8 +46,9 @@
 
     <change-notes><![CDATA[
         <pre style="font-family: sans-serif">
-FIX: ArrayIndexOutOfBoundsException when opening a CSV file with an unexpected separator (table editor)
-FIX: ConcurrentModificationException during event handling (table editor)
+NEW: Zoom table-editor cells with Ctrl+Mouse Wheel (contribution by @royqh1979)
+FIX: Scratches are now recognised as CSV
+FIX: Several issues resolved by reworking column/row editing
       </pre>
     ]]>
     </change-notes>
