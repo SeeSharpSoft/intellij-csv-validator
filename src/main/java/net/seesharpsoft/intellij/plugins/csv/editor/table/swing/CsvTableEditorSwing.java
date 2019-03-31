@@ -118,14 +118,17 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
 
         tblEditor.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         tblEditor.setShowColumns(true);
+        tblEditor.setFont(getFont());
         setTableRowHeight(0);
 
         tblEditor.getColumnModel().addColumnModelListener(tableEditorListener);
 
-        tblEditor.setDefaultRenderer(String.class, new MultiLineCellRenderer(this.tableEditorKeyListener, this));
-        tblEditor.setDefaultRenderer(Object.class, new MultiLineCellRenderer(this.tableEditorKeyListener, this));
-        tblEditor.setDefaultEditor(String.class, new MultiLineCellRenderer(this.tableEditorKeyListener, this));
-        tblEditor.setDefaultEditor(Object.class, new MultiLineCellRenderer(this.tableEditorKeyListener, this));
+        MultiLineCellRenderer cellRenderer = new MultiLineCellRenderer(this.tableEditorKeyListener, this);
+        MultiLineCellRenderer cellEditor = new MultiLineCellRenderer(this.tableEditorKeyListener, this);
+        tblEditor.setDefaultRenderer(String.class, cellRenderer);
+        tblEditor.setDefaultRenderer(Object.class, cellRenderer);
+        tblEditor.setDefaultEditor(String.class, cellEditor);
+        tblEditor.setDefaultEditor(Object.class, cellEditor);
         tblEditor.registerKeyboardAction(this.tableEditorActions.undo,
                 KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_MASK), JComponent.WHEN_FOCUSED);
         tblEditor.registerKeyboardAction(this.tableEditorActions.redo,
@@ -201,7 +204,7 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
             getFileEditorState().setColumnWidths(columnWidths);
         }
 
-        float zoomFactor = calcuateZoomFactor();
+        float zoomFactor = calculateZoomFactor();
         for (int i = 0; i < currentColumnCount; ++i) {
             TableColumn column = this.tblEditor.getColumnModel().getColumn(i);
             column.setPreferredWidth(Math.round(columnWidths[i] * zoomFactor));
@@ -212,7 +215,7 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
         panelInfo.setVisible(getFileEditorState().showInfoPanel());
     }
 
-    private float calcuateZoomFactor() {
+    private float calculateZoomFactor() {
         float fontHeight = getFontHeight();
         return fontHeight / baseFontHeight;
     }
@@ -386,7 +389,7 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
 
     public void storeCurrentTableLayout() {
         int[] widths = getCurrentColumnsWidths();
-        float zoomFactor = calcuateZoomFactor();
+        float zoomFactor = calculateZoomFactor();
         for (int i = 0; i < widths.length; i++) {
             widths[i] /= zoomFactor;
         }
@@ -459,7 +462,7 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
     }
 
     private int getGlobalFontSize() {
-        return  EditorColorsManager.getInstance().getGlobalScheme().getEditorFontSize();
+        return EditorColorsManager.getInstance().getGlobalScheme().getEditorFontSize();
     }
 
     private int getFontHeight() {
