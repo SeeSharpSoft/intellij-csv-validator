@@ -17,7 +17,7 @@ import java.util.*;
 
 public class MultiLineCellRenderer extends JTextArea implements TableCellRenderer, TableCellEditor {
 
-    private Set<CellEditorListener> cellEditorListenerSet = Collections.synchronizedSet(new HashSet<>());
+    private Set<CellEditorListener> cellEditorListenerSet = new HashSet<>();
     private final UserDataHolder userDataHolder;
 
     public MultiLineCellRenderer(CsvTableEditorKeyListener keyListener, UserDataHolder userDataHolderParam) {
@@ -142,11 +142,15 @@ public class MultiLineCellRenderer extends JTextArea implements TableCellRendere
 
     @Override
     public void addCellEditorListener(CellEditorListener cellEditorListener) {
-        cellEditorListenerSet.add(cellEditorListener);
+        synchronized (cellEditorListenerSet) {
+            cellEditorListenerSet.add(cellEditorListener);
+        }
     }
 
     @Override
     public void removeCellEditorListener(CellEditorListener cellEditorListener) {
-        cellEditorListenerSet.remove(cellEditorListener);
+        synchronized (cellEditorListenerSet) {
+            cellEditorListenerSet.remove(cellEditorListener);
+        }
     }
 }
