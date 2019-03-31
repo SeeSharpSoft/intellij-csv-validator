@@ -46,9 +46,8 @@
 
     <change-notes><![CDATA[
         <pre style="font-family: sans-serif">
-NEW: Zoom table-editor cells with Ctrl+Mouse Wheel (contribution by @royqh1979)
-FIX: Scratches are now recognised as CSV
-FIX: Several issues resolved by reworking column/row editing
+NEW: use default color scheme font for table editor as well
+FIX: ConcurrentModificationException tackled (table editor)
       </pre>
     ]]>
     </change-notes>
