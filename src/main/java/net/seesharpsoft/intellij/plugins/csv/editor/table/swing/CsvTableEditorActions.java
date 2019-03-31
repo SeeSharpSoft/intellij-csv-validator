@@ -14,7 +14,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.net.URI;
-import java.util.Vector;
 
 public class CsvTableEditorActions extends CsvTableEditorUtilBase {
 
@@ -143,18 +142,6 @@ public class CsvTableEditorActions extends CsvTableEditorUtilBase {
                 csvTableEditor.applyTableChangeListener();
             }
         }
-    }
-
-    private void removeColumn(DefaultTableModel tableModel, int column) {
-        int prevColumnCount = tableModel.getColumnCount();
-
-        Vector rows = tableModel.getDataVector();
-        for (Object row : rows) {
-            ((Vector) row).remove(column);
-        }
-
-        tableModel.setColumnCount(prevColumnCount - 1);
-        tableModel.fireTableStructureChanged();
     }
 
     private final class DeleteColumnAction implements ActionListener {

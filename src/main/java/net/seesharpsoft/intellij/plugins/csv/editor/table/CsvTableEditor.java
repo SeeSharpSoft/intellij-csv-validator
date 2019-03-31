@@ -6,6 +6,8 @@ import com.intellij.ide.structureView.StructureViewBuilder;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.command.CommandProcessor;
 import com.intellij.openapi.editor.Document;
+import com.intellij.openapi.editor.colors.EditorColorsManager;
+import com.intellij.openapi.editor.colors.EditorFontType;
 import com.intellij.openapi.fileEditor.*;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
@@ -27,6 +29,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import java.awt.*;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.Collections;
@@ -293,6 +296,10 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
 
     public int getRowCount() {
         return getDataHandler().getCurrentState().length;
+    }
+
+    public Font getFont() {
+        return EditorColorsManager.getInstance().getGlobalScheme().getFont(EditorFontType.PLAIN);
     }
 
     public int getColumnCount() {
