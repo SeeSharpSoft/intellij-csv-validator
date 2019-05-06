@@ -25,6 +25,12 @@ public class CsvColumnInfo<T> {
         return myElementInfos.get(element);
     }
 
+    public RowInfo getRowInfo(int index) {
+        return myElementInfos.values().stream()
+                .filter(rowInfo -> rowInfo.getRowIndex() == index)
+                .findFirst().orElse(null);
+    }
+
     public int getColumnIndex() {
         return myColumnIndex;
     }

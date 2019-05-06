@@ -22,7 +22,7 @@ public abstract class CsvTableEditorSwingTestBase extends LightCodeInsightFixtur
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        CsvEditorSettingsExternalizable.getInstance().loadState(new CsvEditorSettingsExternalizable.OptionSet());
+        initializeEditorSettings();
         myFixture.configureByFiles("TableEditorFile.csv");
 
         fileEditor = new CsvTableEditorSwing(this.getProject(), this.getFile().getVirtualFile());
@@ -35,6 +35,13 @@ public abstract class CsvTableEditorSwingTestBase extends LightCodeInsightFixtur
         fileEditor.dispose();
 
         super.tearDown();
+    }
+
+    protected CsvEditorSettingsExternalizable initializeEditorSettings() {
+        CsvEditorSettingsExternalizable instance = CsvEditorSettingsExternalizable.getInstance();
+        instance.loadState(new CsvEditorSettingsExternalizable.OptionSet());
+        instance.setFileEndLineBreak(false);
+        return instance;
     }
 
     protected Object[][] changeValue(String newValue, int row, int column) {

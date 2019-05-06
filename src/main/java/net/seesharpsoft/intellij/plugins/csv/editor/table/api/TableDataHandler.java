@@ -24,12 +24,32 @@ public class TableDataHandler {
     }
 
     public boolean equalsCurrentState(@NotNull Object[][] state) {
-        return Arrays.deepEquals(getCurrentState(), state);
+        return Arrays.deepEquals(getCurrentState(), sanitizeState(state));
     }
 
-    public Object[][] addState(Object[][] state) {
-        if (equalsCurrentState(state)) {
-            return state;
+    public Object[][] sanitizeState(@NotNull Object[][] state) {
+        Object[][] newState = null;
+        if (state.length == 0 || state[0].length == 0) {
+            newState = new Object[1][1];
+        } else {
+            newState = CsvHelper.deepCopy(state);
+        }
+
+        for (int i = 0; i < newState.length; ++i) {
+            for (int j = 0; j < newState[i].length; ++j) {
+                if (newState[i][j] == null) {
+                    newState[i][j] = "";
+                }
+            }
+        }
+
+        return newState;
+    }
+
+    public Object[][] addState(@NotNull Object[][] state) {
+        Object[][] newState = sanitizeState(state);
+        if (equalsCurrentState(newState)) {
+            return newState;
         }
 
         while (states.size() - 1 > currentStateIndex) {
@@ -39,11 +59,11 @@ public class TableDataHandler {
             states.remove(0);
             --currentStateIndex;
         }
-        states.add(state);
+        states.add(newState);
         ++currentStateIndex;
         fireStateUpdated();
 
-        return state;
+        return newState;
     }
 
     public Object[][] getCurrentState() {
