@@ -212,6 +212,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
 
     @Override
     public void selectNotify() {
+        this.initialState = null;
         updateUIComponents();
         this.initialState = dataManagement.getCurrentState();
     }

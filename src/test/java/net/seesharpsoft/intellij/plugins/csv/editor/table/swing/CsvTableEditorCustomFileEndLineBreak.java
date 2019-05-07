@@ -13,10 +13,9 @@ public class CsvTableEditorCustomFileEndLineBreak extends CsvTableEditorSwingTes
     }
 
     @Override
-    protected CsvEditorSettingsExternalizable initializeEditorSettings() {
-        CsvEditorSettingsExternalizable instance = super.initializeEditorSettings();
+    protected void initializeEditorSettings(CsvEditorSettingsExternalizable instance) {
+        super.initializeEditorSettings(instance);
         instance.setFileEndLineBreak(true);
-        return instance;
     }
 
     public void testTableContentChangeWithoutChange() {
