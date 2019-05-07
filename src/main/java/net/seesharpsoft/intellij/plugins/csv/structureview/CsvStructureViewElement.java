@@ -9,8 +9,10 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiNamedElement;
 import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfo;
+import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfoMap;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.CsvIconProvider;
+import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettingsExternalizable;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -18,6 +20,7 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.intellij.openapi.util.Iconable.ICON_FLAG_VISIBILITY;
 
@@ -87,11 +90,20 @@ public abstract class CsvStructureViewElement implements StructureViewTreeElemen
             super(element);
         }
 
+        protected List<PsiElement> getElements(CsvColumnInfo<PsiElement> columnInfo, int maxRowNumbers) {
+            return columnInfo.getElements().stream().limit(maxRowNumbers).collect(Collectors.toList());
+        }
+
         @Override
         public TreeElement[] getChildren() {
             if (myElement instanceof CsvFile) {
                 CsvFile csvFile = (CsvFile) myElement;
-                Map<Integer, CsvColumnInfo<PsiElement>> columnInfoMap = csvFile.getMyColumnInfoMap().getColumnInfos();
+                CsvColumnInfoMap csvColumnInfoMap = csvFile.getMyColumnInfoMap();
+                int maxRowNumbers = csvColumnInfoMap.getColumnInfo(0).getSize();
+                if (csvColumnInfoMap.hasEmptyLastLine() && CsvEditorSettingsExternalizable.getInstance().isFileEndLineBreak()) {
+                    --maxRowNumbers;
+                }
+                Map<Integer, CsvColumnInfo<PsiElement>> columnInfoMap = csvColumnInfoMap.getColumnInfos();
                 TreeElement[] children = new TreeElement[columnInfoMap.size()];
                 for (Map.Entry<Integer, CsvColumnInfo<PsiElement>> entry : columnInfoMap.entrySet()) {
                     CsvColumnInfo<PsiElement> columnInfo = entry.getValue();
@@ -99,7 +111,7 @@ public abstract class CsvStructureViewElement implements StructureViewTreeElemen
                     if (psiElement == null) {
                         psiElement = CsvHelper.createEmptyCsvField(myElement.getProject());
                     }
-                    children[entry.getKey()] = new Header(psiElement, columnInfo);
+                    children[entry.getKey()] = new Header(psiElement, getElements(columnInfo, maxRowNumbers));
                 }
                 return children;
             } else {
@@ -109,20 +121,19 @@ public abstract class CsvStructureViewElement implements StructureViewTreeElemen
     }
 
     public static class Header extends CsvStructureViewElement {
-        private CsvColumnInfo<PsiElement> myColumnInfo;
+        private List<PsiElement> myElements;
 
-        public Header(PsiElement element, CsvColumnInfo<PsiElement> columnInfo) {
+        public Header(PsiElement element, List<PsiElement> elements) {
             super(element);
-            this.myColumnInfo = columnInfo;
+            this.myElements = elements;
         }
 
         @NotNull
         @Override
         public TreeElement[] getChildren() {
             int rowIndex = 0;
-            List<PsiElement> elements = myColumnInfo.getElements();
-            TreeElement[] children = new TreeElement[elements.size() - 1];
-            for (PsiElement element : elements) {
+            TreeElement[] children = new TreeElement[Math.max(0, this.myElements.size() - 1)];
+            for (PsiElement element : this.myElements) {
                 if (rowIndex > 0) {
                     children[rowIndex - 1] = new Field(element == null ? CsvHelper.createEmptyCsvField(this.myElement.getProject()) : element, rowIndex - 1);
                 }
@@ -134,7 +145,7 @@ public abstract class CsvStructureViewElement implements StructureViewTreeElemen
         @Nullable
         @Override
         public String getLocationString() {
-            return String.format("Header (%s entries)", myColumnInfo.getSize() - 1);
+            return String.format("Header (%s entries)", this.myElements.size() - 1);
         }
 
         @Nullable
