@@ -14,9 +14,9 @@ public final class CsvParserUtil {
 
     public static boolean separator(PsiBuilder builder, int tokenType) {
         if (builder.getTokenType() == CsvTypes.COMMA) {
-            PsiFile currentFile = builder.getUserDataUnprotected(FileContextUtil.CONTAINING_FILE_KEY);
+            PsiFile currentFile = builder.getUserData(FileContextUtil.CONTAINING_FILE_KEY);
             return builder.getTokenText().equals(
-                    CsvCodeStyleSettings.getCurrentSeparator(builder.getProject(), currentFile != null ? currentFile.getLanguage() : null)
+                    CsvCodeStyleSettings.getCurrentSeparator(currentFile)
             );
         }
         return false;

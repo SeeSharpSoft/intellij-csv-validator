@@ -63,26 +63,32 @@ FIX: ConcurrentModificationException tackled (table editor)
         <fileTypeFactory implementation="net.seesharpsoft.intellij.plugins.csv.CsvFileTypeFactory"/>
         <fileTypeFactory implementation="net.seesharpsoft.intellij.plugins.tsv.TsvFileTypeFactory"/>
 
-        <lang.parserDefinition language="csv" implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvParserDefinition"/>
-        <lang.parserDefinition language="tsv" implementationClass="net.seesharpsoft.intellij.plugins.tsv.TsvParserDefinition"/>
+        <lang.parserDefinition language="csv"
+                               implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvParserDefinition"/>
+        <lang.parserDefinition language="tsv"
+                               implementationClass="net.seesharpsoft.intellij.plugins.tsv.TsvParserDefinition"/>
 
         <lang.syntaxHighlighterFactory language="csv"
                                        implementationClass="net.seesharpsoft.intellij.plugins.csv.highlighter.CsvSyntaxHighlighterFactory"/>
         <editorHighlighterProvider filetype="CSV"
                                    implementationClass="net.seesharpsoft.intellij.plugins.csv.highlighter.CsvEditorHighlighterProvider"/>
-        <highlightUsagesHandlerFactory implementation="net.seesharpsoft.intellij.plugins.csv.highlighter.CsvHighlightUsagesHandlerFactory"/>
+        <highlightUsagesHandlerFactory
+                implementation="net.seesharpsoft.intellij.plugins.csv.highlighter.CsvHighlightUsagesHandlerFactory"/>
 
         <colorSettingsPage implementation="net.seesharpsoft.intellij.plugins.csv.settings.CsvColorSettings"/>
 
-        <applicationService serviceImplementation="net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettingsExternalizable" />
-        <editorOptionsProvider instance="net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettingsProvider" />
-        <fileEditorProvider implementation="net.seesharpsoft.intellij.plugins.csv.editor.CsvFileEditorProvider" />
-        <fileEditorProvider implementation="net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditorProvider" />
+        <applicationService
+                serviceImplementation="net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettingsExternalizable"/>
+        <projectService serviceImplementation="net.seesharpsoft.intellij.plugins.csv.components.CsvFileAttributes"/>
+
+        <editorOptionsProvider instance="net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettingsProvider"/>
+        <fileEditorProvider implementation="net.seesharpsoft.intellij.plugins.csv.editor.CsvFileEditorProvider"/>
+        <fileEditorProvider implementation="net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditorProvider"/>
 
         <annotator language="csv" implementationClass="net.seesharpsoft.intellij.plugins.csv.editor.CsvAnnotator"/>
 
         <spellchecker.support language="csv"
-                              implementationClass="net.seesharpsoft.intellij.plugins.csv.spellchecker.CsvSpellCheckingStrategy" />
+                              implementationClass="net.seesharpsoft.intellij.plugins.csv.spellchecker.CsvSpellCheckingStrategy"/>
 
         <lang.formatter language="csv"
                         implementationClass="net.seesharpsoft.intellij.plugins.csv.formatter.CsvFormattingModelBuilder"/>
@@ -100,8 +106,9 @@ FIX: ConcurrentModificationException tackled (table editor)
                 enabledByDefault="true"
                 groupName="CSV"
                 shortName="CsvValidation"
-                implementationClass="net.seesharpsoft.intellij.plugins.csv.inspection.CsvValidationInspection" />
-        <lang.inspectionSuppressor language="csv" implementationClass="net.seesharpsoft.intellij.plugins.csv.inspection.CsvInspectionSuppressor" />
+                implementationClass="net.seesharpsoft.intellij.plugins.csv.inspection.CsvValidationInspection"/>
+        <lang.inspectionSuppressor language="csv"
+                                   implementationClass="net.seesharpsoft.intellij.plugins.csv.inspection.CsvInspectionSuppressor"/>
 
         <intentionAction id="CsvShiftColumnLeft" order="FIRST">
             <className>net.seesharpsoft.intellij.plugins.csv.intention.CsvShiftColumnLeftIntentionAction</className>
@@ -136,6 +143,16 @@ FIX: ConcurrentModificationException tackled (table editor)
     </extensions>
 
     <actions>
+        <group id="net.seesharpsoft.intellij.plugins.csv.actions.CsvChangeSeparatorActionGroup"
+               class="net.seesharpsoft.intellij.plugins.csv.actions.CsvChangeSeparatorActionGroup"
+               text="CSV Separator"
+               description="CSV Separator"
+               popup="true"
+               keep-content="true"
+               icon="/media/icons/csv-icon.png"
+        >
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+        </group>
     </actions>
 
 </idea-plugin>

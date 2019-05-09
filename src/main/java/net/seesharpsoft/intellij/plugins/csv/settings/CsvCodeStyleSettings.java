@@ -2,11 +2,16 @@ package net.seesharpsoft.intellij.plugins.csv.settings;
 
 import com.intellij.lang.Language;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.psi.PsiFile;
 import com.intellij.psi.codeStyle.CodeStyleSettings;
 import com.intellij.psi.codeStyle.CodeStyleSettingsManager;
 import com.intellij.psi.codeStyle.CustomCodeStyleSettings;
+import com.intellij.util.ArrayUtil;
 import net.seesharpsoft.intellij.plugins.csv.CsvSeparatorHolder;
+import net.seesharpsoft.intellij.plugins.csv.components.CsvFileAttributes;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.regex.Pattern;
@@ -53,6 +58,21 @@ public class CsvCodeStyleSettings extends CustomCodeStyleSettings {
             return ((CsvSeparatorHolder)language).getSeparator();
         }
         return getCurrentSeparator(project);
+    }
+
+    public static String getCurrentSeparator(@Nullable PsiFile psiFile) {
+        if (psiFile == null) {
+            return getCurrentSeparator((Project)null);
+        }
+        Project project = psiFile.getProject();
+        VirtualFile virtualFile = psiFile.getVirtualFile();
+        CsvFileAttributes csvFileAttributes = project != null && virtualFile != null ? ServiceManager.getService(project, CsvFileAttributes.class) : null;
+        String separator = csvFileAttributes != null ? csvFileAttributes.getFileSeparator(virtualFile) : null;
+        return separator != null ? separator : getCurrentSeparator(project, psiFile.getLanguage());
+    }
+
+    public static String getSeparatorDisplayText(String separator) {
+        return SUPPORTED_SEPARATORS_DISPLAY[ArrayUtil.find(SUPPORTED_SEPARATORS, separator)];
     }
 
     public CsvCodeStyleSettings(CodeStyleSettings settings) {
