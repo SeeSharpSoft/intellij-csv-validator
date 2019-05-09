@@ -34,9 +34,6 @@ public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttrib
         XmlSerializerUtil.copyBean(state, this);
     }
 
-    @Override
-    public void noStateLoaded() { }
-
     protected String generateMapKey(@NotNull VirtualFile virtualFile) {
         return virtualFile.getPresentableUrl();
     }

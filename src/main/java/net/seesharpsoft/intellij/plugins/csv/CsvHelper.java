@@ -47,7 +47,7 @@ public final class CsvHelper {
     public static boolean isCsvFile(Project project, VirtualFile file) {
         final FileType fileType = file.getFileType();
         return (fileType instanceof LanguageFileType && ((LanguageFileType) fileType).getLanguage().isKindOf(CsvLanguage.INSTANCE)) ||
-                (fileType == ScratchFileType.INSTANCE && LanguageUtil.getLanguageForPsi(project, file) == CsvLanguage.INSTANCE);
+                (fileType == ScratchFileType.INSTANCE && LanguageUtil.getLanguageForPsi(project, file).isKindOf(CsvLanguage.INSTANCE));
     }
 
     public static IElementType getElementType(PsiElement element) {

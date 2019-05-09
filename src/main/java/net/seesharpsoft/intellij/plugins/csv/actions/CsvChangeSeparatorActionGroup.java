@@ -25,9 +25,8 @@ public class CsvChangeSeparatorActionGroup extends ActionGroup {
     public void update(AnActionEvent anActionEvent) {
         PsiFile psiFile = anActionEvent.getData(CommonDataKeys.PSI_FILE);
         Language language = psiFile == null ? null : psiFile.getLanguage();
-        anActionEvent.getPresentation().setEnabledAndVisible(psiFile != null && language != null
-                && language.isKindOf(CsvLanguage.INSTANCE)
-                && !(language instanceof CsvSeparatorHolder)
+        anActionEvent.getPresentation().setEnabledAndVisible(psiFile != null && language != null &&
+                language.isKindOf(CsvLanguage.INSTANCE) && !(language instanceof CsvSeparatorHolder)
         );
 
         if (psiFile != null) {
