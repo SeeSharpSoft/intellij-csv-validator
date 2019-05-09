@@ -128,11 +128,15 @@ public abstract class CsvStructureViewElement implements StructureViewTreeElemen
             this.myElements = elements;
         }
 
+        private int getNumberOfChildren() {
+            return Math.max(0, this.myElements.size() - 1);
+        }
+
         @NotNull
         @Override
         public TreeElement[] getChildren() {
             int rowIndex = 0;
-            TreeElement[] children = new TreeElement[Math.max(0, this.myElements.size() - 1)];
+            TreeElement[] children = new TreeElement[getNumberOfChildren()];
             for (PsiElement element : this.myElements) {
                 if (rowIndex > 0) {
                     children[rowIndex - 1] = new Field(element == null ? CsvHelper.createEmptyCsvField(this.myElement.getProject()) : element, rowIndex - 1);
@@ -145,7 +149,7 @@ public abstract class CsvStructureViewElement implements StructureViewTreeElemen
         @Nullable
         @Override
         public String getLocationString() {
-            return String.format("Header (%s entries)", this.myElements.size() - 1);
+            return String.format("Header (%s entries)", getNumberOfChildren());
         }
 
         @Nullable
