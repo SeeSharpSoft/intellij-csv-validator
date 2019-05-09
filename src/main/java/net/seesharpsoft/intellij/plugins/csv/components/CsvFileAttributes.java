@@ -13,7 +13,7 @@ import java.util.Map;
         name = "CsvFileAttributes",
         storages = {@Storage(CsvFileAttributes.CSV_STATE_STORAGE_FILE)}
 )
-public class CsvFileAttributes implements ProjectComponent, PersistentStateComponent<CsvFileAttributes> {
+public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttributes> {
 
     public static final String CSV_STATE_STORAGE_FILE = "csv-plugin.xml";
 
