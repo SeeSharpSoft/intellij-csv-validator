@@ -352,8 +352,8 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
             for (int columnIndex = 0; columnIndex < columnInfoMap.getColumnInfos().size(); ++columnIndex) {
                 CsvColumnInfo<PsiElement> columnInfo = columnInfoMap.getColumnInfo(columnIndex);
                 List<PsiElement> elements = columnInfo.getElements();
-                if (columnIndex == 0 && CsvEditorSettingsExternalizable.getInstance().isFileEndLineBreak()
-                        && lastColumnInfoMap.hasEmptyLastLine()) {
+                if (columnIndex == 0 && CsvEditorSettingsExternalizable.getInstance().isFileEndLineBreak() &&
+                        lastColumnInfoMap.hasEmptyLastLine()) {
                     elements.remove(elements.size() - 1);
                 }
 
