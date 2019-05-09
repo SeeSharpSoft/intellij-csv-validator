@@ -158,7 +158,8 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
                     result.append(this.currentSeparator);
                 }
             }
-            if (CsvEditorSettingsExternalizable.getInstance().isFileEndLineBreak() || row < data.length - 1) {
+            if (row < data.length - 1 ||
+                    (CsvEditorSettingsExternalizable.getInstance().isFileEndLineBreak() && getColumnInfoMap().hasEmptyLastLine())) {
                 result.append("\n");
             }
         }
