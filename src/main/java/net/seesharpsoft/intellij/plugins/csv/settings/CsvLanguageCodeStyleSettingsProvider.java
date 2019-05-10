@@ -21,7 +21,7 @@ public class CsvLanguageCodeStyleSettingsProvider extends LanguageCodeStyleSetti
         if (settingsType == SettingsType.LANGUAGE_SPECIFIC) {
             consumer.showCustomOption(CsvCodeStyleSettings.class,
                     "SEPARATOR_INDEX",
-                    "Value separator",
+                    "Value separator (default)",
                     "Separator",
                     CsvCodeStyleSettings.SUPPORTED_SEPARATORS_DISPLAY,
                     IntStream.rangeClosed(0, CsvCodeStyleSettings.SUPPORTED_SEPARATORS.length - 1).toArray());

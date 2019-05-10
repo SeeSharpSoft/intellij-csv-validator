@@ -14,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class CsvDefaultSeparatorAction extends ToggleAction {
     CsvDefaultSeparatorAction() {
-        super("Use Default");
+        super("Project Default");
     }
 
     @Override
