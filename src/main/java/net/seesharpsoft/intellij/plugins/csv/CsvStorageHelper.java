@@ -7,10 +7,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.regex.Pattern;
 
-public class CsvStorage {
+public final class CsvStorageHelper {
     public static final String CSV_STATE_STORAGE_FILE = "csv-plugin.xml";
 
-    public final static Key<String> RELATIVE_FILE_URL = Key.create("CSV_PLUGIN_RELATIVE_URL");
+    public static final Key<String> RELATIVE_FILE_URL = Key.create("CSV_PLUGIN_RELATIVE_URL");
 
     public static String getRelativeFileUrl(@NotNull PsiFile psiFile) {
         String url = psiFile.getUserData(RELATIVE_FILE_URL);
@@ -23,7 +23,7 @@ public class CsvStorage {
         return url;
     }
 
-    private CsvStorage() {
+    private CsvStorageHelper() {
         // static
     }
 }

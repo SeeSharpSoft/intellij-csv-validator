@@ -5,7 +5,7 @@ import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.psi.PsiFile;
 import com.intellij.util.xmlb.XmlSerializerUtil;
-import net.seesharpsoft.intellij.plugins.csv.CsvStorage;
+import net.seesharpsoft.intellij.plugins.csv.CsvStorageHelper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -14,7 +14,7 @@ import java.util.Map;
 
 @State(
         name = "CsvFileAttributes",
-        storages = {@Storage(CsvStorage.CSV_STATE_STORAGE_FILE)}
+        storages = {@Storage(CsvStorageHelper.CSV_STATE_STORAGE_FILE)}
 )
 @SuppressWarnings("all")
 public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttributes> {
@@ -37,7 +37,7 @@ public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttrib
     }
 
     protected String generateMapKey(@NotNull PsiFile psiFile) {
-        return CsvStorage.getRelativeFileUrl(psiFile);
+        return CsvStorageHelper.getRelativeFileUrl(psiFile);
     }
 
     public void setFileSeparator(@NotNull PsiFile psiFile, @NotNull String separator) {
