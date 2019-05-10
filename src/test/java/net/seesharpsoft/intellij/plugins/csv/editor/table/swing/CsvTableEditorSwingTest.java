@@ -89,7 +89,7 @@ public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
         assertEquals("  and one more value  ", columns.get(1));
         columns = (Vector)tableModel.getDataVector().get(3);
         assertEquals("", columns.get(0));
-        assertEquals(null, columns.get(1));
+        assertEquals("", columns.get(1));
     }
 
     public void testTableContentChanges() {

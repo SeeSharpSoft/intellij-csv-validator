@@ -349,11 +349,15 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
         DefaultTableModel tableModel = new DefaultTableModel(0, 0);
         if (!columnInfoMap.hasErrors()) {
             int startRow = getFileEditorState().getFixedHeaders() ? 1 : 0;
-            for (int i = 0; i < columnInfoMap.getColumnInfos().size(); ++i) {
-                CsvColumnInfo<PsiElement> columnInfo = columnInfoMap.getColumnInfo(i);
+            for (int columnIndex = 0; columnIndex < columnInfoMap.getColumnInfos().size(); ++columnIndex) {
+                CsvColumnInfo<PsiElement> columnInfo = columnInfoMap.getColumnInfo(columnIndex);
                 List<PsiElement> elements = columnInfo.getElements();
+                if (columnIndex == 0 && CsvEditorSettingsExternalizable.getInstance().isFileEndLineBreak() &&
+                        lastColumnInfoMap.hasEmptyLastLine()) {
+                    elements.remove(elements.size() - 1);
+                }
 
-                tableModel.addColumn(String.format("Column %s (%s entries)", i + 1, elements.size()),
+                tableModel.addColumn(String.format("Column %s (%s entries)", columnIndex + 1, elements.size()),
                         elements.stream()
                                 .skip(startRow)
                                 .map(psiElement -> psiElement == null ? "" : CsvHelper.unquoteCsvValue(psiElement.getText()))
@@ -492,7 +496,7 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
     private void setFontSize(int size) {
         Font font = getTable().getFont();
         if (font.getSize() != size) {
-            Font newFont = font.deriveFont((float)size);
+            Font newFont = font.deriveFont((float) size);
             getTable().setFont(newFont);
         }
     }

@@ -63,7 +63,7 @@ public final class TableRowUtilities {
     }
 
     private static JTable createRowHeadersTable(final JTable userTable, int startingNumber) {
-        final JTable rowHeadersTable = new JBTable(new RowHeadersTableModel(userTable.getModel().getRowCount(), startingNumber));
+        final JBTable rowHeadersTable = new JBTable(new RowHeadersTableModel(userTable.getModel().getRowCount(), startingNumber));
 
         // this is where you set the width of the row headers
         rowHeadersTable.createDefaultColumnsFromModel();
@@ -79,6 +79,7 @@ public final class TableRowUtilities {
         rowHeadersTable.setFocusable(true);
         rowHeadersTable.setDragEnabled(true);
         rowHeadersTable.setSelectionMode(userTable.getSelectionModel().getSelectionMode());
+        rowHeadersTable.getEmptyText().setText("");
 
         return rowHeadersTable;
     }
@@ -186,7 +187,7 @@ public final class TableRowUtilities {
             this.startNumber = startingNumber;
             int j = 0;
             for (int i = startingNumber; i < maxNumber + startNumber; i++) {
-                numbersList.add(new Integer(j + startNumber));
+                numbersList.add(j + startNumber);
                 j++;
             }
         }
@@ -225,7 +226,7 @@ public final class TableRowUtilities {
 
         public void addNumber() {
             if (numbersList.isEmpty()) {
-                numbersList.add(0, new Integer(startNumber));
+                numbersList.add(0, startNumber);
             } else {
                 Integer maxNum = numbersList.get(numbersList.size() - 1);
                 numbersList.add(numbersList.size(), maxNum.intValue() + 1);

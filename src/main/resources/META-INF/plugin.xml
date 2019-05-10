@@ -46,8 +46,8 @@
 
     <change-notes><![CDATA[
         <pre style="font-family: sans-serif">
-NEW: use default color scheme font for table editor as well
-FIX: ConcurrentModificationException tackled (table editor)
+NEW: option to keep/ignore a linebreak at the end of a file (table editor)
+NEW: improved change detection of table editor to avoid overwriting original text representation without editing any values
       </pre>
     ]]>
     </change-notes>

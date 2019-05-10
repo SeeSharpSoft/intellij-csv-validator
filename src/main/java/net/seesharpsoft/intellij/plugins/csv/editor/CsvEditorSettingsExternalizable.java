@@ -43,6 +43,7 @@ public class CsvEditorSettingsExternalizable implements PersistentStateComponent
 
         public boolean SHOW_TABLE_EDITOR_INFO_PANEL;
         public boolean QUOTING_ENFORCED;
+        public boolean FILE_END_LINE_BREAK;
 
         public OptionSet() {
             EditorSettingsExternalizable editorSettingsExternalizable = EditorSettingsExternalizable.getInstance();
@@ -58,6 +59,7 @@ public class CsvEditorSettingsExternalizable implements PersistentStateComponent
             QUOTING_ENFORCED = false;
             TABLE_COLUMN_HIGHTLIGHTING = true;
             ZERO_BASED_COLUMN_NUMBERING = false;
+            FILE_END_LINE_BREAK = true;
         }
     }
 
@@ -181,5 +183,12 @@ public class CsvEditorSettingsExternalizable implements PersistentStateComponent
     }
     public void setZeroBasedColumnNumbering(boolean zeroBasedColumnNumbering) {
         getState().ZERO_BASED_COLUMN_NUMBERING = zeroBasedColumnNumbering;
+    }
+
+    public boolean isFileEndLineBreak() {
+        return getState().FILE_END_LINE_BREAK;
+    }
+    public void setFileEndLineBreak(boolean fileEndLineBreak) {
+        getState().FILE_END_LINE_BREAK = fileEndLineBreak;
     }
 }

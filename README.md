@@ -148,6 +148,10 @@ Set whether soft wrapping should be activated for CSV/TSV. It still can be chang
 
 Defines how many lines of text are shown in one editor cell by default. *Auto* does recalculate the height on the fly that can cause some flickering while editing. This setting can be changed in the table editor itself per file.
 
+##### Keep/ignore linebreak at end of file
+
+If the file ends with a completely empty line (no spaces or tabs either), the table editor will not show this line as empty values but ignore it. When table data is serialized, an existing empty line is kept at the end of the file.
+
 ##### Show info panel
 
 Enables/disables the info panel at the bottom of the table editor.
