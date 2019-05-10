@@ -2,6 +2,7 @@ package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.TextEditor;
+import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettingsExternalizable;
 
 public class CsvTableEditorActionsTest extends CsvTableEditorSwingTestBase {
 
@@ -25,16 +26,16 @@ public class CsvTableEditorActionsTest extends CsvTableEditorSwingTestBase {
         Object[][] newState = fileEditor.getDataHandler().getCurrentState();
 
         assertEquals(initialState.length + 1, newState.length);
-        assertEquals(null, newState[newState.length - 1][0]);
-        assertEquals(null, newState[newState.length - 1][1]);
+        assertEquals("", newState[newState.length - 1][0]);
+        assertEquals("", newState[newState.length - 1][1]);
     }
 
     public void testAddRowBeforeAction() {
         fileEditor.tableEditorActions.addRowBefore.actionPerformed(null);
         Object[][] newState = fileEditor.getDataHandler().getCurrentState();
         assertEquals(initialState.length + 1, newState.length);
-        assertEquals(null, newState[0][0]);
-        assertEquals(null, newState[0][1]);
+        assertEquals("", newState[0][0]);
+        assertEquals("", newState[0][1]);
 
         fileEditor.tableEditorActions.undo.actionPerformed(null);
 
@@ -43,8 +44,8 @@ public class CsvTableEditorActionsTest extends CsvTableEditorSwingTestBase {
         fileEditor.tableEditorActions.addRowBefore.actionPerformed(null);
         newState = fileEditor.getDataHandler().getCurrentState();
         assertEquals(initialState.length + 1, newState.length);
-        assertEquals(null, newState[1][0]);
-        assertEquals(null, newState[1][1]);
+        assertEquals("", newState[1][0]);
+        assertEquals("", newState[1][1]);
         assertEquals(2, fileEditor.getTable().getSelectedRow());
         assertEquals(1, fileEditor.getTable().getSelectedColumn());
     }
@@ -55,8 +56,8 @@ public class CsvTableEditorActionsTest extends CsvTableEditorSwingTestBase {
         assertEquals(initialState.length + 1, newState.length);
         assertEquals("Header1", newState[0][0]);
         assertEquals("header 2", newState[0][1]);
-        assertEquals(null, newState[4][0]);
-        assertEquals(null, newState[4][1]);
+        assertEquals("", newState[4][0]);
+        assertEquals("", newState[4][1]);
 
         fileEditor.tableEditorActions.undo.actionPerformed(null);
 
@@ -65,8 +66,8 @@ public class CsvTableEditorActionsTest extends CsvTableEditorSwingTestBase {
         fileEditor.tableEditorActions.addRowAfter.actionPerformed(null);
         newState = fileEditor.getDataHandler().getCurrentState();
         assertEquals(initialState.length + 1, newState.length);
-        assertEquals(null, newState[2][0]);
-        assertEquals(null, newState[2][1]);
+        assertEquals("", newState[2][0]);
+        assertEquals("", newState[2][1]);
         assertEquals(1, fileEditor.getTable().getSelectedRow());
         assertEquals(1, fileEditor.getTable().getSelectedColumn());
     }
@@ -76,8 +77,8 @@ public class CsvTableEditorActionsTest extends CsvTableEditorSwingTestBase {
 
         Object[][] newState = fileEditor.getDataHandler().getCurrentState();
 
-        assertEquals(null, newState[0][2]);
-        assertEquals(null, newState[1][2]);
+        assertEquals("", newState[0][2]);
+        assertEquals("", newState[1][2]);
     }
 
     public void testAddColumnBeforeAction() {
@@ -85,8 +86,8 @@ public class CsvTableEditorActionsTest extends CsvTableEditorSwingTestBase {
         Object[][] newState = fileEditor.getDataHandler().getCurrentState();
         assertEquals("header 2", newState[0][2]);
         assertEquals("this is column header 2", newState[1][2]);
-        assertEquals(null, newState[0][0]);
-        assertEquals(null, newState[1][0]);
+        assertEquals("", newState[0][0]);
+        assertEquals("", newState[1][0]);
 
         fileEditor.tableEditorActions.undo.actionPerformed(null);
 
@@ -94,8 +95,8 @@ public class CsvTableEditorActionsTest extends CsvTableEditorSwingTestBase {
         fileEditor.getTable().setColumnSelectionInterval(1, 1);
         fileEditor.tableEditorActions.addColumnBefore.actionPerformed(null);
         newState = fileEditor.getDataHandler().getCurrentState();
-        assertEquals(null, newState[0][1]);
-        assertEquals(null, newState[1][1]);
+        assertEquals("", newState[0][1]);
+        assertEquals("", newState[1][1]);
         assertEquals(1, fileEditor.getTable().getSelectedRow());
         assertEquals(2, fileEditor.getTable().getSelectedColumn());
     }
@@ -103,8 +104,8 @@ public class CsvTableEditorActionsTest extends CsvTableEditorSwingTestBase {
     public void testAddColumnAfterAction() {
         fileEditor.tableEditorActions.addColumnAfter.actionPerformed(null);
         Object[][] newState = fileEditor.getDataHandler().getCurrentState();
-        assertEquals(null, newState[0][2]);
-        assertEquals(null, newState[1][2]);
+        assertEquals("", newState[0][2]);
+        assertEquals("", newState[1][2]);
 
         fileEditor.tableEditorActions.undo.actionPerformed(null);
 
@@ -112,8 +113,8 @@ public class CsvTableEditorActionsTest extends CsvTableEditorSwingTestBase {
         fileEditor.getTable().setColumnSelectionInterval(1, 1);
         fileEditor.tableEditorActions.addColumnAfter.actionPerformed(null);
         newState = fileEditor.getDataHandler().getCurrentState();
-        assertEquals(null, newState[0][2]);
-        assertEquals(null, newState[1][2]);
+        assertEquals("", newState[0][2]);
+        assertEquals("", newState[1][2]);
         assertEquals(1, fileEditor.getTable().getSelectedRow());
         assertEquals(1, fileEditor.getTable().getSelectedColumn());
     }
@@ -133,6 +134,17 @@ public class CsvTableEditorActionsTest extends CsvTableEditorSwingTestBase {
         assertEquals(1, fileEditor.getTable().getSelectedColumn());
     }
 
+    public void testDeleteAllRowsAction() {
+        fileEditor.getTable().setRowSelectionInterval(0, 3);
+        fileEditor.getTable().setColumnSelectionInterval(0, 0);
+        fileEditor.tableEditorActions.deleteRow.actionPerformed(null);
+        Object[][] newState = fileEditor.getDataHandler().getCurrentState();
+        // always one field/value should remain
+        assertEquals(1, newState.length);
+        assertEquals(1, newState[0].length);
+        assertEquals("", newState[0][0]);
+    }
+
     public void testDeleteColumnAction() {
         fileEditor.tableEditorActions.deleteColumn.actionPerformed(null);
         assertTrue(fileEditor.getDataHandler().equalsCurrentState(initialState));
@@ -147,6 +159,17 @@ public class CsvTableEditorActionsTest extends CsvTableEditorSwingTestBase {
         assertEquals("this is column \"Header1\"", newState[1][0]);
         assertEquals(1, fileEditor.getTable().getSelectedRow());
         assertEquals(0, fileEditor.getTable().getSelectedColumn());
+    }
+
+    public void testDeleteAllColumnsAction() {
+        fileEditor.getTable().setRowSelectionInterval(1, 1);
+        fileEditor.getTable().setColumnSelectionInterval(0, 1);
+        fileEditor.tableEditorActions.deleteColumn.actionPerformed(null);
+        Object[][] newState = fileEditor.getDataHandler().getCurrentState();
+        // always one field/value should remain
+        assertEquals(1, newState.length);
+        assertEquals(1, newState[0].length);
+        assertEquals("", newState[0][0]);
     }
 
     public void testOpenTextEditor() {

@@ -26,6 +26,7 @@ public class CsvEditorSettingsProvider implements SearchableConfigurable {
     private JCheckBox cbQuotingEnforced;
     private JCheckBox cbTableColumnHighlighting;
     private JCheckBox cbZeroBasedColumnNumbering;
+    private JCheckBox cbFileEndLineBreak;
 
     @NotNull
     @Override
@@ -69,7 +70,8 @@ public class CsvEditorSettingsProvider implements SearchableConfigurable {
                 isModified(cbQuotingEnforced, csvEditorSettingsExternalizable.isQuotingEnforced()) ||
                 !Objects.equals(cbEditorUsage.getSelectedIndex(), csvEditorSettingsExternalizable.getEditorPrio().ordinal()) ||
                 isModified(cbTableColumnHighlighting, csvEditorSettingsExternalizable.isTableColumnHighlightingEnabled()) ||
-                isModified(cbZeroBasedColumnNumbering, csvEditorSettingsExternalizable.isZeroBasedColumnNumbering());
+                isModified(cbZeroBasedColumnNumbering, csvEditorSettingsExternalizable.isZeroBasedColumnNumbering()) ||
+                isModified(cbFileEndLineBreak, csvEditorSettingsExternalizable.isFileEndLineBreak());
     }
 
     @Override
@@ -87,6 +89,7 @@ public class CsvEditorSettingsProvider implements SearchableConfigurable {
         cbQuotingEnforced.setSelected(csvEditorSettingsExternalizable.isQuotingEnforced());
         cbTableColumnHighlighting.setSelected(csvEditorSettingsExternalizable.isTableColumnHighlightingEnabled());
         cbZeroBasedColumnNumbering.setSelected(csvEditorSettingsExternalizable.isZeroBasedColumnNumbering());
+        cbFileEndLineBreak.setSelected(csvEditorSettingsExternalizable.isFileEndLineBreak());
     }
 
     @Override
@@ -104,6 +107,7 @@ public class CsvEditorSettingsProvider implements SearchableConfigurable {
         csvEditorSettingsExternalizable.setQuotingEnforced(cbQuotingEnforced.isSelected());
         csvEditorSettingsExternalizable.setTableColumnHighlightingEnabled(cbTableColumnHighlighting.isSelected());
         csvEditorSettingsExternalizable.setZeroBasedColumnNumbering(cbZeroBasedColumnNumbering.isSelected());
+        csvEditorSettingsExternalizable.setFileEndLineBreak(cbFileEndLineBreak.isSelected());
     }
 
     protected void createUIComponents() {

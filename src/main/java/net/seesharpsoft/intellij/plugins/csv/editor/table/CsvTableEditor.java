@@ -154,7 +154,8 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
                     result.append(this.currentSeparator);
                 }
             }
-            if (row < data.length - 1) {
+            if (row < data.length - 1 ||
+                    (CsvEditorSettingsExternalizable.getInstance().isFileEndLineBreak() && getColumnInfoMap().hasEmptyLastLine())) {
                 result.append("\n");
             }
         }
@@ -208,6 +209,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
 
     @Override
     public void selectNotify() {
+        this.initialState = null;
         updateUIComponents();
         this.initialState = dataManagement.getCurrentState();
     }
@@ -313,9 +315,10 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
         int index = (before ? (focusedRowIndex == -1 ? 0 : focusedRowIndex) : (focusedRowIndex == -1 ? getRowCount() : focusedRowIndex + 1)) +
                 (getFileEditorState().getFixedHeaders() ? 1 : 0);
         TableDataHandler dataHandler = getDataHandler();
-        Object[][] currentData = ArrayUtil.insert(dataHandler.getCurrentState(), index, new Object[getColumnCount()]);
-        updateTableComponentData(dataHandler.addState(currentData));
-        return currentData;
+        Object[][] currentData = dataHandler.getCurrentState();
+        Object[][] newData = ArrayUtil.insert(currentData, Math.min(index, currentData.length), new Object[getColumnCount()]);
+        updateTableComponentData(dataHandler.addState(newData));
+        return newData;
     }
 
     public Object[][] removeRows(int[] indices) {

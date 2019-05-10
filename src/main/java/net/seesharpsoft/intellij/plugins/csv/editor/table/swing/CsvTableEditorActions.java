@@ -82,11 +82,11 @@ public class CsvTableEditorActions extends CsvTableEditorUtilBase {
     }
 
     private void selectCell(JTable table, int row, int column) {
-        if (row == -1 || column == -1) {
-            return;
-        }
         int actualRow = Math.min(row, table.getRowCount() - 1);
         int actualColumn = Math.min(column, table.getColumnCount() - 1);
+        if (actualRow < 0 || actualColumn < 0) {
+            return;
+        }
         table.setRowSelectionInterval(actualRow, actualRow);
         table.setColumnSelectionInterval(actualColumn, actualColumn);
     }
