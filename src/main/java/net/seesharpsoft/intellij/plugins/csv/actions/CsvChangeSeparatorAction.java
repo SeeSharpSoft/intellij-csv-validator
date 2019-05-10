@@ -28,7 +28,7 @@ public class CsvChangeSeparatorAction extends ToggleAction {
                 return false;
             }
             CsvFileAttributes csvFileAttributes = ServiceManager.getService(psiFile.getProject(), CsvFileAttributes.class);
-            return csvFileAttributes.getFileSeparator(psiFile.getVirtualFile()) != null && CsvCodeStyleSettings.getCurrentSeparator(psiFile).equals(mySeparator);
+            return csvFileAttributes.getFileSeparator(psiFile) != null && CsvCodeStyleSettings.getCurrentSeparator(psiFile).equals(mySeparator);
         }
 
         @Override
@@ -42,7 +42,7 @@ public class CsvChangeSeparatorAction extends ToggleAction {
                 return;
             }
             CsvFileAttributes csvFileAttributes = ServiceManager.getService(psiFile.getProject(), CsvFileAttributes.class);
-            csvFileAttributes.setFileSeparator(psiFile.getVirtualFile(), this.mySeparator);
+            csvFileAttributes.setFileSeparator(psiFile, this.mySeparator);
             FileContentUtil.reparseFiles(psiFile.getVirtualFile());
         }
     }

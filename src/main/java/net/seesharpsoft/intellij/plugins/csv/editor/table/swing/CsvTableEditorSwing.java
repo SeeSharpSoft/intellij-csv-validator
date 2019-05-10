@@ -143,7 +143,6 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
         applyEditorState(getFileEditorState());
 
         rowHeadersTable = TableRowUtilities.addNumberColumn(tblEditor, 1);
-
     }
 
     protected void applyTableChangeListener() {

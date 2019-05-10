@@ -4,7 +4,6 @@ import com.intellij.lang.Language;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.codeStyle.CodeStyleSettings;
 import com.intellij.psi.codeStyle.CodeStyleSettingsManager;
@@ -65,9 +64,8 @@ public class CsvCodeStyleSettings extends CustomCodeStyleSettings {
             return getCurrentSeparator((Project)null);
         }
         Project project = psiFile.getProject();
-        VirtualFile virtualFile = psiFile.getVirtualFile();
-        CsvFileAttributes csvFileAttributes = project != null && virtualFile != null ? ServiceManager.getService(project, CsvFileAttributes.class) : null;
-        String separator = csvFileAttributes != null ? csvFileAttributes.getFileSeparator(virtualFile) : null;
+        CsvFileAttributes csvFileAttributes = project != null ? ServiceManager.getService(project, CsvFileAttributes.class) : null;
+        String separator = csvFileAttributes != null ? csvFileAttributes.getFileSeparator(psiFile) : null;
         return separator != null ? separator : getCurrentSeparator(project, psiFile.getLanguage());
     }
 
