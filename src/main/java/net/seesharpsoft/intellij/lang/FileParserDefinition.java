@@ -6,7 +6,7 @@ import com.intellij.lexer.Lexer;
 import com.intellij.psi.PsiFile;
 
 /**
- * Support for file specific parser definition (even though .
+ * Support for file specific parser definition.
  */
 public interface FileParserDefinition extends ParserDefinition {
     default Lexer createLexer(PsiFile file) {
