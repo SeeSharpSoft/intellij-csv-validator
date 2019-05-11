@@ -12,8 +12,8 @@ public class CsvTableEditorKeyListenerTest extends CsvTableEditorSwingTestBase {
         fileEditor.tableEditorKeyListener.keyReleased(keyEvent);
         Object[][] newState = fileEditor.getDataHandler().getCurrentState();
         assertEquals(initialState.length + 1, newState.length);
-        assertEquals(null, newState[0][0]);
-        assertEquals(null, newState[0][1]);
+        assertEquals("", newState[0][0]);
+        assertEquals("", newState[0][1]);
 
         fileEditor.tableEditorActions.undo.actionPerformed(null);
 
@@ -22,8 +22,8 @@ public class CsvTableEditorKeyListenerTest extends CsvTableEditorSwingTestBase {
         fileEditor.tableEditorKeyListener.keyReleased(keyEvent);
         newState = fileEditor.getDataHandler().getCurrentState();
         assertEquals(initialState.length + 1, newState.length);
-        assertEquals(null, newState[1][0]);
-        assertEquals(null, newState[1][1]);
+        assertEquals("", newState[1][0]);
+        assertEquals("", newState[1][1]);
         assertEquals(2, fileEditor.getTable().getSelectedRow());
         assertEquals(1, fileEditor.getTable().getSelectedColumn());
     }
@@ -37,8 +37,8 @@ public class CsvTableEditorKeyListenerTest extends CsvTableEditorSwingTestBase {
         assertEquals(initialState.length + 1, newState.length);
         assertEquals("Header1", newState[0][0]);
         assertEquals("header 2", newState[0][1]);
-        assertEquals(null, newState[4][0]);
-        assertEquals(null, newState[4][1]);
+        assertEquals("", newState[4][0]);
+        assertEquals("", newState[4][1]);
 
         fileEditor.tableEditorActions.undo.actionPerformed(null);
 
@@ -47,8 +47,8 @@ public class CsvTableEditorKeyListenerTest extends CsvTableEditorSwingTestBase {
         fileEditor.tableEditorKeyListener.keyReleased(keyEvent);
         newState = fileEditor.getDataHandler().getCurrentState();
         assertEquals(initialState.length + 1, newState.length);
-        assertEquals(null, newState[2][0]);
-        assertEquals(null, newState[2][1]);
+        assertEquals("", newState[2][0]);
+        assertEquals("", newState[2][1]);
         assertEquals(1, fileEditor.getTable().getSelectedRow());
         assertEquals(1, fileEditor.getTable().getSelectedColumn());
     }
@@ -61,8 +61,8 @@ public class CsvTableEditorKeyListenerTest extends CsvTableEditorSwingTestBase {
         Object[][] newState = fileEditor.getDataHandler().getCurrentState();
         assertEquals("header 2", newState[0][2]);
         assertEquals("this is column header 2", newState[1][2]);
-        assertEquals(null, newState[0][0]);
-        assertEquals(null, newState[1][0]);
+        assertEquals("", newState[0][0]);
+        assertEquals("", newState[1][0]);
 
         fileEditor.tableEditorActions.undo.actionPerformed(null);
 
@@ -70,8 +70,8 @@ public class CsvTableEditorKeyListenerTest extends CsvTableEditorSwingTestBase {
         fileEditor.getTable().setColumnSelectionInterval(1, 1);
         fileEditor.tableEditorKeyListener.keyReleased(keyEvent);
         newState = fileEditor.getDataHandler().getCurrentState();
-        assertEquals(null, newState[0][1]);
-        assertEquals(null, newState[1][1]);
+        assertEquals("", newState[0][1]);
+        assertEquals("", newState[1][1]);
         assertEquals(1, fileEditor.getTable().getSelectedRow());
         assertEquals(2, fileEditor.getTable().getSelectedColumn());
     }
@@ -82,8 +82,8 @@ public class CsvTableEditorKeyListenerTest extends CsvTableEditorSwingTestBase {
 
         fileEditor.tableEditorKeyListener.keyReleased(keyEvent);
         Object[][] newState = fileEditor.getDataHandler().getCurrentState();
-        assertEquals(null, newState[0][2]);
-        assertEquals(null, newState[1][2]);
+        assertEquals("", newState[0][2]);
+        assertEquals("", newState[1][2]);
 
         fileEditor.tableEditorActions.undo.actionPerformed(null);
 
@@ -91,8 +91,8 @@ public class CsvTableEditorKeyListenerTest extends CsvTableEditorSwingTestBase {
         fileEditor.getTable().setColumnSelectionInterval(1, 1);
         fileEditor.tableEditorKeyListener.keyReleased(keyEvent);
         newState = fileEditor.getDataHandler().getCurrentState();
-        assertEquals(null, newState[0][2]);
-        assertEquals(null, newState[1][2]);
+        assertEquals("", newState[0][2]);
+        assertEquals("", newState[1][2]);
         assertEquals(1, fileEditor.getTable().getSelectedRow());
         assertEquals(1, fileEditor.getTable().getSelectedColumn());
     }

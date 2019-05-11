@@ -64,6 +64,7 @@ public class CsvEditorSettingsProviderTest extends LightCodeInsightFixtureTestCa
         csvEditorSettingsExternalizable.setQuotingEnforced(true);
         csvEditorSettingsExternalizable.setTableColumnHighlightingEnabled(false);
         csvEditorSettingsExternalizable.setZeroBasedColumnNumbering(true);
+        csvEditorSettingsExternalizable.setFileEndLineBreak(false);
 
         assertEquals(true, editorSettingsPanel.isModified());
 
@@ -79,6 +80,7 @@ public class CsvEditorSettingsProviderTest extends LightCodeInsightFixtureTestCa
         assertEquals(true, csvEditorSettingsExternalizable.isQuotingEnforced());
         assertEquals(false, csvEditorSettingsExternalizable.isTableColumnHighlightingEnabled());
         assertEquals(true, csvEditorSettingsExternalizable.isZeroBasedColumnNumbering());
+        assertEquals(false, csvEditorSettingsExternalizable.isFileEndLineBreak());
 
         editorSettingsPanel.disposeUIResources();
     }
@@ -98,6 +100,7 @@ public class CsvEditorSettingsProviderTest extends LightCodeInsightFixtureTestCa
         csvEditorSettingsExternalizable.setQuotingEnforced(true);
         csvEditorSettingsExternalizable.setTableColumnHighlightingEnabled(false);
         csvEditorSettingsExternalizable.setZeroBasedColumnNumbering(true);
+        csvEditorSettingsExternalizable.setFileEndLineBreak(false);
 
         editorSettingsPanel.apply();
 
@@ -113,6 +116,7 @@ public class CsvEditorSettingsProviderTest extends LightCodeInsightFixtureTestCa
         assertEquals(freshOptionSet.QUOTING_ENFORCED, csvEditorSettingsExternalizable.isQuotingEnforced());
         assertEquals(freshOptionSet.TABLE_COLUMN_HIGHTLIGHTING, csvEditorSettingsExternalizable.isTableColumnHighlightingEnabled());
         assertEquals(freshOptionSet.ZERO_BASED_COLUMN_NUMBERING, csvEditorSettingsExternalizable.isZeroBasedColumnNumbering());
+        assertEquals(freshOptionSet.FILE_END_LINE_BREAK, csvEditorSettingsExternalizable.isFileEndLineBreak());
 
         editorSettingsPanel.disposeUIResources();
     }

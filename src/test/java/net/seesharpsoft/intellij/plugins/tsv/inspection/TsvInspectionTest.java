@@ -1,4 +1,4 @@
-package net.seesharpsoft.intellij.plugins.tsv.intention;
+package net.seesharpsoft.intellij.plugins.tsv.inspection;
 
 import com.intellij.codeInsight.intention.IntentionAction;
 import com.intellij.testFramework.fixtures.LightCodeInsightFixtureTestCase;

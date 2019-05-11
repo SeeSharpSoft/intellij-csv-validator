@@ -44,11 +44,12 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
     protected final Project project;
     protected final VirtualFile file;
     protected final UserDataHolder userDataHolder;
-    protected final Document document;
     protected final PropertyChangeSupport changeSupport;
-    protected final PsiFile psiFile;
-    protected final String currentSeparator;
     protected final TableDataHandler dataManagement;
+
+    protected Document document;
+    protected PsiFile psiFile;
+    protected String currentSeparator;
 
     private Object[][] initialState = null;
     private CsvTableEditorState storedState = null;
@@ -59,11 +60,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
         this.project = projectArg;
         this.file = fileArg;
         this.userDataHolder = new UserDataHolderBase();
-        this.document = FileDocumentManager.getInstance().getDocument(this.file);
-        PsiDocumentManager documentManager = PsiDocumentManager.getInstance(project);
-        this.psiFile = documentManager.getPsiFile(this.document);
         this.changeSupport = new PropertyChangeSupport(this);
-        this.currentSeparator = CsvCodeStyleSettings.getCurrentSeparator(this.project, this.psiFile.getLanguage());
         this.dataManagement = new TableDataHandler(this, TableDataHandler.MAX_SIZE);
     }
 
@@ -82,7 +79,6 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
     protected abstract void afterTableComponentUpdate(Object[][] values);
 
     public abstract int getPreferredRowHeight();
-
 
     public final void updateTableComponentData(Object[][] values) {
         beforeTableComponentUpdate();
@@ -158,7 +154,8 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
                     result.append(this.currentSeparator);
                 }
             }
-            if (row < data.length - 1) {
+            if (row < data.length - 1 ||
+                    (CsvEditorSettingsExternalizable.getInstance().isFileEndLineBreak() && getColumnInfoMap().hasEmptyLastLine())) {
                 result.append("\n");
             }
         }
@@ -212,6 +209,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
 
     @Override
     public void selectNotify() {
+        this.initialState = null;
         updateUIComponents();
         this.initialState = dataManagement.getCurrentState();
     }
@@ -287,6 +285,12 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
 
     @Nullable
     public CsvFile getCsvFile() {
+        if (this.psiFile == null || !this.psiFile.isValid()) {
+            this.document = FileDocumentManager.getInstance().getDocument(this.file);
+            PsiDocumentManager documentManager = PsiDocumentManager.getInstance(project);
+            this.psiFile = documentManager.getPsiFile(this.document);
+            this.currentSeparator = CsvCodeStyleSettings.getCurrentSeparator(this.psiFile);
+        }
         return this.psiFile instanceof CsvFile ? (CsvFile) psiFile : null;
     }
 
@@ -311,9 +315,10 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
         int index = (before ? (focusedRowIndex == -1 ? 0 : focusedRowIndex) : (focusedRowIndex == -1 ? getRowCount() : focusedRowIndex + 1)) +
                 (getFileEditorState().getFixedHeaders() ? 1 : 0);
         TableDataHandler dataHandler = getDataHandler();
-        Object[][] currentData = ArrayUtil.insert(dataHandler.getCurrentState(), index, new Object[getColumnCount()]);
-        updateTableComponentData(dataHandler.addState(currentData));
-        return currentData;
+        Object[][] currentData = dataHandler.getCurrentState();
+        Object[][] newData = ArrayUtil.insert(currentData, Math.min(index, currentData.length), new Object[getColumnCount()]);
+        updateTableComponentData(dataHandler.addState(newData));
+        return newData;
     }
 
     public Object[][] removeRows(int[] indices) {

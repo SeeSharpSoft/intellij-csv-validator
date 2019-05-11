@@ -1,7 +1,14 @@
+2.4.0
+May 11, 2019
+
+NEW: option to keep/ignore a linebreak at the end of a file (table editor)
+NEW: improved change detection of table editor to avoid overwriting original text representation without editing any values
+NEW: file based value separator (e.g. ',' or ';')
+
 2.3.1
 Mar 31, 2019
 
-NEW: use default color scheme font for table editor as well
+NEW: use default color scheme & font for table editor as well
 FIX: ConcurrentModificationException tackled (table editor)
 
 2.3.0

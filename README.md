@@ -3,6 +3,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/SeeSharpSoft/intellij-csv-validator/badge.svg?branch=master)](https://coveralls.io/github/SeeSharpSoft/intellij-csv-validator?branch=master)
 [![Known Vulnerabilities](https://snyk.io/test/github/SeeSharpSoft/intellij-csv-validator/badge.svg?targetFile=build.gradle)](https://snyk.io/test/github/SeeSharpSoft/intellij-csv-validator?targetFile=build.gradle)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/97769359388e44bfb7101346d510fccf)](https://www.codacy.com/app/github_124/intellij-csv-validator?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=SeeSharpSoft/intellij-csv-validator&amp;utm_campaign=Badge_Grade)
+[![BCH compliance](https://bettercodehub.com/edge/badge/SeeSharpSoft/intellij-csv-validator?branch=master)](https://bettercodehub.com/results/SeeSharpSoft/intellij-csv-validator/)
 
 # Lightweight CSV Plugin for JetBrains IDE family
 
@@ -147,6 +148,10 @@ Set whether soft wrapping should be activated for CSV/TSV. It still can be chang
 
 Defines how many lines of text are shown in one editor cell by default. *Auto* does recalculate the height on the fly that can cause some flickering while editing. This setting can be changed in the table editor itself per file.
 
+##### Keep/ignore linebreak at end of file
+
+If the file ends with a completely empty line (no spaces or tabs either), the table editor will not show this line as empty values but ignore it. When table data is serialized, an existing empty line is kept at the end of the file.
+
 ##### Show info panel
 
 Enables/disables the info panel at the bottom of the table editor.
@@ -201,6 +206,8 @@ Annasusanna,Amsterdam,1
 ##### Separator
 
 The following separators are currently supported: **,** (Comma), **;** (Semicolon), **|** (Pipe) and **&#8633;** (Tab)
+
+_Value separator (default)_ defines which separator is used by default. The separator character can be changed for each CSV file individually.
 
 When changing the separator, press the apply button to refresh the preview window properly. 
 
@@ -273,6 +280,18 @@ _Trimming/spacing outside quotes & Leading whitespaces_
 Annasusanna,Amsterdam,         1
         Ben,   Berlin,         2
 ```
+
+### Actions
+
+#### File specific value separator
+
+![Context menu](./docs/contextmenu.png)
+
+The action to switch the value separator used for CSV syntax validation of a specific file is part of its text editors context menu.
+
+
+This action defines how the parser/validator/highlighter/etc. behaves. It does intentionally not change the file content.
+To be more precise: It **does not replace** previous separator characters by new ones or adjust the escaped texts.
 
 ### Inspections
 

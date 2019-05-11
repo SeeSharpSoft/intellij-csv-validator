@@ -8,6 +8,7 @@ import com.intellij.openapi.fileTypes.LanguageFileType;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.TokenType;
 import com.intellij.psi.impl.source.DummyHolder;
@@ -15,6 +16,7 @@ import com.intellij.psi.impl.source.DummyHolderFactory;
 import com.intellij.psi.impl.source.tree.FileElement;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
+import net.seesharpsoft.intellij.lang.FileParserDefinition;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvField;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvFile;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvRecord;
@@ -27,14 +29,15 @@ public final class CsvHelper {
 
     // replaces PsiElementFactory.SERVICE.getInstance(element.getProject()).createDummyHolder("<undefined>", CsvTypes.FIELD, null);
     // https://github.com/SeeSharpSoft/intellij-csv-validator/issues/4
-    public static PsiElement createEmptyCsvField(Project project) {
+    public static PsiElement createEmptyCsvField(PsiFile psiFile) {
+        final Project project = psiFile.getProject();
         final String text = "<undefined>";
         final IElementType type = CsvTypes.FIELD;
         final PsiManager psiManager = PsiManager.getInstance(project);
         final DummyHolder dummyHolder = DummyHolderFactory.createHolder(psiManager, null);
         final FileElement fileElement = dummyHolder.getTreeElement();
-        final ParserDefinition parserDefinition = LanguageParserDefinitions.INSTANCE.forLanguage(CsvLanguage.INSTANCE);
-        final Lexer lexer = parserDefinition.createLexer(project);
+        final FileParserDefinition parserDefinition = (FileParserDefinition)LanguageParserDefinitions.INSTANCE.forLanguage(CsvLanguage.INSTANCE);
+        final Lexer lexer = parserDefinition.createLexer(psiFile);
         final PsiBuilder psiBuilder = PsiBuilderFactory.getInstance().createBuilder(project, fileElement, lexer, CsvLanguage.INSTANCE, text);
         final ASTNode node = parserDefinition.createParser(project).parse(type, psiBuilder);
         fileElement.rawAddChildren((com.intellij.psi.impl.source.tree.TreeElement) node);
@@ -44,7 +47,7 @@ public final class CsvHelper {
     public static boolean isCsvFile(Project project, VirtualFile file) {
         final FileType fileType = file.getFileType();
         return (fileType instanceof LanguageFileType && ((LanguageFileType) fileType).getLanguage().isKindOf(CsvLanguage.INSTANCE)) ||
-                (fileType == ScratchFileType.INSTANCE && LanguageUtil.getLanguageForPsi(project, file) == CsvLanguage.INSTANCE);
+                (fileType == ScratchFileType.INSTANCE && LanguageUtil.getLanguageForPsi(project, file).isKindOf(CsvLanguage.INSTANCE));
     }
 
     public static IElementType getElementType(PsiElement element) {

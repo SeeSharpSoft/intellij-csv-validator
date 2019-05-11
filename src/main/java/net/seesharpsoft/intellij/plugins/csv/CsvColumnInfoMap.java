@@ -54,4 +54,19 @@ public class CsvColumnInfoMap<T> {
     public void setHasErrors(boolean hasErrorsArg) {
         hasErrors = hasErrorsArg;
     }
+
+    public boolean hasEmptyLastLine() {
+        CsvColumnInfo<T> columnInfo = myInfoColumnMap.get(0);
+        int size = columnInfo.getSize();
+        if (!columnInfo.getRowInfo(size - 1).getTextRange().isEmpty()) {
+            return false;
+        }
+        for (int columnIndex = 1; columnIndex < myInfoColumnMap.size(); ++columnIndex) {
+            if (myInfoColumnMap.get(columnIndex).getSize() == size) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 }
