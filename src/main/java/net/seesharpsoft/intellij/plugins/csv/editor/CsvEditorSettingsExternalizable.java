@@ -6,6 +6,7 @@ import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.openapi.editor.ex.EditorSettingsExternalizable;
+import net.seesharpsoft.intellij.plugins.csv.CsvStorageHelper;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
@@ -14,7 +15,7 @@ import java.beans.PropertyChangeSupport;
 
 @State(
         name = "CsvEditorSettings",
-        storages = {@Storage("csv-plugin.xml")}
+        storages = {@Storage(CsvStorageHelper.CSV_STATE_STORAGE_FILE)}
 )
 @SuppressWarnings("all")
 public class CsvEditorSettingsExternalizable implements PersistentStateComponent<CsvEditorSettingsExternalizable.OptionSet> {

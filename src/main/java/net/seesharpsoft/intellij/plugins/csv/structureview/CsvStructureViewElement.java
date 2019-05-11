@@ -109,7 +109,7 @@ public abstract class CsvStructureViewElement implements StructureViewTreeElemen
                     CsvColumnInfo<PsiElement> columnInfo = entry.getValue();
                     PsiElement psiElement = columnInfo.getHeaderElement();
                     if (psiElement == null) {
-                        psiElement = CsvHelper.createEmptyCsvField(myElement.getProject());
+                        psiElement = CsvHelper.createEmptyCsvField(csvFile);
                     }
                     children[entry.getKey()] = new Header(psiElement, getElements(columnInfo, maxRowNumbers));
                 }
@@ -139,7 +139,7 @@ public abstract class CsvStructureViewElement implements StructureViewTreeElemen
             TreeElement[] children = new TreeElement[getNumberOfChildren()];
             for (PsiElement element : this.myElements) {
                 if (rowIndex > 0) {
-                    children[rowIndex - 1] = new Field(element == null ? CsvHelper.createEmptyCsvField(this.myElement.getProject()) : element, rowIndex - 1);
+                    children[rowIndex - 1] = new Field(element == null ? CsvHelper.createEmptyCsvField(this.myElement.getContainingFile()) : element, rowIndex - 1);
                 }
                 ++rowIndex;
             }

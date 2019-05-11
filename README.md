@@ -207,6 +207,8 @@ Annasusanna,Amsterdam,1
 
 The following separators are currently supported: **,** (Comma), **;** (Semicolon), **|** (Pipe) and **&#8633;** (Tab)
 
+_Value separator (default)_ defines which separator is used by default. The separator character can be changed for each CSV file individually.
+
 When changing the separator, press the apply button to refresh the preview window properly. 
 
 _Space before separator_
@@ -278,6 +280,18 @@ _Trimming/spacing outside quotes & Leading whitespaces_
 Annasusanna,Amsterdam,         1
         Ben,   Berlin,         2
 ```
+
+### Actions
+
+#### File specific value separator
+
+![Context menu](./docs/contextmenu.png)
+
+The action to switch the value separator used for CSV syntax validation of a specific file is part of its text editors context menu.
+
+
+This action defines how the parser/validator/highlighter/etc. behaves. It does intentionally not change the file content.
+To be more precise: It **does not replace** previous separator characters by new ones or adjust the escaped texts.
 
 ### Inspections
 
