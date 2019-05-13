@@ -82,7 +82,7 @@ public class CsvAnnotator implements Annotator {
         if (elementType == CsvTypes.COMMA) {
             TextAttributes textAttributes = holder.getCurrentAnnotationSession().getUserData(TAB_SEPARATOR_HIGHLIGHT_COLOR_KEY);
             if (!Boolean.TRUE.equals(holder.getCurrentAnnotationSession().getUserData(TAB_SEPARATOR_HIGHLIGHT_COLOR_DETERMINED_KEY))) {
-                String separator = CsvCodeStyleSettings.getCurrentSeparator(csvFile.getProject(), csvFile.getLanguage());
+                String separator = CsvCodeStyleSettings.getCurrentSeparator(csvFile);
                 if (CsvEditorSettingsExternalizable.getInstance().isHighlightTabSeparator() && separator.equals(CsvCodeStyleSettings.TAB_SEPARATOR)) {
                     textAttributes = new TextAttributes(null,
                             CsvEditorSettingsExternalizable.getInstance().getTabHighlightColor(),
