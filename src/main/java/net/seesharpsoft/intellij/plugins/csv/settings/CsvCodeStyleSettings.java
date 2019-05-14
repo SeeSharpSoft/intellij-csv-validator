@@ -48,14 +48,14 @@ public class CsvCodeStyleSettings extends CustomCodeStyleSettings {
         return DEFAULT_SEPARATOR;
     }
 
-    private static String getCurrentSeparator(@Nullable Project project) {
+    protected static String getCurrentSeparator(@Nullable Project project) {
         if (!ApplicationManager.getApplication().isUnitTestMode() && project != null) {
             return getCurrentSeparator(CodeStyleSettingsManager.getInstance(project).getCurrentSettings());
         }
         return DEFAULT_SEPARATOR;
     }
 
-    private static String getCurrentSeparator(@Nullable Project project, @Nullable Language language) {
+    protected static String getCurrentSeparator(@Nullable Project project, @Nullable Language language) {
         if (language != null && language instanceof CsvSeparatorHolder) {
             return ((CsvSeparatorHolder) language).getSeparator();
         }
@@ -64,7 +64,7 @@ public class CsvCodeStyleSettings extends CustomCodeStyleSettings {
 
     public static String getCurrentSeparator(@Nullable Project project, @Nullable VirtualFile virtualFile) {
         if (virtualFile == null) {
-            return getCurrentSeparator((Project) null);
+            return getCurrentSeparator(project);
         }
         CsvFileAttributes csvFileAttributes = project != null ? ServiceManager.getService(project, CsvFileAttributes.class) : null;
         String separator = csvFileAttributes != null ? csvFileAttributes.getFileSeparator(project, virtualFile) : null;
@@ -74,8 +74,15 @@ public class CsvCodeStyleSettings extends CustomCodeStyleSettings {
                         getCurrentSeparator(project);
     }
 
+    public static String getCurrentSeparator(@Nullable Project project, @Nullable PsiFile psiFile) {
+        return getCurrentSeparator(project, psiFile == null ? null : psiFile.getOriginalFile().getVirtualFile());
+    }
+
     public static String getCurrentSeparator(@Nullable PsiFile psiFile) {
-        return getCurrentSeparator(psiFile.getProject(), psiFile.getOriginalFile().getVirtualFile());
+        if (psiFile == null) {
+            return getCurrentSeparator((Project) null);
+        }
+        return getCurrentSeparator(psiFile.getProject(), psiFile);
     }
 
     public static String getSeparatorDisplayText(String separator) {

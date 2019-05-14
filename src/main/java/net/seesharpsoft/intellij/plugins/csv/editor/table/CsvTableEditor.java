@@ -101,7 +101,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
 
     public CsvColumnInfoMap<PsiElement> getColumnInfoMap() {
         CsvFile csvFile = getCsvFile();
-        return csvFile == null ? null : csvFile.getMyColumnInfoMap();
+        return csvFile == null ? null : csvFile.getColumnInfoMap();
     }
 
     public boolean hasErrors() {
@@ -289,7 +289,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
             this.document = FileDocumentManager.getInstance().getDocument(this.file);
             PsiDocumentManager documentManager = PsiDocumentManager.getInstance(project);
             this.psiFile = documentManager.getPsiFile(this.document);
-            this.currentSeparator = CsvCodeStyleSettings.getCurrentSeparator(this.psiFile);
+            this.currentSeparator = CsvCodeStyleSettings.getCurrentSeparator(this.getProject(), this.getFile());
         }
         return this.psiFile instanceof CsvFile ? (CsvFile) psiFile : null;
     }

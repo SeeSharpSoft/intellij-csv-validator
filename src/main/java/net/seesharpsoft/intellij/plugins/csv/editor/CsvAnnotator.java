@@ -39,7 +39,7 @@ public class CsvAnnotator implements Annotator {
             return;
         }
 
-        CsvColumnInfo<PsiElement> columnInfo = csvFile.getMyColumnInfoMap().getColumnInfo(element);
+        CsvColumnInfo<PsiElement> columnInfo = csvFile.getColumnInfoMap().getColumnInfo(element);
 
         if (columnInfo != null) {
             PsiElement headerElement = columnInfo.getHeaderElement();

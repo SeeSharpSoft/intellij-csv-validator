@@ -47,22 +47,32 @@ public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttrib
     }
 
     public void setFileSeparator(@NotNull PsiFile psiFile, @NotNull String separator) {
-        Attribute state = attributeMap.get(generateMapKey(psiFile));
+        String key = generateMapKey(psiFile);
+        if (key == null) {
+            return;
+        }
+        Attribute state = attributeMap.get(key);
         if (state == null) {
             state = new Attribute();
-            attributeMap.put(generateMapKey(psiFile), state);
+            attributeMap.put(key, state);
         }
         state.separator = separator;
     }
 
     public void removeFileSeparator(@NotNull PsiFile psiFile) {
-        attributeMap.remove(generateMapKey(psiFile));
+        String key = generateMapKey(psiFile);
+        if (key != null) {
+            attributeMap.remove(key);
+        }
     }
 
     public String getFileSeparator(@NotNull Project project, @NotNull VirtualFile virtualFile) {
-        Attribute state = attributeMap.get(generateMapKey(project, virtualFile));
-        if (state != null) {
-            return state.separator;
+        String key = generateMapKey(project, virtualFile);
+        if (key != null) {
+            Attribute state = attributeMap.get(key);
+            if (state != null) {
+                return state.separator;
+            }
         }
         return null;
     }
