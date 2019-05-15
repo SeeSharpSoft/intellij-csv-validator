@@ -98,7 +98,7 @@ public abstract class CsvStructureViewElement implements StructureViewTreeElemen
         public TreeElement[] getChildren() {
             if (myElement instanceof CsvFile) {
                 CsvFile csvFile = (CsvFile) myElement;
-                CsvColumnInfoMap csvColumnInfoMap = csvFile.getMyColumnInfoMap();
+                CsvColumnInfoMap csvColumnInfoMap = csvFile.getColumnInfoMap();
                 int maxRowNumbers = csvColumnInfoMap.getColumnInfo(0).getSize();
                 if (csvColumnInfoMap.hasEmptyLastLine() && CsvEditorSettingsExternalizable.getInstance().isFileEndLineBreak()) {
                     --maxRowNumbers;

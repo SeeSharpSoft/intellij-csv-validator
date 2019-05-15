@@ -52,9 +52,9 @@ public class CsvHighlightUsagesHandler extends HighlightUsagesHandlerBase<PsiEle
 
     @Override
     public void computeUsages(List<PsiElement> list) {
-        CsvColumnInfoMap<PsiElement> columnInfoMap = getCsvFile().getMyColumnInfoMap();
+        CsvColumnInfoMap<PsiElement> columnInfoMap = getCsvFile().getColumnInfoMap();
         for (PsiElement listElement : list) {
-            CsvColumnInfo<PsiElement> csvColumnInfo = getCsvFile().getMyColumnInfoMap().getColumnInfo(listElement);
+            CsvColumnInfo<PsiElement> csvColumnInfo = getCsvFile().getColumnInfoMap().getColumnInfo(listElement);
             if (csvColumnInfo == null) {
                 continue;
             }

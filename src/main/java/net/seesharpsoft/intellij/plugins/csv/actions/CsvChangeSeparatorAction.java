@@ -28,7 +28,7 @@ public class CsvChangeSeparatorAction extends ToggleAction {
                 return false;
             }
             CsvFileAttributes csvFileAttributes = ServiceManager.getService(psiFile.getProject(), CsvFileAttributes.class);
-            return csvFileAttributes.getFileSeparator(psiFile) != null && CsvCodeStyleSettings.getCurrentSeparator(psiFile).equals(mySeparator);
+            return csvFileAttributes.getFileSeparator(psiFile) != null && CsvCodeStyleSettings.getCurrentSeparator(anActionEvent.getProject(), psiFile).equals(mySeparator);
         }
 
         @Override

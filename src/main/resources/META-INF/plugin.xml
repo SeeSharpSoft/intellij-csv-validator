@@ -63,11 +63,14 @@ NEW: file based value separator (e.g. ',' or ';')
     <extensions defaultExtensionNs="com.intellij">
         <fileTypeFactory implementation="net.seesharpsoft.intellij.plugins.csv.CsvFileTypeFactory"/>
         <fileTypeFactory implementation="net.seesharpsoft.intellij.plugins.tsv.TsvFileTypeFactory"/>
+        <fileTypeFactory implementation="net.seesharpsoft.intellij.plugins.psv.PsvFileTypeFactory"/>
 
         <lang.parserDefinition language="csv"
                                implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvParserDefinition"/>
         <lang.parserDefinition language="tsv"
                                implementationClass="net.seesharpsoft.intellij.plugins.tsv.TsvParserDefinition"/>
+        <lang.parserDefinition language="psv"
+                               implementationClass="net.seesharpsoft.intellij.plugins.psv.PsvParserDefinition"/>
 
         <lang.syntaxHighlighterFactory language="csv"
                                        implementationClass="net.seesharpsoft.intellij.plugins.csv.highlighter.CsvSyntaxHighlighterFactory"/>
