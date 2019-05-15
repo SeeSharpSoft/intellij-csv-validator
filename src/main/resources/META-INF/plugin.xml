@@ -13,7 +13,7 @@
         Lightweight CSV plugin that supports editing files in CSV/TSV format.<br><br>
         <b>Features:</b><br>
         <ul>
-            <li>CSV/TSV file detection</li>
+            <li>CSV/TSV/PSV file detection</li>
             <li>table editor</li>
             <li>customizable text editor</li>
             <li>syntax validation</li>
@@ -46,9 +46,8 @@
 
     <change-notes><![CDATA[
         <pre style="font-family: sans-serif">
-NEW: option to keep/ignore a linebreak at the end of a file (table editor)
-NEW: improved change detection of table editor to avoid overwriting original text representation without editing any values
-NEW: file based value separator (e.g. ',' or ';')
+NEW: PSV file support
+FIX: NullPointerException in StorageHelper class
       </pre>
     ]]>
     </change-notes>

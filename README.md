@@ -14,7 +14,7 @@ This enables default editor features like syntax validation, highlighting and in
 
 ## Features
 
-- CSV/TSV file detection
+- CSV/TSV/PSV file detection
 - table editor
 - customizable text editor
 - syntax validation

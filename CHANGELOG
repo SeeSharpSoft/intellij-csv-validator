@@ -1,3 +1,9 @@
+2.5.0
+May 16, 2019
+
+NEW: PSV file support
+FIX: NullPointerException in StorageHelper class
+
 2.4.0
 May 11, 2019
 
