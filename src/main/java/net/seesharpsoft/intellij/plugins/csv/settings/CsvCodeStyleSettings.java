@@ -3,7 +3,9 @@ package net.seesharpsoft.intellij.plugins.csv.settings;
 import com.intellij.lang.Language;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.ServiceManager;
+import com.intellij.openapi.fileTypes.LanguageFileType;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.codeStyle.CodeStyleSettings;
 import com.intellij.psi.codeStyle.CodeStyleSettingsManager;
@@ -31,8 +33,9 @@ public class CsvCodeStyleSettings extends CustomCodeStyleSettings {
 
     public static final String DEFAULT_SEPARATOR = ",";
     public static final String TAB_SEPARATOR = "\t";
-    public static final String[] SUPPORTED_SEPARATORS = new String[]{",", ";", "|", TAB_SEPARATOR};
-    public static final String[] SUPPORTED_SEPARATORS_DISPLAY = new String[]{"Comma (,)", "Semicolon (;)", "Pipe (|)", "Tab (↹)"};
+    public static final String PIPE_SEPARATOR = "|";
+    public static final String[] SUPPORTED_SEPARATORS = new String[] {",", ";", PIPE_SEPARATOR, TAB_SEPARATOR};
+    public static final String[] SUPPORTED_SEPARATORS_DISPLAY = new String[] {"Comma (,)", "Semicolon (;)", "Pipe (|)", "Tab (↹)"};
     public static final Pattern REPLACE_DEFAULT_SEPARATOR_PATTERN = Pattern.compile(CsvCodeStyleSettings.DEFAULT_SEPARATOR);
 
     public static String getCurrentSeparator(CodeStyleSettings codeStyleSettings) {
@@ -45,28 +48,41 @@ public class CsvCodeStyleSettings extends CustomCodeStyleSettings {
         return DEFAULT_SEPARATOR;
     }
 
-    public static String getCurrentSeparator(@Nullable Project project) {
+    protected static String getCurrentSeparator(@Nullable Project project) {
         if (!ApplicationManager.getApplication().isUnitTestMode() && project != null) {
             return getCurrentSeparator(CodeStyleSettingsManager.getInstance(project).getCurrentSettings());
         }
         return DEFAULT_SEPARATOR;
     }
 
-    public static String getCurrentSeparator(@Nullable Project project, @Nullable Language language) {
+    protected static String getCurrentSeparator(@Nullable Project project, @Nullable Language language) {
         if (language != null && language instanceof CsvSeparatorHolder) {
-            return ((CsvSeparatorHolder)language).getSeparator();
+            return ((CsvSeparatorHolder) language).getSeparator();
         }
         return getCurrentSeparator(project);
     }
 
+    public static String getCurrentSeparator(@Nullable Project project, @Nullable VirtualFile virtualFile) {
+        if (virtualFile == null) {
+            return getCurrentSeparator(project);
+        }
+        CsvFileAttributes csvFileAttributes = project != null ? ServiceManager.getService(project, CsvFileAttributes.class) : null;
+        String separator = csvFileAttributes != null ? csvFileAttributes.getFileSeparator(project, virtualFile) : null;
+        return separator != null ? separator :
+                virtualFile.getFileType() instanceof LanguageFileType ?
+                        getCurrentSeparator(project, ((LanguageFileType) virtualFile.getFileType()).getLanguage()) :
+                        getCurrentSeparator(project);
+    }
+
+    public static String getCurrentSeparator(@Nullable Project project, @Nullable PsiFile psiFile) {
+        return getCurrentSeparator(project, psiFile == null ? null : psiFile.getOriginalFile().getVirtualFile());
+    }
+
     public static String getCurrentSeparator(@Nullable PsiFile psiFile) {
         if (psiFile == null) {
-            return getCurrentSeparator((Project)null);
+            return getCurrentSeparator((Project) null);
         }
-        Project project = psiFile.getProject();
-        CsvFileAttributes csvFileAttributes = project != null ? ServiceManager.getService(project, CsvFileAttributes.class) : null;
-        String separator = csvFileAttributes != null ? csvFileAttributes.getFileSeparator(psiFile) : null;
-        return separator != null ? separator : getCurrentSeparator(project, psiFile.getLanguage());
+        return getCurrentSeparator(psiFile.getProject(), psiFile);
     }
 
     public static String getSeparatorDisplayText(String separator) {

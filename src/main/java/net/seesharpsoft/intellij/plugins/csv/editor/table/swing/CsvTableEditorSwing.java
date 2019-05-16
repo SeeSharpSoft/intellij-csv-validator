@@ -338,7 +338,7 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
             return;
         }
 
-        CsvColumnInfoMap<PsiElement> columnInfoMap = csvFile.getMyColumnInfoMap();
+        CsvColumnInfoMap<PsiElement> columnInfoMap = csvFile.getColumnInfoMap();
         if (Objects.equals(lastColumnInfoMap, columnInfoMap)) {
             return;
         }
