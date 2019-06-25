@@ -46,8 +46,7 @@
 
     <change-notes><![CDATA[
         <pre style="font-family: sans-serif">
-NEW: PSV file support
-FIX: NullPointerException in StorageHelper class
+FIX: ConcurrentModificationException in MultiLineCellRenderer
       </pre>
     ]]>
     </change-notes>
