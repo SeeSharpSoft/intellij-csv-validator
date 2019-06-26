@@ -1,13 +1,13 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.api;
 
-import com.intellij.testFramework.fixtures.LightCodeInsightFixtureTestCase;
+import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditor;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.swing.CsvTableEditorSwing;
 
 import java.util.Arrays;
 
 
-public class TableDataHandlerTest extends LightCodeInsightFixtureTestCase {
+public class TableDataHandlerTest extends LightPlatformCodeInsightFixtureTestCase {
 
     @Override
     protected String getTestDataPath() {
@@ -21,7 +21,7 @@ public class TableDataHandlerTest extends LightCodeInsightFixtureTestCase {
     }
 
     public void testConstructor() {
-        CsvTableEditor csvTableEditor = new CsvTableEditorSwing(this.getProject(), this.getFile().getVirtualFile());
+        CsvTableEditor csvTableEditor = new CsvTableEditorSwing(this.getProject(), myFixture.getFile().getVirtualFile());
         TableDataHandler handler = new TableDataHandler(csvTableEditor, 2);
 
         assertEquals(handler.tableEditor, csvTableEditor);
@@ -29,7 +29,7 @@ public class TableDataHandlerTest extends LightCodeInsightFixtureTestCase {
     }
 
     public void testAddState() {
-        CsvTableEditor csvTableEditor = new CsvTableEditorSwing(this.getProject(), this.getFile().getVirtualFile());
+        CsvTableEditor csvTableEditor = new CsvTableEditorSwing(this.getProject(), myFixture.getFile().getVirtualFile());
         TableDataHandler handler = new TableDataHandler(csvTableEditor, 4);
 
         Object[][] values = { { "Test", 1 }, { 2, 5} };
@@ -58,7 +58,7 @@ public class TableDataHandlerTest extends LightCodeInsightFixtureTestCase {
     }
 
     public void testGetCurrentState() {
-        CsvTableEditor csvTableEditor = new CsvTableEditorSwing(this.getProject(), this.getFile().getVirtualFile());
+        CsvTableEditor csvTableEditor = new CsvTableEditorSwing(this.getProject(), myFixture.getFile().getVirtualFile());
         TableDataHandler handler = new TableDataHandler(csvTableEditor, 2);
 
         Object[][] values = { { "Test", 1 }, { 2, 5} };
@@ -68,7 +68,7 @@ public class TableDataHandlerTest extends LightCodeInsightFixtureTestCase {
     }
 
     public void testEqualsCurrentState() {
-        CsvTableEditor csvTableEditor = new CsvTableEditorSwing(this.getProject(), this.getFile().getVirtualFile());
+        CsvTableEditor csvTableEditor = new CsvTableEditorSwing(this.getProject(), myFixture.getFile().getVirtualFile());
         TableDataHandler handler = new TableDataHandler(csvTableEditor, 2);
 
         Object[][] values = { { "Test", 1 }, { 2, 5} };
@@ -80,7 +80,7 @@ public class TableDataHandlerTest extends LightCodeInsightFixtureTestCase {
     }
 
     public void testGetLastState() {
-        CsvTableEditor csvTableEditor = new CsvTableEditorSwing(this.getProject(), this.getFile().getVirtualFile());
+        CsvTableEditor csvTableEditor = new CsvTableEditorSwing(this.getProject(), myFixture.getFile().getVirtualFile());
         TableDataHandler handler = new TableDataHandler(csvTableEditor, 2);
 
         assertNull(handler.getLastState());
@@ -98,7 +98,7 @@ public class TableDataHandlerTest extends LightCodeInsightFixtureTestCase {
     }
 
     public void testCanGetLastState() {
-        CsvTableEditor csvTableEditor = new CsvTableEditorSwing(this.getProject(), this.getFile().getVirtualFile());
+        CsvTableEditor csvTableEditor = new CsvTableEditorSwing(this.getProject(), myFixture.getFile().getVirtualFile());
         TableDataHandler handler = new TableDataHandler(csvTableEditor, 2);
 
         assertFalse(handler.canGetLastState());
@@ -119,7 +119,7 @@ public class TableDataHandlerTest extends LightCodeInsightFixtureTestCase {
     }
 
     public void testGetNextState() {
-        CsvTableEditor csvTableEditor = new CsvTableEditorSwing(this.getProject(), this.getFile().getVirtualFile());
+        CsvTableEditor csvTableEditor = new CsvTableEditorSwing(this.getProject(), myFixture.getFile().getVirtualFile());
         TableDataHandler handler = new TableDataHandler(csvTableEditor, 2);
 
         assertNull(handler.getNextState());
@@ -141,7 +141,7 @@ public class TableDataHandlerTest extends LightCodeInsightFixtureTestCase {
     }
 
     public void testMaxSize() {
-        CsvTableEditor csvTableEditor = new CsvTableEditorSwing(this.getProject(), this.getFile().getVirtualFile());
+        CsvTableEditor csvTableEditor = new CsvTableEditorSwing(this.getProject(), myFixture.getFile().getVirtualFile());
         TableDataHandler handler = new TableDataHandler(csvTableEditor, 2);
 
         Object[][] values = { { "Test", 1 }, { 2, 5} };
@@ -156,7 +156,7 @@ public class TableDataHandlerTest extends LightCodeInsightFixtureTestCase {
     }
 
     public void testDataChangeListener() {
-        CsvTableEditor csvTableEditor = new CsvTableEditorSwing(this.getProject(), this.getFile().getVirtualFile());
+        CsvTableEditor csvTableEditor = new CsvTableEditorSwing(this.getProject(), myFixture.getFile().getVirtualFile());
         TableDataHandler handler = new TableDataHandler(csvTableEditor, 2);
 
         Listener listener = new Listener();

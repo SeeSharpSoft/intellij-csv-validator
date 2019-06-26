@@ -10,6 +10,7 @@ buildscript {
 }
 
 plugins {
+    // https://github.com/JetBrains/gradle-intellij-plugin
     id 'org.jetbrains.intellij' version '0.4.9'
     id 'jacoco'
     id 'com.github.kt3k.coveralls' version '2.8.2'
@@ -69,7 +70,7 @@ idea {
 apply plugin: 'org.jetbrains.intellij'
 intellij {
     // IDE version - https://www.jetbrains.com/intellij-repository/releases
-    version = System.getenv().getOrDefault('IDEA_VERSION', '2019.1.2')
+    version = System.getenv().getOrDefault('IDEA_VERSION', 'IC-2018.3.2')
     pluginName = 'CSV Plugin'
     instrumentCode = true
     updateSinceUntilBuild = false
