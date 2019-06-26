@@ -6,9 +6,9 @@ import com.intellij.featureStatistics.FeatureUsageTracker;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.markup.RangeHighlighter;
 import com.intellij.openapi.util.TextRange;
-import com.intellij.testFramework.fixtures.LightCodeInsightFixtureTestCase;
+import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase;
 
-public class CsvHighlightUsagesHandlerTest extends LightCodeInsightFixtureTestCase {
+public class CsvHighlightUsagesHandlerTest extends LightPlatformCodeInsightFixtureTestCase {
 
     @Override
     protected String getTestDataPath() {
@@ -31,7 +31,7 @@ public class CsvHighlightUsagesHandlerTest extends LightCodeInsightFixtureTestCa
 
         handler.highlightUsages();
 
-        Editor editor = this.getEditor();
+        Editor editor = myFixture.getEditor();
         return editor.getMarkupModel().getAllHighlighters();
     }
 

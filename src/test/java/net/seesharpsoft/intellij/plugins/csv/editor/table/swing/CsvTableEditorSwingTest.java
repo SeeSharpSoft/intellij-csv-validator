@@ -33,10 +33,10 @@ public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
         assertEquals(true, fileEditor.isValid());
         assertEquals(null, fileEditor.getBackgroundHighlighter());
 
-        StructureViewBuilder structureViewBuilder = StructureViewBuilder.PROVIDER.getStructureViewBuilder(this.getFile().getFileType(), this.getFile().getVirtualFile(), this.getProject());
+        StructureViewBuilder structureViewBuilder = StructureViewBuilder.PROVIDER.getStructureViewBuilder(myFixture.getFile().getFileType(), myFixture.getFile().getVirtualFile(), this.getProject());
         assertInstanceOf(fileEditor.getStructureViewBuilder(), structureViewBuilder.getClass());
 
-        assertEquals(this.getFile().getVirtualFile(), fileEditor.getFile());
+        assertEquals(myFixture.getFile().getVirtualFile(), fileEditor.getFile());
         assertEquals(this.getProject(), fileEditor.getProject());
         assertNotNull(fileEditor.getDataHandler());
         assertNotNull(fileEditor.getComponent());

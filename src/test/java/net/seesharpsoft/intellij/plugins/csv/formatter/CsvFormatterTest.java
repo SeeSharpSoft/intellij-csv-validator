@@ -3,7 +3,7 @@ package net.seesharpsoft.intellij.plugins.csv.formatter;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.psi.codeStyle.CodeStyleManager;
 import com.intellij.psi.codeStyle.CodeStyleSettingsManager;
-import com.intellij.testFramework.fixtures.LightCodeInsightFixtureTestCase;
+import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase;
 import com.intellij.util.containers.ContainerUtil;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvCodeStyleSettings;
 import org.junit.Assert;
@@ -12,7 +12,7 @@ import java.io.PrintWriter;
 import java.time.Instant;
 import java.util.Properties;
 
-public class CsvFormatterTest extends LightCodeInsightFixtureTestCase {
+public class CsvFormatterTest extends LightPlatformCodeInsightFixtureTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();

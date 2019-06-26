@@ -1,10 +1,10 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table;
 
-import com.intellij.testFramework.fixtures.LightCodeInsightFixtureTestCase;
+import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase;
 import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettingsExternalizable;
 import org.jdom.Element;
 
-public class CsvTableEditorStateTest extends LightCodeInsightFixtureTestCase {
+public class CsvTableEditorStateTest extends LightPlatformCodeInsightFixtureTestCase {
 
     @Override
     protected String getTestDataPath() {
@@ -29,7 +29,7 @@ public class CsvTableEditorStateTest extends LightCodeInsightFixtureTestCase {
 
         originalTableEditorState.write(getProject(), domElement);
 
-        CsvTableEditorState deserializeEditorState = CsvTableEditorState.create(domElement, this.getProject(), this.getFile().getVirtualFile());
+        CsvTableEditorState deserializeEditorState = CsvTableEditorState.create(domElement, this.getProject(), myFixture.getFile().getVirtualFile());
 
         assertOrderedEquals(deserializeEditorState.getColumnWidths(), originalTableEditorState.getColumnWidths());
         assertEquals(originalTableEditorState.getRowLines(), deserializeEditorState.getRowLines());

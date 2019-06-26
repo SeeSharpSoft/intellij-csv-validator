@@ -2,7 +2,6 @@ package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.TextEditor;
-import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettingsExternalizable;
 
 public class CsvTableEditorActionsTest extends CsvTableEditorSwingTestBase {
 
@@ -175,6 +174,6 @@ public class CsvTableEditorActionsTest extends CsvTableEditorSwingTestBase {
     public void testOpenTextEditor() {
         fileEditor.tableEditorActions.openTextEditor.linkSelected(null, null);
 
-        assertInstanceOf(FileEditorManager.getInstance(this.getProject()).getSelectedEditor(this.getFile().getVirtualFile()), TextEditor.class);
+        assertInstanceOf(FileEditorManager.getInstance(this.getProject()).getSelectedEditor(myFixture.getFile().getVirtualFile()), TextEditor.class);
     }
 }
