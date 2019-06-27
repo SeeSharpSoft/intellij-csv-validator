@@ -4,10 +4,10 @@ import com.intellij.openapi.editor.EditorSettings;
 import com.intellij.openapi.fileEditor.*;
 import com.intellij.openapi.fileEditor.ex.FileEditorProviderManager;
 import com.intellij.openapi.fileEditor.impl.text.TextEditorState;
-import com.intellij.testFramework.fixtures.LightCodeInsightFixtureTestCase;
+import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase;
 import org.jdom.Element;
 
-public class CsvFileEditorTest extends LightCodeInsightFixtureTestCase {
+public class CsvFileEditorTest extends LightPlatformCodeInsightFixtureTestCase {
 
     @Override
     protected String getTestDataPath() {
@@ -84,7 +84,7 @@ public class CsvFileEditorTest extends LightCodeInsightFixtureTestCase {
         CsvFileEditorProvider fileEditorProvider = (CsvFileEditorProvider)fileEditorProviders[0];
         Element dummy = new Element("dummy");
         
-        FileEditorState state = fileEditorProvider.readState(dummy, this.getProject(), this.getFile().getVirtualFile());
+        FileEditorState state = fileEditorProvider.readState(dummy, this.getProject(), myFixture.getFile().getVirtualFile());
         assertInstanceOf(state, TextEditorState.class);
         textEditor.setState(state);
         fileEditorProvider.writeState(state, this.getProject(), dummy);

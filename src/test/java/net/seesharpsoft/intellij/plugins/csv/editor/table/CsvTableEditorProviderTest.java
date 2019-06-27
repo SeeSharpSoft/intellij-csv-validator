@@ -5,13 +5,13 @@ import com.intellij.openapi.fileEditor.FileEditorPolicy;
 import com.intellij.openapi.fileEditor.FileEditorProvider;
 import com.intellij.openapi.fileEditor.FileEditorState;
 import com.intellij.openapi.fileEditor.ex.FileEditorProviderManager;
-import com.intellij.testFramework.fixtures.LightCodeInsightFixtureTestCase;
+import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase;
 import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettingsExternalizable;
 import org.jdom.Element;
 
 import java.util.Objects;
 
-public class CsvTableEditorProviderTest extends LightCodeInsightFixtureTestCase {
+public class CsvTableEditorProviderTest extends LightPlatformCodeInsightFixtureTestCase {
 
     @Override
     protected String getTestDataPath() {
@@ -26,37 +26,37 @@ public class CsvTableEditorProviderTest extends LightCodeInsightFixtureTestCase 
     }
 
     public void testCsvTableEditorProviderIsAvailableAndHasCorrectNameAndPolicy() {
-        FileEditorProvider[] fileEditorProviders = FileEditorProviderManager.getInstance().getProviders(getProject(), getFile().getVirtualFile());
+        FileEditorProvider[] fileEditorProviders = FileEditorProviderManager.getInstance().getProviders(getProject(), myFixture.getFile().getVirtualFile());
         assertEquals(2, fileEditorProviders.length);
         assertInstanceOf(fileEditorProviders[1], CsvTableEditorProvider.class);
 
         FileEditorProvider fileEditorProvider = fileEditorProviders[1];
         assertEquals(CsvTableEditorProvider.EDITOR_TYPE_ID, fileEditorProvider.getEditorTypeId());
         assertEquals(FileEditorPolicy.PLACE_AFTER_DEFAULT_EDITOR, fileEditorProvider.getPolicy());
-        assertEquals(true, fileEditorProvider.accept(getProject(), getFile().getVirtualFile()));
+        assertEquals(true, fileEditorProvider.accept(getProject(), myFixture.getFile().getVirtualFile()));
 
         CsvEditorSettingsExternalizable csvEditorSettingsExternalizable = CsvEditorSettingsExternalizable.getInstance();
         csvEditorSettingsExternalizable.setEditorPrio(CsvEditorSettingsExternalizable.EditorPrio.TEXT_ONLY);
         assertEquals(FileEditorPolicy.PLACE_AFTER_DEFAULT_EDITOR, fileEditorProvider.getPolicy());
-        assertEquals(false, fileEditorProvider.accept(getProject(), getFile().getVirtualFile()));
+        assertEquals(false, fileEditorProvider.accept(getProject(), myFixture.getFile().getVirtualFile()));
 
         csvEditorSettingsExternalizable.setEditorPrio(CsvEditorSettingsExternalizable.EditorPrio.TABLE_FIRST);
         assertEquals(FileEditorPolicy.HIDE_DEFAULT_EDITOR, fileEditorProvider.getPolicy());
-        assertEquals(true, fileEditorProvider.accept(getProject(), getFile().getVirtualFile()));
+        assertEquals(true, fileEditorProvider.accept(getProject(), myFixture.getFile().getVirtualFile()));
     }
 
     public void testCsvTableEditorCreatesInstanceOfCsvTableEditor() {
-        FileEditorProvider[] fileEditorProviders = FileEditorProviderManager.getInstance().getProviders(getProject(), getFile().getVirtualFile());
+        FileEditorProvider[] fileEditorProviders = FileEditorProviderManager.getInstance().getProviders(getProject(), myFixture.getFile().getVirtualFile());
         FileEditorProvider fileEditorProvider = fileEditorProviders[1];
 
-        FileEditor fileEditor = fileEditorProvider.createEditor(getProject(), getFile().getVirtualFile());
+        FileEditor fileEditor = fileEditorProvider.createEditor(getProject(), myFixture.getFile().getVirtualFile());
         assertInstanceOf(fileEditor, CsvTableEditor.class);
 
         fileEditorProvider.disposeEditor(fileEditor);
     }
 
     public void testWriteAndReadTableEditorState() {
-        FileEditorProvider[] fileEditorProviders = FileEditorProviderManager.getInstance().getProviders(getProject(), getFile().getVirtualFile());
+        FileEditorProvider[] fileEditorProviders = FileEditorProviderManager.getInstance().getProviders(getProject(), myFixture.getFile().getVirtualFile());
         FileEditorProvider fileEditorProvider = fileEditorProviders[1];
 
         CsvTableEditorState editorState = new CsvTableEditorState();
@@ -67,7 +67,7 @@ public class CsvTableEditorProviderTest extends LightCodeInsightFixtureTestCase 
         Element element = new Element("state");
         fileEditorProvider.writeState(editorState, getProject(), element);
 
-        FileEditorState readState = fileEditorProvider.readState(element, getProject(), getFile().getVirtualFile());
+        FileEditorState readState = fileEditorProvider.readState(element, getProject(), myFixture.getFile().getVirtualFile());
 
         assertInstanceOf(readState, CsvTableEditorState.class);
 

@@ -1,11 +1,11 @@
 package net.seesharpsoft.intellij.plugins.csv.editor;
 
 import com.intellij.openapi.options.ConfigurationException;
-import com.intellij.testFramework.fixtures.LightCodeInsightFixtureTestCase;
+import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase;
 
 import java.awt.*;
 
-public class CsvEditorSettingsProviderTest extends LightCodeInsightFixtureTestCase {
+public class CsvEditorSettingsProviderTest extends LightPlatformCodeInsightFixtureTestCase {
 
     @Override
     protected String getTestDataPath() {

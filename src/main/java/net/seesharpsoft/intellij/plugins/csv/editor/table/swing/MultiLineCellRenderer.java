@@ -13,11 +13,14 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.text.BadLocationException;
 import java.awt.*;
-import java.util.*;
+import java.util.EventObject;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 public class MultiLineCellRenderer extends JTextArea implements TableCellRenderer, TableCellEditor {
 
-    private Set<CellEditorListener> cellEditorListenerSet = new HashSet<>();
+    private Set<CellEditorListener> cellEditorListenerSet = new CopyOnWriteArraySet<>();
     private final UserDataHolder userDataHolder;
 
     public MultiLineCellRenderer(CsvTableEditorKeyListener keyListener, UserDataHolder userDataHolderParam) {
@@ -123,11 +126,11 @@ public class MultiLineCellRenderer extends JTextArea implements TableCellRendere
     protected void fireStopCellEditing() {
         ChangeEvent changeEvent = new ChangeEvent(this);
         synchronized (cellEditorListenerSet) {
-           Iterator<CellEditorListener> it = cellEditorListenerSet.iterator();
-           while (it.hasNext()) {
-               it.next().editingStopped(changeEvent);
-           }
-       }
+            Iterator<CellEditorListener> it = cellEditorListenerSet.iterator();
+            while (it.hasNext()) {
+                it.next().editingStopped(changeEvent);
+            }
+        }
     }
 
     protected void fireCancelCellEditing() {

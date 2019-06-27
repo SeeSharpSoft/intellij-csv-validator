@@ -1,14 +1,14 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
 import com.intellij.testFramework.exceptionCases.AbstractExceptionCase;
-import com.intellij.testFramework.fixtures.LightCodeInsightFixtureTestCase;
+import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase;
 import com.intellij.util.ThrowableRunnable;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettingsExternalizable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public abstract class CsvTableEditorSwingTestBase extends LightCodeInsightFixtureTestCase {
+public abstract class CsvTableEditorSwingTestBase extends LightPlatformCodeInsightFixtureTestCase {
 
     protected CsvTableEditorSwing fileEditor;
 
@@ -25,7 +25,7 @@ public abstract class CsvTableEditorSwingTestBase extends LightCodeInsightFixtur
         initializeEditorSettings(CsvEditorSettingsExternalizable.getInstance());
         myFixture.configureByFiles("TableEditorFile.csv");
 
-        fileEditor = new CsvTableEditorSwing(this.getProject(), this.getFile().getVirtualFile());
+        fileEditor = new CsvTableEditorSwing(this.getProject(), myFixture.getFile().getVirtualFile());
         fileEditor.selectNotify();
         initialState = fileEditor.getDataHandler().getCurrentState();
     }
