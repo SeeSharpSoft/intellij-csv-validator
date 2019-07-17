@@ -25,7 +25,7 @@ public class CsvTableEditorMouseListener extends CsvTableEditorUtilBase implemen
 
     protected void addCommonActions(JBPopupMenu popupMenu) {
         popupMenu.add(new JSeparator());
-        JMenuItem menuItem = new JMenuItem(csvTableEditor.lnkAdjustColumnWidth.getText(), csvTableEditor.lnkAdjustColumnWidth.getIcon());
+        JMenuItem menuItem = new JMenuItem(csvTableEditor.lnkAdjustColumnWidth.getText(), IconLoader.getIcon("/media/icons/adjust-column-width.png"));
         menuItem.addActionListener(csvTableEditor.tableEditorActions.adjustColumnWidthAction);
         popupMenu.add(menuItem);
         menuItem = new JMenuItem("Reset to default width", IconLoader.getIcon("/media/icons/reset-column-width.png"));

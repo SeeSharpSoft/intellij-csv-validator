@@ -107,7 +107,6 @@
                   <component id="bdd04" class="com.intellij.ui.components.labels.LinkLabel" binding="lnkAdjustColumnWidth">
                     <constraints/>
                     <properties>
-                      <icon value="media/icons/adjust-column-width.png"/>
                       <text value="Adjust column width"/>
                     </properties>
                   </component>

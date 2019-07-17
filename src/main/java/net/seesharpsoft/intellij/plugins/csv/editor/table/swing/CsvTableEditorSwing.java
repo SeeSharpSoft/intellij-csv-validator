@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChangeEvent.Listener {
 
     private static final int TOTAL_CELL_HEIGHT_SPACING = 3;
-    private static final int TOTAL_CELL_WIDTH_SPACING = 6;
+    private static final int TOTAL_CELL_WIDTH_SPACING = 10;
 
     private JBTable tblEditor;
     private JPanel panelMain;
@@ -482,11 +482,13 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
     }
 
     @Override
-    public int getStringWidth(String text) {
-        if (text == null) {
-            return -1;
-        }
-        return getTable().getFontMetrics(getTable().getFont()).stringWidth(text) + TOTAL_CELL_WIDTH_SPACING;
+    public Dimension getPreferredCellSize(int row, int column) {
+        JBTable table = getTable();
+        Component comp = table.prepareRenderer(table.getCellRenderer(row, column), row, column);
+//        rowHeight = Math.max(rowHeight, comp.getPreferredSize().height);
+//        getTable().getFont().getStringBounds()
+//        return getTable().getFontMetrics(getTable().getFont()).stringWidth(text) + TOTAL_CELL_WIDTH_SPACING;
+        return comp.getPreferredSize();
     }
 
     public void changeFontSize(int changeAmount) {

@@ -313,11 +313,13 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
         return EditorColorsManager.getInstance().getGlobalScheme().getFont(EditorFontType.PLAIN);
     }
 
-    public int getStringWidth(String text) {
+    public Dimension getPreferredCellSize(int row, int column) {
+        Object[][] data = getDataHandler().getCurrentState();
+        String text = data[row][column].toString();
         if (text == null) {
-            return -1;
+            return new Dimension();
         }
-        return getFont().getSize() * text.length();
+        return new Dimension(getFont().getSize() * text.length(), getPreferredRowHeight());
     }
 
     public final void resetAllColumnWidths() {
@@ -339,26 +341,16 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
         Map<Integer, CsvColumnInfo<PsiElement>> columnInfos = this.getColumnInfoMap().getColumnInfos();
         Object[][] data = getDataHandler().getCurrentState();
         int[] widths = new int[columnInfos.size()];
-        int maxWidth = 0;
         int tableAutoMaxColumnWidth = CsvEditorSettingsExternalizable.getInstance().getTableAutoMaxColumnWidth();
 
         for (Map.Entry<Integer, CsvColumnInfo<PsiElement>> columnInfoEntry : columnInfos.entrySet()) {
             CsvColumnInfo<PsiElement> columnInfo = columnInfoEntry.getValue();
-            int currentWidth = getStringWidth(data[columnInfo.getMaxLengthRowIndex()][columnInfo.getColumnIndex()].toString());
-            widths[columnInfoEntry.getKey()] = currentWidth;
-            if (currentWidth > maxWidth) {
-                maxWidth = currentWidth;
+            Dimension preferredDimension = getPreferredCellSize(columnInfo.getMaxLengthRowIndex(), columnInfo.getColumnIndex());
+            int currentWidth = preferredDimension.width;
+            if (tableAutoMaxColumnWidth != 0) {
+                currentWidth = Math.min(tableAutoMaxColumnWidth, currentWidth);
             }
-        }
-
-        if (tableAutoMaxColumnWidth == 0) {
-            tableAutoMaxColumnWidth = maxWidth;
-        } else {
-            tableAutoMaxColumnWidth = Math.min(tableAutoMaxColumnWidth, maxWidth);
-        }
-
-        for (int i = 0; i < widths.length; ++i) {
-            widths[i] = (int) (tableAutoMaxColumnWidth * ((double) widths[i] / (double) maxWidth));
+            widths[columnInfoEntry.getKey()] = currentWidth;
         }
 
         return widths;
