@@ -7,7 +7,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import javax.swing.text.NumberFormatter;
 import java.awt.*;
+import java.text.NumberFormat;
 import java.util.Objects;
 
 public class CsvEditorSettingsProvider implements SearchableConfigurable {
@@ -27,6 +29,9 @@ public class CsvEditorSettingsProvider implements SearchableConfigurable {
     private JCheckBox cbTableColumnHighlighting;
     private JCheckBox cbZeroBasedColumnNumbering;
     private JCheckBox cbFileEndLineBreak;
+    private JFormattedTextField tfMaxColumnWidth;
+    private JFormattedTextField tfDefaultColumnWidth;
+    private JCheckBox cbAdjustColumnWidthOnOpen;
 
     @NotNull
     @Override
@@ -71,7 +76,10 @@ public class CsvEditorSettingsProvider implements SearchableConfigurable {
                 !Objects.equals(cbEditorUsage.getSelectedIndex(), csvEditorSettingsExternalizable.getEditorPrio().ordinal()) ||
                 isModified(cbTableColumnHighlighting, csvEditorSettingsExternalizable.isTableColumnHighlightingEnabled()) ||
                 isModified(cbZeroBasedColumnNumbering, csvEditorSettingsExternalizable.isZeroBasedColumnNumbering()) ||
-                isModified(cbFileEndLineBreak, csvEditorSettingsExternalizable.isFileEndLineBreak());
+                isModified(cbFileEndLineBreak, csvEditorSettingsExternalizable.isFileEndLineBreak()) ||
+                !tfMaxColumnWidth.getValue().equals(csvEditorSettingsExternalizable.getTableAutoMaxColumnWidth()) ||
+                !tfDefaultColumnWidth.getValue().equals(csvEditorSettingsExternalizable.getTableDefaultColumnWidth()) ||
+                isModified(cbAdjustColumnWidthOnOpen, csvEditorSettingsExternalizable.isTableAutoColumnWidthOnOpen());
     }
 
     @Override
@@ -90,6 +98,9 @@ public class CsvEditorSettingsProvider implements SearchableConfigurable {
         cbTableColumnHighlighting.setSelected(csvEditorSettingsExternalizable.isTableColumnHighlightingEnabled());
         cbZeroBasedColumnNumbering.setSelected(csvEditorSettingsExternalizable.isZeroBasedColumnNumbering());
         cbFileEndLineBreak.setSelected(csvEditorSettingsExternalizable.isFileEndLineBreak());
+        tfMaxColumnWidth.setValue(csvEditorSettingsExternalizable.getTableAutoMaxColumnWidth());
+        tfDefaultColumnWidth.setValue(csvEditorSettingsExternalizable.getTableDefaultColumnWidth());
+        cbAdjustColumnWidthOnOpen.setSelected(csvEditorSettingsExternalizable.isTableAutoColumnWidthOnOpen());
     }
 
     @Override
@@ -108,10 +119,28 @@ public class CsvEditorSettingsProvider implements SearchableConfigurable {
         csvEditorSettingsExternalizable.setTableColumnHighlightingEnabled(cbTableColumnHighlighting.isSelected());
         csvEditorSettingsExternalizable.setZeroBasedColumnNumbering(cbZeroBasedColumnNumbering.isSelected());
         csvEditorSettingsExternalizable.setFileEndLineBreak(cbFileEndLineBreak.isSelected());
+        csvEditorSettingsExternalizable.setTableAutoMaxColumnWidth((int)tfMaxColumnWidth.getValue());
+        csvEditorSettingsExternalizable.setTableDefaultColumnWidth((int)tfDefaultColumnWidth.getValue());
+        csvEditorSettingsExternalizable.setTableAutoColumnWidthOnOpen(cbAdjustColumnWidthOnOpen.isSelected());
     }
 
     protected void createUIComponents() {
         cbTabHighlightColor = new CheckBoxWithColorChooser("Highlight tab separator   ");
         cbTabHighlightColor.setColor(Color.CYAN);
+
+        NumberFormat numberFormat = NumberFormat.getIntegerInstance();
+        NumberFormatter numberFormatter = new NumberFormatter(numberFormat);
+        numberFormatter.setValueClass(Integer.class);
+        numberFormatter.setAllowsInvalid(false);
+        numberFormatter.setMinimum(0);
+        numberFormatter.setMaximum(Integer.MAX_VALUE);
+        tfMaxColumnWidth = new JFormattedTextField(numberFormatter);
+
+        numberFormatter = new NumberFormatter(numberFormat);
+        numberFormatter.setValueClass(Integer.class);
+        numberFormatter.setAllowsInvalid(false);
+        numberFormatter.setMinimum(10);
+        numberFormatter.setMaximum(10000);
+        tfDefaultColumnWidth = new JFormattedTextField(numberFormatter);
     }
 }

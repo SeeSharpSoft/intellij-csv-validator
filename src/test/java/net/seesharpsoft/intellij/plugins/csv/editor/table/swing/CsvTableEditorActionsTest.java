@@ -2,6 +2,10 @@ package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.TextEditor;
+import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettingsExternalizable;
+
+import javax.swing.table.TableColumn;
+import java.util.Enumeration;
 
 public class CsvTableEditorActionsTest extends CsvTableEditorSwingTestBase {
 
@@ -175,5 +179,33 @@ public class CsvTableEditorActionsTest extends CsvTableEditorSwingTestBase {
         fileEditor.tableEditorActions.openTextEditor.linkSelected(null, null);
 
         assertInstanceOf(FileEditorManager.getInstance(this.getProject()).getSelectedEditor(myFixture.getFile().getVirtualFile()), TextEditor.class);
+    }
+
+    public void testAutoColumnWidthAction() {
+        Enumeration<TableColumn> tableColumnEnumeration = fileEditor.getTable().getColumnModel().getColumns();
+        int expectedWidth = CsvEditorSettingsExternalizable.getInstance().getTableDefaultColumnWidth();
+        while (tableColumnEnumeration.hasMoreElements()) {
+            TableColumn tableColumn = tableColumnEnumeration.nextElement();
+            assertEquals(expectedWidth, tableColumn.getWidth());
+        }
+
+        fileEditor.tableEditorActions.adjustColumnWidthAction.actionPerformed(null);
+
+        assertTrue("first column is bigger than second", fileEditor.getTable().getColumnModel().getColumn(0).getWidth() > fileEditor.getTable().getColumnModel().getColumn(1).getWidth());
+    }
+
+    public void testResetColumnWidthAction() {
+        fileEditor.tableEditorActions.adjustColumnWidthAction.actionPerformed(null);
+
+        assertTrue("first column is bigger than second", fileEditor.getTable().getColumnModel().getColumn(0).getWidth() > fileEditor.getTable().getColumnModel().getColumn(1).getWidth());
+
+        fileEditor.tableEditorActions.resetColumnWidthAction.actionPerformed(null);
+
+        Enumeration<TableColumn> tableColumnEnumeration = fileEditor.getTable().getColumnModel().getColumns();
+        int expectedWidth = CsvEditorSettingsExternalizable.getInstance().getTableDefaultColumnWidth();
+        while (tableColumnEnumeration.hasMoreElements()) {
+            TableColumn tableColumn = tableColumnEnumeration.nextElement();
+            assertEquals(expectedWidth, tableColumn.getWidth());
+        }
     }
 }

@@ -28,6 +28,10 @@ public class CsvTableEditorActions extends CsvTableEditorUtilBase {
     protected ActionListener deleteRow = new DeleteRowAction();
     protected ActionListener deleteColumn = new DeleteColumnAction();
     protected ActionListener clearCells = new ClearCellsAction();
+    protected ActionListener adjustColumnWidthAction = new AutoColumnWidthAction();
+    protected ActionListener resetColumnWidthAction = new ResetColumnWidthAction();
+
+    protected LinkListener adjustColumnWidthLink = ((linkLabel, o) -> adjustColumnWidthAction.actionPerformed(null));
     protected LinkListener openTextEditor = new OpenTextEditor();
     protected LinkListener openCsvPluginLink = new OpenCsvPluginLink();
 
@@ -204,6 +208,20 @@ public class CsvTableEditorActions extends CsvTableEditorUtilBase {
             } finally {
                 csvTableEditor.applyTableChangeListener();
             }
+        }
+    }
+
+    private final class AutoColumnWidthAction implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            csvTableEditor.adjustAllColumnWidths();
+        }
+    }
+
+    private final class ResetColumnWidthAction implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            csvTableEditor.resetAllColumnWidths();
         }
     }
 

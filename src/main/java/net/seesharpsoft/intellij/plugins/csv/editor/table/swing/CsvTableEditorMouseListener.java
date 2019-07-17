@@ -1,6 +1,7 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
 import com.intellij.openapi.ui.JBPopupMenu;
+import com.intellij.openapi.util.IconLoader;
 
 import javax.swing.*;
 import javax.swing.table.JTableHeader;
@@ -22,6 +23,16 @@ public class CsvTableEditorMouseListener extends CsvTableEditorUtilBase implemen
         // mouseClicked
     }
 
+    protected void addCommonActions(JBPopupMenu popupMenu) {
+        popupMenu.add(new JSeparator());
+        JMenuItem menuItem = new JMenuItem(csvTableEditor.lnkAdjustColumnWidth.getText(), csvTableEditor.lnkAdjustColumnWidth.getIcon());
+        menuItem.addActionListener(csvTableEditor.tableEditorActions.adjustColumnWidthAction);
+        popupMenu.add(menuItem);
+        menuItem = new JMenuItem("Reset to default width", IconLoader.getIcon("/media/icons/reset-column-width.png"));
+        menuItem.addActionListener(csvTableEditor.tableEditorActions.resetColumnWidthAction);
+        popupMenu.add(menuItem);
+    }
+
     protected JBPopupMenu getRowPopupMenu() {
         if (rowPopupMenu == null) {
             rowPopupMenu = new JBPopupMenu();
@@ -34,6 +45,8 @@ public class CsvTableEditorMouseListener extends CsvTableEditorUtilBase implemen
             menuItem = new JMenuItem("Delete selected row(s) (Ctrl+Del)", csvTableEditor.btnRemoveRow.getIcon());
             menuItem.addActionListener(csvTableEditor.tableEditorActions.deleteRow);
             rowPopupMenu.add(menuItem);
+
+            addCommonActions(rowPopupMenu);
         }
         return rowPopupMenu;
     }
@@ -50,6 +63,8 @@ public class CsvTableEditorMouseListener extends CsvTableEditorUtilBase implemen
             menuItem = new JMenuItem("Delete selected column (Ctrl+Shift+Del)", csvTableEditor.btnRemoveColumn.getIcon());
             menuItem.addActionListener(csvTableEditor.tableEditorActions.deleteColumn);
             columnPopupMenu.add(menuItem);
+
+            addCommonActions(columnPopupMenu);
         }
         return columnPopupMenu;
     }

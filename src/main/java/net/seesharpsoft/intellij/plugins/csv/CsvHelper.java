@@ -156,9 +156,9 @@ public final class CsvHelper {
             for (CsvField field : record.getFieldList()) {
                 Integer length = field.getTextLength();
                 if (!columnInfoMap.containsKey(column)) {
-                    columnInfoMap.put(column, new CsvColumnInfo(column, length));
+                    columnInfoMap.put(column, new CsvColumnInfo(column, length, row));
                 } else if (columnInfoMap.get(column).getMaxLength() < length) {
-                    columnInfoMap.get(column).setMaxLength(length);
+                    columnInfoMap.get(column).setMaxLength(length, row);
                 }
                 columnInfoMap.get(column).addElement(field, row, getFieldStartOffset(field), getFieldEndOffset(field));
                 ++column;
