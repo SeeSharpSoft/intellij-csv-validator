@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChangeEvent.Listener {
 
     private static final int TOTAL_CELL_HEIGHT_SPACING = 3;
-    private static final int TOTAL_CELL_WIDTH_SPACING = 10;
+    private static final int TOTAL_CELL_WIDTH_SPACING = 8;
 
     private JBTable tblEditor;
     private JPanel panelMain;
@@ -212,7 +212,7 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
             getFileEditorState().setColumnWidths(columnWidths);
         }
 
-        float zoomFactor = calculateZoomFactor();
+        float zoomFactor = getZoomFactor();
         for (int i = 0; i < currentColumnCount; ++i) {
             TableColumn column = this.tblEditor.getColumnModel().getColumn(i);
             column.setPreferredWidth(Math.round(columnWidths[i] * zoomFactor));
@@ -223,7 +223,7 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
         panelInfo.setVisible(getFileEditorState().showInfoPanel());
     }
 
-    private float calculateZoomFactor() {
+    private float getZoomFactor() {
         float fontHeight = getFontHeight();
         return fontHeight / baseFontHeight;
     }
@@ -401,7 +401,7 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
 
     public void storeCurrentTableLayout() {
         int[] widths = getCurrentColumnsWidths();
-        float zoomFactor = calculateZoomFactor();
+        float zoomFactor = getZoomFactor();
         for (int i = 0; i < widths.length; i++) {
             widths[i] /= zoomFactor;
         }
@@ -482,13 +482,13 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
     }
 
     @Override
-    public Dimension getPreferredCellSize(int row, int column) {
-        JBTable table = getTable();
-        Component comp = table.prepareRenderer(table.getCellRenderer(row, column), row, column);
-//        rowHeight = Math.max(rowHeight, comp.getPreferredSize().height);
-//        getTable().getFont().getStringBounds()
-//        return getTable().getFontMetrics(getTable().getFont()).stringWidth(text) + TOTAL_CELL_WIDTH_SPACING;
-        return comp.getPreferredSize();
+    protected int getStringWidth(String text) {
+        if (text == null) {
+            return TOTAL_CELL_WIDTH_SPACING;
+        }
+        JTable table = getTable();
+        FontMetrics fontMetrics = getTable().getFontMetrics(table.getFont());
+        return CsvHelper.getMaxTextLineLength(text, input -> (int)Math.ceil((float)(fontMetrics.stringWidth(input) + TOTAL_CELL_WIDTH_SPACING) / getZoomFactor()));
     }
 
     public void changeFontSize(int changeAmount) {

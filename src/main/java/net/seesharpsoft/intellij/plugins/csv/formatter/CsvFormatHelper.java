@@ -6,6 +6,7 @@ import com.intellij.lang.ASTNode;
 import com.intellij.psi.codeStyle.CodeStyleSettings;
 import com.intellij.psi.formatter.common.AbstractBlock;
 import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfo;
+import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvElementType;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
@@ -163,7 +164,7 @@ public final class CsvFormatHelper {
             text = END_WHITE_SPACE_PATTERN.matcher(text).replaceFirst("");
             length += 2;
         }
-        length += csvCodeStyleSettings.ENABLE_WIDE_CHARACTER_DETECTION ? charWidth(text, csvCodeStyleSettings.TREAT_AMBIGUOUS_CHARACTERS_AS_WIDE) : text.length();
+        length += CsvHelper.getMaxTextLineLength(text, line -> csvCodeStyleSettings.ENABLE_WIDE_CHARACTER_DETECTION ? charWidth(line, csvCodeStyleSettings.TREAT_AMBIGUOUS_CHARACTERS_AS_WIDE) : line.length());
 
         return length;
     }

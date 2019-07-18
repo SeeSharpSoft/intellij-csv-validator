@@ -313,13 +313,9 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
         return EditorColorsManager.getInstance().getGlobalScheme().getFont(EditorFontType.PLAIN);
     }
 
-    public Dimension getPreferredCellSize(int row, int column) {
-        Object[][] data = getDataHandler().getCurrentState();
-        String text = data[row][column].toString();
-        if (text == null) {
-            return new Dimension();
-        }
-        return new Dimension(getFont().getSize() * text.length(), getPreferredRowHeight());
+    protected int getStringWidth(String text) {
+        int fontSize = getFont().getSize();
+        return CsvHelper.getMaxTextLineLength(text, input -> fontSize * input.length());
     }
 
     public final void resetAllColumnWidths() {
@@ -345,8 +341,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
 
         for (Map.Entry<Integer, CsvColumnInfo<PsiElement>> columnInfoEntry : columnInfos.entrySet()) {
             CsvColumnInfo<PsiElement> columnInfo = columnInfoEntry.getValue();
-            Dimension preferredDimension = getPreferredCellSize(columnInfo.getMaxLengthRowIndex(), columnInfo.getColumnIndex());
-            int currentWidth = preferredDimension.width;
+            int currentWidth = getStringWidth(data[columnInfo.getMaxLengthRowIndex()][columnInfo.getColumnIndex()].toString());
             if (tableAutoMaxColumnWidth != 0) {
                 currentWidth = Math.min(tableAutoMaxColumnWidth, currentWidth);
             }
