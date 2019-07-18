@@ -19,6 +19,7 @@ import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.util.ArrayUtil;
+import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfo;
 import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfoMap;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettingsExternalizable;
@@ -32,14 +33,14 @@ import javax.swing.*;
 import java.awt.*;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
 
     public static final String EDITOR_NAME = "Table Editor";
-
-    public static final int INITIAL_COLUMN_WIDTH = 100;
 
     protected final Project project;
     protected final VirtualFile file;
@@ -79,6 +80,8 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
     protected abstract void afterTableComponentUpdate(Object[][] values);
 
     public abstract int getPreferredRowHeight();
+
+    protected abstract void updateEditorLayout();
 
     public final void updateTableComponentData(Object[][] values) {
         beforeTableComponentUpdate();
@@ -212,6 +215,10 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
         this.initialState = null;
         updateUIComponents();
         this.initialState = dataManagement.getCurrentState();
+
+        if (getFileEditorState().getAutoColumnWidthOnOpen()) {
+            adjustAllColumnWidths();
+        }
     }
 
     @Override
@@ -284,7 +291,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
     }
 
     @Nullable
-    public CsvFile getCsvFile() {
+    public final CsvFile getCsvFile() {
         if (this.psiFile == null || !this.psiFile.isValid()) {
             this.document = FileDocumentManager.getInstance().getDocument(this.file);
             PsiDocumentManager documentManager = PsiDocumentManager.getInstance(project);
@@ -294,11 +301,11 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
         return this.psiFile instanceof CsvFile ? (CsvFile) psiFile : null;
     }
 
-    public TableDataHandler getDataHandler() {
+    public final TableDataHandler getDataHandler() {
         return this.dataManagement;
     }
 
-    public int getRowCount() {
+    public final int getRowCount() {
         return getDataHandler().getCurrentState().length;
     }
 
@@ -306,12 +313,50 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
         return EditorColorsManager.getInstance().getGlobalScheme().getFont(EditorFontType.PLAIN);
     }
 
-    public int getColumnCount() {
+    protected int getStringWidth(String text) {
+        int fontSize = getFont().getSize();
+        return CsvHelper.getMaxTextLineLength(text, input -> fontSize * input.length());
+    }
+
+    public final void resetAllColumnWidths() {
+        int[] widths = new int[getColumnCount()];
+        Arrays.fill(widths, CsvEditorSettingsExternalizable.getInstance().getTableDefaultColumnWidth());
+        setAllColumnWidths(widths);
+    }
+
+    public final void adjustAllColumnWidths() {
+        setAllColumnWidths(calculateDistributedColumnWidths());
+    }
+
+    protected final void setAllColumnWidths(int[] widths) {
+        getFileEditorState().setColumnWidths(widths);
+        updateEditorLayout();
+    }
+
+    protected int[] calculateDistributedColumnWidths() {
+        Map<Integer, CsvColumnInfo<PsiElement>> columnInfos = this.getColumnInfoMap().getColumnInfos();
+        Object[][] data = getDataHandler().getCurrentState();
+        int[] widths = new int[columnInfos.size()];
+        int tableAutoMaxColumnWidth = CsvEditorSettingsExternalizable.getInstance().getTableAutoMaxColumnWidth();
+
+        for (Map.Entry<Integer, CsvColumnInfo<PsiElement>> columnInfoEntry : columnInfos.entrySet()) {
+            CsvColumnInfo<PsiElement> columnInfo = columnInfoEntry.getValue();
+            int currentWidth = getStringWidth(data[columnInfo.getMaxLengthRowIndex()][columnInfo.getColumnIndex()].toString());
+            if (tableAutoMaxColumnWidth != 0) {
+                currentWidth = Math.min(tableAutoMaxColumnWidth, currentWidth);
+            }
+            widths[columnInfoEntry.getKey()] = currentWidth;
+        }
+
+        return widths;
+    }
+
+    public final int getColumnCount() {
         Object[][] currentData = getDataHandler().getCurrentState();
         return currentData.length > 0 ? currentData[0].length : 0;
     }
 
-    public Object[][] addRow(int focusedRowIndex, boolean before) {
+    public final Object[][] addRow(int focusedRowIndex, boolean before) {
         int index = (before ? (focusedRowIndex == -1 ? 0 : focusedRowIndex) : (focusedRowIndex == -1 ? getRowCount() : focusedRowIndex + 1)) +
                 (getFileEditorState().getFixedHeaders() ? 1 : 0);
         TableDataHandler dataHandler = getDataHandler();
@@ -321,7 +366,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
         return newData;
     }
 
-    public Object[][] removeRows(int[] indices) {
+    public final Object[][] removeRows(int[] indices) {
         List<Integer> currentRows = Ints.asList(indices);
         currentRows.sort(Collections.reverseOrder());
         TableDataHandler dataHandler = getDataHandler();
@@ -333,7 +378,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
         return currentData;
     }
 
-    public Object[][] addColumn(int focusedColumnIndex, boolean before) {
+    public final Object[][] addColumn(int focusedColumnIndex, boolean before) {
         int index = before ? (focusedColumnIndex == -1 ? 0 : focusedColumnIndex) : (focusedColumnIndex == -1 ? getColumnCount() : focusedColumnIndex + 1);
         boolean fixedHeaders = getFileEditorState().getFixedHeaders();
         TableDataHandler dataHandler = getDataHandler();
@@ -345,7 +390,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
         return currentData;
     }
 
-    public Object[][] removeColumns(int[] indices) {
+    public final Object[][] removeColumns(int[] indices) {
         List<Integer> currentColumns = Ints.asList(indices);
         currentColumns.sort(Collections.reverseOrder());
 

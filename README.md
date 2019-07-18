@@ -148,6 +148,18 @@ Set whether soft wrapping should be activated for CSV/TSV. It still can be chang
 
 Defines how many lines of text are shown in one editor cell by default. *Auto* does recalculate the height on the fly that can cause some flickering while editing. This setting can be changed in the table editor itself per file.
 
+##### Default column width
+
+The default and initial width of a single table column in _px_.
+
+##### Maximum column width
+
+The maximum width of a single table column in _px_, which is used when adjusting the column widths automatically. 0 deactivates the limitation. This value has no effect when sizing the columns manually in the table editor.
+
+##### Adjust column width on open (default)
+
+If selected, the table column widths are adjusted based on the column contents automatically when the table editor is opened. This setting can be changed in the table editor itself per file. 
+
 ##### Keep/ignore linebreak at end of file
 
 If the file ends with a completely empty line (no spaces or tabs either), the table editor will not show this line as empty values but ignore it. When table data is serialized, an existing empty line is kept at the end of the file.
@@ -292,6 +304,14 @@ The action to switch the value separator used for CSV syntax validation of a spe
 
 This action defines how the parser/validator/highlighter/etc. behaves. It does intentionally not change the file content.
 To be more precise: It **does not replace** previous separator characters by new ones or adjust the escaped texts.
+
+#### Adjust column widths (table editor only)
+
+Calculates and sets the maximum width for all table columns based on their content. The maximum table column width can be changed via [Editor Settings](#maximum-column-width).  
+
+#### Reset column widths to default (table editor only)
+
+Set the width of all table columns back to default. The default table column width can be changed via [Editor Settings](#default-column-width)).
 
 ### Inspections
 

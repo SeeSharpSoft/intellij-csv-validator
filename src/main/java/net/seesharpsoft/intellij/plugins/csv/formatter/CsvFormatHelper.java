@@ -6,6 +6,7 @@ import com.intellij.lang.ASTNode;
 import com.intellij.psi.codeStyle.CodeStyleSettings;
 import com.intellij.psi.formatter.common.AbstractBlock;
 import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfo;
+import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvElementType;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
@@ -154,9 +155,9 @@ public final class CsvFormatHelper {
         return result;
     }
 
-    public static int getTextLength(ASTNode node, CodeStyleSettings codeStyleSettings) {
+    public static int getTextLength(String textInput, CodeStyleSettings codeStyleSettings) {
+        String text = textInput;
         CsvCodeStyleSettings csvCodeStyleSettings = codeStyleSettings.getCustomSettings(CsvCodeStyleSettings.class);
-        String text = node.getText();
         int length = 0;
         if (csvCodeStyleSettings.TABULARIZE && !csvCodeStyleSettings.WHITE_SPACES_OUTSIDE_QUOTES && text.startsWith("\"")) {
             text = text.substring(1, text.length() - 1);
@@ -164,9 +165,17 @@ public final class CsvFormatHelper {
             text = END_WHITE_SPACE_PATTERN.matcher(text).replaceFirst("");
             length += 2;
         }
-        length += csvCodeStyleSettings.ENABLE_WIDE_CHARACTER_DETECTION ? charWidth(text, csvCodeStyleSettings.TREAT_AMBIGUOUS_CHARACTERS_AS_WIDE) : text.length();
+        length += CsvHelper.getMaxTextLineLength(text, input ->
+                csvCodeStyleSettings.ENABLE_WIDE_CHARACTER_DETECTION ?
+                        charWidth(input, csvCodeStyleSettings.TREAT_AMBIGUOUS_CHARACTERS_AS_WIDE) :
+                        input.length()
+        );
 
         return length;
+    }
+
+    public static int getTextLength(ASTNode node, CodeStyleSettings codeStyleSettings) {
+        return getTextLength(node.getText(), codeStyleSettings);
     }
 
     public static ASTNode getRoot(final ASTNode node) {
@@ -210,6 +219,7 @@ public final class CsvFormatHelper {
     public static Map<Integer, CsvColumnInfo<ASTNode>> createColumnInfoMap(ASTNode root, CodeStyleSettings settings) {
         Map<Integer, CsvColumnInfo<ASTNode>> columnInfoMap = new HashMap<>();
         ASTNode child = root.getFirstChildNode();
+        int row = 0;
         while (child != null) {
             if (child.getElementType() == CsvTypes.RECORD) {
                 Integer column = 0;
@@ -218,15 +228,16 @@ public final class CsvFormatHelper {
                     if (subChild.getElementType() == CsvTypes.FIELD) {
                         int length = getTextLength(subChild, settings);
                         if (!columnInfoMap.containsKey(column)) {
-                            columnInfoMap.put(column, new CsvColumnInfo(column, length));
+                            columnInfoMap.put(column, new CsvColumnInfo(column, length, row));
                         } else if (columnInfoMap.get(column).getMaxLength() < length) {
-                            columnInfoMap.get(column).setMaxLength(length);
+                            columnInfoMap.get(column).setMaxLength(length, row);
                         }
                         columnInfoMap.get(column).addElement(subChild);
                         ++column;
                     }
                     subChild = subChild.getTreeNext();
                 }
+                ++row;
             }
             child = child.getTreeNext();
         }

@@ -9,13 +9,14 @@ public class CsvColumnInfo<T> {
 
     private int myColumnIndex;
     private int myMaxLength;
+    private int myMaxLengthRowIndex;
     private Map<T, RowInfo> myElementInfos;
     private T myHeaderElement;
     private int mySize;
 
-    public CsvColumnInfo(int columnIndex, int maxLength) {
+    public CsvColumnInfo(int columnIndex, int maxLength, int maxLengthRowIndex) {
         this.myColumnIndex = columnIndex;
-        this.myMaxLength = maxLength;
+        setMaxLength(maxLength, maxLengthRowIndex);
         this.myElementInfos = new HashMap<>();
         this.myHeaderElement = null;
         this.mySize = 0;
@@ -39,8 +40,13 @@ public class CsvColumnInfo<T> {
         return myMaxLength;
     }
 
-    public void setMaxLength(int maxLength) {
+    public void setMaxLength(int maxLength, int maxLengthRowIndex) {
         this.myMaxLength = maxLength;
+        this.myMaxLengthRowIndex = maxLengthRowIndex;
+    }
+
+    public int getMaxLengthRowIndex() {
+        return this.myMaxLengthRowIndex;
     }
 
     public int getSize() {
