@@ -16,6 +16,9 @@ public class CsvEditorSettingsProvider implements SearchableConfigurable {
 
     public static final String CSV_EDITOR_SETTINGS_ID = "Csv.Editor.Settings";
 
+    public static final int MIN_TABLE_COLUMN_SIZE = 10;
+    public static final int MAX_TABLE_COLUMN_SIZE = 10000;
+
     private JCheckBox cbCaretRowShown;
     private JPanel myMainPanel;
     private JCheckBox cbUseSoftWraps;
@@ -139,8 +142,8 @@ public class CsvEditorSettingsProvider implements SearchableConfigurable {
         numberFormatter = new NumberFormatter(numberFormat);
         numberFormatter.setValueClass(Integer.class);
         numberFormatter.setAllowsInvalid(false);
-        numberFormatter.setMinimum(10);
-        numberFormatter.setMaximum(10000);
+        numberFormatter.setMinimum(MIN_TABLE_COLUMN_SIZE);
+        numberFormatter.setMaximum(MAX_TABLE_COLUMN_SIZE);
         tfDefaultColumnWidth = new JFormattedTextField(numberFormatter);
     }
 }

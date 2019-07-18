@@ -488,7 +488,9 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
         }
         JTable table = getTable();
         FontMetrics fontMetrics = getTable().getFontMetrics(table.getFont());
-        return CsvHelper.getMaxTextLineLength(text, input -> (int)Math.ceil((float)(fontMetrics.stringWidth(input) + TOTAL_CELL_WIDTH_SPACING) / getZoomFactor()));
+        return CsvHelper.getMaxTextLineLength(text, input ->
+                (int)Math.ceil((float)(fontMetrics.stringWidth(input) + TOTAL_CELL_WIDTH_SPACING) / getZoomFactor())
+        );
     }
 
     public void changeFontSize(int changeAmount) {

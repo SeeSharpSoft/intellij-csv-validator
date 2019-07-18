@@ -155,7 +155,8 @@ public final class CsvFormatHelper {
         return result;
     }
 
-    public static int getTextLength(String text, CodeStyleSettings codeStyleSettings) {
+    public static int getTextLength(String textInput, CodeStyleSettings codeStyleSettings) {
+        String text = textInput;
         CsvCodeStyleSettings csvCodeStyleSettings = codeStyleSettings.getCustomSettings(CsvCodeStyleSettings.class);
         int length = 0;
         if (csvCodeStyleSettings.TABULARIZE && !csvCodeStyleSettings.WHITE_SPACES_OUTSIDE_QUOTES && text.startsWith("\"")) {
@@ -164,7 +165,11 @@ public final class CsvFormatHelper {
             text = END_WHITE_SPACE_PATTERN.matcher(text).replaceFirst("");
             length += 2;
         }
-        length += CsvHelper.getMaxTextLineLength(text, line -> csvCodeStyleSettings.ENABLE_WIDE_CHARACTER_DETECTION ? charWidth(line, csvCodeStyleSettings.TREAT_AMBIGUOUS_CHARACTERS_AS_WIDE) : line.length());
+        length += CsvHelper.getMaxTextLineLength(text, input ->
+                csvCodeStyleSettings.ENABLE_WIDE_CHARACTER_DETECTION ?
+                        charWidth(input, csvCodeStyleSettings.TREAT_AMBIGUOUS_CHARACTERS_AS_WIDE) :
+                        input.length()
+        );
 
         return length;
     }
