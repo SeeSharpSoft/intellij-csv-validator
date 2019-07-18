@@ -64,7 +64,7 @@ public class CsvEditorSettingsExternalizable implements PersistentStateComponent
             TABLE_EDITOR_ROW_HEIGHT = TABLE_EDITOR_ROW_HEIGHT_DEFAULT;
             TABLE_AUTO_MAX_COLUMN_WIDTH = TABLE_AUTO_MAX_COLUMN_WIDTH_DEFAULT;
             TABLE_DEFAULT_COLUMN_WIDTH = TABLE_DEFAULT_COLUMN_WIDTH_DEFAULT;
-            TABLE_AUTO_COLUMN_WIDTH_ON_OPEN = true;
+            TABLE_AUTO_COLUMN_WIDTH_ON_OPEN = false;
             QUOTING_ENFORCED = false;
             TABLE_COLUMN_HIGHTLIGHTING = true;
             ZERO_BASED_COLUMN_NUMBERING = false;

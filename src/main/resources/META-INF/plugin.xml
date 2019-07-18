@@ -46,7 +46,7 @@
 
     <change-notes><![CDATA[
         <pre style="font-family: sans-serif">
-FIX: ConcurrentModificationException in MultiLineCellRenderer
+NEW: Table column width calculation and adjustment based on content
       </pre>
     ]]>
     </change-notes>

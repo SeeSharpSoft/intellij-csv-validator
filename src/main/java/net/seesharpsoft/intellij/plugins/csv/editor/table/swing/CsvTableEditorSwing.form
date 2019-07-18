@@ -108,7 +108,7 @@
                     <constraints/>
                     <properties>
                       <icon value="media/icons/empty.png"/>
-                      <text value="Adjust column width"/>
+                      <text value="Adjust column widths"/>
                     </properties>
                   </component>
                   <component id="8674f" class="javax.swing.JCheckBox" binding="cbAutoColumnWidthOnOpen">
