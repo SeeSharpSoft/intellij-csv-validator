@@ -20,9 +20,11 @@ import java.beans.PropertyChangeSupport;
 @SuppressWarnings("all")
 public class CsvEditorSettingsExternalizable implements PersistentStateComponent<CsvEditorSettingsExternalizable.OptionSet> {
 
-    public static final int TABLE_EDITOR_MIN_ROW_HEIGHT = 0;
-    public static final int TABLE_EDITOR_MAX_ROW_HEIGHT = 10;
-    public static final int TABLE_EDITOR_DEFAULT_ROW_HEIGHT = 3;
+    public static final int TABLE_EDITOR_ROW_HEIGHT_MIN = 0;
+    public static final int TABLE_EDITOR_ROW_HEIGHT_MAX = 10;
+    public static final int TABLE_EDITOR_ROW_HEIGHT_DEFAULT = 3;
+    public static final int TABLE_AUTO_MAX_COLUMN_WIDTH_DEFAULT = 300;
+    public static final int TABLE_DEFAULT_COLUMN_WIDTH_DEFAULT = 100;
 
     public enum EditorPrio {
         TEXT_FIRST,
@@ -39,6 +41,9 @@ public class CsvEditorSettingsExternalizable implements PersistentStateComponent
         public String TAB_HIGHLIGHT_COLOR;
         public EditorPrio EDITOR_PRIO;
         public int TABLE_EDITOR_ROW_HEIGHT;
+        public int TABLE_AUTO_MAX_COLUMN_WIDTH;
+        public int TABLE_DEFAULT_COLUMN_WIDTH;
+        public boolean TABLE_AUTO_COLUMN_WIDTH_ON_OPEN;
         public boolean TABLE_COLUMN_HIGHTLIGHTING;
         public boolean ZERO_BASED_COLUMN_NUMBERING;
 
@@ -56,7 +61,10 @@ public class CsvEditorSettingsExternalizable implements PersistentStateComponent
             TAB_HIGHLIGHT_COLOR = "-7984";
             EDITOR_PRIO = EditorPrio.TEXT_FIRST;
             SHOW_TABLE_EDITOR_INFO_PANEL = true;
-            TABLE_EDITOR_ROW_HEIGHT = TABLE_EDITOR_DEFAULT_ROW_HEIGHT;
+            TABLE_EDITOR_ROW_HEIGHT = TABLE_EDITOR_ROW_HEIGHT_DEFAULT;
+            TABLE_AUTO_MAX_COLUMN_WIDTH = TABLE_AUTO_MAX_COLUMN_WIDTH_DEFAULT;
+            TABLE_DEFAULT_COLUMN_WIDTH = TABLE_DEFAULT_COLUMN_WIDTH_DEFAULT;
+            TABLE_AUTO_COLUMN_WIDTH_ON_OPEN = false;
             QUOTING_ENFORCED = false;
             TABLE_COLUMN_HIGHTLIGHTING = true;
             ZERO_BASED_COLUMN_NUMBERING = false;
@@ -160,8 +168,8 @@ public class CsvEditorSettingsExternalizable implements PersistentStateComponent
     }
     public void setTableEditorRowHeight(int rowHeight) {
         int finalRowHeight = rowHeight;
-        if (finalRowHeight > TABLE_EDITOR_MAX_ROW_HEIGHT) finalRowHeight = TABLE_EDITOR_MAX_ROW_HEIGHT;
-        if (finalRowHeight < TABLE_EDITOR_MIN_ROW_HEIGHT) finalRowHeight = TABLE_EDITOR_MIN_ROW_HEIGHT;
+        if (finalRowHeight > TABLE_EDITOR_ROW_HEIGHT_MAX) finalRowHeight = TABLE_EDITOR_ROW_HEIGHT_MAX;
+        if (finalRowHeight < TABLE_EDITOR_ROW_HEIGHT_MIN) finalRowHeight = TABLE_EDITOR_ROW_HEIGHT_MIN;
         getState().TABLE_EDITOR_ROW_HEIGHT = finalRowHeight;
     }
 
@@ -191,5 +199,26 @@ public class CsvEditorSettingsExternalizable implements PersistentStateComponent
     }
     public void setFileEndLineBreak(boolean fileEndLineBreak) {
         getState().FILE_END_LINE_BREAK = fileEndLineBreak;
+    }
+
+    public int getTableAutoMaxColumnWidth() {
+        return getState().TABLE_AUTO_MAX_COLUMN_WIDTH;
+    }
+    public void setTableAutoMaxColumnWidth(int tableAutoMaxColumnWidth) {
+        getState().TABLE_AUTO_MAX_COLUMN_WIDTH = tableAutoMaxColumnWidth;
+    }
+
+    public int getTableDefaultColumnWidth() {
+        return getState().TABLE_DEFAULT_COLUMN_WIDTH;
+    }
+    public void setTableDefaultColumnWidth(int tableDefaultColumnWidth) {
+        getState().TABLE_DEFAULT_COLUMN_WIDTH = tableDefaultColumnWidth;
+    }
+
+    public boolean isTableAutoColumnWidthOnOpen() {
+        return getState().TABLE_AUTO_COLUMN_WIDTH_ON_OPEN;
+    }
+    public void setTableAutoColumnWidthOnOpen(boolean tableAutoColumnWidthOnOpen) {
+        getState().TABLE_AUTO_COLUMN_WIDTH_ON_OPEN = tableAutoColumnWidthOnOpen;
     }
 }

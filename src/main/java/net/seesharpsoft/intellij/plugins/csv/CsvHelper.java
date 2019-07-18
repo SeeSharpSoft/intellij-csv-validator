@@ -21,9 +21,11 @@ import net.seesharpsoft.intellij.plugins.csv.psi.CsvField;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvFile;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvRecord;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 public final class CsvHelper {
 
@@ -154,11 +156,11 @@ public final class CsvHelper {
         for (CsvRecord record : records) {
             int column = 0;
             for (CsvField field : record.getFieldList()) {
-                Integer length = field.getTextLength();
+                Integer length = CsvHelper.getMaxTextLineLength(unquoteCsvValue(field.getText()));
                 if (!columnInfoMap.containsKey(column)) {
-                    columnInfoMap.put(column, new CsvColumnInfo(column, length));
+                    columnInfoMap.put(column, new CsvColumnInfo(column, length, row));
                 } else if (columnInfoMap.get(column).getMaxLength() < length) {
-                    columnInfoMap.get(column).setMaxLength(length);
+                    columnInfoMap.get(column).setMaxLength(length, row);
                 }
                 columnInfoMap.get(column).addElement(field, row, getFieldStartOffset(field), getFieldEndOffset(field));
                 ++column;
@@ -197,6 +199,24 @@ public final class CsvHelper {
 
     public static <T> T[][] deepCopy(T[][] matrix) {
         return java.util.Arrays.stream(matrix).map(el -> el.clone()).toArray($ -> matrix.clone());
+    }
+
+    public static int getMaxTextLineLength(String text, @NotNull Function<String, Integer> calcCallback) {
+        if (text == null) {
+            return 0;
+        }
+        int maxLength = -1;
+        for (String line : text.split("(\\r?\\n|\\r)+")) {
+            int length = calcCallback.apply(line);
+            if (length > maxLength) {
+                maxLength = length;
+            }
+        }
+        return maxLength;
+    }
+
+    public static int getMaxTextLineLength(String text) {
+        return getMaxTextLineLength(text, input -> input == null ? 0 : input.length());
     }
 
     private CsvHelper() {

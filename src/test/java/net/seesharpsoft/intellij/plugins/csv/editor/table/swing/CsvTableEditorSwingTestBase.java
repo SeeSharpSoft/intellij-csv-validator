@@ -40,6 +40,7 @@ public abstract class CsvTableEditorSwingTestBase extends LightPlatformCodeInsig
     protected void initializeEditorSettings(CsvEditorSettingsExternalizable instance) {
         instance.loadState(new CsvEditorSettingsExternalizable.OptionSet());
         instance.setFileEndLineBreak(false);
+        instance.setTableAutoColumnWidthOnOpen(false);
     }
 
     protected Object[][] changeValue(String newValue, int row, int column) {
