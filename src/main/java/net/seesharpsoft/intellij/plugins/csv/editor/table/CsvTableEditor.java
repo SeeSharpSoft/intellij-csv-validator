@@ -108,8 +108,11 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
     }
 
     public boolean hasErrors() {
+        if (!isValid()) {
+            return true;
+        }
         CsvColumnInfoMap columnInfoMap = getColumnInfoMap();
-        return !isValid() || (columnInfoMap != null && columnInfoMap.hasErrors());
+        return (columnInfoMap != null && columnInfoMap.hasErrors());
     }
 
     protected Object[][] storeStateChange(Object[][] data) {
@@ -129,7 +132,8 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
             return;
         }
         ApplicationManager.getApplication().invokeLater(() -> {
-            if (!this.document.isWritable() && ReadonlyStatusHandler.getInstance(this.project).ensureFilesWritable(this.file).hasReadonlyFiles()) {
+            if (project == null || project.isDisposed() ||
+                    (!this.document.isWritable() && ReadonlyStatusHandler.getInstance(this.project).ensureFilesWritable(this.file).hasReadonlyFiles())) {
                 return;
             }
             ApplicationManager.getApplication().runWriteAction(() ->
@@ -206,6 +210,9 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
 
     @Override
     public boolean isValid() {
+        if (file == null || !file.isValid()) {
+            return false;
+        }
         CsvFile csvFile = this.getCsvFile();
         return csvFile != null && csvFile.isValid();
     }
@@ -277,7 +284,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
 
     @Nullable
     public StructureViewBuilder getStructureViewBuilder() {
-        return file != null && file.isValid() ? StructureViewBuilder.PROVIDER.getStructureViewBuilder(file.getFileType(), file, this.project) : null;
+        return isValid() ? StructureViewBuilder.PROVIDER.getStructureViewBuilder(file.getFileType(), file, this.project) : null;
     }
 
     @Nullable
@@ -292,6 +299,9 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
 
     @Nullable
     public final CsvFile getCsvFile() {
+        if (project == null || project.isDisposed()) {
+            return null;
+        }
         if (this.psiFile == null || !this.psiFile.isValid()) {
             this.document = FileDocumentManager.getInstance().getDocument(this.file);
             PsiDocumentManager documentManager = PsiDocumentManager.getInstance(project);
