@@ -1,3 +1,9 @@
+2.6.2
+Aug 09, 2019
+
+FIX: AssertionError: Already disposed: Project (Disposed) #147
+FIX: No fallback font used in table editor #145
+
 2.6.1
 Aug 01, 2019
 
