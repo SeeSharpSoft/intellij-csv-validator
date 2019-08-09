@@ -4,6 +4,7 @@
 [![Known Vulnerabilities](https://snyk.io/test/github/SeeSharpSoft/intellij-csv-validator/badge.svg?targetFile=build.gradle)](https://snyk.io/test/github/SeeSharpSoft/intellij-csv-validator?targetFile=build.gradle)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/97769359388e44bfb7101346d510fccf)](https://www.codacy.com/app/github_124/intellij-csv-validator?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=SeeSharpSoft/intellij-csv-validator&amp;utm_campaign=Badge_Grade)
 [![BCH compliance](https://bettercodehub.com/edge/badge/SeeSharpSoft/intellij-csv-validator?branch=master)](https://bettercodehub.com/results/SeeSharpSoft/intellij-csv-validator/)
+[![Donate](https://img.shields.io/badge/Paypal-Donate-yellow)](https://paypal.me/knerzbert)
 
 # Lightweight CSV Plugin for JetBrains IDE family
 

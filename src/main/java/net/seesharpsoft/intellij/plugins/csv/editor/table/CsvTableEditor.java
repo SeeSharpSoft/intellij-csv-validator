@@ -11,6 +11,7 @@ import com.intellij.openapi.editor.colors.EditorFontType;
 import com.intellij.openapi.fileEditor.*;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
+import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.util.UserDataHolder;
 import com.intellij.openapi.util.UserDataHolderBase;
 import com.intellij.openapi.vfs.ReadonlyStatusHandler;
@@ -30,6 +31,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import javax.swing.plaf.FontUIResource;
+import javax.swing.text.StyleContext;
 import java.awt.*;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -108,8 +111,11 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
     }
 
     public boolean hasErrors() {
+        if (!isValid()) {
+            return true;
+        }
         CsvColumnInfoMap columnInfoMap = getColumnInfoMap();
-        return !isValid() || (columnInfoMap != null && columnInfoMap.hasErrors());
+        return (columnInfoMap != null && columnInfoMap.hasErrors());
     }
 
     protected Object[][] storeStateChange(Object[][] data) {
@@ -129,7 +135,8 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
             return;
         }
         ApplicationManager.getApplication().invokeLater(() -> {
-            if (!this.document.isWritable() && ReadonlyStatusHandler.getInstance(this.project).ensureFilesWritable(this.file).hasReadonlyFiles()) {
+            if (project == null || project.isDisposed() ||
+                    (!this.document.isWritable() && ReadonlyStatusHandler.getInstance(this.project).ensureFilesWritable(this.file).hasReadonlyFiles())) {
                 return;
             }
             ApplicationManager.getApplication().runWriteAction(() ->
@@ -206,6 +213,9 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
 
     @Override
     public boolean isValid() {
+        if (file == null || !file.isValid()) {
+            return false;
+        }
         CsvFile csvFile = this.getCsvFile();
         return csvFile != null && csvFile.isValid();
     }
@@ -277,7 +287,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
 
     @Nullable
     public StructureViewBuilder getStructureViewBuilder() {
-        return file != null && file.isValid() ? StructureViewBuilder.PROVIDER.getStructureViewBuilder(file.getFileType(), file, this.project) : null;
+        return isValid() ? StructureViewBuilder.PROVIDER.getStructureViewBuilder(file.getFileType(), file, this.project) : null;
     }
 
     @Nullable
@@ -292,6 +302,9 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
 
     @Nullable
     public final CsvFile getCsvFile() {
+        if (project == null || project.isDisposed()) {
+            return null;
+        }
         if (this.psiFile == null || !this.psiFile.isValid()) {
             this.document = FileDocumentManager.getInstance().getDocument(this.file);
             PsiDocumentManager documentManager = PsiDocumentManager.getInstance(project);
@@ -310,7 +323,15 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
     }
 
     public Font getFont() {
-        return EditorColorsManager.getInstance().getGlobalScheme().getFont(EditorFontType.PLAIN);
+        // the one-liner to be used requires 172.2465.6 - compatibility
+        // return UIUtil.getFontWithFallback(EditorColorsManager.getInstance().getGlobalScheme().getFont(EditorFontType.PLAIN));
+
+        Font font = EditorColorsManager.getInstance().getGlobalScheme().getFont(EditorFontType.PLAIN);
+        String familyName = font.getFamily();
+        int style = font.getStyle();
+        int size = font.getSize();
+        Font fontWithFallback = SystemInfo.isMac ? new Font(familyName, style, size) : (new StyleContext()).getFont(familyName, style, size);
+        return fontWithFallback instanceof FontUIResource ? (FontUIResource)fontWithFallback : new FontUIResource(fontWithFallback);
     }
 
     protected int getStringWidth(String text) {
