@@ -1,3 +1,8 @@
+2.6.3
+Aug 25, 2019
+
+FIX: Index out of bound error on multi line clear cells #151
+
 2.6.2
 Aug 09, 2019
 

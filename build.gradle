@@ -78,8 +78,7 @@ intellij {
     downloadSources = false
 }
 publishPlugin {
-    username = System.getenv().getOrDefault('JI_USER', '')
-    password = System.getenv().getOrDefault('JI_PASSWORD', '')
+    token = System.getenv().getOrDefault('JI_TOKEN', '')
     channels = [System.getenv().getOrDefault('JI_CHANNELS', 'Testing')]
 }
 
