@@ -46,8 +46,7 @@
 
     <change-notes><![CDATA[
         <pre style="font-family: sans-serif">
-FIX: AssertionError: Already disposed Project #147
-FIX: No fallback font used in table editor #145
+FIX: Index out of bound error on multi line clear cells #151
       </pre>
     ]]>
     </change-notes>
