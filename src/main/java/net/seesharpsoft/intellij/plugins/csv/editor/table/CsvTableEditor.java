@@ -392,8 +392,9 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
         currentRows.sort(Collections.reverseOrder());
         TableDataHandler dataHandler = getDataHandler();
         Object[][] currentData = dataHandler.getCurrentState();
+        int offset = getFileEditorState().getFixedHeaders() ? 1 : 0;
         for (int currentRow : currentRows) {
-            currentData = ArrayUtil.remove(currentData, currentRow + (getFileEditorState().getFixedHeaders() ? 1 : 0));
+            currentData = ArrayUtil.remove(currentData, currentRow + offset);
         }
         updateTableComponentData(dataHandler.addState(currentData));
         return currentData;
@@ -414,13 +415,24 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
     public final Object[][] removeColumns(int[] indices) {
         List<Integer> currentColumns = Ints.asList(indices);
         currentColumns.sort(Collections.reverseOrder());
-
         TableDataHandler dataHandler = getDataHandler();
         Object[][] currentData = dataHandler.getCurrentState();
-
         for (int currentColumn : currentColumns) {
             for (int i = 0; i < currentData.length; ++i) {
                 currentData[i] = ArrayUtil.remove(currentData[i], currentColumn);
+            }
+        }
+        updateTableComponentData(dataHandler.addState(currentData));
+        return currentData;
+    }
+
+    public final Object[][] clearCells(int[] columns, int[] rows) {
+        TableDataHandler dataHandler = getDataHandler();
+        Object[][] currentData = dataHandler.getCurrentState();
+        int offset = getFileEditorState().getFixedHeaders() ? 1 : 0;
+        for (int currentColumn : columns) {
+            for (int currentRow : rows) {
+                currentData[currentRow + offset][currentColumn] = "";
             }
         }
         updateTableComponentData(dataHandler.addState(currentData));

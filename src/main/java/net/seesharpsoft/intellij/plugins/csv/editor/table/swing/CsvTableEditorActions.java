@@ -8,7 +8,6 @@ import com.intellij.ui.table.JBTable;
 import net.seesharpsoft.intellij.plugins.csv.editor.CsvFileEditorProvider;
 
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -184,25 +183,17 @@ public class CsvTableEditorActions extends CsvTableEditorUtilBase {
             try {
                 JBTable table = csvTableEditor.getTable();
                 int[] selectedRows = table.getSelectedRows();
-                if (selectedRows == null || selectedRows.length == 0) {
-                    return;
-                }
                 int[] selectedColumns = table.getSelectedColumns();
-                if (selectedColumns == null || selectedColumns.length == 0) {
+
+                if (selectedRows == null || selectedRows.length == 0 ||
+                        selectedColumns == null || selectedColumns.length == 0) {
                     return;
                 }
+
                 int focusedRow = table.getSelectedRow();
                 int focusedColumn = table.getSelectedColumn();
 
-                DefaultTableModel tableModel = csvTableEditor.getTableModel();
-
-                for (int row : selectedRows) {
-                    for (int column : selectedColumns) {
-                        tableModel.setValueAt("", row, column);
-                    }
-                }
-
-                csvTableEditor.syncTableModelWithUI();
+                csvTableEditor.clearCells(selectedColumns, selectedRows);
 
                 selectCell(table, focusedRow, focusedColumn);
             } finally {
