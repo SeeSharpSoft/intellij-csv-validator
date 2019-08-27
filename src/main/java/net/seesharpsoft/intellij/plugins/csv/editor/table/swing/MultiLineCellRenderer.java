@@ -1,7 +1,11 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
+import com.intellij.openapi.editor.colors.EditorColorsManager;
+import com.intellij.openapi.editor.colors.EditorFontType;
+import com.intellij.openapi.editor.impl.FontFallbackIterator;
 import com.intellij.openapi.editor.markup.TextAttributes;
 import com.intellij.openapi.util.UserDataHolder;
+import com.intellij.util.ui.UIUtil;
 import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettingsExternalizable;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvColorSettings;
 
@@ -100,6 +104,33 @@ public class MultiLineCellRenderer extends JTextArea implements TableCellRendere
     @Override
     public Object getCellEditorValue() {
         return this.getText();
+    }
+
+    @Override
+    public void setText(String text) {
+        if (CsvEditorSettingsExternalizable.getInstance().isAdvancedFontHandling()) {
+            setFont(determineFont(text));
+        }
+        super.setText(text);
+    }
+
+    public Font determineFont(String text) {
+        Font baseFont = UIUtil.getFontWithFallback(EditorColorsManager.getInstance().getGlobalScheme().getFont(EditorFontType.PLAIN));
+
+        FontFallbackIterator it = new FontFallbackIterator();
+        it.setPreferredFont(baseFont.getFamily(), baseFont.getSize());
+        it.setFontStyle(baseFont.getStyle());
+        it.start(text, 0, text.length());
+
+        Font finalFont = baseFont;
+        for(; !it.atEnd(); it.advance()) {
+            Font font = it.getFont();
+            if(!font.getFamily().equals(baseFont.getFamily())) {
+                finalFont = font;
+                break;
+            }
+        }
+        return finalFont;
     }
 
     @Override

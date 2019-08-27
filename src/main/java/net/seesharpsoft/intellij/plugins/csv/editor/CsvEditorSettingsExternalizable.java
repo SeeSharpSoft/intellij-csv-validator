@@ -50,6 +50,7 @@ public class CsvEditorSettingsExternalizable implements PersistentStateComponent
         public boolean SHOW_TABLE_EDITOR_INFO_PANEL;
         public boolean QUOTING_ENFORCED;
         public boolean FILE_END_LINE_BREAK;
+        public boolean ADVANCED_FONT_HANDLING;
 
         public OptionSet() {
             EditorSettingsExternalizable editorSettingsExternalizable = EditorSettingsExternalizable.getInstance();
@@ -69,6 +70,7 @@ public class CsvEditorSettingsExternalizable implements PersistentStateComponent
             TABLE_COLUMN_HIGHTLIGHTING = true;
             ZERO_BASED_COLUMN_NUMBERING = false;
             FILE_END_LINE_BREAK = true;
+            ADVANCED_FONT_HANDLING = true;
         }
     }
 
@@ -220,5 +222,12 @@ public class CsvEditorSettingsExternalizable implements PersistentStateComponent
     }
     public void setTableAutoColumnWidthOnOpen(boolean tableAutoColumnWidthOnOpen) {
         getState().TABLE_AUTO_COLUMN_WIDTH_ON_OPEN = tableAutoColumnWidthOnOpen;
+    }
+
+    public boolean isAdvancedFontHandling() {
+        return getState().ADVANCED_FONT_HANDLING;
+    }
+    public void setAdvancedFontHandling(boolean advancedFontHandling) {
+        getState().ADVANCED_FONT_HANDLING = advancedFontHandling;
     }
 }
