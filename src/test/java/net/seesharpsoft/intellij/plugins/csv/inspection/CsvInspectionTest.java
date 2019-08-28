@@ -1,9 +1,9 @@
 package net.seesharpsoft.intellij.plugins.csv.inspection;
 
 import com.intellij.codeInsight.intention.IntentionAction;
-import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase;
+import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 
-public class CsvInspectionTest extends LightPlatformCodeInsightFixtureTestCase {
+public class CsvInspectionTest extends BasePlatformTestCase {
 
     @Override
     protected String getTestDataPath() {

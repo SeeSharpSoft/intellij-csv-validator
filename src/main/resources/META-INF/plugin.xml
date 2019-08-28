@@ -59,9 +59,27 @@ FIX: Index out of bound error on multi line clear cells #151
     <depends>com.intellij.modules.lang</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <fileType name="CSV" implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvFileType" extensions="csv"/>
-        <fileType name="TSV" implementationClass="net.seesharpsoft.intellij.plugins.tsv.TsvFileType" extensions="tsv;tab"/>
-        <fileType name="PSV" implementationClass="net.seesharpsoft.intellij.plugins.psv.PsvFileType" extensions="psv"/>
+        <fileType name="CSV"
+                  implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvFileType"
+                  extensions="csv"
+                  language="csv"
+                  fileNamesCaseInsensitive="true"
+                  fieldName="INSTANCE"
+        />
+        <fileType name="TSV"
+                  implementationClass="net.seesharpsoft.intellij.plugins.tsv.TsvFileType"
+                  extensions="tsv;tab"
+                  language="tsv"
+                  fileNamesCaseInsensitive="true"
+                  fieldName="INSTANCE"
+        />
+        <fileType name="PSV"
+                  implementationClass="net.seesharpsoft.intellij.plugins.psv.PsvFileType"
+                  extensions="psv"
+                  language="psv"
+                  fileNamesCaseInsensitive="true"
+                  fieldName="INSTANCE"
+        />
 
         <lang.parserDefinition language="csv"
                                implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvParserDefinition"/>

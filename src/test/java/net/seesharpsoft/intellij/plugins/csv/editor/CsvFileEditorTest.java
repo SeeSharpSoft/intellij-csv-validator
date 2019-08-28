@@ -4,10 +4,10 @@ import com.intellij.openapi.editor.EditorSettings;
 import com.intellij.openapi.fileEditor.*;
 import com.intellij.openapi.fileEditor.ex.FileEditorProviderManager;
 import com.intellij.openapi.fileEditor.impl.text.TextEditorState;
-import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase;
+import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import org.jdom.Element;
 
-public class CsvFileEditorTest extends LightPlatformCodeInsightFixtureTestCase {
+public class CsvFileEditorTest extends BasePlatformTestCase {
 
     @Override
     protected String getTestDataPath() {

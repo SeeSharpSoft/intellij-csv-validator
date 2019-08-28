@@ -5,13 +5,13 @@ import com.intellij.openapi.fileEditor.FileEditorPolicy;
 import com.intellij.openapi.fileEditor.FileEditorProvider;
 import com.intellij.openapi.fileEditor.FileEditorState;
 import com.intellij.openapi.fileEditor.ex.FileEditorProviderManager;
-import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase;
+import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettingsExternalizable;
 import org.jdom.Element;
 
 import java.util.Objects;
 
-public class CsvTableEditorProviderTest extends LightPlatformCodeInsightFixtureTestCase {
+public class CsvTableEditorProviderTest extends BasePlatformTestCase {
 
     @Override
     protected String getTestDataPath() {

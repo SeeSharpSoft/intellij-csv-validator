@@ -14,7 +14,7 @@ import com.intellij.psi.impl.source.tree.FileElement;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.testFramework.EdtTestUtil;
 import com.intellij.testFramework.ExpectedHighlightingData;
-import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase;
+import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
@@ -23,7 +23,7 @@ import java.util.List;
 
 import static net.seesharpsoft.intellij.plugins.csv.editor.CsvAnnotator.CSV_COLUMN_INFO_SEVERITY;
 
-public class CsvAnnotatorTest extends LightPlatformCodeInsightFixtureTestCase {
+public class CsvAnnotatorTest extends BasePlatformTestCase {
 
     @Override
     protected String getTestDataPath() {

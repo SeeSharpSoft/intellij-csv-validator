@@ -1,10 +1,10 @@
 package net.seesharpsoft.intellij.plugins.tsv.inspection;
 
 import com.intellij.codeInsight.intention.IntentionAction;
-import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase;
+import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import net.seesharpsoft.intellij.plugins.csv.inspection.CsvValidationInspection;
 
-public class TsvInspectionTest extends LightPlatformCodeInsightFixtureTestCase {
+public class TsvInspectionTest extends BasePlatformTestCase {
 
     @Override
     protected String getTestDataPath() {

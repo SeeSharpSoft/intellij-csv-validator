@@ -1,12 +1,12 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.api;
 
-import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase;
+import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import org.junit.Test;
 
 import java.util.Arrays;
 
 
-public class TableDataChangeEventTest extends LightPlatformCodeInsightFixtureTestCase {
+public class TableDataChangeEventTest extends BasePlatformTestCase {
 
     @Override
     protected String getTestDataPath() {
