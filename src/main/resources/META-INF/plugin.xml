@@ -63,21 +63,18 @@ FIX: Index out of bound error on multi line clear cells #151
                   implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvFileType"
                   extensions="csv"
                   language="csv"
-                  fileNamesCaseInsensitive="true"
                   fieldName="INSTANCE"
         />
         <fileType name="TSV"
                   implementationClass="net.seesharpsoft.intellij.plugins.tsv.TsvFileType"
                   extensions="tsv;tab"
                   language="tsv"
-                  fileNamesCaseInsensitive="true"
                   fieldName="INSTANCE"
         />
         <fileType name="PSV"
                   implementationClass="net.seesharpsoft.intellij.plugins.psv.PsvFileType"
                   extensions="psv"
                   language="psv"
-                  fileNamesCaseInsensitive="true"
                   fieldName="INSTANCE"
         />
 
