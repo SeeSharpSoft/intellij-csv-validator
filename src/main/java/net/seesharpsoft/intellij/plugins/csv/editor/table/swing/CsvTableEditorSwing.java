@@ -251,9 +251,10 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
             int columnCount = table.getColumnCount();
             int actualFirst = Math.min(first, table.getRowCount());
             int actualLast = Math.min(last, table.getRowCount());
+            boolean isCalculated = getFileEditorState().getRowLines() == 0;
             for (int row = actualFirst; row < actualLast; row++) {
                 int rowHeight = getPreferredRowHeight();
-                if (rowHeight == 0) {
+                if (isCalculated) {
                     for (int column = 0; column < columnCount; column++) {
                         Component comp = table.prepareRenderer(table.getCellRenderer(row, column), row, column);
                         rowHeight = Math.max(rowHeight, comp.getPreferredSize().height);
@@ -500,7 +501,6 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
         int oldSize = getTable().getFont().getSize();
         int newSize = oldSize + changeAmount;
         setFontSize(newSize);
-        setTableRowHeight(getPreferredRowHeight());
         updateEditorLayout();
     }
 
