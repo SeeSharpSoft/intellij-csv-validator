@@ -1,3 +1,9 @@
+2.6.4
+Aug 30, 2019
+
+FIX: scrollable table cells
+FIX: auto cell height computation
+
 2.6.3
 Aug 25, 2019
 

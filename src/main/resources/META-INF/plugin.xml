@@ -46,7 +46,8 @@
 
     <change-notes><![CDATA[
         <pre style="font-family: sans-serif">
-FIX: Index out of bound error on multi line clear cells #151
+FIX: scrollable table cells
+FIX: auto cell height computation
       </pre>
     ]]>
     </change-notes>
