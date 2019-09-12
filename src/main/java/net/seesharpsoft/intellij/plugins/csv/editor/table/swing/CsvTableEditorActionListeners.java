@@ -6,6 +6,7 @@ import com.intellij.ui.components.labels.LinkLabel;
 import com.intellij.ui.components.labels.LinkListener;
 import com.intellij.ui.table.JBTable;
 import net.seesharpsoft.intellij.plugins.csv.editor.CsvFileEditorProvider;
+import net.seesharpsoft.intellij.plugins.csv.editor.table.api.TableActions;
 
 import javax.swing.*;
 import java.awt.*;
@@ -14,7 +15,7 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.net.URI;
 
-public class CsvTableEditorActions extends CsvTableEditorUtilBase {
+public class CsvTableEditorActionListeners extends CsvTableEditorUtilBase implements TableActions<CsvTableEditorSwing> {
 
     protected ActionListener undo = new UndoAction();
     protected ActionListener redo = new RedoAction();
@@ -34,8 +35,94 @@ public class CsvTableEditorActions extends CsvTableEditorUtilBase {
     protected LinkListener openTextEditor = new OpenTextEditor();
     protected LinkListener openCsvPluginLink = new OpenCsvPluginLink();
 
-    public CsvTableEditorActions(CsvTableEditorSwing tableEditor) {
+    public CsvTableEditorActionListeners(CsvTableEditorSwing tableEditor) {
         super(tableEditor);
+    }
+
+    @Override
+    public void addRow(CsvTableEditorSwing tableEditor, boolean before) {
+        if (tableEditor.hasErrors()) {
+            return;
+        }
+
+        tableEditor.removeTableChangeListener();
+        try {
+            JTable table = tableEditor.getTable();
+            int currentColumn = table.getSelectedColumn();
+            int currentRow = table.getSelectedRow();
+
+            tableEditor.addRow(currentRow, before);
+
+            selectCell(tableEditor.getTable(), before ? currentRow + 1 : currentRow, currentColumn);
+        } finally {
+            tableEditor.applyTableChangeListener();
+        }
+    }
+
+    @Override
+    public void addColumn(CsvTableEditorSwing tableEditor, boolean before) {
+        if (tableEditor.hasErrors()) {
+            return;
+        }
+
+        tableEditor.removeTableChangeListener();
+        try {
+            JBTable table = tableEditor.getTable();
+            int currentColumn = table.getSelectedColumn();
+            int currentRow = table.getSelectedRow();
+
+            tableEditor.addColumn(currentColumn, before);
+
+            selectCell(table, currentRow, before ? currentColumn + 1 : currentColumn);
+        } finally {
+            tableEditor.applyTableChangeListener();
+        }
+    }
+
+    @Override
+    public void deleteSelectedRows(CsvTableEditorSwing tableEditor) {
+        if (tableEditor.hasErrors()) {
+            return;
+        }
+
+        tableEditor.removeTableChangeListener();
+        try {
+            JTable table = tableEditor.getTable();
+            int[] currentRows = tableEditor.getTable().getSelectedRows();
+            if (currentRows == null || currentRows.length == 0) {
+                return;
+            }
+            int currentColumn = table.getSelectedColumn();
+
+            tableEditor.removeRows(currentRows);
+
+            selectCell(table, currentRows[0], currentColumn);
+        } finally {
+            tableEditor.applyTableChangeListener();
+        }
+    }
+
+    @Override
+    public void deleteSelectedColumns(CsvTableEditorSwing tableEditor) {
+        if (tableEditor.hasErrors()) {
+            return;
+        }
+
+        tableEditor.removeTableChangeListener();
+        try {
+            JBTable table = tableEditor.getTable();
+            int[] selectedColumns = table.getSelectedColumns();
+            if (selectedColumns == null || selectedColumns.length == 0) {
+                return;
+            }
+            int focusedRow = table.getSelectedRow();
+
+            tableEditor.removeColumns(selectedColumns);
+
+            selectCell(table, focusedRow, selectedColumns[0]);
+        } finally {
+            tableEditor.applyTableChangeListener();
+        }
     }
 
     private class UndoAction implements ActionListener {
@@ -65,22 +152,7 @@ public class CsvTableEditorActions extends CsvTableEditorUtilBase {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            if (csvTableEditor.hasErrors()) {
-                return;
-            }
-
-            csvTableEditor.removeTableChangeListener();
-            try {
-                JTable table = csvTableEditor.getTable();
-                int currentColumn = table.getSelectedColumn();
-                int currentRow = table.getSelectedRow();
-
-                csvTableEditor.addRow(this.before == null ? -1 : currentRow, Boolean.TRUE.equals(this.before));
-
-                selectCell(csvTableEditor.getTable(), Boolean.TRUE.equals(this.before) ? currentRow + 1 : currentRow, currentColumn);
-            } finally {
-                csvTableEditor.applyTableChangeListener();
-            }
+            addRow(csvTableEditor, Boolean.TRUE.equals(before));
         }
     }
 
@@ -97,25 +169,7 @@ public class CsvTableEditorActions extends CsvTableEditorUtilBase {
     private final class DeleteRowAction implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            if (csvTableEditor.hasErrors()) {
-                return;
-            }
-
-            csvTableEditor.removeTableChangeListener();
-            try {
-                JTable table = csvTableEditor.getTable();
-                int[] currentRows = csvTableEditor.getTable().getSelectedRows();
-                if (currentRows == null || currentRows.length == 0) {
-                    return;
-                }
-                int currentColumn = table.getSelectedColumn();
-
-                csvTableEditor.removeRows(currentRows);
-
-                selectCell(table, currentRows[0], currentColumn);
-            } finally {
-                csvTableEditor.applyTableChangeListener();
-            }
+            deleteSelectedRows(csvTableEditor);
         }
     }
 
@@ -128,47 +182,14 @@ public class CsvTableEditorActions extends CsvTableEditorUtilBase {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            if (csvTableEditor.hasErrors()) {
-                return;
-            }
-
-            csvTableEditor.removeTableChangeListener();
-            try {
-                JBTable table = csvTableEditor.getTable();
-                int currentColumn = table.getSelectedColumn();
-                int currentRow = table.getSelectedRow();
-
-                csvTableEditor.addColumn(currentColumn, Boolean.TRUE.equals(before));
-
-                selectCell(table, currentRow, Boolean.TRUE.equals(before) ? currentColumn + 1 : currentColumn);
-            } finally {
-                csvTableEditor.applyTableChangeListener();
-            }
+            addColumn(csvTableEditor, Boolean.TRUE.equals(before));
         }
     }
 
     private final class DeleteColumnAction implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            if (csvTableEditor.hasErrors()) {
-                return;
-            }
-
-            csvTableEditor.removeTableChangeListener();
-            try {
-                JBTable table = csvTableEditor.getTable();
-                int[] selectedColumns = table.getSelectedColumns();
-                if (selectedColumns == null || selectedColumns.length == 0) {
-                    return;
-                }
-                int focusedRow = table.getSelectedRow();
-
-                csvTableEditor.removeColumns(selectedColumns);
-
-                selectCell(table, focusedRow, selectedColumns[0]);
-            } finally {
-                csvTableEditor.applyTableChangeListener();
-            }
+            deleteSelectedColumns(csvTableEditor);
         }
     }
 

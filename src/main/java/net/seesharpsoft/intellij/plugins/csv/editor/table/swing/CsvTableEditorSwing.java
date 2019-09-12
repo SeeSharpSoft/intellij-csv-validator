@@ -13,6 +13,7 @@ import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettingsExternalizable;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditor;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditorState;
+import net.seesharpsoft.intellij.plugins.csv.editor.table.api.TableActions;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.api.TableDataChangeEvent;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvFile;
 import org.jetbrains.annotations.NotNull;
@@ -62,7 +63,7 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
 
     private int baseFontHeight;
 
-    protected final CsvTableEditorActions tableEditorActions;
+    protected final CsvTableEditorActionListeners tableEditorActions;
     protected final CsvTableEditorChangeListener tableEditorListener;
     protected final CsvTableEditorMouseListener tableEditorMouseListener;
     protected final CsvTableEditorKeyListener tableEditorKeyListener;
@@ -80,7 +81,7 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
         this.tableEditorListener = new CsvTableEditorChangeListener(this);
         this.tableEditorMouseListener = new CsvTableEditorMouseListener(this);
         this.tableEditorKeyListener = new CsvTableEditorKeyListener(this);
-        this.tableEditorActions = new CsvTableEditorActions(this);
+        this.tableEditorActions = new CsvTableEditorActionListeners(this);
         this.tableEditorMouseWheelListener = new CsvTableEditorMouseWheelListener(this);
 
         initializedUIComponents();
@@ -390,6 +391,12 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
 
     @NotNull
     @Override
+    public TableActions getActions() {
+        return this.tableEditorActions;
+    }
+
+    @NotNull
+    @Override
     public JComponent getComponent() {
         return this.panelMain;
     }
@@ -490,7 +497,7 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
         JTable table = getTable();
         FontMetrics fontMetrics = getTable().getFontMetrics(table.getFont());
         return CsvHelper.getMaxTextLineLength(text, input ->
-                (int)Math.ceil((float)(fontMetrics.stringWidth(input) + TOTAL_CELL_WIDTH_SPACING) / getZoomFactor())
+                (int) Math.ceil((float) (fontMetrics.stringWidth(input) + TOTAL_CELL_WIDTH_SPACING) / getZoomFactor())
         );
     }
 

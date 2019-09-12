@@ -10,6 +10,7 @@ import com.intellij.util.FileContentUtil;
 import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
 import net.seesharpsoft.intellij.plugins.csv.CsvSeparatorHolder;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvFileAttributes;
+import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditor;
 import org.jetbrains.annotations.NotNull;
 
 public class CsvDefaultSeparatorAction extends ToggleAction {
@@ -28,7 +29,7 @@ public class CsvDefaultSeparatorAction extends ToggleAction {
     }
 
     @Override
-    public void setSelected(@NotNull AnActionEvent anActionEvent, boolean b) {
+    public void setSelected(@NotNull AnActionEvent anActionEvent, boolean selected) {
         PsiFile psiFile = anActionEvent.getData(CommonDataKeys.PSI_FILE);
         if (psiFile == null) {
             return;
@@ -40,5 +41,10 @@ public class CsvDefaultSeparatorAction extends ToggleAction {
         CsvFileAttributes csvFileAttributes = ServiceManager.getService(psiFile.getProject(), CsvFileAttributes.class);
         csvFileAttributes.removeFileSeparator(psiFile);
         FileContentUtil.reparseFiles(psiFile.getVirtualFile());
+
+        CsvTableEditor tableEditor = CsvTableEditorActions.getTableEditor(anActionEvent);
+        if (tableEditor != null) {
+            tableEditor.selectNotify();
+        }
     }
 }

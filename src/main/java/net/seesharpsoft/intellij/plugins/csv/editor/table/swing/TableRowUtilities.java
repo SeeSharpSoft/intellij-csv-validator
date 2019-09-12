@@ -43,9 +43,9 @@ import java.util.ArrayList;
 
 /**
  * TableRowUtilities. Utility for adding a row column to a JTable.
- *
+ * <p>
  * https://github.com/oliverwatkins/swing_library
- *
+ * <p>
  * Changes for CSV-Plugin:
  * - addNumberColumn method returns the created row header table
  * - use JBTable as RowHeaderTable instead of (deprecated) JTable
@@ -139,7 +139,7 @@ public final class TableRowUtilities {
      * in the table. Assumes that table has already been added to a scollpane.
      * If the table is not in a scrollpane nothing will happen.
      *
-     * @param userTable - Table to have column added to (if it is in a scrollpane)
+     * @param userTable      - Table to have column added to (if it is in a scrollpane)
      * @param startingNumber - Number to start number column with, typically 0 or 1.
      */
     public static JTable addNumberColumn(final JTable userTable, int startingNumber) {
@@ -179,7 +179,7 @@ public final class TableRowUtilities {
         /**
          * Initialize model
          *
-         * @param maxNumber determined by JTable row size
+         * @param maxNumber      determined by JTable row size
          * @param startingNumber usually zero or 1
          */
         RowHeadersTableModel(int maxNumber, int startingNumber) {
@@ -248,13 +248,13 @@ public final class TableRowUtilities {
      * Adjusts the column width of the row headers table containing the number
      * column. The font metrics are extracted from the label of the row at the
      * bottom of the viewport and used to determining the appropriate width.
-     *
+     * <p>
      * The reason why this method is important, is that when the row number increases by an extra digit
      * the column needs to get wider. It also needs to shrink when scrolling to smaller digit numbers.
      *
      * @param rowHeadersTable - single column table in the row header
-     * @param label - label used to get font metrics
-     * @param scrollBarValue - int value for determining point of lowest row
+     * @param label           - label used to get font metrics
+     * @param scrollBarValue  - int value for determining point of lowest row
      */
     private static void adjustColumnWidth(final JTable rowHeadersTable, final JLabel label, int scrollBarValue) {
 

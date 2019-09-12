@@ -19,7 +19,7 @@ public class CsvShiftColumnRightIntentionAction extends CsvShiftColumnIntentionA
     @Override
     public void invoke(@NotNull Project project, Editor editor, @NotNull PsiElement psiElement)
             throws IncorrectOperationException {
-        CsvFile csvFile = (CsvFile)psiElement.getContainingFile();
+        CsvFile csvFile = (CsvFile) psiElement.getContainingFile();
 
         PsiElement element = CsvHelper.getParentFieldElement(psiElement);
 

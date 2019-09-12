@@ -28,11 +28,11 @@ public class CsvSyntaxHighlighter extends SyntaxHighlighterBase {
     public static final TextAttributesKey BAD_CHARACTER =
             createTextAttributesKey("CSV_BAD_CHARACTER", HighlighterColors.BAD_CHARACTER);
 
-    private static final TextAttributesKey[] BAD_CHAR_KEYS = new TextAttributesKey[]{BAD_CHARACTER};
-    private static final TextAttributesKey[] COMMA_KEYS = new TextAttributesKey[]{COMMA};
-    private static final TextAttributesKey[] QUOTE_KEYS = new TextAttributesKey[]{QUOTE};
-    private static final TextAttributesKey[] TEXT_KEYS = new TextAttributesKey[]{TEXT};
-    private static final TextAttributesKey[] ESCAPED_TEXT_KEYS = new TextAttributesKey[]{ESCAPED_TEXT};
+    private static final TextAttributesKey[] BAD_CHAR_KEYS = new TextAttributesKey[] {BAD_CHARACTER};
+    private static final TextAttributesKey[] COMMA_KEYS = new TextAttributesKey[] {COMMA};
+    private static final TextAttributesKey[] QUOTE_KEYS = new TextAttributesKey[] {QUOTE};
+    private static final TextAttributesKey[] TEXT_KEYS = new TextAttributesKey[] {TEXT};
+    private static final TextAttributesKey[] ESCAPED_TEXT_KEYS = new TextAttributesKey[] {ESCAPED_TEXT};
     private static final TextAttributesKey[] EMPTY_KEYS = new TextAttributesKey[0];
 
     private Project myProject;
