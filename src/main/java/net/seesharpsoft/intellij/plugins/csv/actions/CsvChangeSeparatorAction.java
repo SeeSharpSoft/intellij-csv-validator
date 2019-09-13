@@ -3,14 +3,15 @@ package net.seesharpsoft.intellij.plugins.csv.actions;
 import com.intellij.lang.Language;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
+import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.actionSystem.ToggleAction;
 import com.intellij.openapi.components.ServiceManager;
+import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.psi.PsiFile;
 import com.intellij.util.FileContentUtil;
 import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
 import net.seesharpsoft.intellij.plugins.csv.CsvSeparatorHolder;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvFileAttributes;
-import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditor;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvCodeStyleSettings;
 import org.jetbrains.annotations.NotNull;
 
@@ -46,9 +47,9 @@ public class CsvChangeSeparatorAction extends ToggleAction {
         csvFileAttributes.setFileSeparator(psiFile, this.mySeparator);
         FileContentUtil.reparseFiles(psiFile.getVirtualFile());
 
-        CsvTableEditor tableEditor = CsvTableEditorActions.getTableEditor(anActionEvent);
-        if (tableEditor != null) {
-            tableEditor.selectNotify();
+        FileEditor fileEditor = anActionEvent.getData(PlatformDataKeys.FILE_EDITOR);
+        if (fileEditor != null) {
+            fileEditor.selectNotify();
         }
     }
 }

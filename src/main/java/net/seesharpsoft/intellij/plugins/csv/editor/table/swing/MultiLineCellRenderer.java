@@ -14,6 +14,7 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.text.BadLocationException;
 import java.awt.*;
+import java.awt.event.FocusEvent;
 import java.util.EventObject;
 import java.util.Iterator;
 import java.util.Set;
@@ -33,6 +34,7 @@ public class MultiLineCellRenderer extends JBScrollPane implements TableCellRend
         myTextArea.setWrapStyleWord(true);
         myTextArea.setOpaque(true);
         myTextArea.setBorder(null);
+        myTextArea.setRequestFocusEnabled(true);
         myTextArea.addKeyListener(keyListener);
         this.setOpaque(true);
         this.setViewportView(myTextArea);
@@ -165,5 +167,11 @@ public class MultiLineCellRenderer extends JBScrollPane implements TableCellRend
         synchronized (cellEditorListenerSet) {
             cellEditorListenerSet.remove(cellEditorListener);
         }
+    }
+
+    @Override
+    protected void processFocusEvent(FocusEvent focusEvent) {
+        super.processFocusEvent(focusEvent);
+        myTextArea.grabFocus();
     }
 }

@@ -3,7 +3,6 @@ package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 import com.intellij.openapi.actionSystem.ActionGroup;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.ActionPopupMenu;
-import com.intellij.openapi.util.IconLoader;
 
 import javax.swing.*;
 import javax.swing.table.JTableHeader;
@@ -12,6 +11,9 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
 public class CsvTableEditorMouseListener extends CsvTableEditorUtilBase implements MouseListener {
+
+    public static final String ROW_CONTEXT_MENU_ID = "CsvTableEditorRowContextMenu";
+    public static final String COLUMN_CONTEXT_MENU_ID = "CsvTableEditorColumnContextMenu";
 
     private JPopupMenu rowPopupMenu;
     private JPopupMenu columnPopupMenu;
@@ -28,9 +30,9 @@ public class CsvTableEditorMouseListener extends CsvTableEditorUtilBase implemen
     protected JPopupMenu getRowPopupMenu() {
         if (rowPopupMenu == null) {
             ActionManager actionManager = ActionManager.getInstance();
-            ActionGroup rowContextMenu = (ActionGroup) actionManager.getAction("CsvTableEditorRowContextMenu");
-            ActionPopupMenu popupMenu = actionManager.createActionPopupMenu("Csv Table Editor - row context menu", rowContextMenu);
-            popupMenu.setTargetComponent(csvTableEditor.getComponent());
+            ActionGroup rowContextMenu = (ActionGroup) actionManager.getAction(ROW_CONTEXT_MENU_ID);
+            ActionPopupMenu popupMenu = actionManager.createActionPopupMenu(ROW_CONTEXT_MENU_ID, rowContextMenu);
+            // popupMenu.setTargetComponent(csvTableEditor.getComponent());
             rowPopupMenu = popupMenu.getComponent();
         }
         return rowPopupMenu;
@@ -39,9 +41,9 @@ public class CsvTableEditorMouseListener extends CsvTableEditorUtilBase implemen
     protected JPopupMenu getColumnPopupMenu() {
         if (columnPopupMenu == null) {
             ActionManager actionManager = ActionManager.getInstance();
-            ActionGroup columnContextMenu = (ActionGroup) actionManager.getAction("CsvTableEditorColumnContextMenu");
-            ActionPopupMenu popupMenu = actionManager.createActionPopupMenu("Csv Table Editor - column context menu", columnContextMenu);
-            popupMenu.setTargetComponent(csvTableEditor.getComponent());
+            ActionGroup columnContextMenu = (ActionGroup) actionManager.getAction(COLUMN_CONTEXT_MENU_ID);
+            ActionPopupMenu popupMenu = actionManager.createActionPopupMenu(COLUMN_CONTEXT_MENU_ID, columnContextMenu);
+            // popupMenu.setTargetComponent(csvTableEditor.getComponent());
             columnPopupMenu = popupMenu.getComponent();
         }
         return columnPopupMenu;

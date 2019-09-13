@@ -2,7 +2,7 @@ package net.seesharpsoft.intellij.plugins.csv.actions;
 
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.DataKeys;
+import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.fileEditor.FileEditor;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditor;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.api.TableActions;
@@ -67,7 +67,7 @@ public abstract class CsvTableEditorActions extends AnAction {
     }
 
     public static CsvTableEditor getTableEditor(@NotNull AnActionEvent anActionEvent) {
-        FileEditor fileEditor = anActionEvent.getDataContext().getData(DataKeys.FILE_EDITOR);
+        FileEditor fileEditor = anActionEvent.getDataContext().getData(PlatformDataKeys.FILE_EDITOR);
         if (!(fileEditor instanceof CsvTableEditor)) {
             return null;
         }
