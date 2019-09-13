@@ -67,7 +67,7 @@ public abstract class CsvTableEditorActions extends AnAction {
     }
 
     public static CsvTableEditor getTableEditor(@NotNull AnActionEvent anActionEvent) {
-        FileEditor fileEditor = anActionEvent.getDataContext().getData(PlatformDataKeys.FILE_EDITOR);
+        FileEditor fileEditor = anActionEvent.getData(PlatformDataKeys.FILE_EDITOR);
         if (!(fileEditor instanceof CsvTableEditor)) {
             return null;
         }
