@@ -60,11 +60,6 @@ FIX: auto cell height computation
     <depends>com.intellij.modules.lang</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <fileType name="FileType_CSV" implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvFileType" extensions="csv"/>
-        <fileType name="FileType_TSV" implementationClass="net.seesharpsoft.intellij.plugins.tsv.TsvFileType" extensions="tsv;tab"/>
-        <fileType name="FileType_PSV" implementationClass="net.seesharpsoft.intellij.plugins.psv.PsvFileType" extensions="psv"/>
-
-        <!-- backward compatibility -->
         <fileTypeFactory implementation="net.seesharpsoft.intellij.plugins.csv.CsvFileTypeFactory"/>
         <fileTypeFactory implementation="net.seesharpsoft.intellij.plugins.tsv.TsvFileTypeFactory"/>
         <fileTypeFactory implementation="net.seesharpsoft.intellij.plugins.psv.PsvFileTypeFactory"/>
