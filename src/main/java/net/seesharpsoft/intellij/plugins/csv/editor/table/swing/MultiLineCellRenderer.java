@@ -33,10 +33,10 @@ public class MultiLineCellRenderer extends JBScrollPane implements TableCellRend
         myTextArea.setLineWrap(true);
         myTextArea.setWrapStyleWord(true);
         myTextArea.setOpaque(true);
-        myTextArea.setBorder(null);
         myTextArea.setRequestFocusEnabled(true);
         myTextArea.addKeyListener(keyListener);
         this.setOpaque(true);
+        this.setBorder(null);
         this.setViewportView(myTextArea);
     }
 
@@ -60,20 +60,20 @@ public class MultiLineCellRenderer extends JBScrollPane implements TableCellRend
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         if (isSelected) {
-            setForeground(table.getSelectionForeground());
-            setBackground(table.getSelectionBackground());
+            myTextArea.setForeground(table.getSelectionForeground());
+            myTextArea.setBackground(table.getSelectionBackground());
         } else {
-            setForeground(getColumnForegroundColor(column, table.getForeground()));
-            setBackground(getColumnBackgroundColor(column, table.getBackground()));
+            myTextArea.setForeground(getColumnForegroundColor(column, table.getForeground()));
+            myTextArea.setBackground(getColumnBackgroundColor(column, table.getBackground()));
         }
         if (hasFocus) {
-            setBorder(UIManager.getBorder("Table.focusCellHighlightBorder"));
+            myTextArea.setBorder(UIManager.getBorder("Table.focusCellHighlightBorder"));
             if (table.isCellEditable(row, column)) {
-                setForeground(UIManager.getColor("Table.focusCellForeground"));
-                setBackground(UIManager.getColor("Table.focusCellBackground"));
+                myTextArea.setForeground(UIManager.getColor("Table.focusCellForeground"));
+                myTextArea.setBackground(UIManager.getColor("Table.focusCellBackground"));
             }
         } else {
-            setBorder(new EmptyBorder(1, 2, 1, 2));
+            myTextArea.setBorder(new EmptyBorder(1, 2, 1, 2));
         }
 
         final int columnWidth = table.getColumnModel().getColumn(column).getWidth();
