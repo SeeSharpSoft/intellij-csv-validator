@@ -53,13 +53,18 @@ FIX: auto cell height computation
     </change-notes>
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
-    <idea-version since-build="163.10154"/>
+    <idea-version since-build="163.10154" until-build="192.6603.28"/>
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
          on how to target different products -->
     <depends>com.intellij.modules.lang</depends>
 
     <extensions defaultExtensionNs="com.intellij">
+        <fileType name="FileType_CSV" implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvFileType" extensions="csv"/>
+        <fileType name="FileType_TSV" implementationClass="net.seesharpsoft.intellij.plugins.tsv.TsvFileType" extensions="tsv;tab"/>
+        <fileType name="FileType_PSV" implementationClass="net.seesharpsoft.intellij.plugins.psv.PsvFileType" extensions="psv"/>
+
+        <!-- backward compatibility -->
         <fileTypeFactory implementation="net.seesharpsoft.intellij.plugins.csv.CsvFileTypeFactory"/>
         <fileTypeFactory implementation="net.seesharpsoft.intellij.plugins.tsv.TsvFileTypeFactory"/>
         <fileTypeFactory implementation="net.seesharpsoft.intellij.plugins.psv.PsvFileTypeFactory"/>
