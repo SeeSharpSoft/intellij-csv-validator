@@ -22,7 +22,7 @@ public class CsvHighlightUsagesHandler extends HighlightUsagesHandlerBase<PsiEle
     }
 
     protected CsvFile getCsvFile() {
-        return (CsvFile)this.myFile;
+        return (CsvFile) this.myFile;
     }
 
     @Override

@@ -7,6 +7,6 @@ import org.jetbrains.annotations.NotNull;
 public class PsvFileTypeFactory extends FileTypeFactory {
     @Override
     public void createFileTypes(@NotNull FileTypeConsumer fileTypeConsumer) {
-        fileTypeConsumer.consume(PsvFileType.INSTANCE, String.join(FileTypeConsumer.EXTENSION_DELIMITER, new String[]{"psv"}));
+        fileTypeConsumer.consume(PsvFileType.INSTANCE, String.join(FileTypeConsumer.EXTENSION_DELIMITER, new String[] {"psv"}));
     }
 }

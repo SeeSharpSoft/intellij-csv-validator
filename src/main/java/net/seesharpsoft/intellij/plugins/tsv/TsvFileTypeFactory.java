@@ -7,6 +7,6 @@ import org.jetbrains.annotations.NotNull;
 public class TsvFileTypeFactory extends FileTypeFactory {
     @Override
     public void createFileTypes(@NotNull FileTypeConsumer fileTypeConsumer) {
-        fileTypeConsumer.consume(TsvFileType.INSTANCE, String.join(FileTypeConsumer.EXTENSION_DELIMITER, new String[]{"tsv", "tab"}));
+        fileTypeConsumer.consume(TsvFileType.INSTANCE, String.join(FileTypeConsumer.EXTENSION_DELIMITER, new String[] {"tsv", "tab"}));
     }
 }

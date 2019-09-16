@@ -38,7 +38,7 @@ public final class CsvHelper {
         final PsiManager psiManager = PsiManager.getInstance(project);
         final DummyHolder dummyHolder = DummyHolderFactory.createHolder(psiManager, null);
         final FileElement fileElement = dummyHolder.getTreeElement();
-        final FileParserDefinition parserDefinition = (FileParserDefinition)LanguageParserDefinitions.INSTANCE.forLanguage(CsvLanguage.INSTANCE);
+        final FileParserDefinition parserDefinition = (FileParserDefinition) LanguageParserDefinitions.INSTANCE.forLanguage(CsvLanguage.INSTANCE);
         final Lexer lexer = parserDefinition.createLexer(psiFile);
         final PsiBuilder psiBuilder = PsiBuilderFactory.getInstance().createBuilder(project, fileElement, lexer, CsvLanguage.INSTANCE, text);
         final ASTNode node = parserDefinition.createParser(project).parse(type, psiBuilder);
