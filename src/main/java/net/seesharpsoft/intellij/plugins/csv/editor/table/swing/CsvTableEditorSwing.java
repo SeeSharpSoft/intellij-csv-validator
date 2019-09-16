@@ -320,6 +320,8 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
         lblTextlines.setVisible(!hasErrors());
         comboRowHeight.setVisible(!hasErrors());
         cbFixedHeaders.setVisible(!hasErrors());
+        lnkAdjustColumnWidth.setVisible(!hasErrors());
+        cbAutoColumnWidthOnOpen.setVisible(!hasErrors());
 
         this.removeTableChangeListener();
         this.applyTableChangeListener();
