@@ -98,7 +98,7 @@ grammarKit {
     jflexRelease = '1.7.0-1'
 
     // tag or short commit hash of Grammar-Kit to use - https://github.com/JetBrains/Grammar-Kit
-    grammarKitRelease = System.getenv().getOrDefault('GRAMMAR_KIT_VERSION', '2017.1.6')
+    grammarKitRelease = System.getenv().getOrDefault('GRAMMAR_KIT_VERSION', '2017.1.7')
 }
 
 import org.jetbrains.grammarkit.tasks.GenerateLexer

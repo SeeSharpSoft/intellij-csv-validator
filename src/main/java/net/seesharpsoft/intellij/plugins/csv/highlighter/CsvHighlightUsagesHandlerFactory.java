@@ -13,7 +13,7 @@ public class CsvHighlightUsagesHandlerFactory implements HighlightUsagesHandlerF
     @Override
     public HighlightUsagesHandlerBase createHighlightUsagesHandler(@NotNull Editor editor, @NotNull PsiFile psiFile) {
         if (psiFile instanceof CsvFile) {
-            return new CsvHighlightUsagesHandler(editor, (CsvFile)psiFile);
+            return new CsvHighlightUsagesHandler(editor, (CsvFile) psiFile);
         }
         return null;
     }

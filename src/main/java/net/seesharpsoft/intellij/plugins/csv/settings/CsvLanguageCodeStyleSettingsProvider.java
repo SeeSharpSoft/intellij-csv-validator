@@ -71,7 +71,7 @@ public class CsvLanguageCodeStyleSettingsProvider extends LanguageCodeStyleSetti
                     CodeStyleSettingsCustomizable.WrappingOrBraceOption.RIGHT_MARGIN.toString(),
                     CodeStyleSettingsCustomizable.WrappingOrBraceOption.WRAP_LONG_LINES.toString(),
                     CodeStyleSettingsCustomizable.WrappingOrBraceOption.WRAP_ON_TYPING.toString()
-                    );
+            );
         }
     }
 

@@ -14,7 +14,7 @@ public class MultiLineCellRendererTest extends CsvTableEditorSwingTestBase {
     }
 
     public void testPreferredSize() {
-        JTextArea jTextArea = (JTextArea)fileEditor.getTable().getCellRenderer(0, 0);
+        JScrollPane jTextArea = (JScrollPane)fileEditor.getTable().getCellRenderer(0, 0);
 
         assertNotNull(jTextArea.getPreferredSize());
     }

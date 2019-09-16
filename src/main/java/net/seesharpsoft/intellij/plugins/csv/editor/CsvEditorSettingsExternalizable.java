@@ -107,6 +107,7 @@ public class CsvEditorSettingsExternalizable implements PersistentStateComponent
     public boolean isCaretRowShown() {
         return getState().CARET_ROW_SHOWN;
     }
+
     public void setCaretRowShown(boolean caretRowShown) {
         getState().CARET_ROW_SHOWN = caretRowShown;
     }
@@ -114,6 +115,7 @@ public class CsvEditorSettingsExternalizable implements PersistentStateComponent
     public boolean isUseSoftWraps() {
         return getState().USE_SOFT_WRAP;
     }
+
     public void setUseSoftWraps(boolean useSoftWraps) {
         getState().USE_SOFT_WRAP = useSoftWraps;
     }
@@ -121,6 +123,7 @@ public class CsvEditorSettingsExternalizable implements PersistentStateComponent
     public boolean isColumnHighlightingEnabled() {
         return getState().COLUMN_HIGHTLIGHTING;
     }
+
     public void setColumnHighlightingEnabled(boolean columnHighlightingEnabled) {
         getState().COLUMN_HIGHTLIGHTING = columnHighlightingEnabled;
     }
@@ -128,6 +131,7 @@ public class CsvEditorSettingsExternalizable implements PersistentStateComponent
     public boolean isHighlightTabSeparator() {
         return getState().HIGHTLIGHT_TAB_SEPARATOR;
     }
+
     public void setHighlightTabSeparator(boolean highlightTabSeparator) {
         getState().HIGHTLIGHT_TAB_SEPARATOR = highlightTabSeparator;
     }
@@ -135,6 +139,7 @@ public class CsvEditorSettingsExternalizable implements PersistentStateComponent
     public boolean isShowInfoBalloon() {
         return getState().SHOW_INFO_BALLOON;
     }
+
     public void setShowInfoBalloon(boolean showInfoBalloon) {
         getState().SHOW_INFO_BALLOON = showInfoBalloon;
     }
@@ -147,6 +152,7 @@ public class CsvEditorSettingsExternalizable implements PersistentStateComponent
             return null;
         }
     }
+
     public void setTabHighlightColor(Color color) {
         getState().TAB_HIGHLIGHT_COLOR = color == null ? "" : "" + color.getRGB();
     }
@@ -154,6 +160,7 @@ public class CsvEditorSettingsExternalizable implements PersistentStateComponent
     public EditorPrio getEditorPrio() {
         return getState().EDITOR_PRIO;
     }
+
     public void setEditorPrio(EditorPrio editorPrio) {
         getState().EDITOR_PRIO = editorPrio;
     }
@@ -161,6 +168,7 @@ public class CsvEditorSettingsExternalizable implements PersistentStateComponent
     public boolean showTableEditorInfoPanel() {
         return getState().SHOW_TABLE_EDITOR_INFO_PANEL;
     }
+
     public void showTableEditorInfoPanel(boolean showInfoPanel) {
         getState().SHOW_TABLE_EDITOR_INFO_PANEL = showInfoPanel;
     }
@@ -168,6 +176,7 @@ public class CsvEditorSettingsExternalizable implements PersistentStateComponent
     public int getTableEditorRowHeight() {
         return getState().TABLE_EDITOR_ROW_HEIGHT;
     }
+
     public void setTableEditorRowHeight(int rowHeight) {
         int finalRowHeight = rowHeight;
         if (finalRowHeight > TABLE_EDITOR_ROW_HEIGHT_MAX) finalRowHeight = TABLE_EDITOR_ROW_HEIGHT_MAX;
@@ -178,6 +187,7 @@ public class CsvEditorSettingsExternalizable implements PersistentStateComponent
     public boolean isQuotingEnforced() {
         return getState().QUOTING_ENFORCED;
     }
+
     public void setQuotingEnforced(boolean quotingEnforced) {
         getState().QUOTING_ENFORCED = quotingEnforced;
     }
@@ -185,6 +195,7 @@ public class CsvEditorSettingsExternalizable implements PersistentStateComponent
     public boolean isTableColumnHighlightingEnabled() {
         return getState().TABLE_COLUMN_HIGHTLIGHTING;
     }
+
     public void setTableColumnHighlightingEnabled(boolean columnHighlightingEnabled) {
         getState().TABLE_COLUMN_HIGHTLIGHTING = columnHighlightingEnabled;
     }
@@ -192,6 +203,7 @@ public class CsvEditorSettingsExternalizable implements PersistentStateComponent
     public boolean isZeroBasedColumnNumbering() {
         return getState().ZERO_BASED_COLUMN_NUMBERING;
     }
+
     public void setZeroBasedColumnNumbering(boolean zeroBasedColumnNumbering) {
         getState().ZERO_BASED_COLUMN_NUMBERING = zeroBasedColumnNumbering;
     }
@@ -199,6 +211,7 @@ public class CsvEditorSettingsExternalizable implements PersistentStateComponent
     public boolean isFileEndLineBreak() {
         return getState().FILE_END_LINE_BREAK;
     }
+
     public void setFileEndLineBreak(boolean fileEndLineBreak) {
         getState().FILE_END_LINE_BREAK = fileEndLineBreak;
     }
@@ -206,6 +219,7 @@ public class CsvEditorSettingsExternalizable implements PersistentStateComponent
     public int getTableAutoMaxColumnWidth() {
         return getState().TABLE_AUTO_MAX_COLUMN_WIDTH;
     }
+
     public void setTableAutoMaxColumnWidth(int tableAutoMaxColumnWidth) {
         getState().TABLE_AUTO_MAX_COLUMN_WIDTH = tableAutoMaxColumnWidth;
     }
@@ -213,6 +227,7 @@ public class CsvEditorSettingsExternalizable implements PersistentStateComponent
     public int getTableDefaultColumnWidth() {
         return getState().TABLE_DEFAULT_COLUMN_WIDTH;
     }
+
     public void setTableDefaultColumnWidth(int tableDefaultColumnWidth) {
         getState().TABLE_DEFAULT_COLUMN_WIDTH = tableDefaultColumnWidth;
     }
@@ -220,6 +235,7 @@ public class CsvEditorSettingsExternalizable implements PersistentStateComponent
     public boolean isTableAutoColumnWidthOnOpen() {
         return getState().TABLE_AUTO_COLUMN_WIDTH_ON_OPEN;
     }
+
     public void setTableAutoColumnWidthOnOpen(boolean tableAutoColumnWidthOnOpen) {
         getState().TABLE_AUTO_COLUMN_WIDTH_ON_OPEN = tableAutoColumnWidthOnOpen;
     }

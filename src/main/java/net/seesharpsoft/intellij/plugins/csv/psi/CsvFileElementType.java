@@ -16,7 +16,7 @@ public class CsvFileElementType extends IFileElementType {
 
     @Override
     protected ASTNode doParseContents(@NotNull ASTNode chameleon, @NotNull PsiElement psi) {
-        PsiFile file = (PsiFile)psi;
+        PsiFile file = (PsiFile) psi;
         Project project = file.getProject();
         Language languageForParser = this.getLanguageForParser(file);
         FileParserDefinition parserDefinition = (FileParserDefinition) LanguageParserDefinitions.INSTANCE.forLanguage(languageForParser);

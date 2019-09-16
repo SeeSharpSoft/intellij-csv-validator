@@ -125,8 +125,8 @@ public class CsvEditorSettingsProvider implements SearchableConfigurable {
         csvEditorSettingsExternalizable.setTableColumnHighlightingEnabled(cbTableColumnHighlighting.isSelected());
         csvEditorSettingsExternalizable.setZeroBasedColumnNumbering(cbZeroBasedColumnNumbering.isSelected());
         csvEditorSettingsExternalizable.setFileEndLineBreak(cbFileEndLineBreak.isSelected());
-        csvEditorSettingsExternalizable.setTableAutoMaxColumnWidth((int)tfMaxColumnWidth.getValue());
-        csvEditorSettingsExternalizable.setTableDefaultColumnWidth((int)tfDefaultColumnWidth.getValue());
+        csvEditorSettingsExternalizable.setTableAutoMaxColumnWidth((int) tfMaxColumnWidth.getValue());
+        csvEditorSettingsExternalizable.setTableDefaultColumnWidth((int) tfDefaultColumnWidth.getValue());
         csvEditorSettingsExternalizable.setTableAutoColumnWidthOnOpen(cbAdjustColumnWidthOnOpen.isSelected());
         csvEditorSettingsExternalizable.setAdvancedFontHandling(cbAdvancedFontHandling.isSelected());
     }

@@ -1,7 +1,8 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
-import com.intellij.openapi.ui.JBPopupMenu;
-import com.intellij.openapi.util.IconLoader;
+import com.intellij.openapi.actionSystem.ActionGroup;
+import com.intellij.openapi.actionSystem.ActionManager;
+import com.intellij.openapi.actionSystem.ActionPopupMenu;
 
 import javax.swing.*;
 import javax.swing.table.JTableHeader;
@@ -11,8 +12,11 @@ import java.awt.event.MouseListener;
 
 public class CsvTableEditorMouseListener extends CsvTableEditorUtilBase implements MouseListener {
 
-    private JBPopupMenu rowPopupMenu;
-    private JBPopupMenu columnPopupMenu;
+    public static final String ROW_CONTEXT_MENU_ID = "CsvTableEditorRowContextMenu";
+    public static final String COLUMN_CONTEXT_MENU_ID = "CsvTableEditorColumnContextMenu";
+
+    private JPopupMenu rowPopupMenu;
+    private JPopupMenu columnPopupMenu;
 
     public CsvTableEditorMouseListener(CsvTableEditorSwing csvTableEditorArg) {
         super(csvTableEditorArg);
@@ -23,53 +27,29 @@ public class CsvTableEditorMouseListener extends CsvTableEditorUtilBase implemen
         // mouseClicked
     }
 
-    protected void addCommonActions(JBPopupMenu popupMenu) {
-        popupMenu.add(new JSeparator());
-        JMenuItem menuItem = new JMenuItem(csvTableEditor.lnkAdjustColumnWidth.getText(), IconLoader.getIcon("/media/icons/adjust-column-width.png"));
-        menuItem.addActionListener(csvTableEditor.tableEditorActions.adjustColumnWidthAction);
-        popupMenu.add(menuItem);
-        menuItem = new JMenuItem("Reset column widths to default", IconLoader.getIcon("/media/icons/reset-column-width.png"));
-        menuItem.addActionListener(csvTableEditor.tableEditorActions.resetColumnWidthAction);
-        popupMenu.add(menuItem);
-    }
-
-    protected JBPopupMenu getRowPopupMenu() {
+    protected JPopupMenu getRowPopupMenu() {
         if (rowPopupMenu == null) {
-            rowPopupMenu = new JBPopupMenu();
-            JMenuItem menuItem = new JMenuItem("New row before (Ctrl+Up)", csvTableEditor.btnAddRowBefore.getIcon());
-            menuItem.addActionListener(csvTableEditor.tableEditorActions.addRowBefore);
-            rowPopupMenu.add(menuItem);
-            menuItem = new JMenuItem("New row after (Ctrl+Down)", csvTableEditor.btnAddRow.getIcon());
-            menuItem.addActionListener(csvTableEditor.tableEditorActions.addRowAfter);
-            rowPopupMenu.add(menuItem);
-            menuItem = new JMenuItem("Delete selected row(s) (Ctrl+Del)", csvTableEditor.btnRemoveRow.getIcon());
-            menuItem.addActionListener(csvTableEditor.tableEditorActions.deleteRow);
-            rowPopupMenu.add(menuItem);
-
-            addCommonActions(rowPopupMenu);
+            ActionManager actionManager = ActionManager.getInstance();
+            ActionGroup rowContextMenu = (ActionGroup) actionManager.getAction(ROW_CONTEXT_MENU_ID);
+            ActionPopupMenu popupMenu = actionManager.createActionPopupMenu(ROW_CONTEXT_MENU_ID, rowContextMenu);
+            // popupMenu.setTargetComponent(csvTableEditor.getComponent());
+            rowPopupMenu = popupMenu.getComponent();
         }
         return rowPopupMenu;
     }
 
-    protected JBPopupMenu getColumnPopupMenu() {
+    protected JPopupMenu getColumnPopupMenu() {
         if (columnPopupMenu == null) {
-            columnPopupMenu = new JBPopupMenu();
-            JMenuItem menuItem = new JMenuItem("New column before (Ctrl+Left)", csvTableEditor.btnAddColumnBefore.getIcon());
-            menuItem.addActionListener(csvTableEditor.tableEditorActions.addColumnBefore);
-            columnPopupMenu.add(menuItem);
-            menuItem = new JMenuItem("New column after (Ctrl+Right)", csvTableEditor.btnAddColumn.getIcon());
-            menuItem.addActionListener(csvTableEditor.tableEditorActions.addColumnAfter);
-            columnPopupMenu.add(menuItem);
-            menuItem = new JMenuItem("Delete selected column (Ctrl+Shift+Del)", csvTableEditor.btnRemoveColumn.getIcon());
-            menuItem.addActionListener(csvTableEditor.tableEditorActions.deleteColumn);
-            columnPopupMenu.add(menuItem);
-
-            addCommonActions(columnPopupMenu);
+            ActionManager actionManager = ActionManager.getInstance();
+            ActionGroup columnContextMenu = (ActionGroup) actionManager.getAction(COLUMN_CONTEXT_MENU_ID);
+            ActionPopupMenu popupMenu = actionManager.createActionPopupMenu(COLUMN_CONTEXT_MENU_ID, columnContextMenu);
+            // popupMenu.setTargetComponent(csvTableEditor.getComponent());
+            columnPopupMenu = popupMenu.getComponent();
         }
         return columnPopupMenu;
     }
 
-    protected void showPopupMenu(JBPopupMenu popupMenu, Component component, int x, int y) {
+    protected void showPopupMenu(JPopupMenu popupMenu, Component component, int x, int y) {
         if (!popupMenu.isShowing()) {
             popupMenu.show(component, x, y);
         }
@@ -81,7 +61,7 @@ public class CsvTableEditorMouseListener extends CsvTableEditorUtilBase implemen
         if (currentColumn == -1) {
             return;
         }
-        JBPopupMenu menu;
+        JPopupMenu menu;
         if (e.getSource() instanceof JTableHeader) {
             if (e.getButton() == MouseEvent.BUTTON1) {
                 csvTableEditor.selectColumn(currentColumn, (e.isControlDown() || e.isShiftDown()));
@@ -97,7 +77,7 @@ public class CsvTableEditorMouseListener extends CsvTableEditorUtilBase implemen
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        JBPopupMenu menu;
+        JPopupMenu menu;
         if (e.getSource() instanceof JTableHeader) {
             menu = this.getColumnPopupMenu();
         } else {
