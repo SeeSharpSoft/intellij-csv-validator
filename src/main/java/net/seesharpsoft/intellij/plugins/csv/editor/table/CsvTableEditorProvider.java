@@ -59,7 +59,7 @@ public class CsvTableEditorProvider implements AsyncFileEditorProvider, DumbAwar
         if (!(state instanceof CsvTableEditorState)) {
             return;
         }
-        CsvTableEditorState csvTableEditorState = (CsvTableEditorState)state;
+        CsvTableEditorState csvTableEditorState = (CsvTableEditorState) state;
         csvTableEditorState.write(project, targetElement);
     }
 

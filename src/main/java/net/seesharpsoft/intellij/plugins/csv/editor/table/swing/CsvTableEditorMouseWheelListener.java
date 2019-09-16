@@ -3,7 +3,7 @@ package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 
-public class CsvTableEditorMouseWheelListener extends  CsvTableEditorUtilBase implements MouseWheelListener {
+public class CsvTableEditorMouseWheelListener extends CsvTableEditorUtilBase implements MouseWheelListener {
 
     public static final int SCROLL_FACTOR = 3;
 

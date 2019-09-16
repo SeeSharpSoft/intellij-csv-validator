@@ -10,8 +10,8 @@
 
 Compatible with _IntelliJ IDEA  PhpStorm  WebStorm  PyCharm  RubyMine  AppCode  CLion  Gogland  DataGrip  Rider  MPS  Android Studio_ - __2016.3.2 and newer__
 
-This plugin introduces CSV (_Comma-Separated Values_) as a language to Jetbrains IDE with a syntax definition, structured language elements and associated file types (.csv/.tsv).
-This enables default editor features like syntax validation, highlighting and inspections for CSV files.
+This plugin introduces CSV (_Comma-Separated Values_) as a language to Jetbrains IDE with a syntax definition, structured language elements and associated file types (.csv/.tsv/.psv).
+This enables default editor features like syntax validation, highlighting and inspections for CSV-alike files.
 
 ## Features
 
@@ -300,7 +300,7 @@ Annasusanna,Amsterdam,         1
 
 ![Context menu](./docs/contextmenu.png)
 
-The action to switch the value separator used for CSV syntax validation of a specific file is part of its text editors context menu.
+The action to switch the value separator used for CSV syntax validation of a specific file is part of its editors context menu.
 
 
 This action defines how the parser/validator/highlighter/etc. behaves. It does intentionally not change the file content.
@@ -312,7 +312,7 @@ Calculates and sets the maximum width for all table columns based on their conte
 
 #### Reset column widths to default (table editor only)
 
-Set the width of all table columns back to default. The default table column width can be changed via [Editor Settings](#default-column-width)).
+Set the width of all table columns back to default. The default table column width can be changed via [Editor Settings](#default-column-width).
 
 ### Inspections
 
