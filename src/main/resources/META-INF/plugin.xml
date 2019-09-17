@@ -45,9 +45,8 @@
 
     <change-notes><![CDATA[
         <pre style="font-family: sans-serif">
-NEW: add separator selection to table editor #140
-FIX: coloring of table cells (e.g. selection mode)
-FIX: enter edit mode via keyboard (e.g. ENTER key in cell)
+NEW: improved font handling in table editor #122
+FIX: proper font handling in balloon tooltips
       </pre>
     ]]>
     </change-notes>

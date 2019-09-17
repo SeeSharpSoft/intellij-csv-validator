@@ -109,6 +109,4 @@ public class CsvAnnotator implements Annotator {
         }
         return false;
     }
-
-
 }
