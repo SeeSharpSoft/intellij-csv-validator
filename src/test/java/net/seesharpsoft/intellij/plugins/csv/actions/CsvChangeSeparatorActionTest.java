@@ -1,10 +1,10 @@
 package net.seesharpsoft.intellij.plugins.csv.actions;
 
 import com.intellij.openapi.actionSystem.Presentation;
-import com.intellij.testFramework.fixtures.BasePlatformTestCase;
+import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvCodeStyleSettings;
 
-public class CsvChangeSeparatorActionTest extends BasePlatformTestCase {
+public class CsvChangeSeparatorActionTest extends LightPlatformCodeInsightFixtureTestCase {
 
     @Override
     protected String getTestDataPath() {

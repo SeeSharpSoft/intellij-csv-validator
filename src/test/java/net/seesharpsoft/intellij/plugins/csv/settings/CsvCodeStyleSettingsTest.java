@@ -1,8 +1,8 @@
 package net.seesharpsoft.intellij.plugins.csv.settings;
 
-import com.intellij.testFramework.fixtures.BasePlatformTestCase;
+import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase;
 
-public class CsvCodeStyleSettingsTest extends BasePlatformTestCase {
+public class CsvCodeStyleSettingsTest extends LightPlatformCodeInsightFixtureTestCase {
 
     @Override
     protected String getTestDataPath() {

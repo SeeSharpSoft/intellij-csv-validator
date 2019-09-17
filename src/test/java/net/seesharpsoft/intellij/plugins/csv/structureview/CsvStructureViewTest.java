@@ -3,10 +3,10 @@ package net.seesharpsoft.intellij.plugins.csv.structureview;
 import com.intellij.ide.structureView.StructureViewTreeElement;
 import com.intellij.ide.util.treeView.smartTree.TreeElement;
 import com.intellij.navigation.ItemPresentation;
-import com.intellij.testFramework.fixtures.BasePlatformTestCase;
+import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase;
 import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettingsExternalizable;
 
-public class CsvStructureViewTest extends BasePlatformTestCase{
+public class CsvStructureViewTest extends LightPlatformCodeInsightFixtureTestCase{
 
     @Override
     protected String getTestDataPath() {

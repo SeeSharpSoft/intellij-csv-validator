@@ -9,6 +9,7 @@ import com.intellij.ui.components.JBScrollPane;
 import com.intellij.util.ui.UIUtil;
 import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettingsExternalizable;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvColorSettings;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -80,13 +81,13 @@ public class MultiLineCellRenderer extends JBScrollPane implements TableCellRend
             myTextArea.setBorder(new EmptyBorder(1, 2, 1, 2));
         }
 
+        this.setText(value == null ? "" : value.toString());
+
         final int columnWidth = table.getColumnModel().getColumn(column).getWidth();
         final int rowHeight = table.getRowHeight(row);
-        this.setFont(table.getFont());
+
         this.setSize(columnWidth, rowHeight);
         this.validate();
-        myTextArea.setText((value == null) ? "" : value.toString());
-        myTextArea.setFont(table.getFont());
         myTextArea.setSize(columnWidth, rowHeight);
         myTextArea.validate();
 
@@ -118,30 +119,30 @@ public class MultiLineCellRenderer extends JBScrollPane implements TableCellRend
         return myTextArea.getText();
     }
 
-    @Override
-    public void setText(String text) {
-        if (CsvEditorSettingsExternalizable.getInstance().isAdvancedFontHandling()) {
-            setFont(determineFont(text));
-        }
-        super.setText(text);
+    protected void setText(@NotNull String text) {
+        Font font = determineFont(text);
+        this.setFont(font);
+        myTextArea.setFont(font);
+        myTextArea.setText(text);
     }
 
-    public Font determineFont(String text) {
-        Font baseFont = UIUtil.getFontWithFallback(EditorColorsManager.getInstance().getGlobalScheme().getFont(EditorFontType.PLAIN));
+    protected Font determineFont(@NotNull String text) {
+        Font finalFont = UIUtil.getFontWithFallback(EditorColorsManager.getInstance().getGlobalScheme().getFont(EditorFontType.PLAIN));
 
-        FontFallbackIterator it = new FontFallbackIterator();
-        it.setPreferredFont(baseFont.getFamily(), baseFont.getSize());
-        it.setFontStyle(baseFont.getStyle());
-        it.start(text, 0, text.length());
-
-        Font finalFont = baseFont;
-        for(; !it.atEnd(); it.advance()) {
-            Font font = it.getFont();
-            if(!font.getFamily().equals(baseFont.getFamily())) {
-                finalFont = font;
-                break;
+        if (CsvEditorSettingsExternalizable.getInstance().isAdvancedFontHandling()) {
+            FontFallbackIterator it = new FontFallbackIterator();
+            it.setPreferredFont(finalFont.getFamily(), finalFont.getSize());
+            it.setFontStyle(finalFont.getStyle());
+            it.start(text, 0, text.length());
+            for (; !it.atEnd(); it.advance()) {
+                Font font = it.getFont();
+                if (!font.getFamily().equals(finalFont.getFamily())) {
+                    finalFont = font;
+                    break;
+                }
             }
         }
+
         return finalFont;
     }
 

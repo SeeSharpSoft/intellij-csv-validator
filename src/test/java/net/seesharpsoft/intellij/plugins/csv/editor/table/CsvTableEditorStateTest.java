@@ -1,10 +1,10 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table;
 
-import com.intellij.testFramework.fixtures.BasePlatformTestCase;
+import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase;
 import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettingsExternalizable;
 import org.jdom.Element;
 
-public class CsvTableEditorStateTest extends BasePlatformTestCase {
+public class CsvTableEditorStateTest extends LightPlatformCodeInsightFixtureTestCase {
 
     @Override
     protected String getTestDataPath() {

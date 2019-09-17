@@ -243,6 +243,7 @@ public class CsvEditorSettingsExternalizable implements PersistentStateComponent
     public boolean isAdvancedFontHandling() {
         return getState().ADVANCED_FONT_HANDLING;
     }
+
     public void setAdvancedFontHandling(boolean advancedFontHandling) {
         getState().ADVANCED_FONT_HANDLING = advancedFontHandling;
     }
