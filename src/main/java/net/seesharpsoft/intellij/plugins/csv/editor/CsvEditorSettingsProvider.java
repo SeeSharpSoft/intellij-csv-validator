@@ -35,7 +35,6 @@ public class CsvEditorSettingsProvider implements SearchableConfigurable {
     private JFormattedTextField tfMaxColumnWidth;
     private JFormattedTextField tfDefaultColumnWidth;
     private JCheckBox cbAdjustColumnWidthOnOpen;
-    private JCheckBox cbAdvancedFontHandling;
 
     @NotNull
     @Override
@@ -83,8 +82,7 @@ public class CsvEditorSettingsProvider implements SearchableConfigurable {
                 isModified(cbFileEndLineBreak, csvEditorSettingsExternalizable.isFileEndLineBreak()) ||
                 !tfMaxColumnWidth.getValue().equals(csvEditorSettingsExternalizable.getTableAutoMaxColumnWidth()) ||
                 !tfDefaultColumnWidth.getValue().equals(csvEditorSettingsExternalizable.getTableDefaultColumnWidth()) ||
-                isModified(cbAdjustColumnWidthOnOpen, csvEditorSettingsExternalizable.isTableAutoColumnWidthOnOpen()) ||
-                isModified(cbAdvancedFontHandling, csvEditorSettingsExternalizable.isAdvancedFontHandling());
+                isModified(cbAdjustColumnWidthOnOpen, csvEditorSettingsExternalizable.isTableAutoColumnWidthOnOpen());
     }
 
     @Override
@@ -106,7 +104,6 @@ public class CsvEditorSettingsProvider implements SearchableConfigurable {
         tfMaxColumnWidth.setValue(csvEditorSettingsExternalizable.getTableAutoMaxColumnWidth());
         tfDefaultColumnWidth.setValue(csvEditorSettingsExternalizable.getTableDefaultColumnWidth());
         cbAdjustColumnWidthOnOpen.setSelected(csvEditorSettingsExternalizable.isTableAutoColumnWidthOnOpen());
-        cbAdvancedFontHandling.setSelected(csvEditorSettingsExternalizable.isAdvancedFontHandling());
     }
 
     @Override
@@ -128,7 +125,6 @@ public class CsvEditorSettingsProvider implements SearchableConfigurable {
         csvEditorSettingsExternalizable.setTableAutoMaxColumnWidth((int) tfMaxColumnWidth.getValue());
         csvEditorSettingsExternalizable.setTableDefaultColumnWidth((int) tfDefaultColumnWidth.getValue());
         csvEditorSettingsExternalizable.setTableAutoColumnWidthOnOpen(cbAdjustColumnWidthOnOpen.isSelected());
-        csvEditorSettingsExternalizable.setAdvancedFontHandling(cbAdvancedFontHandling.isSelected());
     }
 
     protected void createUIComponents() {
