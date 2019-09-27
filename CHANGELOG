@@ -4,6 +4,11 @@
 NEW: improved font handling in table editor #122
 FIX: proper font handling in balloon tooltips
 
+2.7.1
+Sep 26, 2019
+
+Support for IDE v192.*
+
 2.7.0
 Sep 16, 2019
 
