@@ -22,6 +22,8 @@
 hs_err_pid*
 
 *.iml
-.idea
+.idea/
+.gradle/
 out/
+build/
 gen/
