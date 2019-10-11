@@ -4,6 +4,7 @@ import com.intellij.lang.annotation.*;
 import com.intellij.openapi.editor.markup.TextAttributes;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.TextRange;
+import com.intellij.openapi.vcs.ui.FontUtil;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.xml.util.XmlStringUtil;
@@ -43,12 +44,16 @@ public class CsvAnnotator implements Annotator {
 
         if (columnInfo != null) {
             PsiElement headerElement = columnInfo.getHeaderElement();
-            String message = XmlStringUtil.escapeString(headerElement == null ? "" : headerElement.getText(), true);
+            String message = FontUtil.getHtmlWithFonts(
+                    XmlStringUtil.escapeString(headerElement == null ? "" : headerElement.getText(), true)
+            );
             String tooltip = null;
             if (showInfoBalloon(holder.getCurrentAnnotationSession())) {
                 tooltip = XmlStringUtil.wrapInHtml(
                         String.format("%s<br /><br />Header: %s<br />Index: %d",
-                                XmlStringUtil.escapeString(element.getText(), true),
+                                FontUtil.getHtmlWithFonts(
+                                    XmlStringUtil.escapeString(element.getText(), true)
+                                ),
                                 message,
                                 columnInfo.getColumnIndex() + (CsvEditorSettingsExternalizable.getInstance().isZeroBasedColumnNumbering() ? 0 : 1)
                         )
@@ -104,6 +109,4 @@ public class CsvAnnotator implements Annotator {
         }
         return false;
     }
-
-
 }
