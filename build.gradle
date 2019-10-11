@@ -11,7 +11,7 @@ buildscript {
 
 plugins {
     // https://github.com/JetBrains/gradle-intellij-plugin
-    id 'org.jetbrains.intellij' version '0.4.9'
+    id 'org.jetbrains.intellij' version '0.4.10'
     id 'jacoco'
     id 'com.github.kt3k.coveralls' version '2.8.2'
     id "com.github.ManifestClasspath" version "0.1.0-RELEASE"
@@ -24,7 +24,7 @@ jacocoTestReport {
 }
 
 group 'net.seesharpsoft.intellij.plugins'
-version '2.7.1'
+version '2.8.0'
 
 apply plugin: 'java'
 sourceCompatibility = javaVersion
@@ -71,11 +71,11 @@ idea {
 apply plugin: 'org.jetbrains.intellij'
 intellij {
     // IDE version - https://www.jetbrains.com/intellij-repository/releases
-    version = System.getenv().getOrDefault('IDEA_VERSION', 'IC-192.6817.14')
+    version = System.getenv().getOrDefault('IDEA_VERSION', 'IC-191.5701.16')
     pluginName = 'CSV Plugin'
     instrumentCode = true
     updateSinceUntilBuild = false
-    downloadSources = false
+    downloadSources = true
 }
 publishPlugin {
     token = System.getenv().getOrDefault('JI_TOKEN', '')

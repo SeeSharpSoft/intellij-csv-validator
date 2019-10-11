@@ -39,32 +39,33 @@
         <hr /><br>
         <span style="color: #555555">
             <b>IntelliJ IDEA Ultimate/PhpStorm/DataGrip/etc.:</b> The plugin is fully compatible with the <em>'Edit as Table...'</em> functionality.<br><br>
-            In IDE releases prior v2017.3, the shortcut in the editor context menu becomes invisible when using this plugin. However, the option can still be accessed via Toolbar -> Edit -> <em>'Edit as Table...'</em>.
         </span>
     ]]></description>
 
     <change-notes><![CDATA[
         <pre style="font-family: sans-serif">
-NEW: add separator selection to table editor #140
-FIX: coloring of table cells (e.g. selection mode)
-FIX: enter edit mode via keyboard (e.g. ENTER key in cell)
+NEW: improved font handling in table editor #122
+FIX: proper font handling in balloon tooltips
+
+NOTE: IDE versions prior to 2017.3.* are no longer supported!
       </pre>
     ]]>
     </change-notes>
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
-    <idea-version since-build="163.10154" until-build="192.*"/>
+    <idea-version since-build="173.2099.1" />
+<!--    <idea-version since-build="192" until-build="192.*" />-->
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
          on how to target different products -->
     <depends>com.intellij.modules.lang</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <fileType name="FileType_CSV" implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvFileType" extensions="csv"/>
-        <fileType name="FileType_TSV" implementationClass="net.seesharpsoft.intellij.plugins.tsv.TsvFileType" extensions="tsv;tab"/>
-        <fileType name="FileType_PSV" implementationClass="net.seesharpsoft.intellij.plugins.psv.PsvFileType" extensions="psv"/>
+        <!-- required for 192.* -->
+<!--        <fileType name="FileType_CSV" implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvFileType" extensions="csv"/>-->
+<!--        <fileType name="FileType_TSV" implementationClass="net.seesharpsoft.intellij.plugins.tsv.TsvFileType" extensions="tsv;tab"/>-->
+<!--        <fileType name="FileType_PSV" implementationClass="net.seesharpsoft.intellij.plugins.psv.PsvFileType" extensions="psv"/>-->
 
-        <!-- backward compatibility -->
         <fileTypeFactory implementation="net.seesharpsoft.intellij.plugins.csv.CsvFileTypeFactory"/>
         <fileTypeFactory implementation="net.seesharpsoft.intellij.plugins.tsv.TsvFileTypeFactory"/>
         <fileTypeFactory implementation="net.seesharpsoft.intellij.plugins.psv.PsvFileTypeFactory"/>

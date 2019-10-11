@@ -1,3 +1,11 @@
+2.8.0
+???
+
+NEW: improved font handling in table editor #122
+FIX: proper font handling in balloon tooltips
+
+NOTE: IDE versions older than 2017.3.* are no longer supported!
+
 2.7.1
 Sep 26, 2019
 
