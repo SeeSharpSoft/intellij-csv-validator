@@ -30,6 +30,10 @@ This enables default editor features like syntax validation, highlighting and in
 
 (see [full changelog](./CHANGELOG))
 
+**Please note**
+
+Due to a bug in all editions of IntelliJ 2019.2.\*, the plugin now comes in two versions. Both versions are identical except a configuration workaround, which is only part of the version ending with *-192*. This version is not compatible - and will therefore not work properly - with never versions (>= 2019.3.\*) of the IntelliJ IDE.
+
 ### Syntax parser & validation
 
 The CSV syntax parser follows the standard defined in [IETF 4180](https://www.ietf.org/rfc/rfc4180.txt) but tolerates leading and trailing whitespaces of escaped text and accepts basically every literal as text data.
@@ -54,12 +58,12 @@ This led to a variety of CSV derivatives like semicolon or pipe separated values
 The plugin supports project specific separator setting.
 New separators can be added fairly easy in the parser definition of the source code.
 
-#### TSV
+#### TSV/PSV
 
-Tab (&#8633;) can be explicitly set as a separator for CSV files.
-Additionally the file type TSV was introduced as a kind of CSV language.
-For TSV files the same formatter and code style settings are applied as for CSV itself, but the separator is considered to be a tab.
-All functionality that is available for plain CSV files (inspections, intentions, structure view, etc.) can be used for TSV as well.   
+Comma (,), semicolon (;), tab (&#8633;) and pipe (|) can be explicitly set as a separator for CSV files.
+Additionally the file types TSV (Tab-Separated-Values) and PSV (Pipe-Separated-Values) were introduced as a kind of CSV language.
+For TSV and PSV files the same formatter and code style settings are applied as for CSV itself, but the separator is considered to be a tab or a pipe respectively.
+All functionality that is available for plain CSV files (inspections, intentions, structure view, etc.) can be used for TSV and PSV as well.
 
 ### Table Editor 
 
