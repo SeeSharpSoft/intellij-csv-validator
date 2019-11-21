@@ -19,11 +19,13 @@ public abstract class CsvTableEditorSwingTestBase extends LightPlatformCodeInsig
         return "./src/test/resources/editor";
     }
 
+    protected String getTestFile() { return "TableEditorFile.csv"; }
+
     @Override
     protected void setUp() throws Exception {
         super.setUp();
         initializeEditorSettings(CsvEditorSettingsExternalizable.getInstance());
-        myFixture.configureByFiles("TableEditorFile.csv");
+        myFixture.configureByFiles(getTestFile());
 
         fileEditor = new CsvTableEditorSwing(this.getProject(), myFixture.getFile().getVirtualFile());
         fileEditor.selectNotify();
