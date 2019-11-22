@@ -44,8 +44,7 @@
 
     <change-notes><![CDATA[
         <pre style="font-family: sans-serif">
-NEW: improved font handling in table editor #122
-FIX: proper font handling in balloon tooltips
+FIX: scrolling within table editor #164
 
 NOTE: IDE versions prior to 2017.3.* are no longer supported!
       </pre>
