@@ -58,6 +58,7 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
     private JCheckBox cbFixedHeaders;
     private JCheckBox cbAutoColumnWidthOnOpen;
     protected LinkLabel lnkAdjustColumnWidth;
+    private JScrollPane tableScrollPane;
 
     private JTable rowHeadersTable;
 
@@ -338,6 +339,10 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
 
     protected JBTable getTable() {
         return this.tblEditor;
+    }
+
+    protected JScrollPane getTableScrollPane() {
+        return this.tableScrollPane;
     }
 
     protected DefaultTableModel getTableModel() {

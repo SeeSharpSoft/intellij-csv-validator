@@ -1,5 +1,10 @@
+2.8.1
+Nov 22, 2019
+
+FIX: scrolling within table editor #164
+
 2.8.0
-???
+Oct 12, 2019
 
 NEW: improved font handling in table editor #122
 FIX: proper font handling in balloon tooltips
