@@ -27,7 +27,7 @@ public class CsvTableEditorMouseWheelListenerTest extends CsvTableEditorSwingTes
         assertEquals(size + 1, new_size);
     }
 
-    public void testScrollVerticallyOnCsvTable() {
+    public void testVerticalScrollingOnCsvTable() {
         CsvTableEditorSwing fileEditor = Mockito.spy(this.fileEditor);
 
         MouseWheelEvent wheelEvent = new MouseWheelEvent(fileEditor.getTable(),
@@ -50,7 +50,7 @@ public class CsvTableEditorMouseWheelListenerTest extends CsvTableEditorSwingTes
         assertEquals(0, vScrollValue);
     }
 
-    public void testScrollHorizontalOnCsvTable() {
+    public void testHorizontalScrollingOnCsvTable() {
         CsvTableEditorSwing fileEditor = Mockito.spy(this.fileEditor);
 
         MouseWheelEvent wheelEvent = new MouseWheelEvent(fileEditor.getTable(),
