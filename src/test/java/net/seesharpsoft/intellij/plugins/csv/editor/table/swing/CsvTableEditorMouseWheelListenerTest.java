@@ -27,7 +27,7 @@ public class CsvTableEditorMouseWheelListenerTest extends CsvTableEditorSwingTes
         assertEquals(size + 1, new_size);
     }
 
-    public void testScrollOnCsvTable() {
+    public void testScrollVerticallyOnCsvTable() {
         CsvTableEditorSwing fileEditor = Mockito.spy(this.fileEditor);
 
         MouseWheelEvent wheelEvent = new MouseWheelEvent(fileEditor.getTable(),
@@ -37,12 +37,39 @@ public class CsvTableEditorMouseWheelListenerTest extends CsvTableEditorSwingTes
 
         CsvTableEditorMouseWheelListener spiedMouseWheelListener = fileEditor.tableEditorMouseWheelListener;
 
-        int scrollValue = fileEditor.getTableScrollPane().getVerticalScrollBar().getValue();
-        assertEquals(0, scrollValue);
+        int hScrollValue = fileEditor.getTableScrollPane().getVerticalScrollBar().getValue();
+        int vScrollValue = fileEditor.getTableScrollPane().getHorizontalScrollBar().getValue();
+        assertEquals(0, hScrollValue);
+        assertEquals(0, vScrollValue);
         spiedMouseWheelListener.mouseWheelMoved(wheelEvent);
-        scrollValue = fileEditor.getTableScrollPane().getVerticalScrollBar().getValue();
+        hScrollValue = fileEditor.getTableScrollPane().getVerticalScrollBar().getValue();
+        vScrollValue = fileEditor.getTableScrollPane().getHorizontalScrollBar().getValue();
 
         // 90 is max in this case
-        assertEquals(90, scrollValue);
+        assertEquals(90, hScrollValue);
+        assertEquals(0, vScrollValue);
+    }
+
+    public void testScrollHorizontalOnCsvTable() {
+        CsvTableEditorSwing fileEditor = Mockito.spy(this.fileEditor);
+
+        MouseWheelEvent wheelEvent = new MouseWheelEvent(fileEditor.getTable(),
+                MouseWheelEvent.MOUSE_WHEEL,JComponent.WHEN_FOCUSED,
+                MouseWheelEvent.SHIFT_MASK,0,0,0,false, MouseWheelEvent.WHEEL_UNIT_SCROLL,
+                1,1);
+
+        CsvTableEditorMouseWheelListener spiedMouseWheelListener = fileEditor.tableEditorMouseWheelListener;
+
+        int hScrollValue = fileEditor.getTableScrollPane().getVerticalScrollBar().getValue();
+        int vScrollValue = fileEditor.getTableScrollPane().getHorizontalScrollBar().getValue();
+        assertEquals(0, hScrollValue);
+        assertEquals(0, vScrollValue);
+        spiedMouseWheelListener.mouseWheelMoved(wheelEvent);
+        hScrollValue = fileEditor.getTableScrollPane().getVerticalScrollBar().getValue();
+        vScrollValue = fileEditor.getTableScrollPane().getHorizontalScrollBar().getValue();
+
+        // 90 is max in this case
+        assertEquals(0, hScrollValue);
+        assertEquals(90, vScrollValue);
     }
 }
