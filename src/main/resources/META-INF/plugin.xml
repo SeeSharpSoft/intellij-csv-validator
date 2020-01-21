@@ -44,7 +44,8 @@
 
     <change-notes><![CDATA[
         <pre style="font-family: sans-serif">
-FIX: scrolling within table editor #164
+FIX: vertical scrolling within table editor #164
+FIX: horizontal scrolling within table editor #169
 
 NOTE: IDE versions prior to 2017.3.* are no longer supported!
       </pre>
