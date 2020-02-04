@@ -1,7 +1,7 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table;
 
 import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase;
-import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettingsExternalizable;
+import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettings;
 import org.jdom.Element;
 
 public class CsvTableEditorStateTest extends LightPlatformCodeInsightFixtureTestCase {
@@ -14,7 +14,7 @@ public class CsvTableEditorStateTest extends LightPlatformCodeInsightFixtureTest
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        CsvEditorSettingsExternalizable.getInstance().loadState(new CsvEditorSettingsExternalizable.OptionSet());
+        CsvEditorSettings.getInstance().loadState(new CsvEditorSettings.OptionSet());
         myFixture.configureByFiles("AnyFile.csv");
     }
 

@@ -65,66 +65,66 @@ public class CsvEditorSettingsProvider implements SearchableConfigurable {
 
     @Override
     public boolean isModified() {
-        CsvEditorSettingsExternalizable csvEditorSettingsExternalizable = CsvEditorSettingsExternalizable.getInstance();
-        return isModified(cbCaretRowShown, csvEditorSettingsExternalizable.isCaretRowShown()) ||
-                isModified(cbUseSoftWraps, csvEditorSettingsExternalizable.isUseSoftWraps()) ||
-                isModified(cbColumnHighlighting, csvEditorSettingsExternalizable.isColumnHighlightingEnabled()) ||
-                isModified(cbShowInfoBalloonCheckBox, csvEditorSettingsExternalizable.isShowInfoBalloon()) ||
-                isModified(cbShowInfoPanel, csvEditorSettingsExternalizable.showTableEditorInfoPanel()) ||
-                cbTabHighlightColor.isSelected() != csvEditorSettingsExternalizable.isHighlightTabSeparator() ||
-                !Objects.equals(cbTabHighlightColor.getColor(), csvEditorSettingsExternalizable.getTabHighlightColor()) ||
-                !Objects.equals(cbRowHeight.getSelectedIndex(), csvEditorSettingsExternalizable.getTableEditorRowHeight()) ||
-                !Objects.equals(cbEditorUsage.getSelectedIndex(), csvEditorSettingsExternalizable.getEditorPrio().ordinal()) ||
-                isModified(cbQuotingEnforced, csvEditorSettingsExternalizable.isQuotingEnforced()) ||
-                !Objects.equals(cbEditorUsage.getSelectedIndex(), csvEditorSettingsExternalizable.getEditorPrio().ordinal()) ||
-                isModified(cbTableColumnHighlighting, csvEditorSettingsExternalizable.isTableColumnHighlightingEnabled()) ||
-                isModified(cbZeroBasedColumnNumbering, csvEditorSettingsExternalizable.isZeroBasedColumnNumbering()) ||
-                isModified(cbFileEndLineBreak, csvEditorSettingsExternalizable.isFileEndLineBreak()) ||
-                !tfMaxColumnWidth.getValue().equals(csvEditorSettingsExternalizable.getTableAutoMaxColumnWidth()) ||
-                !tfDefaultColumnWidth.getValue().equals(csvEditorSettingsExternalizable.getTableDefaultColumnWidth()) ||
-                isModified(cbAdjustColumnWidthOnOpen, csvEditorSettingsExternalizable.isTableAutoColumnWidthOnOpen());
+        CsvEditorSettings csvEditorSettings = CsvEditorSettings.getInstance();
+        return isModified(cbCaretRowShown, csvEditorSettings.isCaretRowShown()) ||
+                isModified(cbUseSoftWraps, csvEditorSettings.isUseSoftWraps()) ||
+                isModified(cbColumnHighlighting, csvEditorSettings.isColumnHighlightingEnabled()) ||
+                isModified(cbShowInfoBalloonCheckBox, csvEditorSettings.isShowInfoBalloon()) ||
+                isModified(cbShowInfoPanel, csvEditorSettings.showTableEditorInfoPanel()) ||
+                cbTabHighlightColor.isSelected() != csvEditorSettings.isHighlightTabSeparator() ||
+                !Objects.equals(cbTabHighlightColor.getColor(), csvEditorSettings.getTabHighlightColor()) ||
+                !Objects.equals(cbRowHeight.getSelectedIndex(), csvEditorSettings.getTableEditorRowHeight()) ||
+                !Objects.equals(cbEditorUsage.getSelectedIndex(), csvEditorSettings.getEditorPrio().ordinal()) ||
+                isModified(cbQuotingEnforced, csvEditorSettings.isQuotingEnforced()) ||
+                !Objects.equals(cbEditorUsage.getSelectedIndex(), csvEditorSettings.getEditorPrio().ordinal()) ||
+                isModified(cbTableColumnHighlighting, csvEditorSettings.isTableColumnHighlightingEnabled()) ||
+                isModified(cbZeroBasedColumnNumbering, csvEditorSettings.isZeroBasedColumnNumbering()) ||
+                isModified(cbFileEndLineBreak, csvEditorSettings.isFileEndLineBreak()) ||
+                !tfMaxColumnWidth.getValue().equals(csvEditorSettings.getTableAutoMaxColumnWidth()) ||
+                !tfDefaultColumnWidth.getValue().equals(csvEditorSettings.getTableDefaultColumnWidth()) ||
+                isModified(cbAdjustColumnWidthOnOpen, csvEditorSettings.isTableAutoColumnWidthOnOpen());
     }
 
     @Override
     public void reset() {
-        CsvEditorSettingsExternalizable csvEditorSettingsExternalizable = CsvEditorSettingsExternalizable.getInstance();
-        cbCaretRowShown.setSelected(csvEditorSettingsExternalizable.isCaretRowShown());
-        cbUseSoftWraps.setSelected(csvEditorSettingsExternalizable.isUseSoftWraps());
-        cbColumnHighlighting.setSelected(csvEditorSettingsExternalizable.isColumnHighlightingEnabled());
-        cbShowInfoBalloonCheckBox.setSelected(csvEditorSettingsExternalizable.isShowInfoBalloon());
-        cbShowInfoPanel.setSelected(csvEditorSettingsExternalizable.showTableEditorInfoPanel());
-        cbTabHighlightColor.setSelected(csvEditorSettingsExternalizable.isHighlightTabSeparator());
-        cbTabHighlightColor.setColor(csvEditorSettingsExternalizable.getTabHighlightColor());
-        cbRowHeight.setSelectedIndex(csvEditorSettingsExternalizable.getTableEditorRowHeight());
-        cbEditorUsage.setSelectedIndex(csvEditorSettingsExternalizable.getEditorPrio().ordinal());
-        cbQuotingEnforced.setSelected(csvEditorSettingsExternalizable.isQuotingEnforced());
-        cbTableColumnHighlighting.setSelected(csvEditorSettingsExternalizable.isTableColumnHighlightingEnabled());
-        cbZeroBasedColumnNumbering.setSelected(csvEditorSettingsExternalizable.isZeroBasedColumnNumbering());
-        cbFileEndLineBreak.setSelected(csvEditorSettingsExternalizable.isFileEndLineBreak());
-        tfMaxColumnWidth.setValue(csvEditorSettingsExternalizable.getTableAutoMaxColumnWidth());
-        tfDefaultColumnWidth.setValue(csvEditorSettingsExternalizable.getTableDefaultColumnWidth());
-        cbAdjustColumnWidthOnOpen.setSelected(csvEditorSettingsExternalizable.isTableAutoColumnWidthOnOpen());
+        CsvEditorSettings csvEditorSettings = CsvEditorSettings.getInstance();
+        cbCaretRowShown.setSelected(csvEditorSettings.isCaretRowShown());
+        cbUseSoftWraps.setSelected(csvEditorSettings.isUseSoftWraps());
+        cbColumnHighlighting.setSelected(csvEditorSettings.isColumnHighlightingEnabled());
+        cbShowInfoBalloonCheckBox.setSelected(csvEditorSettings.isShowInfoBalloon());
+        cbShowInfoPanel.setSelected(csvEditorSettings.showTableEditorInfoPanel());
+        cbTabHighlightColor.setSelected(csvEditorSettings.isHighlightTabSeparator());
+        cbTabHighlightColor.setColor(csvEditorSettings.getTabHighlightColor());
+        cbRowHeight.setSelectedIndex(csvEditorSettings.getTableEditorRowHeight());
+        cbEditorUsage.setSelectedIndex(csvEditorSettings.getEditorPrio().ordinal());
+        cbQuotingEnforced.setSelected(csvEditorSettings.isQuotingEnforced());
+        cbTableColumnHighlighting.setSelected(csvEditorSettings.isTableColumnHighlightingEnabled());
+        cbZeroBasedColumnNumbering.setSelected(csvEditorSettings.isZeroBasedColumnNumbering());
+        cbFileEndLineBreak.setSelected(csvEditorSettings.isFileEndLineBreak());
+        tfMaxColumnWidth.setValue(csvEditorSettings.getTableAutoMaxColumnWidth());
+        tfDefaultColumnWidth.setValue(csvEditorSettings.getTableDefaultColumnWidth());
+        cbAdjustColumnWidthOnOpen.setSelected(csvEditorSettings.isTableAutoColumnWidthOnOpen());
     }
 
     @Override
     public void apply() throws ConfigurationException {
-        CsvEditorSettingsExternalizable csvEditorSettingsExternalizable = CsvEditorSettingsExternalizable.getInstance();
-        csvEditorSettingsExternalizable.setCaretRowShown(cbCaretRowShown.isSelected());
-        csvEditorSettingsExternalizable.setUseSoftWraps(cbUseSoftWraps.isSelected());
-        csvEditorSettingsExternalizable.setColumnHighlightingEnabled(cbColumnHighlighting.isSelected());
-        csvEditorSettingsExternalizable.setShowInfoBalloon(cbShowInfoBalloonCheckBox.isSelected());
-        csvEditorSettingsExternalizable.showTableEditorInfoPanel(cbShowInfoPanel.isSelected());
-        csvEditorSettingsExternalizable.setHighlightTabSeparator(cbTabHighlightColor.isSelected());
-        csvEditorSettingsExternalizable.setTabHighlightColor(cbTabHighlightColor.getColor());
-        csvEditorSettingsExternalizable.setTableEditorRowHeight(cbRowHeight.getSelectedIndex());
-        csvEditorSettingsExternalizable.setEditorPrio(CsvEditorSettingsExternalizable.EditorPrio.values()[cbEditorUsage.getSelectedIndex()]);
-        csvEditorSettingsExternalizable.setQuotingEnforced(cbQuotingEnforced.isSelected());
-        csvEditorSettingsExternalizable.setTableColumnHighlightingEnabled(cbTableColumnHighlighting.isSelected());
-        csvEditorSettingsExternalizable.setZeroBasedColumnNumbering(cbZeroBasedColumnNumbering.isSelected());
-        csvEditorSettingsExternalizable.setFileEndLineBreak(cbFileEndLineBreak.isSelected());
-        csvEditorSettingsExternalizable.setTableAutoMaxColumnWidth((int) tfMaxColumnWidth.getValue());
-        csvEditorSettingsExternalizable.setTableDefaultColumnWidth((int) tfDefaultColumnWidth.getValue());
-        csvEditorSettingsExternalizable.setTableAutoColumnWidthOnOpen(cbAdjustColumnWidthOnOpen.isSelected());
+        CsvEditorSettings csvEditorSettings = CsvEditorSettings.getInstance();
+        csvEditorSettings.setCaretRowShown(cbCaretRowShown.isSelected());
+        csvEditorSettings.setUseSoftWraps(cbUseSoftWraps.isSelected());
+        csvEditorSettings.setColumnHighlightingEnabled(cbColumnHighlighting.isSelected());
+        csvEditorSettings.setShowInfoBalloon(cbShowInfoBalloonCheckBox.isSelected());
+        csvEditorSettings.showTableEditorInfoPanel(cbShowInfoPanel.isSelected());
+        csvEditorSettings.setHighlightTabSeparator(cbTabHighlightColor.isSelected());
+        csvEditorSettings.setTabHighlightColor(cbTabHighlightColor.getColor());
+        csvEditorSettings.setTableEditorRowHeight(cbRowHeight.getSelectedIndex());
+        csvEditorSettings.setEditorPrio(CsvEditorSettings.EditorPrio.values()[cbEditorUsage.getSelectedIndex()]);
+        csvEditorSettings.setQuotingEnforced(cbQuotingEnforced.isSelected());
+        csvEditorSettings.setTableColumnHighlightingEnabled(cbTableColumnHighlighting.isSelected());
+        csvEditorSettings.setZeroBasedColumnNumbering(cbZeroBasedColumnNumbering.isSelected());
+        csvEditorSettings.setFileEndLineBreak(cbFileEndLineBreak.isSelected());
+        csvEditorSettings.setTableAutoMaxColumnWidth((int) tfMaxColumnWidth.getValue());
+        csvEditorSettings.setTableDefaultColumnWidth((int) tfDefaultColumnWidth.getValue());
+        csvEditorSettings.setTableAutoColumnWidthOnOpen(cbAdjustColumnWidthOnOpen.isSelected());
     }
 
     protected void createUIComponents() {

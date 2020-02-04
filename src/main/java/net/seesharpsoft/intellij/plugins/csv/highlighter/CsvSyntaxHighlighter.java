@@ -10,6 +10,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.TokenType;
 import com.intellij.psi.tree.IElementType;
 import net.seesharpsoft.intellij.plugins.csv.CsvLexerAdapter;
+import net.seesharpsoft.intellij.plugins.csv.components.CsvFileAttributes;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvCodeStyleSettings;
 import org.jetbrains.annotations.NotNull;
@@ -35,8 +36,8 @@ public class CsvSyntaxHighlighter extends SyntaxHighlighterBase {
     private static final TextAttributesKey[] ESCAPED_TEXT_KEYS = new TextAttributesKey[] {ESCAPED_TEXT};
     private static final TextAttributesKey[] EMPTY_KEYS = new TextAttributesKey[0];
 
-    private Project myProject;
-    private VirtualFile myVirtualFile;
+    private final Project myProject;
+    private final VirtualFile myVirtualFile;
 
     public CsvSyntaxHighlighter(Project project, VirtualFile virtualFile) {
         this.myProject = project;
@@ -46,7 +47,7 @@ public class CsvSyntaxHighlighter extends SyntaxHighlighterBase {
     @NotNull
     @Override
     public Lexer getHighlightingLexer() {
-        return new CsvLexerAdapter(CsvCodeStyleSettings.getCurrentSeparator(this.myProject, this.myVirtualFile));
+        return new CsvLexerAdapter(CsvCodeStyleSettings.getCurrentSeparator(myProject, myVirtualFile), CsvFileAttributes.getInstance(myProject).getEscapeCharacter(myProject, myVirtualFile));
     }
 
     @NotNull

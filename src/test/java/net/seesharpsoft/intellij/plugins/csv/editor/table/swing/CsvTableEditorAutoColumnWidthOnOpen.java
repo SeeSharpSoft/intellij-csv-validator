@@ -1,11 +1,11 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
-import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettingsExternalizable;
+import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettings;
 
 public class CsvTableEditorAutoColumnWidthOnOpen extends CsvTableEditorSwingTestBase {
 
     @Override
-    protected void initializeEditorSettings(CsvEditorSettingsExternalizable instance) {
+    protected void initializeEditorSettings(CsvEditorSettings instance) {
         super.initializeEditorSettings(instance);
         instance.setTableAutoColumnWidthOnOpen(true);
     }

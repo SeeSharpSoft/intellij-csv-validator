@@ -7,7 +7,7 @@ import com.intellij.openapi.editor.markup.TextAttributes;
 import com.intellij.openapi.util.UserDataHolder;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.util.ui.UIUtil;
-import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettingsExternalizable;
+import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettings;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvColorSettings;
 import org.jetbrains.annotations.NotNull;
 
@@ -46,7 +46,7 @@ public class MultiLineCellRenderer extends JBScrollPane implements TableCellRend
     }
 
     private TextAttributes getColumnTextAttributes(int column) {
-        if (CsvEditorSettingsExternalizable.getInstance().isTableColumnHighlightingEnabled()) {
+        if (CsvEditorSettings.getInstance().isTableColumnHighlightingEnabled()) {
             return CsvColorSettings.getTextAttributesOfColumn(column, myUserDataHolder);
         }
         return null;

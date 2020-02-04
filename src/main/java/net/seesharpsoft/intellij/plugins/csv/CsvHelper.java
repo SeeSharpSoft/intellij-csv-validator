@@ -17,6 +17,8 @@ import com.intellij.psi.impl.source.tree.FileElement;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
 import net.seesharpsoft.intellij.lang.FileParserDefinition;
+import net.seesharpsoft.intellij.plugins.csv.components.CsvFileAttributes;
+import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettings;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvField;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvFile;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvRecord;
@@ -149,14 +151,23 @@ public final class CsvHelper {
         return separator == null ? field.getContainingFile().getTextLength() : separator.getTextOffset();
     }
 
+    public static CsvEditorSettings.EscapeCharacter getCurrentEscapeCharacter(CsvFile csvFile) {
+        return getCurrentEscapeCharacter(csvFile.getContainingFile());
+    }
+
+    public static CsvEditorSettings.EscapeCharacter getCurrentEscapeCharacter(PsiFile psiFile) {
+        return CsvFileAttributes.getInstance(psiFile.getProject()).getEscapeCharacter(psiFile);
+    }
+
     public static CsvColumnInfoMap<PsiElement> createColumnInfoMap(CsvFile csvFile) {
+        CsvEditorSettings.EscapeCharacter escapeCharacter = getCurrentEscapeCharacter(csvFile);
         Map<Integer, CsvColumnInfo<PsiElement>> columnInfoMap = new HashMap<>();
         CsvRecord[] records = PsiTreeUtil.getChildrenOfType(csvFile, CsvRecord.class);
         int row = 0;
         for (CsvRecord record : records) {
             int column = 0;
             for (CsvField field : record.getFieldList()) {
-                Integer length = CsvHelper.getMaxTextLineLength(unquoteCsvValue(field.getText()));
+                Integer length = CsvHelper.getMaxTextLineLength(unquoteCsvValue(field.getText(), escapeCharacter));
                 if (!columnInfoMap.containsKey(column)) {
                     columnInfoMap.put(column, new CsvColumnInfo(column, length, row));
                 } else if (columnInfoMap.get(column).getMaxLength() < length) {
@@ -170,7 +181,7 @@ public final class CsvHelper {
         return new CsvColumnInfoMap(columnInfoMap, PsiTreeUtil.hasErrorElements(csvFile));
     }
 
-    public static String unquoteCsvValue(String content) {
+    public static String unquoteCsvValue(String content, CsvEditorSettings.EscapeCharacter escapeCharacter) {
         if (content == null) {
             return "";
         }
@@ -186,12 +197,12 @@ public final class CsvHelper {
         return content != null && (content.contains(separator) || content.contains("\"") || content.contains("\n") || content.startsWith(" ") || content.endsWith(" "));
     }
 
-    public static String quoteCsvField(String content, String separator, boolean quotingEnforced) {
+    public static String quoteCsvField(String content, CsvEditorSettings.EscapeCharacter escapeCharacter, String separator, boolean quotingEnforced) {
         if (content == null) {
             return "";
         }
         if (quotingEnforced || isQuotingRequired(content, separator)) {
-            String result = content.replaceAll("\"", "\"\"");
+            String result = content.replaceAll("\"", escapeCharacter.getCharacter() + "\"");
             return "\"" + result + "\"";
         }
         return content;

@@ -87,7 +87,7 @@ NOTE: IDE versions prior to 2017.3.* are no longer supported!
         <colorSettingsPage implementation="net.seesharpsoft.intellij.plugins.csv.settings.CsvColorSettings"/>
 
         <applicationService
-                serviceImplementation="net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettingsExternalizable"/>
+                serviceImplementation="net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettings"/>
         <projectService serviceImplementation="net.seesharpsoft.intellij.plugins.csv.components.CsvFileAttributes"/>
 
         <editorOptionsProvider instance="net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettingsProvider"/>
@@ -227,6 +227,19 @@ NOTE: IDE versions prior to 2017.3.* are no longer supported!
                class="net.seesharpsoft.intellij.plugins.csv.actions.CsvChangeSeparatorActionGroup"
                text="CSV Separator"
                description="CSV Separator"
+               popup="true"
+               keep-content="true"
+               icon="/media/icons/csv-icon.png"
+        >
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+            <add-to-group group-id="CsvTableEditorColumnContextMenu" anchor="last"/>
+            <add-to-group group-id="CsvTableEditorRowContextMenu" anchor="last"/>
+        </group>
+
+        <group id="net.seesharpsoft.intellij.plugins.csv.actions.CsvChangeEscapeCharacterActionGroup"
+               class="net.seesharpsoft.intellij.plugins.csv.actions.CsvChangeEscapeCharacterActionGroup"
+               text="CSV Escape Character"
+               description="CSV Escape Character"
                popup="true"
                keep-content="true"
                icon="/media/icons/csv-icon.png"

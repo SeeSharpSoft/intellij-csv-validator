@@ -55,7 +55,7 @@ public class CsvAnnotator implements Annotator {
                                     XmlStringUtil.escapeString(element.getText(), true)
                                 ),
                                 message,
-                                columnInfo.getColumnIndex() + (CsvEditorSettingsExternalizable.getInstance().isZeroBasedColumnNumbering() ? 0 : 1)
+                                columnInfo.getColumnIndex() + (CsvEditorSettings.getInstance().isZeroBasedColumnNumbering() ? 0 : 1)
                         )
                 );
             }
@@ -66,7 +66,7 @@ public class CsvAnnotator implements Annotator {
 
             Annotation annotation = holder.createAnnotation(CSV_COLUMN_INFO_SEVERITY, textRange, message, tooltip);
             annotation.setEnforcedTextAttributes(
-                    CsvEditorSettingsExternalizable.getInstance().isColumnHighlightingEnabled() ?
+                    CsvEditorSettings.getInstance().isColumnHighlightingEnabled() ?
                             CsvColorSettings.getTextAttributesOfColumn(columnInfo.getColumnIndex(), holder.getCurrentAnnotationSession()) :
                             null
             );
@@ -77,7 +77,7 @@ public class CsvAnnotator implements Annotator {
     protected boolean showInfoBalloon(@NotNull AnnotationSession annotationSession) {
         Boolean showInfoBalloon = annotationSession.getUserData(SHOW_INFO_BALLOON_KEY);
         if (showInfoBalloon == null) {
-            showInfoBalloon = CsvEditorSettingsExternalizable.getInstance().isShowInfoBalloon();
+            showInfoBalloon = CsvEditorSettings.getInstance().isShowInfoBalloon();
             annotationSession.putUserData(SHOW_INFO_BALLOON_KEY, showInfoBalloon);
         }
         return showInfoBalloon;
@@ -88,9 +88,9 @@ public class CsvAnnotator implements Annotator {
             TextAttributes textAttributes = holder.getCurrentAnnotationSession().getUserData(TAB_SEPARATOR_HIGHLIGHT_COLOR_KEY);
             if (!Boolean.TRUE.equals(holder.getCurrentAnnotationSession().getUserData(TAB_SEPARATOR_HIGHLIGHT_COLOR_DETERMINED_KEY))) {
                 String separator = CsvCodeStyleSettings.getCurrentSeparator(csvFile);
-                if (CsvEditorSettingsExternalizable.getInstance().isHighlightTabSeparator() && separator.equals(CsvCodeStyleSettings.TAB_SEPARATOR)) {
+                if (CsvEditorSettings.getInstance().isHighlightTabSeparator() && separator.equals(CsvCodeStyleSettings.TAB_SEPARATOR)) {
                     textAttributes = new TextAttributes(null,
-                            CsvEditorSettingsExternalizable.getInstance().getTabHighlightColor(),
+                            CsvEditorSettings.getInstance().getTabHighlightColor(),
                             null, null, 0);
                     holder.getCurrentAnnotationSession().putUserData(TAB_SEPARATOR_HIGHLIGHT_COLOR_KEY, textAttributes);
                     holder.getCurrentAnnotationSession().putUserData(TAB_SEPARATOR_HIGHLIGHT_COLOR_DETERMINED_KEY, Boolean.TRUE);

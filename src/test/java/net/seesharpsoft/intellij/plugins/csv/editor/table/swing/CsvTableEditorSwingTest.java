@@ -3,7 +3,7 @@ package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 import com.intellij.ide.structureView.StructureViewBuilder;
 import com.intellij.openapi.fileEditor.FileEditorStateLevel;
 import com.intellij.openapi.util.Key;
-import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettingsExternalizable;
+import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettings;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditor;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditorState;
 
@@ -111,7 +111,7 @@ public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
 
     public void testTableCsvGenerationEnforceQuoting() throws FileNotFoundException {
         changeValue("new value", 2, 1);
-        CsvEditorSettingsExternalizable.getInstance().setQuotingEnforced(true);
+        CsvEditorSettings.getInstance().setQuotingEnforced(true);
         String generatedCsv = fileEditor.generateCsv(fileEditor.getDataHandler().getCurrentState());
 
         File resultFile = new File(this.getTestDataPath(), "TableEditorFileChangedQuoted.csv");

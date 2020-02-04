@@ -4,7 +4,7 @@ import com.intellij.ide.structureView.StructureViewTreeElement;
 import com.intellij.ide.util.treeView.smartTree.TreeElement;
 import com.intellij.navigation.ItemPresentation;
 import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase;
-import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettingsExternalizable;
+import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettings;
 
 public class CsvStructureViewTest extends LightPlatformCodeInsightFixtureTestCase{
 
@@ -26,7 +26,7 @@ public class CsvStructureViewTest extends LightPlatformCodeInsightFixtureTestCas
 
     public void testStructureViewWithoutFileEndLineBreakSupport() {
         myFixture.configureByFile("StructureViewTestData.csv");
-        CsvEditorSettingsExternalizable.getInstance().setFileEndLineBreak(false);
+        CsvEditorSettings.getInstance().setFileEndLineBreak(false);
         myFixture.testStructureView(structureViewComponent -> {
             StructureViewTreeElement root = structureViewComponent.getTreeModel().getRoot();
             doCheckTreeElement(root, CsvStructureViewElement.File.class, "FirstName, LastName\n" +
@@ -128,7 +128,7 @@ public class CsvStructureViewTest extends LightPlatformCodeInsightFixtureTestCas
 
     public void testStructureViewFileEndLineBreakSupport() {
         myFixture.configureByFile("StructureViewTestData.csv");
-        CsvEditorSettingsExternalizable.getInstance().setFileEndLineBreak(true);
+        CsvEditorSettings.getInstance().setFileEndLineBreak(true);
         myFixture.testStructureView(structureViewComponent -> {
             StructureViewTreeElement root = structureViewComponent.getTreeModel().getRoot();
             doCheckTreeElement(root, CsvStructureViewElement.File.class, "FirstName, LastName\n" +

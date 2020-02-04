@@ -10,7 +10,7 @@ import com.intellij.util.ArrayUtil;
 import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfo;
 import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfoMap;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
-import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettingsExternalizable;
+import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettings;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditor;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditorState;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.api.TableActions;
@@ -104,7 +104,7 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
         lnkTextEditor.setListener(this.tableEditorActions.openTextEditor, null);
         lnkPlugin.setListener(this.tableEditorActions.openCsvPluginLink, null);
 
-        panelInfo.setVisible(CsvEditorSettingsExternalizable.getInstance().showTableEditorInfoPanel());
+        panelInfo.setVisible(CsvEditorSettings.getInstance().showTableEditorInfoPanel());
         btnCloseInfoPanel.addActionListener(e -> {
             panelInfo.setVisible(false);
             getFileEditorState().setShowInfoPanel(false);
@@ -193,7 +193,7 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
             return values != null && values.length > 0 ? values[0] : new Object[columnCount];
         }
 
-        int columnOffset = CsvEditorSettingsExternalizable.getInstance().isZeroBasedColumnNumbering() ? 0 : 1;
+        int columnOffset = CsvEditorSettings.getInstance().isZeroBasedColumnNumbering() ? 0 : 1;
         Object[] identifiers = new Object[columnCount];
         for (int i = 0; i < columnCount; ++i) {
             identifiers[i] = i + columnOffset;
@@ -209,7 +209,7 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
         if (prevColumnCount != currentColumnCount) {
             columnWidths = ArrayUtil.realloc(columnWidths, currentColumnCount);
             if (prevColumnCount < currentColumnCount) {
-                Arrays.fill(columnWidths, prevColumnCount, currentColumnCount, CsvEditorSettingsExternalizable.getInstance().getTableDefaultColumnWidth());
+                Arrays.fill(columnWidths, prevColumnCount, currentColumnCount, CsvEditorSettings.getInstance().getTableDefaultColumnWidth());
             }
             getFileEditorState().setColumnWidths(columnWidths);
         }
@@ -369,7 +369,7 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
             for (int columnIndex = 0; columnIndex < columnInfoMap.getColumnInfos().size(); ++columnIndex) {
                 CsvColumnInfo<PsiElement> columnInfo = columnInfoMap.getColumnInfo(columnIndex);
                 List<PsiElement> elements = columnInfo.getElements();
-                if (columnIndex == 0 && CsvEditorSettingsExternalizable.getInstance().isFileEndLineBreak() &&
+                if (columnIndex == 0 && CsvEditorSettings.getInstance().isFileEndLineBreak() &&
                         lastColumnInfoMap.hasEmptyLastLine()) {
                     elements.remove(elements.size() - 1);
                 }
@@ -377,7 +377,7 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
                 tableModel.addColumn(String.format("Column %s (%s entries)", columnIndex + 1, elements.size()),
                         elements.stream()
                                 .skip(startRow)
-                                .map(psiElement -> psiElement == null ? "" : CsvHelper.unquoteCsvValue(psiElement.getText()))
+                                .map(psiElement -> psiElement == null ? "" : CsvHelper.unquoteCsvValue(psiElement.getText(), currentEscapeCharacter))
                                 .collect(Collectors.toList()).toArray(new String[0]));
             }
         }
@@ -448,7 +448,7 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
             for (int i = 0; i < columnInfoMap.getColumnInfos().size(); ++i) {
                 CsvColumnInfo<PsiElement> columnInfo = columnInfoMap.getColumnInfo(i);
                 PsiElement psiElement = columnInfo.getHeaderElement();
-                headerValues[i] = psiElement == null ? "" : CsvHelper.unquoteCsvValue(psiElement.getText());
+                headerValues[i] = psiElement == null ? "" : CsvHelper.unquoteCsvValue(psiElement.getText(), currentEscapeCharacter);
             }
         }
         return headerValues;

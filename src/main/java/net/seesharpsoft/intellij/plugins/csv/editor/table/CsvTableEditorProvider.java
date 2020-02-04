@@ -9,7 +9,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.SingleRootFileViewProvider;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
-import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettingsExternalizable;
+import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettings;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.swing.CsvTableEditorSwing;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
@@ -25,20 +25,20 @@ public class CsvTableEditorProvider implements AsyncFileEditorProvider, DumbAwar
 
     @Override
     public FileEditorPolicy getPolicy() {
-        switch (CsvEditorSettingsExternalizable.getInstance().getEditorPrio()) {
+        switch (CsvEditorSettings.getInstance().getEditorPrio()) {
             case TEXT_FIRST:
             case TEXT_ONLY:
                 return FileEditorPolicy.PLACE_AFTER_DEFAULT_EDITOR;
             case TABLE_FIRST:
                 return FileEditorPolicy.HIDE_DEFAULT_EDITOR;
             default:
-                throw new IllegalArgumentException("unhandled EditorPrio: " + CsvEditorSettingsExternalizable.getInstance().getEditorPrio());
+                throw new IllegalArgumentException("unhandled EditorPrio: " + CsvEditorSettings.getInstance().getEditorPrio());
         }
     }
 
     @Override
     public boolean accept(@NotNull Project project, @NotNull VirtualFile file) {
-        return CsvEditorSettingsExternalizable.getInstance().getEditorPrio() != CsvEditorSettingsExternalizable.EditorPrio.TEXT_ONLY &&
+        return CsvEditorSettings.getInstance().getEditorPrio() != CsvEditorSettings.EditorPrio.TEXT_ONLY &&
                 CsvHelper.isCsvFile(project, file) &&
                 !SingleRootFileViewProvider.isTooLargeForIntelligence(file);
     }

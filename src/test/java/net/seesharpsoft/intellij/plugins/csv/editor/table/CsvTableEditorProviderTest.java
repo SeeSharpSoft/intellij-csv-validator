@@ -6,7 +6,7 @@ import com.intellij.openapi.fileEditor.FileEditorProvider;
 import com.intellij.openapi.fileEditor.FileEditorState;
 import com.intellij.openapi.fileEditor.ex.FileEditorProviderManager;
 import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase;
-import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettingsExternalizable;
+import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettings;
 import org.jdom.Element;
 
 import java.util.Objects;
@@ -21,7 +21,7 @@ public class CsvTableEditorProviderTest extends LightPlatformCodeInsightFixtureT
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        CsvEditorSettingsExternalizable.getInstance().loadState(new CsvEditorSettingsExternalizable.OptionSet());
+        CsvEditorSettings.getInstance().loadState(new CsvEditorSettings.OptionSet());
         myFixture.configureByFiles("AnyFile.csv");
     }
 
@@ -35,12 +35,12 @@ public class CsvTableEditorProviderTest extends LightPlatformCodeInsightFixtureT
         assertEquals(FileEditorPolicy.PLACE_AFTER_DEFAULT_EDITOR, fileEditorProvider.getPolicy());
         assertEquals(true, fileEditorProvider.accept(getProject(), myFixture.getFile().getVirtualFile()));
 
-        CsvEditorSettingsExternalizable csvEditorSettingsExternalizable = CsvEditorSettingsExternalizable.getInstance();
-        csvEditorSettingsExternalizable.setEditorPrio(CsvEditorSettingsExternalizable.EditorPrio.TEXT_ONLY);
+        CsvEditorSettings csvEditorSettings = CsvEditorSettings.getInstance();
+        csvEditorSettings.setEditorPrio(CsvEditorSettings.EditorPrio.TEXT_ONLY);
         assertEquals(FileEditorPolicy.PLACE_AFTER_DEFAULT_EDITOR, fileEditorProvider.getPolicy());
         assertEquals(false, fileEditorProvider.accept(getProject(), myFixture.getFile().getVirtualFile()));
 
-        csvEditorSettingsExternalizable.setEditorPrio(CsvEditorSettingsExternalizable.EditorPrio.TABLE_FIRST);
+        csvEditorSettings.setEditorPrio(CsvEditorSettings.EditorPrio.TABLE_FIRST);
         assertEquals(FileEditorPolicy.HIDE_DEFAULT_EDITOR, fileEditorProvider.getPolicy());
         assertEquals(true, fileEditorProvider.accept(getProject(), myFixture.getFile().getVirtualFile()));
     }
