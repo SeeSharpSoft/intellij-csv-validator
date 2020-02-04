@@ -16,7 +16,7 @@
 
   tokens=[
     TEXT='regexp:[^ ,;|\t\r\n"\\]+'
-    ESCAPED_TEXT='regexp:([,;|\t\r\n\\]|""|\\")+'
+    ESCAPED_TEXT='regexp:[,;|\t\r\n\\]|""|\\"'
     COMMA='regexp:[,;|\t]'
     QUOTE='"'
     CRLF='regexp:\n'

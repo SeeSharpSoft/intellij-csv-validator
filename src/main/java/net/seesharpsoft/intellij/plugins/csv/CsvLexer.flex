@@ -34,7 +34,7 @@ import java.util.regex.Pattern;
 %eof}
 
 TEXT=[^ ,;|\t\r\n\"\\]+
-ESCAPED_TEXT=([,;|\t\r\n\\]|\"\"|\\\")+
+ESCAPED_TEXT=[,;|\t\r\n\\]|\"\"|\\\"
 QUOTE=\"
 COMMA=[,;|\t]
 EOL=\n
