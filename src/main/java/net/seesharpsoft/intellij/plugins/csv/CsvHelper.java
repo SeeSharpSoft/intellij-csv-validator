@@ -28,6 +28,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 
 public final class CsvHelper {
 
@@ -189,7 +190,7 @@ public final class CsvHelper {
         if (result.length() > 1 && result.startsWith("\"") && result.endsWith("\"")) {
             result = result.substring(1, result.length() - 1);
         }
-        result = result.replaceAll("(?:\")\"", "\"");
+        result = result.replaceAll("(?:" + Pattern.quote(escapeCharacter.getCharacter()) + ")\"", "\"");
         return result;
     }
 
