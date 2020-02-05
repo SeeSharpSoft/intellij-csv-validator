@@ -1,16 +1,12 @@
 package net.seesharpsoft.intellij.plugins.csv.actions;
 
-import com.intellij.lang.Language;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.actionSystem.ToggleAction;
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.psi.PsiFile;
-import com.intellij.util.FileContentUtil;
-import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
-import net.seesharpsoft.intellij.plugins.csv.CsvSeparatorHolder;
+import com.intellij.util.FileContentUtilCore;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvFileAttributes;
 import org.jetbrains.annotations.NotNull;
 
@@ -35,7 +31,7 @@ public class CsvDefaultEscapeCharacterAction extends ToggleAction {
             return;
         }
         CsvFileAttributes.getInstance(psiFile.getProject()).resetEscapeSeparator(psiFile);
-        FileContentUtil.reparseFiles(psiFile.getVirtualFile());
+        FileContentUtilCore.reparseFiles(psiFile.getVirtualFile());
 
         FileEditor fileEditor = anActionEvent.getData(PlatformDataKeys.FILE_EDITOR);
         if (fileEditor != null) {

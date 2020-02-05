@@ -113,9 +113,8 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
 
         public OptionSet() {
             EditorSettingsExternalizable editorSettingsExternalizable = EditorSettingsExternalizable.getInstance();
-            editorSettingsExternalizable = editorSettingsExternalizable == null ? new EditorSettingsExternalizable() : editorSettingsExternalizable;
-            CARET_ROW_SHOWN = editorSettingsExternalizable.isCaretRowShown();
-            USE_SOFT_WRAP = editorSettingsExternalizable.isUseSoftWraps();
+            CARET_ROW_SHOWN = editorSettingsExternalizable == null ? true : editorSettingsExternalizable.isCaretRowShown();
+            USE_SOFT_WRAP = editorSettingsExternalizable == null ? false : editorSettingsExternalizable.isUseSoftWraps();
             COLUMN_HIGHTLIGHTING = true;
             HIGHTLIGHT_TAB_SEPARATOR = true;
             SHOW_INFO_BALLOON = true;

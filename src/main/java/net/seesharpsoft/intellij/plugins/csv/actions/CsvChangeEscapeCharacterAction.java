@@ -6,7 +6,7 @@ import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.actionSystem.ToggleAction;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.psi.PsiFile;
-import com.intellij.util.FileContentUtil;
+import com.intellij.util.FileContentUtilCore;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvFileAttributes;
 import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettings;
 import org.jetbrains.annotations.NotNull;
@@ -36,7 +36,7 @@ public class CsvChangeEscapeCharacterAction extends ToggleAction {
             return;
         }
         CsvFileAttributes.getInstance(psiFile.getProject()).setEscapeCharacter(psiFile, this.myEscapeCharacter);
-        FileContentUtil.reparseFiles(psiFile.getVirtualFile());
+        FileContentUtilCore.reparseFiles(psiFile.getVirtualFile());
 
         FileEditor fileEditor = anActionEvent.getData(PlatformDataKeys.FILE_EDITOR);
         if (fileEditor != null) {
