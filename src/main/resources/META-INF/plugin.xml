@@ -9,7 +9,8 @@
 
         <p>Lightweight plugin for editing CSV/TSV/PSV files with a flexible table editor, syntax validation, structure highlighting, customizable coloring, new intentions and helpful inspections.</p>
         <br><hr/><br>
-        <b>Features:</b><br>
+        <img width="600" height="297" src="https://raw.githubusercontent.com/SeeSharpSoft/intellij-csv-validator/master/docs/example.png" /><br><br>
+        <p><b>Features:</b><br>
         <ul>
             <li>support for CSV/TSV/PSV file extensions</li>
             <li>customizable table editor</li>
@@ -23,10 +24,13 @@
             <li>balloon help & spell checker</li>
             <li>structure view (header-entry layout)</li>
             <li>support for ',', ';', '|' or '&#8633;' as value separator</li>
+            <li>support for '"' or '\' as escape character</li>
             <li>highlight of active column values</li>
             <li>tab (&#8633;) separator highlighting</li>
         </ul>
+        </p>
 
+        <p>
         <b>TSV/PSV file support:</b> <em>TSV/PSV files are recognized as such but treated as a variant of CSV files, the same syntax highlighting and code style settings are applied.</em>
         <br><br>
         <b>Code formatting:</b> <em>Default code formatting is 'Tabularize'. Can be changed in Settings -> Editor -> Code Style -> CSV</em>
@@ -35,19 +39,19 @@
         <br><br><br>
         <em>Thanks to @royqh1979, @egoisticalgoat, @sabi0, @ptahchiev, @ghost, @MarkJeronimus, <a href="http://finevisuals.de" target="_blank">FineVisuals</a> and others for supporting me and the project!</em>
         <br><br><br>
+        </p>
 
         <hr /><br>
+        <p>
         <span style="color: #555555">
             <b>IntelliJ IDEA Ultimate/PhpStorm/DataGrip/etc.:</b> The plugin is fully compatible with the <em>'Edit as Table...'</em> functionality.<br><br>
         </span>
+        </p>
     ]]></description>
 
     <change-notes><![CDATA[
         <pre style="font-family: sans-serif">
-FIX: vertical scrolling within table editor #164
-FIX: horizontal scrolling within table editor #169
-
-NOTE: IDE versions prior to 2017.3.* are no longer supported!
+NEW: customizable escape character #159
       </pre>
     ]]>
     </change-notes>

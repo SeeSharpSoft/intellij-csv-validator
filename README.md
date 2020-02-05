@@ -299,15 +299,15 @@ Annasusanna,Amsterdam,         1
 
 ### Actions
 
-#### File specific value separator
+#### File specific value separator & escape character
 
 ![Context menu](./docs/contextmenu.png)
 
-The action to switch the value separator used for CSV syntax validation of a specific file is part of its editors context menu.
+The action to switch the value separator (or escape character) - *which is used for CSV syntax validation of a specific file* - is part of its editors context menu.
 
 
 This action defines how the parser/validator/highlighter/etc. behaves. It does intentionally not change the file content.
-To be more precise: It **does not replace** previous separator characters by new ones or adjust the escaped texts.
+To be more precise: It **does not replace** previous separator/escape characters by new ones or adjust the escaped texts.
 
 #### Adjust column widths (table editor only)
 
