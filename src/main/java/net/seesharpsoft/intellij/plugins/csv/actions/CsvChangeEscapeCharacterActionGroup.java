@@ -8,7 +8,7 @@ import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.psi.PsiFile;
 import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvFileAttributes;
-import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettings;
+import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

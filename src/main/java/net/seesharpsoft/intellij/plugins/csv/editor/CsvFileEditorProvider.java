@@ -8,6 +8,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.SingleRootFileViewProvider;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
+import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
 

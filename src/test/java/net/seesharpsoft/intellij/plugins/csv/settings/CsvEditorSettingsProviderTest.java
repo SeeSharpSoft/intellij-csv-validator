@@ -1,7 +1,8 @@
-package net.seesharpsoft.intellij.plugins.csv.editor;
+package net.seesharpsoft.intellij.plugins.csv.settings;
 
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase;
+import net.seesharpsoft.intellij.plugins.csv.components.CsvFileAttributes;
 
 import java.awt.*;
 
@@ -16,6 +17,12 @@ public class CsvEditorSettingsProviderTest extends LightPlatformCodeInsightFixtu
     protected void setUp() throws Exception {
         super.setUp();
         CsvEditorSettings.getInstance().loadState(new CsvEditorSettings.OptionSet());
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        CsvEditorSettings.getInstance().loadState(new CsvEditorSettings.OptionSet());
+        super.tearDown();
     }
 
     public void testId() {

@@ -2,7 +2,7 @@ package net.seesharpsoft.intellij.plugins.csv.components;
 
 import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
-import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettings;
+import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 
 public class CsvFileAttributesTest extends LightPlatformCodeInsightFixtureTestCase {
     @Override

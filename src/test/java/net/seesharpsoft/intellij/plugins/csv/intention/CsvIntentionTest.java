@@ -2,7 +2,7 @@ package net.seesharpsoft.intellij.plugins.csv.intention;
 
 import com.intellij.codeInsight.intention.IntentionAction;
 import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase;
-import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettings;
+import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 
 public class CsvIntentionTest extends LightPlatformCodeInsightFixtureTestCase {
 

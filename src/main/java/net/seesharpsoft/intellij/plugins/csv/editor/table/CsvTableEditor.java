@@ -23,11 +23,10 @@ import com.intellij.util.ui.UIUtil;
 import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfo;
 import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfoMap;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
-import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettings;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.api.TableActions;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.api.TableDataHandler;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvFile;
-import net.seesharpsoft.intellij.plugins.csv.settings.CsvCodeStyleSettings;
+import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -52,7 +51,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
 
     protected Document document;
     protected PsiFile psiFile;
-    protected String currentSeparator;
+    protected CsvEditorSettings.ValueSeparator currentSeparator;
     protected CsvEditorSettings.EscapeCharacter currentEscapeCharacter;
 
     private Object[][] initialState = null;
@@ -164,7 +163,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
                 Object value = data[row][column];
                 result.append(sanitizeFieldValue(value));
                 if (column < data[row].length - 1) {
-                    result.append(this.currentSeparator);
+                    result.append(this.currentSeparator.getCharacter());
                 }
             }
             if (row < data.length - 1 ||
@@ -312,7 +311,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
             this.document = FileDocumentManager.getInstance().getDocument(this.file);
             PsiDocumentManager documentManager = PsiDocumentManager.getInstance(project);
             this.psiFile = documentManager.getPsiFile(this.document);
-            this.currentSeparator = CsvCodeStyleSettings.getCurrentSeparator(this.getProject(), this.getFile());
+            this.currentSeparator = CsvHelper.getCurrentValueSeparator(this.psiFile);
             this.currentEscapeCharacter = CsvHelper.getCurrentEscapeCharacter(this.psiFile);
         }
         return this.psiFile instanceof CsvFile ? (CsvFile) psiFile : null;

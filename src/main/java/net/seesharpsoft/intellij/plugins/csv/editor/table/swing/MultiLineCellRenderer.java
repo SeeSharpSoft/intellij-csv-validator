@@ -7,7 +7,7 @@ import com.intellij.openapi.editor.markup.TextAttributes;
 import com.intellij.openapi.util.UserDataHolder;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.util.ui.UIUtil;
-import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettings;
+import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvColorSettings;
 import org.jetbrains.annotations.NotNull;
 

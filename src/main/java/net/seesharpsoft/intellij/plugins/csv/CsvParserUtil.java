@@ -3,9 +3,7 @@ package net.seesharpsoft.intellij.plugins.csv;
 import com.intellij.lang.PsiBuilder;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.impl.source.resolve.FileContextUtil;
-import net.seesharpsoft.intellij.plugins.csv.components.CsvFileAttributes;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
-import net.seesharpsoft.intellij.plugins.csv.settings.CsvCodeStyleSettings;
 
 import java.util.regex.Pattern;
 
@@ -23,9 +21,7 @@ public final class CsvParserUtil {
             if (psiFile == null) {
                 throw new UnsupportedOperationException("parser requires containing file");
             }
-            return builder.getTokenText().equals(
-                    CsvCodeStyleSettings.getCurrentSeparator(psiFile)
-            );
+            return CsvHelper.getCurrentValueSeparator(psiFile).isValueSeparator(builder.getTokenText());
         }
         return false;
     }
@@ -37,7 +33,7 @@ public final class CsvParserUtil {
                 throw new UnsupportedOperationException("parser requires containing file");
             }
             String tokenText = builder.getTokenText();
-            return CsvFileAttributes.getInstance(psiFile.getProject()).getEscapeCharacter(psiFile).isEscapedQuote(tokenText) ||
+            return CsvHelper.getCurrentEscapeCharacter(psiFile).isEscapedQuote(tokenText) ||
                     ESCAPE_TEXT_PATTERN.matcher(tokenText).matches();
         }
         return false;

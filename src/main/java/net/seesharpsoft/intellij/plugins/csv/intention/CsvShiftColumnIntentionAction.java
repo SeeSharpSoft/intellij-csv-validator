@@ -8,7 +8,7 @@ import com.intellij.psi.PsiElement;
 import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfo;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvFile;
-import net.seesharpsoft.intellij.plugins.csv.settings.CsvCodeStyleSettings;
+import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -25,12 +25,12 @@ public abstract class CsvShiftColumnIntentionAction extends CsvIntentionAction {
                                                         CsvColumnInfo<PsiElement> rightColumnInfo) {
         Document document = PsiDocumentManager.getInstance(project).getDocument(csvFile);
         document.setText(
-                changeLeftAndRightColumnOrder(document.getText(), CsvCodeStyleSettings.getCurrentSeparator(project, csvFile), leftColumnInfo, rightColumnInfo)
+                changeLeftAndRightColumnOrder(document.getText(), CsvHelper.getCurrentValueSeparator(csvFile), leftColumnInfo, rightColumnInfo)
         );
     }
 
     @NotNull
-    protected static String changeLeftAndRightColumnOrder(String text, String separator, CsvColumnInfo<PsiElement> leftColumnInfo, CsvColumnInfo<PsiElement> rightColumnInfo) {
+    protected static String changeLeftAndRightColumnOrder(String text, CsvEditorSettings.ValueSeparator separator, CsvColumnInfo<PsiElement> leftColumnInfo, CsvColumnInfo<PsiElement> rightColumnInfo) {
         List<PsiElement> rightElements = rightColumnInfo.getElements();
         List<PsiElement> leftElements = leftColumnInfo.getElements();
         int lastIndex = 0;
@@ -52,7 +52,7 @@ public abstract class CsvShiftColumnIntentionAction extends CsvIntentionAction {
 
             newText.append(text, lastIndex, leftSeparator.getEndOffset())
                     .append(text, middleSeparator.getEndOffset(), rightSeparator.getStartOffset())
-                    .append(separator)
+                    .append(separator.getCharacter())
                     .append(text, leftSeparator.getEndOffset(), middleSeparator.getStartOffset());
 
             lastIndex = rightSeparator.getStartOffset();

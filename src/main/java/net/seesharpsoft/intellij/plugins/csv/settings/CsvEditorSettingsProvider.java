@@ -1,4 +1,4 @@
-package net.seesharpsoft.intellij.plugins.csv.editor;
+package net.seesharpsoft.intellij.plugins.csv.settings;
 
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.options.SearchableConfigurable;

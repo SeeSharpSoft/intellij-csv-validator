@@ -18,7 +18,7 @@ import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
 import net.seesharpsoft.intellij.lang.FileParserDefinition;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvFileAttributes;
-import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettings;
+import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvField;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvFile;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvRecord;
@@ -152,6 +152,14 @@ public final class CsvHelper {
         return separator == null ? field.getContainingFile().getTextLength() : separator.getTextOffset();
     }
 
+    public static CsvEditorSettings.ValueSeparator getCurrentValueSeparator(CsvFile csvFile) {
+        return getCurrentValueSeparator(csvFile.getContainingFile());
+    }
+
+    public static CsvEditorSettings.ValueSeparator getCurrentValueSeparator(PsiFile psiFile) {
+        return CsvFileAttributes.getInstance(psiFile.getProject()).getFileSeparator(psiFile);
+    }
+
     public static CsvEditorSettings.EscapeCharacter getCurrentEscapeCharacter(CsvFile csvFile) {
         return getCurrentEscapeCharacter(csvFile.getContainingFile());
     }
@@ -194,15 +202,19 @@ public final class CsvHelper {
         return result;
     }
 
-    private static boolean isQuotingRequired(String content, String separator) {
-        return content != null && (content.contains(separator) || content.contains("\"") || content.contains("\n") || content.startsWith(" ") || content.endsWith(" "));
+    private static boolean isQuotingRequired(String content, CsvEditorSettings.ValueSeparator valueSeparator) {
+        return content != null &&
+                (content.contains(valueSeparator.getCharacter()) || content.contains("\"") || content.contains("\n") || content.startsWith(" ") || content.endsWith(" "));
     }
 
-    public static String quoteCsvField(String content, CsvEditorSettings.EscapeCharacter escapeCharacter, String separator, boolean quotingEnforced) {
+    public static String quoteCsvField(String content,
+                                       CsvEditorSettings.EscapeCharacter escapeCharacter,
+                                       CsvEditorSettings.ValueSeparator valueSeparator,
+                                       boolean quotingEnforced) {
         if (content == null) {
             return "";
         }
-        if (quotingEnforced || isQuotingRequired(content, separator)) {
+        if (quotingEnforced || isQuotingRequired(content, valueSeparator)) {
             String result = content.replaceAll("\"", escapeCharacter.getCharacter() + "\"");
             return "\"" + result + "\"";
         }

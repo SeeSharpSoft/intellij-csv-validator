@@ -8,7 +8,7 @@ import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.psi.PsiFile;
 import com.intellij.util.FileContentUtilCore;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvFileAttributes;
-import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettings;
+import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import org.jetbrains.annotations.NotNull;
 
 public class CsvChangeEscapeCharacterAction extends ToggleAction {

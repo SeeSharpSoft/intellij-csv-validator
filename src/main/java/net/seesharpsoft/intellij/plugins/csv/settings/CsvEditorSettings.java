@@ -1,4 +1,4 @@
-package net.seesharpsoft.intellij.plugins.csv.editor;
+package net.seesharpsoft.intellij.plugins.csv.settings;
 
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.ServiceManager;
@@ -109,7 +109,8 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
         public boolean SHOW_TABLE_EDITOR_INFO_PANEL;
         public boolean QUOTING_ENFORCED;
         public boolean FILE_END_LINE_BREAK;
-        public EscapeCharacter DEFAULT_ESCAPE_CHARACTER = EscapeCharacter.QUOTE;
+        public EscapeCharacter DEFAULT_ESCAPE_CHARACTER = ESCAPE_CHARACTER_DEFAULT;
+        public ValueSeparator DEFAULT_VALUE_SEPARATOR = VALUE_SEPARATOR_DEFAULT;
 
         public OptionSet() {
             EditorSettingsExternalizable editorSettingsExternalizable = EditorSettingsExternalizable.getInstance();
@@ -305,5 +306,13 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
 
     public EscapeCharacter getDefaultEscapeCharacter() {
         return getState().DEFAULT_ESCAPE_CHARACTER;
+    }
+
+    public void setDefaultValueSeparator(ValueSeparator defaultValueSeparator) {
+        getState().DEFAULT_VALUE_SEPARATOR = defaultValueSeparator;
+    }
+
+    public ValueSeparator getDefaultValueSeparator() {
+        return getState().DEFAULT_VALUE_SEPARATOR;
     }
 }

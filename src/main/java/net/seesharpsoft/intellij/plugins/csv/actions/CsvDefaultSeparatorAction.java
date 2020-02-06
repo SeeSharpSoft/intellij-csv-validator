@@ -1,6 +1,5 @@
 package net.seesharpsoft.intellij.plugins.csv.actions;
 
-import com.intellij.lang.Language;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
@@ -9,8 +8,6 @@ import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.psi.PsiFile;
 import com.intellij.util.FileContentUtilCore;
-import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
-import net.seesharpsoft.intellij.plugins.csv.CsvSeparatorHolder;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvFileAttributes;
 import org.jetbrains.annotations.NotNull;
 
@@ -35,12 +32,8 @@ public class CsvDefaultSeparatorAction extends ToggleAction {
         if (psiFile == null) {
             return;
         }
-        Language language = psiFile.getLanguage();
-        if (!language.isKindOf(CsvLanguage.INSTANCE) || language instanceof CsvSeparatorHolder) {
-            return;
-        }
-        CsvFileAttributes csvFileAttributes = ServiceManager.getService(psiFile.getProject(), CsvFileAttributes.class);
-        csvFileAttributes.removeFileSeparator(psiFile);
+
+        CsvFileAttributes.getInstance(psiFile.getProject()).resetValueSeparator(psiFile);
         FileContentUtilCore.reparseFiles(psiFile.getVirtualFile());
 
         FileEditor fileEditor = anActionEvent.getData(PlatformDataKeys.FILE_EDITOR);

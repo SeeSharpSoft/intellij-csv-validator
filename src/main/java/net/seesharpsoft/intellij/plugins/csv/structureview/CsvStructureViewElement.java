@@ -12,7 +12,7 @@ import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfo;
 import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfoMap;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.CsvIconProvider;
-import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettings;
+import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
