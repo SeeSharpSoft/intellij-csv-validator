@@ -15,8 +15,8 @@
   tokenTypeClass="net.seesharpsoft.intellij.plugins.csv.psi.CsvTokenType"
 
   tokens=[
-    TEXT='regexp:[^ ,;|\t\r\n"]+'
-    ESCAPED_TEXT='regexp:([,;|\t\r\n]|"")+'
+    TEXT='regexp:[^ ,;|\t\r\n"\\]+'
+    ESCAPED_TEXT='regexp:[,;|\t\r\n\\]|""|\\"'
     COMMA='regexp:[,;|\t]'
     QUOTE='"'
     CRLF='regexp:\n'
@@ -29,6 +29,6 @@ record ::= field ( << separator >> COMMA field)*
 
 field ::= (escaped | nonEscaped)
 
-private escaped ::= QUOTE ( TEXT | ESCAPED_TEXT)* QUOTE
+private escaped ::= QUOTE ( TEXT | << escapeCharacter >> ESCAPED_TEXT)* QUOTE
 
 private nonEscaped ::= TEXT*

@@ -1,6 +1,5 @@
 package net.seesharpsoft.intellij.plugins.csv.editor;
 
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.components.State;
@@ -12,19 +11,79 @@ import org.jetbrains.annotations.NotNull;
 import java.awt.*;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.util.regex.Pattern;
 
 @State(
         name = "CsvEditorSettings",
         storages = {@Storage(CsvStorageHelper.CSV_STATE_STORAGE_FILE)}
 )
 @SuppressWarnings("all")
-public class CsvEditorSettingsExternalizable implements PersistentStateComponent<CsvEditorSettingsExternalizable.OptionSet> {
+public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSettings.OptionSet> {
 
     public static final int TABLE_EDITOR_ROW_HEIGHT_MIN = 0;
     public static final int TABLE_EDITOR_ROW_HEIGHT_MAX = 10;
     public static final int TABLE_EDITOR_ROW_HEIGHT_DEFAULT = 3;
     public static final int TABLE_AUTO_MAX_COLUMN_WIDTH_DEFAULT = 300;
     public static final int TABLE_DEFAULT_COLUMN_WIDTH_DEFAULT = 100;
+
+    public static final EscapeCharacter ESCAPE_CHARACTER_DEFAULT = EscapeCharacter.QUOTE;
+    public static final ValueSeparator VALUE_SEPARATOR_DEFAULT = ValueSeparator.COMMA;
+
+    public enum ValueSeparator {
+        COMMA(",", "Comma (,)"),
+        SEMICOLON(";", "Semicolon (;)"),
+        PIPE("|", "Pipe (|)"),
+        TAB("\t", "Tab (↹)");
+
+        private final String myCharacter;
+        private final String myDisplay;
+        private final Pattern myPattern;
+
+        private ValueSeparator(String character, String display) {
+            myCharacter = character;
+            myDisplay = display;
+            myPattern = Pattern.compile(Pattern.quote(myCharacter));
+        }
+
+        public String getCharacter() {
+            return myCharacter;
+        }
+
+        public String getDisplay() {
+            return myDisplay;
+        }
+
+        public boolean isValueSeparator(String text) {
+            return myPattern.matcher(text).matches();
+        }
+    }
+
+    public enum EscapeCharacter {
+        QUOTE("\"", "Double Quote (\")"),
+        BACKSLASH("\\", "Backslash (\\)");
+
+        private final String myCharacter;
+        private final String myDisplay;
+        private final Pattern myPattern;
+
+        private EscapeCharacter(String character, String display) {
+            myCharacter = character;
+            myDisplay = display;
+            myPattern = Pattern.compile(Pattern.quote(myCharacter + "\""));
+        }
+
+        public String getCharacter() {
+            return myCharacter;
+        }
+
+        public String getDisplay() {
+            return myDisplay;
+        }
+
+        public boolean isEscapedQuote(String text) {
+            return myPattern.matcher(text).matches();
+        }
+    }
 
     public enum EditorPrio {
         TEXT_FIRST,
@@ -50,11 +109,12 @@ public class CsvEditorSettingsExternalizable implements PersistentStateComponent
         public boolean SHOW_TABLE_EDITOR_INFO_PANEL;
         public boolean QUOTING_ENFORCED;
         public boolean FILE_END_LINE_BREAK;
+        public EscapeCharacter DEFAULT_ESCAPE_CHARACTER = EscapeCharacter.QUOTE;
 
         public OptionSet() {
             EditorSettingsExternalizable editorSettingsExternalizable = EditorSettingsExternalizable.getInstance();
-            CARET_ROW_SHOWN = editorSettingsExternalizable.isCaretRowShown();
-            USE_SOFT_WRAP = editorSettingsExternalizable.isUseSoftWraps();
+            CARET_ROW_SHOWN = editorSettingsExternalizable == null ? true : editorSettingsExternalizable.isCaretRowShown();
+            USE_SOFT_WRAP = editorSettingsExternalizable == null ? false : editorSettingsExternalizable.isUseSoftWraps();
             COLUMN_HIGHTLIGHTING = true;
             HIGHTLIGHT_TAB_SEPARATOR = true;
             SHOW_INFO_BALLOON = true;
@@ -75,11 +135,12 @@ public class CsvEditorSettingsExternalizable implements PersistentStateComponent
     private OptionSet myOptions = new OptionSet();
     private final PropertyChangeSupport myPropertyChangeSupport = new PropertyChangeSupport(this);
 
-    public CsvEditorSettingsExternalizable() {
+    public CsvEditorSettings() {
     }
 
-    public static CsvEditorSettingsExternalizable getInstance() {
-        return ApplicationManager.getApplication().isDisposed() ? new CsvEditorSettingsExternalizable() : ServiceManager.getService(CsvEditorSettingsExternalizable.class);
+    public static CsvEditorSettings getInstance() {
+        CsvEditorSettings instance = ServiceManager.getService(CsvEditorSettings.class);
+        return instance == null ? new CsvEditorSettings() : instance;
     }
 
     public void addPropertyChangeListener(PropertyChangeListener listener) {
@@ -236,5 +297,13 @@ public class CsvEditorSettingsExternalizable implements PersistentStateComponent
 
     public void setTableAutoColumnWidthOnOpen(boolean tableAutoColumnWidthOnOpen) {
         getState().TABLE_AUTO_COLUMN_WIDTH_ON_OPEN = tableAutoColumnWidthOnOpen;
+    }
+
+    public void setDefaultEscapeCharacter(EscapeCharacter defaultEscapeCharacter) {
+        getState().DEFAULT_ESCAPE_CHARACTER = defaultEscapeCharacter;
+    }
+
+    public EscapeCharacter getDefaultEscapeCharacter() {
+        return getState().DEFAULT_ESCAPE_CHARACTER;
     }
 }

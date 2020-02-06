@@ -2,6 +2,7 @@ package net.seesharpsoft.intellij.plugins.csv.intention;
 
 import com.intellij.codeInsight.intention.IntentionAction;
 import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase;
+import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettings;
 
 public class CsvIntentionTest extends LightPlatformCodeInsightFixtureTestCase {
 
@@ -18,13 +19,25 @@ public class CsvIntentionTest extends LightPlatformCodeInsightFixtureTestCase {
         myFixture.launchAction(action);
         myFixture.checkResultByFile(testName + "/after.csv");
     }
-    
+
     public void testQuoteAllIntention() throws Throwable {
         doTestIntention("QuoteAll", "Quote All");
     }
 
+    public void testQuoteAllBackslashIntention() throws Throwable {
+        CsvEditorSettings.getInstance().setDefaultEscapeCharacter(CsvEditorSettings.EscapeCharacter.BACKSLASH);
+        doTestIntention("QuoteAllBackslash", "Quote All");
+        CsvEditorSettings.getInstance().setDefaultEscapeCharacter(CsvEditorSettings.ESCAPE_CHARACTER_DEFAULT);
+    }
+
     public void testUnquoteAllIntention() throws Throwable {
         doTestIntention("UnquoteAll", "Unquote All");
+    }
+
+    public void testUnquoteAllBackslashIntention() throws Throwable {
+        CsvEditorSettings.getInstance().setDefaultEscapeCharacter(CsvEditorSettings.EscapeCharacter.BACKSLASH);
+        doTestIntention("UnquoteAllBackslash", "Unquote All");
+        CsvEditorSettings.getInstance().setDefaultEscapeCharacter(CsvEditorSettings.ESCAPE_CHARACTER_DEFAULT);
     }
 
     public void testQuoteIntention() throws Throwable {

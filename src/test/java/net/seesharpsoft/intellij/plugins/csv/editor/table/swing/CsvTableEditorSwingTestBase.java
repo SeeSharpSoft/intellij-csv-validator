@@ -4,7 +4,7 @@ import com.intellij.testFramework.exceptionCases.AbstractExceptionCase;
 import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase;
 import com.intellij.util.ThrowableRunnable;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
-import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettingsExternalizable;
+import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettings;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -24,7 +24,7 @@ public abstract class CsvTableEditorSwingTestBase extends LightPlatformCodeInsig
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        initializeEditorSettings(CsvEditorSettingsExternalizable.getInstance());
+        initializeEditorSettings(CsvEditorSettings.getInstance());
         myFixture.configureByFiles(getTestFile());
 
         fileEditor = new CsvTableEditorSwing(this.getProject(), myFixture.getFile().getVirtualFile());
@@ -39,8 +39,8 @@ public abstract class CsvTableEditorSwingTestBase extends LightPlatformCodeInsig
         super.tearDown();
     }
 
-    protected void initializeEditorSettings(CsvEditorSettingsExternalizable instance) {
-        instance.loadState(new CsvEditorSettingsExternalizable.OptionSet());
+    protected void initializeEditorSettings(CsvEditorSettings instance) {
+        instance.loadState(new CsvEditorSettings.OptionSet());
         instance.setFileEndLineBreak(false);
         instance.setTableAutoColumnWidthOnOpen(false);
     }

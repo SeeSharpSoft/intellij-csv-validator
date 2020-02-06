@@ -2,7 +2,7 @@ package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.TextEditor;
-import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettingsExternalizable;
+import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettings;
 
 import javax.swing.table.TableColumn;
 import java.util.Enumeration;
@@ -183,7 +183,7 @@ public class CsvTableEditorActionsTest extends CsvTableEditorSwingTestBase {
 
     public void testAutoColumnWidthAction() {
         Enumeration<TableColumn> tableColumnEnumeration = fileEditor.getTable().getColumnModel().getColumns();
-        int expectedWidth = CsvEditorSettingsExternalizable.getInstance().getTableDefaultColumnWidth();
+        int expectedWidth = CsvEditorSettings.getInstance().getTableDefaultColumnWidth();
         while (tableColumnEnumeration.hasMoreElements()) {
             TableColumn tableColumn = tableColumnEnumeration.nextElement();
             assertEquals(expectedWidth, tableColumn.getWidth());
@@ -202,7 +202,7 @@ public class CsvTableEditorActionsTest extends CsvTableEditorSwingTestBase {
         fileEditor.tableEditorActions.resetColumnWidthAction.actionPerformed(null);
 
         Enumeration<TableColumn> tableColumnEnumeration = fileEditor.getTable().getColumnModel().getColumns();
-        int expectedWidth = CsvEditorSettingsExternalizable.getInstance().getTableDefaultColumnWidth();
+        int expectedWidth = CsvEditorSettings.getInstance().getTableDefaultColumnWidth();
         while (tableColumnEnumeration.hasMoreElements()) {
             TableColumn tableColumn = tableColumnEnumeration.nextElement();
             assertEquals(expectedWidth, tableColumn.getWidth());

@@ -8,7 +8,7 @@ import com.intellij.openapi.actionSystem.ToggleAction;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.psi.PsiFile;
-import com.intellij.util.FileContentUtil;
+import com.intellij.util.FileContentUtilCore;
 import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
 import net.seesharpsoft.intellij.plugins.csv.CsvSeparatorHolder;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvFileAttributes;
@@ -41,7 +41,7 @@ public class CsvDefaultSeparatorAction extends ToggleAction {
         }
         CsvFileAttributes csvFileAttributes = ServiceManager.getService(psiFile.getProject(), CsvFileAttributes.class);
         csvFileAttributes.removeFileSeparator(psiFile);
-        FileContentUtil.reparseFiles(psiFile.getVirtualFile());
+        FileContentUtilCore.reparseFiles(psiFile.getVirtualFile());
 
         FileEditor fileEditor = anActionEvent.getData(PlatformDataKeys.FILE_EDITOR);
         if (fileEditor != null) {

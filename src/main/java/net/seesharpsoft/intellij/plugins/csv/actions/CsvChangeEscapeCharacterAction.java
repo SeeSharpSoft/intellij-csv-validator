@@ -1,26 +1,22 @@
 package net.seesharpsoft.intellij.plugins.csv.actions;
 
-import com.intellij.lang.Language;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.actionSystem.ToggleAction;
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.psi.PsiFile;
 import com.intellij.util.FileContentUtilCore;
-import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
-import net.seesharpsoft.intellij.plugins.csv.CsvSeparatorHolder;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvFileAttributes;
-import net.seesharpsoft.intellij.plugins.csv.settings.CsvCodeStyleSettings;
+import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettings;
 import org.jetbrains.annotations.NotNull;
 
-public class CsvChangeSeparatorAction extends ToggleAction {
-    private String mySeparator;
+public class CsvChangeEscapeCharacterAction extends ToggleAction {
+    private CsvEditorSettings.EscapeCharacter myEscapeCharacter;
 
-    CsvChangeSeparatorAction(String separator, String mySeparatorTextArg) {
-        super(mySeparatorTextArg);
-        mySeparator = separator;
+    CsvChangeEscapeCharacterAction(CsvEditorSettings.EscapeCharacter escapeCharacter) {
+        super(escapeCharacter.getDisplay());
+        myEscapeCharacter = escapeCharacter;
     }
 
     @Override
@@ -29,8 +25,8 @@ public class CsvChangeSeparatorAction extends ToggleAction {
         if (psiFile == null) {
             return false;
         }
-        CsvFileAttributes csvFileAttributes = ServiceManager.getService(psiFile.getProject(), CsvFileAttributes.class);
-        return csvFileAttributes.getFileSeparator(psiFile) != null && CsvCodeStyleSettings.getCurrentSeparator(anActionEvent.getProject(), psiFile).equals(mySeparator);
+        CsvFileAttributes csvFileAttributes = CsvFileAttributes.getInstance(psiFile.getProject());
+        return csvFileAttributes.hasEscapeCharacterAttribute(psiFile) && csvFileAttributes.getEscapeCharacter(psiFile).equals(myEscapeCharacter);
     }
 
     @Override
@@ -39,12 +35,7 @@ public class CsvChangeSeparatorAction extends ToggleAction {
         if (psiFile == null) {
             return;
         }
-        Language language = psiFile.getLanguage();
-        if (!language.isKindOf(CsvLanguage.INSTANCE) || language instanceof CsvSeparatorHolder) {
-            return;
-        }
-        CsvFileAttributes csvFileAttributes = ServiceManager.getService(psiFile.getProject(), CsvFileAttributes.class);
-        csvFileAttributes.setFileSeparator(psiFile, this.mySeparator);
+        CsvFileAttributes.getInstance(psiFile.getProject()).setEscapeCharacter(psiFile, this.myEscapeCharacter);
         FileContentUtilCore.reparseFiles(psiFile.getVirtualFile());
 
         FileEditor fileEditor = anActionEvent.getData(PlatformDataKeys.FILE_EDITOR);

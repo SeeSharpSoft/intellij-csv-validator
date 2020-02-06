@@ -2,9 +2,11 @@ package net.seesharpsoft.intellij.plugins.csv;
 
 import com.intellij.lexer.FlexLexer;
 import com.intellij.psi.tree.IElementType;
-import com.intellij.openapi.project.Project;
+import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettings;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
 import com.intellij.psi.TokenType;
+
+import java.util.regex.Pattern;
 
 %%
 
@@ -14,21 +16,25 @@ import com.intellij.psi.TokenType;
 %function advance
 %type IElementType
 %{
-  private String currentSeparator;
+    private String currentSeparator;
+    private CsvEditorSettings.EscapeCharacter myEscapeCharacter;
 
-  /**
-   * Provide constructor that supports a Project as parameter.
-   */
-  CsvLexer(java.io.Reader in, String separator) {
-    this(in);
-    this.currentSeparator = separator;
-  }
+    private static final Pattern ESCAPE_TEXT_PATTERN = Pattern.compile("[,;|\\t\\r\\n]");
+
+    /**
+     * Provide constructor that supports a Project as parameter.
+     */
+    CsvLexer(java.io.Reader in, String separator, CsvEditorSettings.EscapeCharacter escapeCharacter) {
+      this(in);
+      this.currentSeparator = separator;
+      myEscapeCharacter = escapeCharacter;
+    }
 %}
 %eof{  return;
 %eof}
 
-TEXT=[^ ,;|\t\r\n\"]+
-ESCAPED_TEXT=([,;|\t\r\n]|\"\")+
+TEXT=[^ ,;|\t\r\n\"\\]+
+ESCAPED_TEXT=[,;|\t\r\n\\]|\"\"|\\\"
 QUOTE=\"
 COMMA=[,;|\t]
 EOL=\n
@@ -65,7 +71,13 @@ WHITE_SPACE=[ \f]+
 
 <ESCAPED_TEXT> {ESCAPED_TEXT}
 {
-    return CsvTypes.ESCAPED_TEXT;
+    String text = yytext().toString();
+    if (myEscapeCharacter.isEscapedQuote(text)
+        || ESCAPE_TEXT_PATTERN.matcher(text).matches()
+     ) {
+        return CsvTypes.ESCAPED_TEXT;
+    }
+    return TokenType.BAD_CHARACTER;
 }
 
 <YYINITIAL, AFTER_TEXT, UNESCAPED_TEXT> {COMMA}
