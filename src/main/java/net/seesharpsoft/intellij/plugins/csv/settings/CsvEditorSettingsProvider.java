@@ -55,7 +55,7 @@ public class CsvEditorSettingsProvider implements SearchableConfigurable {
 
     @Override
     public String getHelpTopic() {
-        return "Editor Options for CSV/TSV files";
+        return "Editor Options for CSV/TSV/PSV files";
     }
 
     @Nullable

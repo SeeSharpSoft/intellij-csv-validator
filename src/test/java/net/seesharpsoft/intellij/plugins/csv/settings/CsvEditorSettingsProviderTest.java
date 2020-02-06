@@ -2,7 +2,6 @@ package net.seesharpsoft.intellij.plugins.csv.settings;
 
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase;
-import net.seesharpsoft.intellij.plugins.csv.components.CsvFileAttributes;
 
 import java.awt.*;
 
@@ -36,7 +35,7 @@ public class CsvEditorSettingsProviderTest extends LightPlatformCodeInsightFixtu
     public void testDisplayName() {
         CsvEditorSettingsProvider editorSettingsPanel = new CsvEditorSettingsProvider();
 
-        assertEquals("CSV/TSV Editor", editorSettingsPanel.getDisplayName());
+        assertEquals("CSV/TSV/PSV", editorSettingsPanel.getDisplayName());
 
         editorSettingsPanel.disposeUIResources();
     }
@@ -44,7 +43,7 @@ public class CsvEditorSettingsProviderTest extends LightPlatformCodeInsightFixtu
     public void testHelpTopic() {
         CsvEditorSettingsProvider editorSettingsPanel = new CsvEditorSettingsProvider();
 
-        assertEquals("Editor Options for CSV/TSV files", editorSettingsPanel.getHelpTopic());
+        assertEquals("Editor Options for CSV/TSV/PSV files", editorSettingsPanel.getHelpTopic());
 
         editorSettingsPanel.disposeUIResources();
     }
