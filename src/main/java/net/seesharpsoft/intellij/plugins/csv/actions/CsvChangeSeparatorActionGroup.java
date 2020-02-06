@@ -9,7 +9,7 @@ import com.intellij.psi.PsiFile;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
 import net.seesharpsoft.intellij.plugins.csv.CsvSeparatorHolder;
-import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
+import net.seesharpsoft.intellij.plugins.csv.CsvValueSeparator;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,9 +18,9 @@ public class CsvChangeSeparatorActionGroup extends ActionGroup {
     private static final AnAction[] CSV_SEPARATOR_CHANGE_ACTIONS;
 
     static {
-        CSV_SEPARATOR_CHANGE_ACTIONS = new AnAction[CsvEditorSettings.ValueSeparator.values().length + 1];
+        CSV_SEPARATOR_CHANGE_ACTIONS = new AnAction[CsvValueSeparator.values().length + 1];
         for (int i = 0; i < CSV_SEPARATOR_CHANGE_ACTIONS.length - 1; ++i) {
-            CSV_SEPARATOR_CHANGE_ACTIONS[i] = new CsvChangeSeparatorAction(CsvEditorSettings.ValueSeparator.values()[i]);
+            CSV_SEPARATOR_CHANGE_ACTIONS[i] = new CsvChangeSeparatorAction(CsvValueSeparator.values()[i]);
         }
         CSV_SEPARATOR_CHANGE_ACTIONS[CSV_SEPARATOR_CHANGE_ACTIONS.length - 1] = new CsvDefaultSeparatorAction();
     }

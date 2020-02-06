@@ -1,6 +1,7 @@
 package net.seesharpsoft.intellij.plugins.csv.components;
 
 import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase;
+import net.seesharpsoft.intellij.plugins.csv.CsvEscapeCharacter;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 
@@ -33,9 +34,9 @@ public class CsvFileAttributesTest extends LightPlatformCodeInsightFixtureTestCa
         myFixture.configureByFiles("AnyFile.csv");
 
         CsvFileAttributes csvFileAttributes = CsvFileAttributes.getInstance(this.getProject());
-        csvFileAttributes.setEscapeCharacter(myFixture.getFile(), CsvEditorSettings.EscapeCharacter.BACKSLASH);
+        csvFileAttributes.setEscapeCharacter(myFixture.getFile(), CsvEscapeCharacter.BACKSLASH);
 
-        assertEquals(CsvEditorSettings.EscapeCharacter.BACKSLASH, csvFileAttributes.getEscapeCharacter(myFixture.getFile()));
+        assertEquals(CsvEscapeCharacter.BACKSLASH, csvFileAttributes.getEscapeCharacter(myFixture.getFile()));
     }
 
 }

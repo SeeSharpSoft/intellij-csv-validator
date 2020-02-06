@@ -11,14 +11,14 @@ import com.intellij.psi.PsiFile;
 import com.intellij.util.FileContentUtilCore;
 import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
 import net.seesharpsoft.intellij.plugins.csv.CsvSeparatorHolder;
+import net.seesharpsoft.intellij.plugins.csv.CsvValueSeparator;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvFileAttributes;
-import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import org.jetbrains.annotations.NotNull;
 
 public class CsvChangeSeparatorAction extends ToggleAction {
-    private CsvEditorSettings.ValueSeparator mySeparator;
+    private CsvValueSeparator mySeparator;
 
-    CsvChangeSeparatorAction(CsvEditorSettings.ValueSeparator separator) {
+    CsvChangeSeparatorAction(CsvValueSeparator separator) {
         super(separator.getDisplay());
         mySeparator = separator;
     }

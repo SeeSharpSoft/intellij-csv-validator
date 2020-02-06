@@ -7,14 +7,14 @@ import com.intellij.openapi.actionSystem.ToggleAction;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.psi.PsiFile;
 import com.intellij.util.FileContentUtilCore;
+import net.seesharpsoft.intellij.plugins.csv.CsvEscapeCharacter;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvFileAttributes;
-import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import org.jetbrains.annotations.NotNull;
 
 public class CsvChangeEscapeCharacterAction extends ToggleAction {
-    private CsvEditorSettings.EscapeCharacter myEscapeCharacter;
+    private CsvEscapeCharacter myEscapeCharacter;
 
-    CsvChangeEscapeCharacterAction(CsvEditorSettings.EscapeCharacter escapeCharacter) {
+    CsvChangeEscapeCharacterAction(CsvEscapeCharacter escapeCharacter) {
         super(escapeCharacter.getDisplay());
         myEscapeCharacter = escapeCharacter;
     }

@@ -1,10 +1,9 @@
 package net.seesharpsoft.intellij.plugins.csv;
 
 import com.intellij.psi.tree.IElementType;
-import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
-import com.intellij.lexer.FlexLexer;
 import com.intellij.psi.TokenType;
+import com.intellij.lexer.FlexLexer;
 
 import java.util.regex.Pattern;
 
@@ -16,15 +15,15 @@ import java.util.regex.Pattern;
 %function advance
 %type IElementType
 %{
-    private CsvEditorSettings.ValueSeparator myValueSeparator;
-    private CsvEditorSettings.EscapeCharacter myEscapeCharacter;
+    private CsvValueSeparator myValueSeparator;
+    private CsvEscapeCharacter myEscapeCharacter;
 
     private static final Pattern ESCAPE_TEXT_PATTERN = Pattern.compile("[,;|\\t\\r\\n]");
 
     /**
      * Provide constructor that supports a Project as parameter.
      */
-    CsvLexer(java.io.Reader in, CsvEditorSettings.ValueSeparator valueSeparator, CsvEditorSettings.EscapeCharacter escapeCharacter) {
+    CsvLexer(java.io.Reader in, CsvValueSeparator valueSeparator, CsvEscapeCharacter escapeCharacter) {
       this(in);
       myValueSeparator = valueSeparator;
       myEscapeCharacter = escapeCharacter;

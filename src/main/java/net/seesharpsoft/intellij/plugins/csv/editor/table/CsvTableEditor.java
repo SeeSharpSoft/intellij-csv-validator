@@ -20,9 +20,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.util.ArrayUtil;
 import com.intellij.util.ui.UIUtil;
-import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfo;
-import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfoMap;
-import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
+import net.seesharpsoft.intellij.plugins.csv.*;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.api.TableActions;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.api.TableDataHandler;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvFile;
@@ -51,8 +49,8 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
 
     protected Document document;
     protected PsiFile psiFile;
-    protected CsvEditorSettings.ValueSeparator currentSeparator;
-    protected CsvEditorSettings.EscapeCharacter currentEscapeCharacter;
+    protected CsvValueSeparator currentSeparator;
+    protected CsvEscapeCharacter currentEscapeCharacter;
 
     private Object[][] initialState = null;
     private CsvTableEditorState storedState = null;

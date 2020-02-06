@@ -49,6 +49,7 @@
     <change-notes><![CDATA[
         <pre style="font-family: sans-serif">
 NEW: customizable escape character #159
+NEW: value separator setting moved from 'Code Style' to 'General'
       </pre>
     ]]>
     </change-notes>

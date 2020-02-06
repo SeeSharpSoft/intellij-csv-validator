@@ -5,13 +5,14 @@ import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.openapi.editor.ex.EditorSettingsExternalizable;
+import net.seesharpsoft.intellij.plugins.csv.CsvEscapeCharacter;
 import net.seesharpsoft.intellij.plugins.csv.CsvStorageHelper;
+import net.seesharpsoft.intellij.plugins.csv.CsvValueSeparator;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import java.util.regex.Pattern;
 
 @State(
         name = "CsvEditorSettings",
@@ -26,64 +27,8 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
     public static final int TABLE_AUTO_MAX_COLUMN_WIDTH_DEFAULT = 300;
     public static final int TABLE_DEFAULT_COLUMN_WIDTH_DEFAULT = 100;
 
-    public static final EscapeCharacter ESCAPE_CHARACTER_DEFAULT = EscapeCharacter.QUOTE;
-    public static final ValueSeparator VALUE_SEPARATOR_DEFAULT = ValueSeparator.COMMA;
-
-    public enum ValueSeparator {
-        COMMA(",", "Comma (,)"),
-        SEMICOLON(";", "Semicolon (;)"),
-        PIPE("|", "Pipe (|)"),
-        TAB("\t", "Tab (↹)");
-
-        private final String myCharacter;
-        private final String myDisplay;
-        private final Pattern myPattern;
-
-        private ValueSeparator(String character, String display) {
-            myCharacter = character;
-            myDisplay = display;
-            myPattern = Pattern.compile(Pattern.quote(myCharacter));
-        }
-
-        public String getCharacter() {
-            return myCharacter;
-        }
-
-        public String getDisplay() {
-            return myDisplay;
-        }
-
-        public boolean isValueSeparator(String text) {
-            return myPattern.matcher(text).matches();
-        }
-    }
-
-    public enum EscapeCharacter {
-        QUOTE("\"", "Double Quote (\")"),
-        BACKSLASH("\\", "Backslash (\\)");
-
-        private final String myCharacter;
-        private final String myDisplay;
-        private final Pattern myPattern;
-
-        private EscapeCharacter(String character, String display) {
-            myCharacter = character;
-            myDisplay = display;
-            myPattern = Pattern.compile(Pattern.quote(myCharacter + "\""));
-        }
-
-        public String getCharacter() {
-            return myCharacter;
-        }
-
-        public String getDisplay() {
-            return myDisplay;
-        }
-
-        public boolean isEscapedQuote(String text) {
-            return myPattern.matcher(text).matches();
-        }
-    }
+    public static final CsvEscapeCharacter ESCAPE_CHARACTER_DEFAULT = CsvEscapeCharacter.QUOTE;
+    public static final CsvValueSeparator VALUE_SEPARATOR_DEFAULT = CsvValueSeparator.COMMA;
 
     public enum EditorPrio {
         TEXT_FIRST,
@@ -109,8 +54,8 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
         public boolean SHOW_TABLE_EDITOR_INFO_PANEL;
         public boolean QUOTING_ENFORCED;
         public boolean FILE_END_LINE_BREAK;
-        public EscapeCharacter DEFAULT_ESCAPE_CHARACTER = ESCAPE_CHARACTER_DEFAULT;
-        public ValueSeparator DEFAULT_VALUE_SEPARATOR = VALUE_SEPARATOR_DEFAULT;
+        public CsvEscapeCharacter DEFAULT_ESCAPE_CHARACTER = ESCAPE_CHARACTER_DEFAULT;
+        public CsvValueSeparator DEFAULT_VALUE_SEPARATOR = VALUE_SEPARATOR_DEFAULT;
 
         public OptionSet() {
             EditorSettingsExternalizable editorSettingsExternalizable = EditorSettingsExternalizable.getInstance();
@@ -300,19 +245,19 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
         getState().TABLE_AUTO_COLUMN_WIDTH_ON_OPEN = tableAutoColumnWidthOnOpen;
     }
 
-    public void setDefaultEscapeCharacter(EscapeCharacter defaultEscapeCharacter) {
+    public void setDefaultEscapeCharacter(CsvEscapeCharacter defaultEscapeCharacter) {
         getState().DEFAULT_ESCAPE_CHARACTER = defaultEscapeCharacter;
     }
 
-    public EscapeCharacter getDefaultEscapeCharacter() {
+    public CsvEscapeCharacter getDefaultEscapeCharacter() {
         return getState().DEFAULT_ESCAPE_CHARACTER;
     }
 
-    public void setDefaultValueSeparator(ValueSeparator defaultValueSeparator) {
+    public void setDefaultValueSeparator(CsvValueSeparator defaultValueSeparator) {
         getState().DEFAULT_VALUE_SEPARATOR = defaultValueSeparator;
     }
 
-    public ValueSeparator getDefaultValueSeparator() {
+    public CsvValueSeparator getDefaultValueSeparator() {
         return getState().DEFAULT_VALUE_SEPARATOR;
     }
 }

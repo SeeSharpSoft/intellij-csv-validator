@@ -20,7 +20,7 @@ public class CsvCodeStyleSettingsProvider extends CodeStyleSettingsProvider {
     @Nullable
     @Override
     public String getConfigurableDisplayName() {
-        return CsvLanguage.INSTANCE.getDisplayName();
+        return "CSV/TSV/PSV";
     }
 
     @NotNull
@@ -76,26 +76,6 @@ public class CsvCodeStyleSettingsProvider extends CodeStyleSettingsProvider {
             public LanguageCodeStyleSettingsProvider.SettingsType getSettingsType() {
                 return LanguageCodeStyleSettingsProvider.SettingsType.LANGUAGE_SPECIFIC;
             }
-
-//            private void updatePreviewHighlighter(EditorEx editor) {
-//                EditorColorsScheme scheme = editor.getColorsScheme();
-//                editor.getSettings().setCaretRowShown(false);
-//                EditorHighlighter highlighter = this.createHighlighter(scheme);
-//                if (highlighter != null) {
-//                    editor.setHighlighter(highlighter);
-//                }
-//            }
-
-//            @Override
-//            protected PsiFile createFileFromText(final Project project, final String text) {
-//                // the highlighter is not properly updated - do it manually
-//                Editor editor = this.getEditor();
-//                if (editor != null) {
-//                    updatePreviewHighlighter((EditorEx) editor);
-//                }
-//
-//                return super.createFileFromText(project, this.getPreviewText());
-//            }
 
             @Override
             protected PsiFile doReformat(Project project, PsiFile psiFile) {

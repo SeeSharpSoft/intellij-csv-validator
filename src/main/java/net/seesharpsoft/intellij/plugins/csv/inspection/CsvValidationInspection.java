@@ -15,9 +15,9 @@ import com.intellij.psi.tree.IElementType;
 import com.intellij.util.IncorrectOperationException;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
+import net.seesharpsoft.intellij.plugins.csv.CsvValueSeparator;
 import net.seesharpsoft.intellij.plugins.csv.intention.CsvIntentionHelper;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
-import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -151,7 +151,7 @@ public class CsvValidationInspection extends LocalInspectionTool {
             try {
                 PsiElement element = descriptor.getPsiElement();
                 Document document = PsiDocumentManager.getInstance(project).getDocument(element.getContainingFile());
-                CsvEditorSettings.ValueSeparator separator = CsvHelper.getCurrentValueSeparator(element.getContainingFile());
+                CsvValueSeparator separator = CsvHelper.getCurrentValueSeparator(element.getContainingFile());
                 String text = document.getText();
                 document.setText(text.substring(0, element.getTextOffset()) + separator.getCharacter() + text.substring(element.getTextOffset()));
             } catch (IncorrectOperationException e) {

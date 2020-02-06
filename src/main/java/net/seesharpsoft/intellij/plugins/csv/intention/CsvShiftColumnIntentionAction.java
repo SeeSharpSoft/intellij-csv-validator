@@ -7,8 +7,8 @@ import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiElement;
 import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfo;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
+import net.seesharpsoft.intellij.plugins.csv.CsvValueSeparator;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvFile;
-import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -30,7 +30,7 @@ public abstract class CsvShiftColumnIntentionAction extends CsvIntentionAction {
     }
 
     @NotNull
-    protected static String changeLeftAndRightColumnOrder(String text, CsvEditorSettings.ValueSeparator separator, CsvColumnInfo<PsiElement> leftColumnInfo, CsvColumnInfo<PsiElement> rightColumnInfo) {
+    protected static String changeLeftAndRightColumnOrder(String text, CsvValueSeparator separator, CsvColumnInfo<PsiElement> leftColumnInfo, CsvColumnInfo<PsiElement> rightColumnInfo) {
         List<PsiElement> rightElements = rightColumnInfo.getElements();
         List<PsiElement> leftElements = leftColumnInfo.getElements();
         int lastIndex = 0;

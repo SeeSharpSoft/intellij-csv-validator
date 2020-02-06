@@ -3,7 +3,7 @@ package net.seesharpsoft.intellij.plugins.tsv;
 import com.intellij.lang.Language;
 import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
 import net.seesharpsoft.intellij.plugins.csv.CsvSeparatorHolder;
-import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
+import net.seesharpsoft.intellij.plugins.csv.CsvValueSeparator;
 
 public final class TsvLanguage extends Language implements CsvSeparatorHolder {
     public static final TsvLanguage INSTANCE = new TsvLanguage();
@@ -18,7 +18,7 @@ public final class TsvLanguage extends Language implements CsvSeparatorHolder {
     }
 
     @Override
-    public CsvEditorSettings.ValueSeparator getSeparator() {
-        return CsvEditorSettings.ValueSeparator.TAB;
+    public CsvValueSeparator getSeparator() {
+        return CsvValueSeparator.TAB;
     }
 }
