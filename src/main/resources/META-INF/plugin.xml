@@ -7,9 +7,7 @@
 
     <description><![CDATA[
 
-        <p>Lightweight plugin for editing CSV/TSV/PSV files with a flexible table editor, syntax validation, structure highlighting, customizable coloring, new intentions and helpful inspections.</p>
-        <br><hr/><br>
-        <img width="600" height="297" src="https://raw.githubusercontent.com/SeeSharpSoft/intellij-csv-validator/master/docs/example.png" /><br><br>
+        <p>Lightweight plugin for editing CSV/TSV/PSV files with a flexible table editor, syntax validation, structure highlighting, customizable coloring, new intentions and helpful inspections.</p><br>
         <p><b>Features:</b><br>
         <ul>
             <li>support for CSV/TSV/PSV file extensions</li>
@@ -40,8 +38,7 @@
         <em>Thanks to @royqh1979, @egoisticalgoat, @sabi0, @ptahchiev, @ghost, @MarkJeronimus, <a href="http://finevisuals.de" target="_blank">FineVisuals</a> and others for supporting me and the project!</em>
         <br><br><br>
         </p>
-
-        <hr /><br>
+        <img width="600" height="297" src="https://plugins.jetbrains.com/files/10037/screenshot_21096.png" /><br><br>
         <p>
         <span style="color: #555555">
             <b>IntelliJ IDEA Ultimate/PhpStorm/DataGrip/etc.:</b> The plugin is fully compatible with the <em>'Edit as Table...'</em> functionality.<br><br>

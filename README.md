@@ -12,6 +12,8 @@ Compatible with _IntelliJ IDEA  PhpStorm  WebStorm  PyCharm  RubyMine  AppCode  
 This plugin introduces CSV (_Comma-Separated Values_) as a language to Jetbrains IDE with a syntax definition, structured language elements and associated file types (.csv/.tsv/.psv).
 This enables default editor features like syntax validation, highlighting and inspections for CSV-alike files.
 
+![CSV Plugin Example](./docs/example.png)
+
 ## Features
 
 - CSV/TSV/PSV file detection
