@@ -2,7 +2,9 @@ package net.seesharpsoft.intellij.plugins.csv.editor;
 
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.options.SearchableConfigurable;
+import com.intellij.openapi.ui.ComboBox;
 import com.intellij.ui.CheckBoxWithColorChooser;
+import net.seesharpsoft.intellij.ui.CustomDisplayListCellRenderer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -35,6 +37,7 @@ public class CsvEditorSettingsProvider implements SearchableConfigurable {
     private JFormattedTextField tfMaxColumnWidth;
     private JFormattedTextField tfDefaultColumnWidth;
     private JCheckBox cbAdjustColumnWidthOnOpen;
+    private JComboBox comboEscapeCharacter;
 
     @NotNull
     @Override
@@ -82,7 +85,8 @@ public class CsvEditorSettingsProvider implements SearchableConfigurable {
                 isModified(cbFileEndLineBreak, csvEditorSettings.isFileEndLineBreak()) ||
                 !tfMaxColumnWidth.getValue().equals(csvEditorSettings.getTableAutoMaxColumnWidth()) ||
                 !tfDefaultColumnWidth.getValue().equals(csvEditorSettings.getTableDefaultColumnWidth()) ||
-                isModified(cbAdjustColumnWidthOnOpen, csvEditorSettings.isTableAutoColumnWidthOnOpen());
+                isModified(cbAdjustColumnWidthOnOpen, csvEditorSettings.isTableAutoColumnWidthOnOpen()) ||
+                !Objects.equals(comboEscapeCharacter.getSelectedItem(), csvEditorSettings.getDefaultEscapeCharacter());
     }
 
     @Override
@@ -104,6 +108,7 @@ public class CsvEditorSettingsProvider implements SearchableConfigurable {
         tfMaxColumnWidth.setValue(csvEditorSettings.getTableAutoMaxColumnWidth());
         tfDefaultColumnWidth.setValue(csvEditorSettings.getTableDefaultColumnWidth());
         cbAdjustColumnWidthOnOpen.setSelected(csvEditorSettings.isTableAutoColumnWidthOnOpen());
+        comboEscapeCharacter.setSelectedItem(csvEditorSettings.getDefaultEscapeCharacter());
     }
 
     @Override
@@ -125,9 +130,13 @@ public class CsvEditorSettingsProvider implements SearchableConfigurable {
         csvEditorSettings.setTableAutoMaxColumnWidth((int) tfMaxColumnWidth.getValue());
         csvEditorSettings.setTableDefaultColumnWidth((int) tfDefaultColumnWidth.getValue());
         csvEditorSettings.setTableAutoColumnWidthOnOpen(cbAdjustColumnWidthOnOpen.isSelected());
+        csvEditorSettings.setDefaultEscapeCharacter((CsvEditorSettings.EscapeCharacter)comboEscapeCharacter.getSelectedItem());
     }
 
     protected void createUIComponents() {
+        comboEscapeCharacter = new ComboBox(CsvEditorSettings.EscapeCharacter.values());
+        comboEscapeCharacter.setRenderer(new CustomDisplayListCellRenderer<CsvEditorSettings.EscapeCharacter>(ec -> ec.getDisplay()));
+
         cbTabHighlightColor = new CheckBoxWithColorChooser("Highlight tab separator   ");
         cbTabHighlightColor.setColor(Color.CYAN);
 
