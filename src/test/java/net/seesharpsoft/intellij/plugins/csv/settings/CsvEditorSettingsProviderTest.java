@@ -2,6 +2,8 @@ package net.seesharpsoft.intellij.plugins.csv.settings;
 
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase;
+import net.seesharpsoft.intellij.plugins.csv.CsvEscapeCharacter;
+import net.seesharpsoft.intellij.plugins.csv.CsvValueSeparator;
 
 import java.awt.*;
 
@@ -74,12 +76,15 @@ public class CsvEditorSettingsProviderTest extends LightPlatformCodeInsightFixtu
         csvEditorSettings.setTableDefaultColumnWidth(500);
         csvEditorSettings.setTableAutoMaxColumnWidth(1000);
         csvEditorSettings.setTableAutoColumnWidthOnOpen(false);
+        csvEditorSettings.setDefaultEscapeCharacter(CsvEscapeCharacter.BACKSLASH);
+        csvEditorSettings.setDefaultValueSeparator(CsvValueSeparator.PIPE);
 
         assertEquals(true, editorSettingsPanel.isModified());
 
         editorSettingsPanel.reset();
 
         assertEquals(false, editorSettingsPanel.isModified());
+
         assertEquals(false, csvEditorSettings.isCaretRowShown());
         assertEquals(true, csvEditorSettings.isUseSoftWraps());
         assertEquals(true, csvEditorSettings.isColumnHighlightingEnabled());
@@ -93,6 +98,8 @@ public class CsvEditorSettingsProviderTest extends LightPlatformCodeInsightFixtu
         assertEquals(500, csvEditorSettings.getTableDefaultColumnWidth());
         assertEquals(1000, csvEditorSettings.getTableAutoMaxColumnWidth());
         assertEquals(false, csvEditorSettings.isTableAutoColumnWidthOnOpen());
+        assertEquals(CsvEscapeCharacter.BACKSLASH, csvEditorSettings.getDefaultEscapeCharacter());
+        assertEquals(CsvValueSeparator.PIPE, csvEditorSettings.getDefaultValueSeparator());
 
         editorSettingsPanel.disposeUIResources();
     }
@@ -116,6 +123,8 @@ public class CsvEditorSettingsProviderTest extends LightPlatformCodeInsightFixtu
         csvEditorSettings.setTableDefaultColumnWidth(500);
         csvEditorSettings.setTableAutoMaxColumnWidth(1000);
         csvEditorSettings.setTableAutoColumnWidthOnOpen(false);
+        csvEditorSettings.setDefaultEscapeCharacter(CsvEscapeCharacter.BACKSLASH);
+        csvEditorSettings.setDefaultValueSeparator(CsvValueSeparator.PIPE);
 
         editorSettingsPanel.apply();
 
@@ -135,6 +144,8 @@ public class CsvEditorSettingsProviderTest extends LightPlatformCodeInsightFixtu
         assertEquals(freshOptionSet.TABLE_DEFAULT_COLUMN_WIDTH, csvEditorSettings.getTableDefaultColumnWidth());
         assertEquals(freshOptionSet.TABLE_AUTO_MAX_COLUMN_WIDTH, csvEditorSettings.getTableAutoMaxColumnWidth());
         assertEquals(freshOptionSet.TABLE_AUTO_COLUMN_WIDTH_ON_OPEN, csvEditorSettings.isTableAutoColumnWidthOnOpen());
+        assertEquals(freshOptionSet.DEFAULT_ESCAPE_CHARACTER, csvEditorSettings.getDefaultEscapeCharacter());
+        assertEquals(freshOptionSet.DEFAULT_VALUE_SEPARATOR, csvEditorSettings.getDefaultValueSeparator());
 
         editorSettingsPanel.disposeUIResources();
     }
