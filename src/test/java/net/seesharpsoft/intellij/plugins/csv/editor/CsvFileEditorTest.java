@@ -5,6 +5,7 @@ import com.intellij.openapi.fileEditor.*;
 import com.intellij.openapi.fileEditor.ex.FileEditorProviderManager;
 import com.intellij.openapi.fileEditor.impl.text.TextEditorState;
 import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase;
+import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import org.jdom.Element;
 
 public class CsvFileEditorTest extends LightPlatformCodeInsightFixtureTestCase {
@@ -17,7 +18,7 @@ public class CsvFileEditorTest extends LightPlatformCodeInsightFixtureTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        CsvEditorSettingsExternalizable.getInstance().loadState(new CsvEditorSettingsExternalizable.OptionSet());
+        CsvEditorSettings.getInstance().loadState(new CsvEditorSettings.OptionSet());
         myFixture.configureByFiles("AnyFile.csv");
     }
 
@@ -30,11 +31,11 @@ public class CsvFileEditorTest extends LightPlatformCodeInsightFixtureTestCase {
         assertEquals(CsvFileEditorProvider.EDITOR_TYPE_ID, fileEditorProvider.getEditorTypeId());
         assertEquals(FileEditorPolicy.HIDE_DEFAULT_EDITOR, fileEditorProvider.getPolicy());
 
-        CsvEditorSettingsExternalizable csvEditorSettingsExternalizable = CsvEditorSettingsExternalizable.getInstance();
-        csvEditorSettingsExternalizable.setEditorPrio(CsvEditorSettingsExternalizable.EditorPrio.TEXT_ONLY);
+        CsvEditorSettings csvEditorSettings = CsvEditorSettings.getInstance();
+        csvEditorSettings.setEditorPrio(CsvEditorSettings.EditorPrio.TEXT_ONLY);
         assertEquals(FileEditorPolicy.HIDE_DEFAULT_EDITOR, fileEditorProvider.getPolicy());
 
-        csvEditorSettingsExternalizable.setEditorPrio(CsvEditorSettingsExternalizable.EditorPrio.TABLE_FIRST);
+        csvEditorSettings.setEditorPrio(CsvEditorSettings.EditorPrio.TABLE_FIRST);
         assertEquals(FileEditorPolicy.PLACE_AFTER_DEFAULT_EDITOR, fileEditorProvider.getPolicy());
     }
 
@@ -50,10 +51,10 @@ public class CsvFileEditorTest extends LightPlatformCodeInsightFixtureTestCase {
 
         TextEditor textEditor = (TextEditor)fileEditor;
 
-        CsvEditorSettingsExternalizable csvEditorSettingsExternalizable = CsvEditorSettingsExternalizable.getInstance();
+        CsvEditorSettings csvEditorSettings = CsvEditorSettings.getInstance();
         EditorSettings editorSettings = textEditor.getEditor().getSettings();
-        assertEquals(csvEditorSettingsExternalizable.isCaretRowShown(), editorSettings.isCaretRowShown());
-        assertEquals(csvEditorSettingsExternalizable.isUseSoftWraps(), editorSettings.isUseSoftWraps());
+        assertEquals(csvEditorSettings.isCaretRowShown(), editorSettings.isCaretRowShown());
+        assertEquals(csvEditorSettings.isUseSoftWraps(), editorSettings.isUseSoftWraps());
 
         disposeTextEditor(textEditor);
     }
@@ -64,32 +65,32 @@ public class CsvFileEditorTest extends LightPlatformCodeInsightFixtureTestCase {
     }
 
     public void testCsvEditorSettingsAreApplied() {
-        CsvEditorSettingsExternalizable csvEditorSettingsExternalizable = CsvEditorSettingsExternalizable.getInstance();
-        csvEditorSettingsExternalizable.setCaretRowShown(false);
-        csvEditorSettingsExternalizable.setUseSoftWraps(true);
+        CsvEditorSettings csvEditorSettings = CsvEditorSettings.getInstance();
+        csvEditorSettings.setCaretRowShown(false);
+        csvEditorSettings.setUseSoftWraps(true);
 
         TextEditor textEditor = getCurrentTextEditor();
 
         EditorSettings editorSettings = textEditor.getEditor().getSettings();
-        assertEquals(csvEditorSettingsExternalizable.isCaretRowShown(), editorSettings.isCaretRowShown());
-        assertEquals(csvEditorSettingsExternalizable.isUseSoftWraps(), editorSettings.isUseSoftWraps());
+        assertEquals(csvEditorSettings.isCaretRowShown(), editorSettings.isCaretRowShown());
+        assertEquals(csvEditorSettings.isUseSoftWraps(), editorSettings.isUseSoftWraps());
 
         disposeTextEditor(textEditor);
     }
-    
+
     public void testCsvEditorStateReadsAndWritesStates() {
         TextEditor textEditor = getCurrentTextEditor();
 
         FileEditorProvider[] fileEditorProviders = FileEditorProviderManager.getInstance().getProviders(myFixture.getProject(), myFixture.getFile().getVirtualFile());
         CsvFileEditorProvider fileEditorProvider = (CsvFileEditorProvider)fileEditorProviders[0];
         Element dummy = new Element("dummy");
-        
+
         FileEditorState state = fileEditorProvider.readState(dummy, this.getProject(), myFixture.getFile().getVirtualFile());
         assertInstanceOf(state, TextEditorState.class);
         textEditor.setState(state);
         fileEditorProvider.writeState(state, this.getProject(), dummy);
-        
+
         disposeTextEditor(textEditor);
     }
-    
+
 }

@@ -17,7 +17,7 @@ public final class CsvStorageHelper {
             return null;
         }
         String url = virtualFile.getUserData(RELATIVE_FILE_URL);
-        if (url == null) {
+        if (url == null && project.getBasePath() != null) {
             String projectDir = PathUtil.getLocalPath(project.getBasePath());
             url = PathUtil.getLocalPath(virtualFile.getPath())
                     .replaceFirst("^" + Pattern.quote(projectDir), "");

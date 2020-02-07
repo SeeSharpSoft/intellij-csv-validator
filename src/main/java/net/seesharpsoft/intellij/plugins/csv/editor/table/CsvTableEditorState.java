@@ -5,7 +5,7 @@ import com.intellij.openapi.fileEditor.FileEditorStateLevel;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.text.StringUtilRt;
 import com.intellij.openapi.vfs.VirtualFile;
-import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettingsExternalizable;
+import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import org.jdom.Attribute;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
@@ -34,7 +34,7 @@ public class CsvTableEditorState implements FileEditorState {
 
     public boolean showInfoPanel() {
         if (showInfoPanel == null) {
-            return CsvEditorSettingsExternalizable.getInstance().showTableEditorInfoPanel();
+            return CsvEditorSettings.getInstance().showTableEditorInfoPanel();
         }
         return showInfoPanel;
     }
@@ -52,7 +52,7 @@ public class CsvTableEditorState implements FileEditorState {
     }
 
     public boolean getAutoColumnWidthOnOpen() {
-        return autoColumnWidthOnOpen == null ? CsvEditorSettingsExternalizable.getInstance().isTableAutoColumnWidthOnOpen() : autoColumnWidthOnOpen;
+        return autoColumnWidthOnOpen == null ? CsvEditorSettings.getInstance().isTableAutoColumnWidthOnOpen() : autoColumnWidthOnOpen;
     }
 
     public void setAutoColumnWidthOnOpen(Boolean autoColumnWidthOnOpenArg) {
@@ -61,7 +61,7 @@ public class CsvTableEditorState implements FileEditorState {
 
     public int getRowLines() {
         if (rowLines == null) {
-            rowLines = CsvEditorSettingsExternalizable.getInstance().getTableEditorRowHeight();
+            rowLines = CsvEditorSettings.getInstance().getTableEditorRowHeight();
         }
         return rowLines;
     }
@@ -98,7 +98,7 @@ public class CsvTableEditorState implements FileEditorState {
 
         Attribute attribute = element.getAttribute("showInfoPanel");
         state.setShowInfoPanel(
-                attribute == null ? CsvEditorSettingsExternalizable.getInstance().showTableEditorInfoPanel() : Boolean.parseBoolean(attribute.getValue())
+                attribute == null ? CsvEditorSettings.getInstance().showTableEditorInfoPanel() : Boolean.parseBoolean(attribute.getValue())
         );
 
         attribute = element.getAttribute("fixedHeaders");
@@ -112,12 +112,12 @@ public class CsvTableEditorState implements FileEditorState {
         }
 
         state.setRowLines(
-                StringUtilRt.parseInt(element.getAttributeValue("rowLines"), CsvEditorSettingsExternalizable.getInstance().getTableEditorRowHeight())
+                StringUtilRt.parseInt(element.getAttributeValue("rowLines"), CsvEditorSettings.getInstance().getTableEditorRowHeight())
         );
 
         List<Element> columnWidthElements = element.getChildren("column");
         int[] columnWidths = new int[columnWidthElements.size()];
-        int defaultColumnWidth = CsvEditorSettingsExternalizable.getInstance().getTableDefaultColumnWidth();
+        int defaultColumnWidth = CsvEditorSettings.getInstance().getTableDefaultColumnWidth();
         for (int i = 0; i < columnWidthElements.size(); ++i) {
             Element columnElement = columnWidthElements.get(i);
             int index = StringUtilRt.parseInt(columnElement.getAttributeValue("index"), i);

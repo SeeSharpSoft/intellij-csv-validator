@@ -1,3 +1,10 @@
+2.9.0
+Feb 07, 2020
+
+NEW: customizable escape character #159
+NEW: value separator setting moved from 'Code Style' to 'General'
++ lots of cleanup & rework
+
 2.8.2
 Jan 22, 2020
 

@@ -8,6 +8,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.SingleRootFileViewProvider;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
+import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
 
@@ -22,14 +23,14 @@ public class CsvFileEditorProvider implements AsyncFileEditorProvider, DumbAware
 
     @Override
     public FileEditorPolicy getPolicy() {
-        switch (CsvEditorSettingsExternalizable.getInstance().getEditorPrio()) {
+        switch (CsvEditorSettings.getInstance().getEditorPrio()) {
             case TEXT_FIRST:
             case TEXT_ONLY:
                 return FileEditorPolicy.HIDE_DEFAULT_EDITOR;
             case TABLE_FIRST:
                 return FileEditorPolicy.PLACE_AFTER_DEFAULT_EDITOR;
             default:
-                throw new IllegalArgumentException("unhandled EditorPrio: " + CsvEditorSettingsExternalizable.getInstance().getEditorPrio());
+                throw new IllegalArgumentException("unhandled EditorPrio: " + CsvEditorSettings.getInstance().getEditorPrio());
         }
     }
 
@@ -38,12 +39,12 @@ public class CsvFileEditorProvider implements AsyncFileEditorProvider, DumbAware
         return CsvHelper.isCsvFile(project, file) && !SingleRootFileViewProvider.isTooLargeForContentLoading(file);
     }
 
-    protected void applySettings(EditorSettings editorSettings, CsvEditorSettingsExternalizable csvEditorSettingsExternalizable) {
-        if (editorSettings == null || csvEditorSettingsExternalizable == null) {
+    protected void applySettings(EditorSettings editorSettings, CsvEditorSettings csvEditorSettings) {
+        if (editorSettings == null || csvEditorSettings == null) {
             return;
         }
-        editorSettings.setCaretRowShown(csvEditorSettingsExternalizable.isCaretRowShown());
-        editorSettings.setUseSoftWraps(csvEditorSettingsExternalizable.isUseSoftWraps());
+        editorSettings.setCaretRowShown(csvEditorSettings.isCaretRowShown());
+        editorSettings.setUseSoftWraps(csvEditorSettings.isUseSoftWraps());
     }
 
     @NotNull
@@ -74,7 +75,7 @@ public class CsvFileEditorProvider implements AsyncFileEditorProvider, DumbAware
             @Override
             public FileEditor build() {
                 TextEditor textEditor = (TextEditor) TextEditorProvider.getInstance().createEditor(project, virtualFile);
-                applySettings(textEditor.getEditor().getSettings(), CsvEditorSettingsExternalizable.getInstance());
+                applySettings(textEditor.getEditor().getSettings(), CsvEditorSettings.getInstance());
                 return textEditor;
             }
         };

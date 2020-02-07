@@ -7,8 +7,6 @@ import com.intellij.psi.codeStyle.LanguageCodeStyleSettingsProvider;
 import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.stream.IntStream;
-
 public class CsvLanguageCodeStyleSettingsProvider extends LanguageCodeStyleSettingsProvider {
     @NotNull
     @Override
@@ -19,13 +17,6 @@ public class CsvLanguageCodeStyleSettingsProvider extends LanguageCodeStyleSetti
     @Override
     public void customizeSettings(@NotNull CodeStyleSettingsCustomizable consumer, @NotNull SettingsType settingsType) {
         if (settingsType == SettingsType.LANGUAGE_SPECIFIC) {
-            consumer.showCustomOption(CsvCodeStyleSettings.class,
-                    "SEPARATOR_INDEX",
-                    "Value separator (default)",
-                    "Separator",
-                    CsvCodeStyleSettings.SUPPORTED_SEPARATORS_DISPLAY,
-                    IntStream.rangeClosed(0, CsvCodeStyleSettings.SUPPORTED_SEPARATORS.length - 1).toArray());
-
             consumer.showCustomOption(CsvCodeStyleSettings.class,
                     "SPACE_BEFORE_SEPARATOR",
                     "Space before separator",

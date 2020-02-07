@@ -7,9 +7,8 @@
 
     <description><![CDATA[
 
-        <p>Lightweight plugin for editing CSV/TSV/PSV files with a flexible table editor, syntax validation, structure highlighting, customizable coloring, new intentions and helpful inspections.</p>
-        <br><hr/><br>
-        <b>Features:</b><br>
+        <p>Lightweight plugin for editing CSV/TSV/PSV files with a flexible table editor, syntax validation, structure highlighting, customizable coloring, new intentions and helpful inspections.</p><br>
+        <p><b>Features:</b><br>
         <ul>
             <li>support for CSV/TSV/PSV file extensions</li>
             <li>customizable table editor</li>
@@ -23,10 +22,13 @@
             <li>balloon help & spell checker</li>
             <li>structure view (header-entry layout)</li>
             <li>support for ',', ';', '|' or '&#8633;' as value separator</li>
+            <li>support for '"' or '\' as escape character</li>
             <li>highlight of active column values</li>
             <li>tab (&#8633;) separator highlighting</li>
         </ul>
+        </p><br>
 
+        <p>
         <b>TSV/PSV file support:</b> <em>TSV/PSV files are recognized as such but treated as a variant of CSV files, the same syntax highlighting and code style settings are applied.</em>
         <br><br>
         <b>Code formatting:</b> <em>Default code formatting is 'Tabularize'. Can be changed in Settings -> Editor -> Code Style -> CSV</em>
@@ -35,19 +37,20 @@
         <br><br><br>
         <em>Thanks to @royqh1979, @egoisticalgoat, @sabi0, @ptahchiev, @ghost, @MarkJeronimus, <a href="http://finevisuals.de" target="_blank">FineVisuals</a> and others for supporting me and the project!</em>
         <br><br><br>
-
-        <hr /><br>
+        </p>
+        <img width="600" height="297" src="https://plugins.jetbrains.com/files/10037/screenshot_21096.png" /><br><br>
+        <p>
         <span style="color: #555555">
             <b>IntelliJ IDEA Ultimate/PhpStorm/DataGrip/etc.:</b> The plugin is fully compatible with the <em>'Edit as Table...'</em> functionality.<br><br>
         </span>
+        </p>
     ]]></description>
 
     <change-notes><![CDATA[
         <pre style="font-family: sans-serif">
-FIX: vertical scrolling within table editor #164
-FIX: horizontal scrolling within table editor #169
-
-NOTE: IDE versions prior to 2017.3.* are no longer supported!
+NEW: customizable escape character #159
+NEW: value separator setting moved from 'Code Style' to 'General'
++ lots of code cleanup & rework
       </pre>
     ]]>
     </change-notes>
@@ -87,10 +90,10 @@ NOTE: IDE versions prior to 2017.3.* are no longer supported!
         <colorSettingsPage implementation="net.seesharpsoft.intellij.plugins.csv.settings.CsvColorSettings"/>
 
         <applicationService
-                serviceImplementation="net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettingsExternalizable"/>
+                serviceImplementation="net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings"/>
         <projectService serviceImplementation="net.seesharpsoft.intellij.plugins.csv.components.CsvFileAttributes"/>
 
-        <editorOptionsProvider instance="net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettingsProvider"/>
+        <editorOptionsProvider instance="net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettingsProvider"/>
         <fileEditorProvider implementation="net.seesharpsoft.intellij.plugins.csv.editor.CsvFileEditorProvider"/>
         <fileEditorProvider implementation="net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditorProvider"/>
 
@@ -227,6 +230,19 @@ NOTE: IDE versions prior to 2017.3.* are no longer supported!
                class="net.seesharpsoft.intellij.plugins.csv.actions.CsvChangeSeparatorActionGroup"
                text="CSV Separator"
                description="CSV Separator"
+               popup="true"
+               keep-content="true"
+               icon="/media/icons/csv-icon.png"
+        >
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+            <add-to-group group-id="CsvTableEditorColumnContextMenu" anchor="last"/>
+            <add-to-group group-id="CsvTableEditorRowContextMenu" anchor="last"/>
+        </group>
+
+        <group id="net.seesharpsoft.intellij.plugins.csv.actions.CsvChangeEscapeCharacterActionGroup"
+               class="net.seesharpsoft.intellij.plugins.csv.actions.CsvChangeEscapeCharacterActionGroup"
+               text="CSV Escape Character"
+               description="CSV Escape Character"
                popup="true"
                keep-content="true"
                icon="/media/icons/csv-icon.png"

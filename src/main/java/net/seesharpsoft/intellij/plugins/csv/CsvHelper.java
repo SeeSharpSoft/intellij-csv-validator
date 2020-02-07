@@ -17,6 +17,7 @@ import com.intellij.psi.impl.source.tree.FileElement;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
 import net.seesharpsoft.intellij.lang.FileParserDefinition;
+import net.seesharpsoft.intellij.plugins.csv.components.CsvFileAttributes;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvField;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvFile;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvRecord;
@@ -26,6 +27,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 
 public final class CsvHelper {
 
@@ -149,14 +151,55 @@ public final class CsvHelper {
         return separator == null ? field.getContainingFile().getTextLength() : separator.getTextOffset();
     }
 
+    public static VirtualFile getVirtualFile(PsiFile psiFile) {
+        return psiFile == null ? null : psiFile.getOriginalFile().getVirtualFile();
+    }
+
+    public static Project getProject(PsiFile psiFile) {
+        return psiFile == null ? null : psiFile.getProject();
+    }
+
+    public static CsvValueSeparator getValueSeparator(CsvFile csvFile) {
+        return getValueSeparator(csvFile.getContainingFile());
+    }
+
+    public static CsvValueSeparator getValueSeparator(PsiFile psiFile) {
+        return getValueSeparator(getProject(psiFile), getVirtualFile(psiFile));
+    }
+
+    public static CsvValueSeparator getValueSeparator(Project project, VirtualFile virtualFile) {
+        return CsvFileAttributes.getInstance(project).getValueSeparator(project, virtualFile);
+    }
+
+    public static boolean hasValueSeparatorAttribute(@NotNull PsiFile psiFile) {
+        return CsvFileAttributes.getInstance(getProject(psiFile)).hasValueSeparatorAttribute(getProject(psiFile), getVirtualFile(psiFile));
+    }
+
+    public static CsvEscapeCharacter getEscapeCharacter(CsvFile csvFile) {
+        return getEscapeCharacter(csvFile.getContainingFile());
+    }
+
+    public static CsvEscapeCharacter getEscapeCharacter(PsiFile psiFile) {
+        return getEscapeCharacter(getProject(psiFile), getVirtualFile(psiFile));
+    }
+
+    public static CsvEscapeCharacter getEscapeCharacter(Project project, VirtualFile virtualFile) {
+        return CsvFileAttributes.getInstance(project).getEscapeCharacter(project, virtualFile);
+    }
+
+    public static boolean hasEscapeCharacterAttribute(@NotNull PsiFile psiFile) {
+        return CsvFileAttributes.getInstance(getProject(psiFile)).hasEscapeCharacterAttribute(getProject(psiFile), getVirtualFile(psiFile));
+    }
+
     public static CsvColumnInfoMap<PsiElement> createColumnInfoMap(CsvFile csvFile) {
+        CsvEscapeCharacter escapeCharacter = getEscapeCharacter(csvFile);
         Map<Integer, CsvColumnInfo<PsiElement>> columnInfoMap = new HashMap<>();
         CsvRecord[] records = PsiTreeUtil.getChildrenOfType(csvFile, CsvRecord.class);
         int row = 0;
         for (CsvRecord record : records) {
             int column = 0;
             for (CsvField field : record.getFieldList()) {
-                Integer length = CsvHelper.getMaxTextLineLength(unquoteCsvValue(field.getText()));
+                Integer length = CsvHelper.getMaxTextLineLength(unquoteCsvValue(field.getText(), escapeCharacter));
                 if (!columnInfoMap.containsKey(column)) {
                     columnInfoMap.put(column, new CsvColumnInfo(column, length, row));
                 } else if (columnInfoMap.get(column).getMaxLength() < length) {
@@ -170,7 +213,7 @@ public final class CsvHelper {
         return new CsvColumnInfoMap(columnInfoMap, PsiTreeUtil.hasErrorElements(csvFile));
     }
 
-    public static String unquoteCsvValue(String content) {
+    public static String unquoteCsvValue(String content, CsvEscapeCharacter escapeCharacter) {
         if (content == null) {
             return "";
         }
@@ -178,20 +221,24 @@ public final class CsvHelper {
         if (result.length() > 1 && result.startsWith("\"") && result.endsWith("\"")) {
             result = result.substring(1, result.length() - 1);
         }
-        result = result.replaceAll("(?:\")\"", "\"");
+        result = result.replaceAll("(?:" + Pattern.quote(escapeCharacter.getCharacter()) + ")\"", "\"");
         return result;
     }
 
-    private static boolean isQuotingRequired(String content, String separator) {
-        return content != null && (content.contains(separator) || content.contains("\"") || content.contains("\n") || content.startsWith(" ") || content.endsWith(" "));
+    private static boolean isQuotingRequired(String content, CsvValueSeparator valueSeparator) {
+        return content != null &&
+                (content.contains(valueSeparator.getCharacter()) || content.contains("\"") || content.contains("\n") || content.startsWith(" ") || content.endsWith(" "));
     }
 
-    public static String quoteCsvField(String content, String separator, boolean quotingEnforced) {
+    public static String quoteCsvField(String content,
+                                       CsvEscapeCharacter escapeCharacter,
+                                       CsvValueSeparator valueSeparator,
+                                       boolean quotingEnforced) {
         if (content == null) {
             return "";
         }
-        if (quotingEnforced || isQuotingRequired(content, separator)) {
-            String result = content.replaceAll("\"", "\"\"");
+        if (quotingEnforced || isQuotingRequired(content, valueSeparator)) {
+            String result = content.replaceAll("\"", escapeCharacter.getCharacter() + "\"");
             return "\"" + result + "\"";
         }
         return content;

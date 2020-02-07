@@ -12,7 +12,7 @@ import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfo;
 import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfoMap;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.CsvIconProvider;
-import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettingsExternalizable;
+import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -100,7 +100,7 @@ public abstract class CsvStructureViewElement implements StructureViewTreeElemen
                 CsvFile csvFile = (CsvFile) myElement;
                 CsvColumnInfoMap csvColumnInfoMap = csvFile.getColumnInfoMap();
                 int maxRowNumbers = csvColumnInfoMap.getColumnInfo(0).getSize();
-                if (csvColumnInfoMap.hasEmptyLastLine() && CsvEditorSettingsExternalizable.getInstance().isFileEndLineBreak()) {
+                if (csvColumnInfoMap.hasEmptyLastLine() && CsvEditorSettings.getInstance().isFileEndLineBreak()) {
                     --maxRowNumbers;
                 }
                 Map<Integer, CsvColumnInfo<PsiElement>> columnInfoMap = csvColumnInfoMap.getColumnInfos();

@@ -1,6 +1,6 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
-import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettingsExternalizable;
+import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 
 import javax.swing.table.DefaultTableModel;
 import java.util.Vector;
@@ -13,7 +13,7 @@ public class CsvTableEditorCustomFileEndLineBreak extends CsvTableEditorSwingTes
     }
 
     @Override
-    protected void initializeEditorSettings(CsvEditorSettingsExternalizable instance) {
+    protected void initializeEditorSettings(CsvEditorSettings instance) {
         super.initializeEditorSettings(instance);
         instance.setFileEndLineBreak(true);
     }
