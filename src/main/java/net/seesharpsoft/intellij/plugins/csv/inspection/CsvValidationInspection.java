@@ -151,7 +151,7 @@ public class CsvValidationInspection extends LocalInspectionTool {
             try {
                 PsiElement element = descriptor.getPsiElement();
                 Document document = PsiDocumentManager.getInstance(project).getDocument(element.getContainingFile());
-                CsvValueSeparator separator = CsvHelper.getCurrentValueSeparator(element.getContainingFile());
+                CsvValueSeparator separator = CsvHelper.getValueSeparator(element.getContainingFile());
                 String text = document.getText();
                 document.setText(text.substring(0, element.getTextOffset()) + separator.getCharacter() + text.substring(element.getTextOffset()));
             } catch (IncorrectOperationException e) {

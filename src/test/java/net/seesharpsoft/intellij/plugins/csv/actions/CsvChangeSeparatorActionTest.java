@@ -41,7 +41,7 @@ public class CsvChangeSeparatorActionTest extends LightPlatformCodeInsightFixtur
         for (CsvValueSeparator newSeparator : CsvValueSeparator.values()) {
             Presentation presentation = myFixture.testAction(new CsvChangeSeparatorAction(newSeparator));
             assertEquals(newSeparator.getDisplay(), presentation.getText());
-            assertEquals(newSeparator, CsvHelper.getCurrentValueSeparator(myFixture.getFile()));
+            assertEquals(newSeparator, CsvHelper.getValueSeparator(myFixture.getFile()));
         }
     }
 
@@ -52,21 +52,21 @@ public class CsvChangeSeparatorActionTest extends LightPlatformCodeInsightFixtur
             Presentation presentation = myFixture.testAction(new CsvChangeSeparatorAction(newSeparator));
             assertEquals(newSeparator.getDisplay(), presentation.getText());
             // for TSV files, the separator should always be a tab
-            assertEquals(CsvValueSeparator.TAB, CsvHelper.getCurrentValueSeparator(myFixture.getFile()));
+            assertEquals(CsvValueSeparator.TAB, CsvHelper.getValueSeparator(myFixture.getFile()));
         }
     }
 
     public void testDefaultSeparatorAction() {
         myFixture.configureByFiles("CommaSeparated.csv");
 
-        CsvValueSeparator initialSeparator = CsvHelper.getCurrentValueSeparator(myFixture.getFile());
+        CsvValueSeparator initialSeparator = CsvHelper.getValueSeparator(myFixture.getFile());
 
         myFixture.testAction(new CsvChangeSeparatorAction(CsvValueSeparator.PIPE));
 
-        assertFalse("separator should not be initial", initialSeparator.equals(CsvHelper.getCurrentValueSeparator(myFixture.getFile())));
+        assertFalse("separator should not be initial", initialSeparator.equals(CsvHelper.getValueSeparator(myFixture.getFile())));
 
         myFixture.testAction(new CsvDefaultSeparatorAction());
 
-        assertEquals(initialSeparator, CsvHelper.getCurrentValueSeparator(myFixture.getFile()));
+        assertEquals(initialSeparator, CsvHelper.getValueSeparator(myFixture.getFile()));
     }
 }

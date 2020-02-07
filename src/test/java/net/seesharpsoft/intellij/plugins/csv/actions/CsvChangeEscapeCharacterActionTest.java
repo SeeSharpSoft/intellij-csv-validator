@@ -41,21 +41,21 @@ public class CsvChangeEscapeCharacterActionTest extends LightPlatformCodeInsight
         for (CsvEscapeCharacter escapeCharacter : CsvEscapeCharacter.values()) {
             Presentation presentation = myFixture.testAction(new CsvChangeEscapeCharacterAction(escapeCharacter));
             assertEquals(escapeCharacter.getDisplay(), presentation.getText());
-            assertEquals(escapeCharacter, CsvHelper.getCurrentEscapeCharacter(myFixture.getFile()));
+            assertEquals(escapeCharacter, CsvHelper.getEscapeCharacter(myFixture.getFile()));
         }
     }
 
     public void testDefaultEscapeCharacterAction() {
         myFixture.configureByFiles("CommaSeparated.csv");
 
-        CsvEscapeCharacter initialEscapeCharacter = CsvHelper.getCurrentEscapeCharacter(myFixture.getFile());
+        CsvEscapeCharacter initialEscapeCharacter = CsvHelper.getEscapeCharacter(myFixture.getFile());
 
         myFixture.testAction(new CsvChangeEscapeCharacterAction(CsvEscapeCharacter.BACKSLASH));
 
-        assertFalse("separator should not be initial", initialEscapeCharacter.equals(CsvHelper.getCurrentEscapeCharacter(myFixture.getFile())));
+        assertFalse("separator should not be initial", initialEscapeCharacter.equals(CsvHelper.getEscapeCharacter(myFixture.getFile())));
 
         myFixture.testAction(new CsvDefaultEscapeCharacterAction());
 
-        assertEquals(initialEscapeCharacter, CsvHelper.getCurrentEscapeCharacter(myFixture.getFile()));
+        assertEquals(initialEscapeCharacter, CsvHelper.getEscapeCharacter(myFixture.getFile()));
     }
 }

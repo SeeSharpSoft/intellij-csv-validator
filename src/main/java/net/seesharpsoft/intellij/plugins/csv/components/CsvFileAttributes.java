@@ -119,7 +119,7 @@ public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttrib
     }
 
     public @NotNull
-    CsvValueSeparator getFileSeparator(Project project, VirtualFile virtualFile) {
+    CsvValueSeparator getValueSeparator(Project project, VirtualFile virtualFile) {
         if (project == null || virtualFile == null) {
             return CsvEditorSettings.getInstance().getDefaultValueSeparator();
         }
@@ -134,17 +134,9 @@ public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttrib
                 attribute.valueSeparator;
     }
 
-    public CsvValueSeparator getFileSeparator(@NotNull PsiFile psiFile) {
-        return getFileSeparator(psiFile.getProject(), psiFile.getOriginalFile().getVirtualFile());
-    }
-
-    public boolean hasSeparatorAttribute(@NotNull Project project, @NotNull VirtualFile virtualFile) {
+    public boolean hasValueSeparatorAttribute(@NotNull Project project, @NotNull VirtualFile virtualFile) {
         Attribute attribute = getFileAttribute(project, virtualFile);
         return attribute != null && attribute.valueSeparator != null;
-    }
-
-    public boolean hasSeparatorAttribute(@NotNull PsiFile psiFile) {
-        return hasSeparatorAttribute(psiFile.getProject(), psiFile.getOriginalFile().getVirtualFile());
     }
 
     public void setEscapeCharacter(@NotNull PsiFile psiFile, @NotNull CsvEscapeCharacter escapeCharacter) {
@@ -170,16 +162,8 @@ public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttrib
                 attribute.escapeCharacter;
     }
 
-    public CsvEscapeCharacter getEscapeCharacter(@NotNull PsiFile psiFile) {
-        return getEscapeCharacter(psiFile.getProject(), psiFile.getOriginalFile().getVirtualFile());
-    }
-
     public boolean hasEscapeCharacterAttribute(@NotNull Project project, @NotNull VirtualFile virtualFile) {
         Attribute attribute = getFileAttribute(project, virtualFile);
         return attribute != null && attribute.escapeCharacter != null;
-    }
-
-    public boolean hasEscapeCharacterAttribute(@NotNull PsiFile psiFile) {
-        return hasEscapeCharacterAttribute(psiFile.getProject(), psiFile.getOriginalFile().getVirtualFile());
     }
 }

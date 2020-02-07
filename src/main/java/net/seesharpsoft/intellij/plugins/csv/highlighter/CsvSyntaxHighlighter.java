@@ -46,7 +46,7 @@ public class CsvSyntaxHighlighter extends SyntaxHighlighterBase {
     @NotNull
     @Override
     public Lexer getHighlightingLexer() {
-        return new CsvLexerAdapter(CsvFileAttributes.getInstance(myProject).getFileSeparator(myProject, myVirtualFile), CsvFileAttributes.getInstance(myProject).getEscapeCharacter(myProject, myVirtualFile));
+        return new CsvLexerAdapter(CsvFileAttributes.getInstance(myProject).getValueSeparator(myProject, myVirtualFile), CsvFileAttributes.getInstance(myProject).getEscapeCharacter(myProject, myVirtualFile));
     }
 
     @NotNull

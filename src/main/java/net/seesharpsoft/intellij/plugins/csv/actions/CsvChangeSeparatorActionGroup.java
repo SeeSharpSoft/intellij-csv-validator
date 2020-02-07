@@ -36,7 +36,7 @@ public class CsvChangeSeparatorActionGroup extends ActionGroup {
         if (psiFile != null) {
             anActionEvent.getPresentation()
                     .setText(String.format("CSV Value Separator: %s",
-                            CsvHelper.getCurrentValueSeparator(psiFile).getDisplay())
+                            CsvHelper.getValueSeparator(psiFile).getDisplay())
                     );
         }
     }

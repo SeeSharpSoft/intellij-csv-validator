@@ -26,8 +26,8 @@ public class CsvFileAttributesTest extends LightPlatformCodeInsightFixtureTestCa
     public void testFileEscapeCharacter() {
         myFixture.configureByFiles("AnyFile.csv");
 
-        assertEquals(CsvEditorSettings.ESCAPE_CHARACTER_DEFAULT, CsvFileAttributes.getInstance(this.getProject()).getEscapeCharacter(myFixture.getFile()));
-        assertEquals(CsvEditorSettings.ESCAPE_CHARACTER_DEFAULT, CsvHelper.getCurrentEscapeCharacter(myFixture.getFile()));
+        assertEquals(CsvEditorSettings.ESCAPE_CHARACTER_DEFAULT, CsvFileAttributes.getInstance(this.getProject()).getEscapeCharacter(this.getProject(), myFixture.getFile().getOriginalFile().getVirtualFile()));
+        assertEquals(CsvEditorSettings.ESCAPE_CHARACTER_DEFAULT, CsvHelper.getEscapeCharacter(myFixture.getFile()));
     }
 
     public void testSaveFileEscapeCharacter() {
@@ -36,7 +36,7 @@ public class CsvFileAttributesTest extends LightPlatformCodeInsightFixtureTestCa
         CsvFileAttributes csvFileAttributes = CsvFileAttributes.getInstance(this.getProject());
         csvFileAttributes.setEscapeCharacter(myFixture.getFile(), CsvEscapeCharacter.BACKSLASH);
 
-        assertEquals(CsvEscapeCharacter.BACKSLASH, csvFileAttributes.getEscapeCharacter(myFixture.getFile()));
+        assertEquals(CsvEscapeCharacter.BACKSLASH, csvFileAttributes.getEscapeCharacter(this.getProject(), myFixture.getFile().getOriginalFile().getVirtualFile()));
     }
 
 }

@@ -309,8 +309,8 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
             this.document = FileDocumentManager.getInstance().getDocument(this.file);
             PsiDocumentManager documentManager = PsiDocumentManager.getInstance(project);
             this.psiFile = documentManager.getPsiFile(this.document);
-            this.currentSeparator = CsvHelper.getCurrentValueSeparator(this.psiFile);
-            this.currentEscapeCharacter = CsvHelper.getCurrentEscapeCharacter(this.psiFile);
+            this.currentSeparator = CsvHelper.getValueSeparator(this.psiFile);
+            this.currentEscapeCharacter = CsvHelper.getEscapeCharacter(this.psiFile);
         }
         return this.psiFile instanceof CsvFile ? (CsvFile) psiFile : null;
     }

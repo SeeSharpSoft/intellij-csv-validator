@@ -11,12 +11,10 @@ import com.intellij.psi.TokenType;
 import com.intellij.psi.tree.IFileElementType;
 import com.intellij.psi.tree.TokenSet;
 import net.seesharpsoft.intellij.lang.FileParserDefinition;
-import net.seesharpsoft.intellij.plugins.csv.components.CsvFileAttributes;
 import net.seesharpsoft.intellij.plugins.csv.parser.CsvParser;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvFile;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvFileElementType;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
-import net.seesharpsoft.intellij.plugins.csv.settings.CsvCodeStyleSettings;
 import org.jetbrains.annotations.NotNull;
 
 public class CsvParserDefinition implements FileParserDefinition {
@@ -77,7 +75,7 @@ public class CsvParserDefinition implements FileParserDefinition {
 
     @Override
     public Lexer createLexer(@NotNull PsiFile file) {
-        return new CsvLexerAdapter(CsvHelper.getCurrentValueSeparator(file), CsvFileAttributes.getInstance(file.getProject()).getEscapeCharacter(file));
+        return new CsvLexerAdapter(CsvHelper.getValueSeparator(file), CsvHelper.getEscapeCharacter(file));
     }
 
     @Override

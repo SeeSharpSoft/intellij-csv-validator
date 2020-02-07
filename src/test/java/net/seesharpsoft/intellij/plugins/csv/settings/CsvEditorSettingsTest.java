@@ -13,12 +13,12 @@ public class CsvEditorSettingsTest extends LightPlatformCodeInsightFixtureTestCa
     public void testDefaultValueSeparator() {
         myFixture.configureByFiles("AnyFile.csv");
 
-        assertEquals(CsvEditorSettings.VALUE_SEPARATOR_DEFAULT, CsvHelper.getCurrentValueSeparator(myFixture.getFile()));
+        assertEquals(CsvEditorSettings.VALUE_SEPARATOR_DEFAULT, CsvHelper.getValueSeparator(myFixture.getFile()));
     }
 
     public void testDefaultEscapeCharacter() {
         myFixture.configureByFiles("AnyFile.csv");
 
-        assertEquals(CsvEditorSettings.ESCAPE_CHARACTER_DEFAULT, CsvHelper.getCurrentEscapeCharacter(myFixture.getFile()));
+        assertEquals(CsvEditorSettings.ESCAPE_CHARACTER_DEFAULT, CsvHelper.getEscapeCharacter(myFixture.getFile()));
     }
 }

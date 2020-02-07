@@ -151,24 +151,48 @@ public final class CsvHelper {
         return separator == null ? field.getContainingFile().getTextLength() : separator.getTextOffset();
     }
 
-    public static CsvValueSeparator getCurrentValueSeparator(CsvFile csvFile) {
-        return getCurrentValueSeparator(csvFile.getContainingFile());
+    public static VirtualFile getVirtualFile(PsiFile psiFile) {
+        return psiFile == null ? null : psiFile.getOriginalFile().getVirtualFile();
     }
 
-    public static CsvValueSeparator getCurrentValueSeparator(PsiFile psiFile) {
-        return CsvFileAttributes.getInstance(psiFile.getProject()).getFileSeparator(psiFile);
+    public static Project getProject(PsiFile psiFile) {
+        return psiFile == null ? null : psiFile.getProject();
     }
 
-    public static CsvEscapeCharacter getCurrentEscapeCharacter(CsvFile csvFile) {
-        return getCurrentEscapeCharacter(csvFile.getContainingFile());
+    public static CsvValueSeparator getValueSeparator(CsvFile csvFile) {
+        return getValueSeparator(csvFile.getContainingFile());
     }
 
-    public static CsvEscapeCharacter getCurrentEscapeCharacter(PsiFile psiFile) {
-        return CsvFileAttributes.getInstance(psiFile.getProject()).getEscapeCharacter(psiFile);
+    public static CsvValueSeparator getValueSeparator(PsiFile psiFile) {
+        return getValueSeparator(getProject(psiFile), getVirtualFile(psiFile));
+    }
+
+    public static CsvValueSeparator getValueSeparator(Project project, VirtualFile virtualFile) {
+        return CsvFileAttributes.getInstance(project).getValueSeparator(project, virtualFile);
+    }
+
+    public static boolean hasValueSeparatorAttribute(@NotNull PsiFile psiFile) {
+        return CsvFileAttributes.getInstance(getProject(psiFile)).hasValueSeparatorAttribute(getProject(psiFile), getVirtualFile(psiFile));
+    }
+
+    public static CsvEscapeCharacter getEscapeCharacter(CsvFile csvFile) {
+        return getEscapeCharacter(csvFile.getContainingFile());
+    }
+
+    public static CsvEscapeCharacter getEscapeCharacter(PsiFile psiFile) {
+        return getEscapeCharacter(getProject(psiFile), getVirtualFile(psiFile));
+    }
+
+    public static CsvEscapeCharacter getEscapeCharacter(Project project, VirtualFile virtualFile) {
+        return CsvFileAttributes.getInstance(project).getEscapeCharacter(project, virtualFile);
+    }
+
+    public static boolean hasEscapeCharacterAttribute(@NotNull PsiFile psiFile) {
+        return CsvFileAttributes.getInstance(getProject(psiFile)).hasEscapeCharacterAttribute(getProject(psiFile), getVirtualFile(psiFile));
     }
 
     public static CsvColumnInfoMap<PsiElement> createColumnInfoMap(CsvFile csvFile) {
-        CsvEscapeCharacter escapeCharacter = getCurrentEscapeCharacter(csvFile);
+        CsvEscapeCharacter escapeCharacter = getEscapeCharacter(csvFile);
         Map<Integer, CsvColumnInfo<PsiElement>> columnInfoMap = new HashMap<>();
         CsvRecord[] records = PsiTreeUtil.getChildrenOfType(csvFile, CsvRecord.class);
         int row = 0;

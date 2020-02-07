@@ -9,6 +9,7 @@ import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.psi.PsiFile;
 import com.intellij.util.FileContentUtilCore;
+import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
 import net.seesharpsoft.intellij.plugins.csv.CsvSeparatorHolder;
 import net.seesharpsoft.intellij.plugins.csv.CsvValueSeparator;
@@ -29,8 +30,7 @@ public class CsvChangeSeparatorAction extends ToggleAction {
         if (psiFile == null) {
             return false;
         }
-        CsvFileAttributes csvFileAttributes = ServiceManager.getService(psiFile.getProject(), CsvFileAttributes.class);
-        return csvFileAttributes.getFileSeparator(psiFile) != null && csvFileAttributes.getFileSeparator(psiFile).equals(mySeparator);
+        return CsvHelper.hasValueSeparatorAttribute(psiFile) && CsvHelper.getValueSeparator(psiFile).equals(mySeparator);
     }
 
     @Override
