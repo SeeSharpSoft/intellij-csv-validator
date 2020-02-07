@@ -1,8 +1,6 @@
 {
   parserClass="net.seesharpsoft.intellij.plugins.csv.parser.CsvParser"
 
-  parserImports=["static net.seesharpsoft.intellij.plugins.csv.CsvParserUtil.*"]
-
   extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
 
   psiClassPrefix="Csv"
@@ -25,10 +23,10 @@
 
 csvFile ::= record (CRLF record)* [CRLF]
 
-record ::= field ( << separator >> COMMA field)*
+record ::= field (COMMA field)*
 
 field ::= (escaped | nonEscaped)
 
-private escaped ::= QUOTE ( TEXT | << escapeCharacter >> ESCAPED_TEXT)* QUOTE
+private escaped ::= QUOTE (TEXT | ESCAPED_TEXT)* QUOTE
 
 private nonEscaped ::= TEXT*

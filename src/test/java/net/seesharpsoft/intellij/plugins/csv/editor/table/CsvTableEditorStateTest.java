@@ -1,7 +1,7 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table;
 
 import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase;
-import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettings;
+import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import org.jdom.Element;
 
 public class CsvTableEditorStateTest extends LightPlatformCodeInsightFixtureTestCase {

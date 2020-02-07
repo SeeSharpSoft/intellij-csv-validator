@@ -1,9 +1,11 @@
-package net.seesharpsoft.intellij.plugins.csv.editor;
+package net.seesharpsoft.intellij.plugins.csv.settings;
 
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.options.SearchableConfigurable;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.ui.CheckBoxWithColorChooser;
+import net.seesharpsoft.intellij.plugins.csv.CsvEscapeCharacter;
+import net.seesharpsoft.intellij.plugins.csv.CsvValueSeparator;
 import net.seesharpsoft.intellij.ui.CustomDisplayListCellRenderer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -38,6 +40,7 @@ public class CsvEditorSettingsProvider implements SearchableConfigurable {
     private JFormattedTextField tfDefaultColumnWidth;
     private JCheckBox cbAdjustColumnWidthOnOpen;
     private JComboBox comboEscapeCharacter;
+    private JComboBox comboValueSeparator;
 
     @NotNull
     @Override
@@ -47,12 +50,12 @@ public class CsvEditorSettingsProvider implements SearchableConfigurable {
 
     @Override
     public String getDisplayName() {
-        return "CSV/TSV Editor";
+        return "CSV/TSV/PSV";
     }
 
     @Override
     public String getHelpTopic() {
-        return "Editor Options for CSV/TSV files";
+        return "Editor Options for CSV/TSV/PSV files";
     }
 
     @Nullable
@@ -86,7 +89,8 @@ public class CsvEditorSettingsProvider implements SearchableConfigurable {
                 !tfMaxColumnWidth.getValue().equals(csvEditorSettings.getTableAutoMaxColumnWidth()) ||
                 !tfDefaultColumnWidth.getValue().equals(csvEditorSettings.getTableDefaultColumnWidth()) ||
                 isModified(cbAdjustColumnWidthOnOpen, csvEditorSettings.isTableAutoColumnWidthOnOpen()) ||
-                !Objects.equals(comboEscapeCharacter.getSelectedItem(), csvEditorSettings.getDefaultEscapeCharacter());
+                !Objects.equals(comboEscapeCharacter.getSelectedItem(), csvEditorSettings.getDefaultEscapeCharacter()) ||
+                !Objects.equals(comboValueSeparator.getSelectedItem(), csvEditorSettings.getDefaultValueSeparator());
     }
 
     @Override
@@ -109,6 +113,7 @@ public class CsvEditorSettingsProvider implements SearchableConfigurable {
         tfDefaultColumnWidth.setValue(csvEditorSettings.getTableDefaultColumnWidth());
         cbAdjustColumnWidthOnOpen.setSelected(csvEditorSettings.isTableAutoColumnWidthOnOpen());
         comboEscapeCharacter.setSelectedItem(csvEditorSettings.getDefaultEscapeCharacter());
+        comboValueSeparator.setSelectedItem(csvEditorSettings.getDefaultValueSeparator());
     }
 
     @Override
@@ -130,12 +135,16 @@ public class CsvEditorSettingsProvider implements SearchableConfigurable {
         csvEditorSettings.setTableAutoMaxColumnWidth((int) tfMaxColumnWidth.getValue());
         csvEditorSettings.setTableDefaultColumnWidth((int) tfDefaultColumnWidth.getValue());
         csvEditorSettings.setTableAutoColumnWidthOnOpen(cbAdjustColumnWidthOnOpen.isSelected());
-        csvEditorSettings.setDefaultEscapeCharacter((CsvEditorSettings.EscapeCharacter)comboEscapeCharacter.getSelectedItem());
+        csvEditorSettings.setDefaultEscapeCharacter((CsvEscapeCharacter)comboEscapeCharacter.getSelectedItem());
+        csvEditorSettings.setDefaultValueSeparator((CsvValueSeparator)comboValueSeparator.getSelectedItem());
     }
 
     protected void createUIComponents() {
-        comboEscapeCharacter = new ComboBox(CsvEditorSettings.EscapeCharacter.values());
-        comboEscapeCharacter.setRenderer(new CustomDisplayListCellRenderer<CsvEditorSettings.EscapeCharacter>(ec -> ec.getDisplay()));
+        comboEscapeCharacter = new ComboBox(CsvEscapeCharacter.values());
+        comboEscapeCharacter.setRenderer(new CustomDisplayListCellRenderer<CsvEscapeCharacter>(ec -> ec.getDisplay()));
+
+        comboValueSeparator = new ComboBox(CsvValueSeparator.values());
+        comboValueSeparator.setRenderer(new CustomDisplayListCellRenderer<CsvValueSeparator>(ec -> ec.getDisplay()));
 
         cbTabHighlightColor = new CheckBoxWithColorChooser("Highlight tab separator   ");
         cbTabHighlightColor.setColor(Color.CYAN);

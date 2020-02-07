@@ -2,13 +2,21 @@ package net.seesharpsoft.intellij.plugins.csv.actions;
 
 import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase;
-import net.seesharpsoft.intellij.plugins.csv.settings.CsvCodeStyleSettings;
+import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
+import net.seesharpsoft.intellij.plugins.csv.CsvValueSeparator;
+import net.seesharpsoft.intellij.plugins.csv.components.CsvFileAttributes;
 
 public class CsvChangeSeparatorActionTest extends LightPlatformCodeInsightFixtureTestCase {
 
     @Override
     protected String getTestDataPath() {
         return "./src/test/resources/actions";
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        CsvFileAttributes.getInstance(this.getProject()).reset();
+        super.tearDown();
     }
 
     public void testActionGroupVisibilityForCsv() {
@@ -30,37 +38,35 @@ public class CsvChangeSeparatorActionTest extends LightPlatformCodeInsightFixtur
     public void testChangeSeparatorForCsv() {
         myFixture.configureByFiles("CommaSeparated.csv");
 
-        for (int i = 0; i < CsvCodeStyleSettings.SUPPORTED_SEPARATORS.length; ++i) {
-            String newSeparator = CsvCodeStyleSettings.SUPPORTED_SEPARATORS[i];
-            Presentation presentation = myFixture.testAction(new CsvChangeSeparatorAction(newSeparator, CsvCodeStyleSettings.getSeparatorDisplayText(newSeparator)));
-            assertEquals(CsvCodeStyleSettings.getSeparatorDisplayText(newSeparator), presentation.getText());
-            assertEquals(newSeparator, CsvCodeStyleSettings.getCurrentSeparator(myFixture.getFile()));
+        for (CsvValueSeparator newSeparator : CsvValueSeparator.values()) {
+            Presentation presentation = myFixture.testAction(new CsvChangeSeparatorAction(newSeparator));
+            assertEquals(newSeparator.getDisplay(), presentation.getText());
+            assertEquals(newSeparator, CsvHelper.getValueSeparator(myFixture.getFile()));
         }
     }
 
     public void testChangeSeparatorForTsv() {
         myFixture.configureByFiles("TabSeparated.tsv");
 
-        for (int i = 0; i < CsvCodeStyleSettings.SUPPORTED_SEPARATORS.length; ++i) {
-            String newSeparator = CsvCodeStyleSettings.SUPPORTED_SEPARATORS[i];
-            Presentation presentation = myFixture.testAction(new CsvChangeSeparatorAction(newSeparator, CsvCodeStyleSettings.getSeparatorDisplayText(newSeparator)));
-            assertEquals(CsvCodeStyleSettings.getSeparatorDisplayText(newSeparator), presentation.getText());
+        for (CsvValueSeparator newSeparator : CsvValueSeparator.values()) {
+            Presentation presentation = myFixture.testAction(new CsvChangeSeparatorAction(newSeparator));
+            assertEquals(newSeparator.getDisplay(), presentation.getText());
             // for TSV files, the separator should always be a tab
-            assertEquals("\t", CsvCodeStyleSettings.getCurrentSeparator(myFixture.getFile()));
+            assertEquals(CsvValueSeparator.TAB, CsvHelper.getValueSeparator(myFixture.getFile()));
         }
     }
 
     public void testDefaultSeparatorAction() {
         myFixture.configureByFiles("CommaSeparated.csv");
 
-        String initialSeparator = CsvCodeStyleSettings.getCurrentSeparator(myFixture.getFile());
+        CsvValueSeparator initialSeparator = CsvHelper.getValueSeparator(myFixture.getFile());
 
-        myFixture.testAction(new CsvChangeSeparatorAction("|", CsvCodeStyleSettings.getSeparatorDisplayText("|")));
+        myFixture.testAction(new CsvChangeSeparatorAction(CsvValueSeparator.PIPE));
 
-        assertFalse("separator should not be initial", initialSeparator.equals(CsvCodeStyleSettings.getCurrentSeparator(myFixture.getFile())));
+        assertFalse("separator should not be initial", initialSeparator.equals(CsvHelper.getValueSeparator(myFixture.getFile())));
 
         myFixture.testAction(new CsvDefaultSeparatorAction());
 
-        assertEquals(initialSeparator, CsvCodeStyleSettings.getCurrentSeparator(myFixture.getFile()));
+        assertEquals(initialSeparator, CsvHelper.getValueSeparator(myFixture.getFile()));
     }
 }

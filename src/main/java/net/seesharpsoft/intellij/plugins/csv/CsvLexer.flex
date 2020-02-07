@@ -1,10 +1,9 @@
 package net.seesharpsoft.intellij.plugins.csv;
 
-import com.intellij.lexer.FlexLexer;
 import com.intellij.psi.tree.IElementType;
-import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettings;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
 import com.intellij.psi.TokenType;
+import com.intellij.lexer.FlexLexer;
 
 import java.util.regex.Pattern;
 
@@ -16,17 +15,17 @@ import java.util.regex.Pattern;
 %function advance
 %type IElementType
 %{
-    private String currentSeparator;
-    private CsvEditorSettings.EscapeCharacter myEscapeCharacter;
+    private CsvValueSeparator myValueSeparator;
+    private CsvEscapeCharacter myEscapeCharacter;
 
     private static final Pattern ESCAPE_TEXT_PATTERN = Pattern.compile("[,;|\\t\\r\\n]");
 
     /**
      * Provide constructor that supports a Project as parameter.
      */
-    CsvLexer(java.io.Reader in, String separator, CsvEditorSettings.EscapeCharacter escapeCharacter) {
+    CsvLexer(java.io.Reader in, CsvValueSeparator valueSeparator, CsvEscapeCharacter escapeCharacter) {
       this(in);
-      this.currentSeparator = separator;
+      myValueSeparator = valueSeparator;
       myEscapeCharacter = escapeCharacter;
     }
 %}
@@ -82,7 +81,7 @@ WHITE_SPACE=[ \f]+
 
 <YYINITIAL, AFTER_TEXT, UNESCAPED_TEXT> {COMMA}
 {
-    if (currentSeparator.equals(yytext().toString())) {
+    if (myValueSeparator.isValueSeparator(yytext().toString())) {
         yybegin(YYINITIAL);
         return CsvTypes.COMMA;
     }

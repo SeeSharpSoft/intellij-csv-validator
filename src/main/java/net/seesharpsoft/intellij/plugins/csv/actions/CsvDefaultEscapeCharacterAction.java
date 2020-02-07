@@ -7,6 +7,7 @@ import com.intellij.openapi.actionSystem.ToggleAction;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.psi.PsiFile;
 import com.intellij.util.FileContentUtilCore;
+import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvFileAttributes;
 import org.jetbrains.annotations.NotNull;
 
@@ -21,7 +22,7 @@ public class CsvDefaultEscapeCharacterAction extends ToggleAction {
         if (psiFile == null) {
             return false;
         }
-        return !CsvFileAttributes.getInstance(psiFile.getProject()).hasEscapeCharacterAttribute(psiFile);
+        return !CsvHelper.hasEscapeCharacterAttribute(psiFile);
     }
 
     @Override

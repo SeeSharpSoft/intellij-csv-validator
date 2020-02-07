@@ -1,6 +1,6 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
-import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettings;
+import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 
 public class CsvTableEditorAutoColumnWidthOnOpen extends CsvTableEditorSwingTestBase {
 

@@ -9,17 +9,18 @@ import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.psi.PsiFile;
 import com.intellij.util.FileContentUtilCore;
+import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
 import net.seesharpsoft.intellij.plugins.csv.CsvSeparatorHolder;
+import net.seesharpsoft.intellij.plugins.csv.CsvValueSeparator;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvFileAttributes;
-import net.seesharpsoft.intellij.plugins.csv.settings.CsvCodeStyleSettings;
 import org.jetbrains.annotations.NotNull;
 
 public class CsvChangeSeparatorAction extends ToggleAction {
-    private String mySeparator;
+    private CsvValueSeparator mySeparator;
 
-    CsvChangeSeparatorAction(String separator, String mySeparatorTextArg) {
-        super(mySeparatorTextArg);
+    CsvChangeSeparatorAction(CsvValueSeparator separator) {
+        super(separator.getDisplay());
         mySeparator = separator;
     }
 
@@ -29,8 +30,7 @@ public class CsvChangeSeparatorAction extends ToggleAction {
         if (psiFile == null) {
             return false;
         }
-        CsvFileAttributes csvFileAttributes = ServiceManager.getService(psiFile.getProject(), CsvFileAttributes.class);
-        return csvFileAttributes.getFileSeparator(psiFile) != null && CsvCodeStyleSettings.getCurrentSeparator(anActionEvent.getProject(), psiFile).equals(mySeparator);
+        return CsvHelper.hasValueSeparatorAttribute(psiFile) && CsvHelper.getValueSeparator(psiFile).equals(mySeparator);
     }
 
     @Override

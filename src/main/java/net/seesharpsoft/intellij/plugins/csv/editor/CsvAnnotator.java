@@ -10,10 +10,11 @@ import com.intellij.psi.tree.IElementType;
 import com.intellij.xml.util.XmlStringUtil;
 import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfo;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
+import net.seesharpsoft.intellij.plugins.csv.CsvValueSeparator;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvFile;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
-import net.seesharpsoft.intellij.plugins.csv.settings.CsvCodeStyleSettings;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvColorSettings;
+import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import org.jetbrains.annotations.NotNull;
 
 import static com.intellij.spellchecker.SpellCheckerSeveritiesProvider.TYPO;
@@ -87,8 +88,8 @@ public class CsvAnnotator implements Annotator {
         if (elementType == CsvTypes.COMMA) {
             TextAttributes textAttributes = holder.getCurrentAnnotationSession().getUserData(TAB_SEPARATOR_HIGHLIGHT_COLOR_KEY);
             if (!Boolean.TRUE.equals(holder.getCurrentAnnotationSession().getUserData(TAB_SEPARATOR_HIGHLIGHT_COLOR_DETERMINED_KEY))) {
-                String separator = CsvCodeStyleSettings.getCurrentSeparator(csvFile);
-                if (CsvEditorSettings.getInstance().isHighlightTabSeparator() && separator.equals(CsvCodeStyleSettings.TAB_SEPARATOR)) {
+                CsvValueSeparator separator = CsvHelper.getValueSeparator(csvFile);
+                if (CsvEditorSettings.getInstance().isHighlightTabSeparator() && separator.equals(CsvValueSeparator.TAB)) {
                     textAttributes = new TextAttributes(null,
                             CsvEditorSettings.getInstance().getTabHighlightColor(),
                             null, null, 0);

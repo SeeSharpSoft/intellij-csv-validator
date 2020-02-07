@@ -2,9 +2,9 @@ package net.seesharpsoft.intellij.plugins.csv.actions;
 
 import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase;
+import net.seesharpsoft.intellij.plugins.csv.CsvEscapeCharacter;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvFileAttributes;
-import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettings;
 
 public class CsvChangeEscapeCharacterActionTest extends LightPlatformCodeInsightFixtureTestCase {
 
@@ -38,24 +38,24 @@ public class CsvChangeEscapeCharacterActionTest extends LightPlatformCodeInsight
     public void testChangeEscapeCharacter() {
         myFixture.configureByFiles("CommaSeparated.csv");
 
-        for (CsvEditorSettings.EscapeCharacter escapeCharacter : CsvEditorSettings.EscapeCharacter.values()) {
+        for (CsvEscapeCharacter escapeCharacter : CsvEscapeCharacter.values()) {
             Presentation presentation = myFixture.testAction(new CsvChangeEscapeCharacterAction(escapeCharacter));
             assertEquals(escapeCharacter.getDisplay(), presentation.getText());
-            assertEquals(escapeCharacter, CsvHelper.getCurrentEscapeCharacter(myFixture.getFile()));
+            assertEquals(escapeCharacter, CsvHelper.getEscapeCharacter(myFixture.getFile()));
         }
     }
 
     public void testDefaultEscapeCharacterAction() {
         myFixture.configureByFiles("CommaSeparated.csv");
 
-        CsvEditorSettings.EscapeCharacter initialEscapeCharacter = CsvHelper.getCurrentEscapeCharacter(myFixture.getFile());
+        CsvEscapeCharacter initialEscapeCharacter = CsvHelper.getEscapeCharacter(myFixture.getFile());
 
-        myFixture.testAction(new CsvChangeEscapeCharacterAction(CsvEditorSettings.EscapeCharacter.BACKSLASH));
+        myFixture.testAction(new CsvChangeEscapeCharacterAction(CsvEscapeCharacter.BACKSLASH));
 
-        assertFalse("separator should not be initial", initialEscapeCharacter.equals(CsvHelper.getCurrentEscapeCharacter(myFixture.getFile())));
+        assertFalse("separator should not be initial", initialEscapeCharacter.equals(CsvHelper.getEscapeCharacter(myFixture.getFile())));
 
         myFixture.testAction(new CsvDefaultEscapeCharacterAction());
 
-        assertEquals(initialEscapeCharacter, CsvHelper.getCurrentEscapeCharacter(myFixture.getFile()));
+        assertEquals(initialEscapeCharacter, CsvHelper.getEscapeCharacter(myFixture.getFile()));
     }
 }

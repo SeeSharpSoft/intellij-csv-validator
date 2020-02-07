@@ -1,8 +1,9 @@
 package net.seesharpsoft.intellij.plugins.csv.components;
 
 import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase;
+import net.seesharpsoft.intellij.plugins.csv.CsvEscapeCharacter;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
-import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettings;
+import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 
 public class CsvFileAttributesTest extends LightPlatformCodeInsightFixtureTestCase {
     @Override
@@ -25,17 +26,17 @@ public class CsvFileAttributesTest extends LightPlatformCodeInsightFixtureTestCa
     public void testFileEscapeCharacter() {
         myFixture.configureByFiles("AnyFile.csv");
 
-        assertEquals(CsvEditorSettings.ESCAPE_CHARACTER_DEFAULT, CsvFileAttributes.getInstance(this.getProject()).getEscapeCharacter(myFixture.getFile()));
-        assertEquals(CsvEditorSettings.ESCAPE_CHARACTER_DEFAULT, CsvHelper.getCurrentEscapeCharacter(myFixture.getFile()));
+        assertEquals(CsvEditorSettings.ESCAPE_CHARACTER_DEFAULT, CsvFileAttributes.getInstance(this.getProject()).getEscapeCharacter(this.getProject(), myFixture.getFile().getOriginalFile().getVirtualFile()));
+        assertEquals(CsvEditorSettings.ESCAPE_CHARACTER_DEFAULT, CsvHelper.getEscapeCharacter(myFixture.getFile()));
     }
 
     public void testSaveFileEscapeCharacter() {
         myFixture.configureByFiles("AnyFile.csv");
 
         CsvFileAttributes csvFileAttributes = CsvFileAttributes.getInstance(this.getProject());
-        csvFileAttributes.setEscapeCharacter(myFixture.getFile(), CsvEditorSettings.EscapeCharacter.BACKSLASH);
+        csvFileAttributes.setEscapeCharacter(myFixture.getFile(), CsvEscapeCharacter.BACKSLASH);
 
-        assertEquals(CsvEditorSettings.EscapeCharacter.BACKSLASH, csvFileAttributes.getEscapeCharacter(myFixture.getFile()));
+        assertEquals(CsvEscapeCharacter.BACKSLASH, csvFileAttributes.getEscapeCharacter(this.getProject(), myFixture.getFile().getOriginalFile().getVirtualFile()));
     }
 
 }

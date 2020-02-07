@@ -7,14 +7,15 @@ import com.intellij.openapi.actionSystem.ToggleAction;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.psi.PsiFile;
 import com.intellij.util.FileContentUtilCore;
+import net.seesharpsoft.intellij.plugins.csv.CsvEscapeCharacter;
+import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvFileAttributes;
-import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorSettings;
 import org.jetbrains.annotations.NotNull;
 
 public class CsvChangeEscapeCharacterAction extends ToggleAction {
-    private CsvEditorSettings.EscapeCharacter myEscapeCharacter;
+    private CsvEscapeCharacter myEscapeCharacter;
 
-    CsvChangeEscapeCharacterAction(CsvEditorSettings.EscapeCharacter escapeCharacter) {
+    CsvChangeEscapeCharacterAction(CsvEscapeCharacter escapeCharacter) {
         super(escapeCharacter.getDisplay());
         myEscapeCharacter = escapeCharacter;
     }
@@ -25,8 +26,7 @@ public class CsvChangeEscapeCharacterAction extends ToggleAction {
         if (psiFile == null) {
             return false;
         }
-        CsvFileAttributes csvFileAttributes = CsvFileAttributes.getInstance(psiFile.getProject());
-        return csvFileAttributes.hasEscapeCharacterAttribute(psiFile) && csvFileAttributes.getEscapeCharacter(psiFile).equals(myEscapeCharacter);
+        return CsvHelper.hasEscapeCharacterAttribute(psiFile) && CsvHelper.getEscapeCharacter(psiFile).equals(myEscapeCharacter);
     }
 
     @Override
