@@ -122,6 +122,22 @@ The preferred editor usage can be switched between "Text Editor first", "Table E
 
 Enable zero-based column numbering. This affects the tooltip info of the text editor as well as column numbering of the table editor.
 
+##### Default Value Separator (CSV only)
+
+The following separators are currently supported: **,** (Comma), **;** (Semicolon), **|** (Pipe) and **&#8633;** (Tab)
+
+_Default Value Separator_ defines which separator is used as standard for each newly opened CSV file. The separator character can be changed for each file individually in its editors context menu.
+
+This option has no effect on TSV/PSV files, the separator is pre-defined by their file- and language-type.
+
+##### Default Escape Character
+
+The following escape characters are currently supported: **"** (Double Quote), **\\** (Backslash)
+
+Within quoted values (fields starting and ending with a double quote), the double quote character must be escaped to be parsed as part of its value and not to be treated as the closing quote. 
+
+_Default Escape Character_ defines which escape character is used as standard for each newly opened CSV/TSV/PSV file. The escape character can be changed for each file individually in its editors context menu.
+
 #### Text Editor
 
 ##### Highlighting
@@ -223,11 +239,7 @@ Annasusanna,Amsterdam,1
 
 ##### Separator
 
-The following separators are currently supported: **,** (Comma), **;** (Semicolon), **|** (Pipe) and **&#8633;** (Tab)
-
-_Value separator (default)_ defines which separator is used by default. The separator character can be changed for each CSV file individually.
-
-When changing the separator, press the apply button to refresh the preview window properly. 
+Adjust spacing around the separator.
 
 _Space before separator_
 

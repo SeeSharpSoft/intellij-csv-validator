@@ -51,6 +51,9 @@
 NEW: customizable escape character #159
 NEW: value separator setting moved from 'Code Style' to 'General'
 + lots of code cleanup & rework
+
+FIX: update failed for AnAction #181
+FIX: selection indicator for default separator action
       </pre>
     ]]>
     </change-notes>
