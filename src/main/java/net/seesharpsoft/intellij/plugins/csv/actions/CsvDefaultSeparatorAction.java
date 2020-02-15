@@ -22,7 +22,7 @@ public class CsvDefaultSeparatorAction extends ToggleAction {
         if (psiFile == null) {
             return false;
         }
-        return CsvHelper.getValueSeparator(psiFile) == null;
+        return !CsvHelper.hasValueSeparatorAttribute(psiFile);
     }
 
     @Override
@@ -31,7 +31,6 @@ public class CsvDefaultSeparatorAction extends ToggleAction {
         if (psiFile == null) {
             return;
         }
-
         CsvFileAttributes.getInstance(psiFile.getProject()).resetValueSeparator(psiFile);
         FileContentUtilCore.reparseFiles(psiFile.getVirtualFile());
 
