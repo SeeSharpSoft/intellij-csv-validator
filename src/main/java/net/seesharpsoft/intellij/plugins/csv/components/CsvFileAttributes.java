@@ -120,10 +120,9 @@ public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttrib
 
     public @NotNull
     CsvValueSeparator getValueSeparator(Project project, VirtualFile virtualFile) {
-        if (project == null || virtualFile == null) {
+        if (project == null || virtualFile == null || !(virtualFile.getFileType() instanceof LanguageFileType)) {
             return CsvEditorSettings.getInstance().getDefaultValueSeparator();
         }
-        assert(virtualFile.getFileType() instanceof LanguageFileType);
         Language language = ((LanguageFileType) virtualFile.getFileType()).getLanguage();
         if (language instanceof CsvSeparatorHolder) {
                 return ((CsvSeparatorHolder) language).getSeparator();
