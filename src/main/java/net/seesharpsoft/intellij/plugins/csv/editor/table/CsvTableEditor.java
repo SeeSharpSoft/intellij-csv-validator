@@ -343,12 +343,19 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
     }
 
     protected final void setAllColumnWidths(int[] widths) {
+        if (widths == null) {
+            return;
+        }
         getFileEditorState().setColumnWidths(widths);
         updateEditorLayout();
     }
 
     protected int[] calculateDistributedColumnWidths() {
-        Map<Integer, CsvColumnInfo<PsiElement>> columnInfos = this.getColumnInfoMap().getColumnInfos();
+        CsvColumnInfoMap csvColumnInfoMap = this.getColumnInfoMap();
+        if (csvColumnInfoMap == null) {
+            return null;
+        }
+        Map<Integer, CsvColumnInfo<PsiElement>> columnInfos = csvColumnInfoMap.getColumnInfos();
         Object[][] data = getDataHandler().getCurrentState();
         int[] widths = new int[columnInfos.size()];
         int tableAutoMaxColumnWidth = CsvEditorSettings.getInstance().getTableAutoMaxColumnWidth();
