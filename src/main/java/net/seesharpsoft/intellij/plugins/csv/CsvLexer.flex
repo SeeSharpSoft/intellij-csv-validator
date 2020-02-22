@@ -35,7 +35,7 @@ import java.util.regex.Pattern;
 TEXT=[^ ,;|\t\r\n\"\\]+
 ESCAPED_TEXT=[,;|\t\r\n\\]|\"\"|\\\"
 QUOTE=\"
-COMMA=[,;|\t]
+SPECIAL_CHAR=[,;|\t\\]
 EOL=\n
 WHITE_SPACE=[ \f]+
 
@@ -79,7 +79,7 @@ WHITE_SPACE=[ \f]+
     return TokenType.BAD_CHARACTER;
 }
 
-<YYINITIAL, AFTER_TEXT, UNESCAPED_TEXT> {COMMA}
+<YYINITIAL, AFTER_TEXT, UNESCAPED_TEXT> {SPECIAL_CHAR}
 {
     if (myValueSeparator.isValueSeparator(yytext().toString())) {
         yybegin(YYINITIAL);
