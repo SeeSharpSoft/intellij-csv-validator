@@ -12,13 +12,37 @@ public class CsvIntentionTest extends LightPlatformCodeInsightFixtureTestCase {
         return "./src/test/resources/intention";
     }
 
+    @Override
+    protected void tearDown() throws Exception {
+        CsvEditorSettings.getInstance().setDefaultEscapeCharacter(CsvEditorSettings.ESCAPE_CHARACTER_DEFAULT);
+        super.tearDown();
+    }
+
     protected void doTestIntention(String testName, String hint) throws Throwable {
+        doTestIntention(testName, hint, false);
+    }
+
+    protected void doTestIntention(String testName, String hint, boolean expectError) throws Throwable {
         myFixture.configureByFile(testName + "/before.csv");
         final IntentionAction action = myFixture.filterAvailableIntentions(hint).stream()
                 .filter(intentionAction -> intentionAction.getText().equals(hint))
-                .findFirst().get();
-        myFixture.launchAction(action);
-        myFixture.checkResultByFile(testName + "/after.csv");
+                .findFirst().orElse(null);
+        if (action == null) {
+            assertTrue("action not found -> this was expected: " + expectError, expectError);
+        } else {
+            assertFalse("action was found -> this was expected: " + !expectError, expectError);
+            myFixture.launchAction(action);
+            myFixture.checkResultByFile(testName + "/after.csv");
+        }
+    }
+
+    public void testErroneousCsv() throws Throwable {
+        doTestIntention("Erroneous", "Quote All", true);
+    }
+
+    public void testErroneousBackslashCsv() throws Throwable {
+        CsvEditorSettings.getInstance().setDefaultEscapeCharacter(CsvEscapeCharacter.BACKSLASH);
+        doTestIntention("ErroneousBackslash", "Quote All", true);
     }
 
     public void testQuoteAllIntention() throws Throwable {
@@ -28,7 +52,6 @@ public class CsvIntentionTest extends LightPlatformCodeInsightFixtureTestCase {
     public void testQuoteAllBackslashIntention() throws Throwable {
         CsvEditorSettings.getInstance().setDefaultEscapeCharacter(CsvEscapeCharacter.BACKSLASH);
         doTestIntention("QuoteAllBackslash", "Quote All");
-        CsvEditorSettings.getInstance().setDefaultEscapeCharacter(CsvEditorSettings.ESCAPE_CHARACTER_DEFAULT);
     }
 
     public void testUnquoteAllIntention() throws Throwable {
@@ -38,7 +61,6 @@ public class CsvIntentionTest extends LightPlatformCodeInsightFixtureTestCase {
     public void testUnquoteAllBackslashIntention() throws Throwable {
         CsvEditorSettings.getInstance().setDefaultEscapeCharacter(CsvEscapeCharacter.BACKSLASH);
         doTestIntention("UnquoteAllBackslash", "Unquote All");
-        CsvEditorSettings.getInstance().setDefaultEscapeCharacter(CsvEditorSettings.ESCAPE_CHARACTER_DEFAULT);
     }
 
     public void testQuoteIntention() throws Throwable {

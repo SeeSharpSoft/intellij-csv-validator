@@ -27,7 +27,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.regex.Pattern;
 
 public final class CsvHelper {
 
@@ -221,13 +220,18 @@ public final class CsvHelper {
         if (result.length() > 1 && result.startsWith("\"") && result.endsWith("\"")) {
             result = result.substring(1, result.length() - 1);
         }
-        result = result.replaceAll("(?:" + Pattern.quote(escapeCharacter.getCharacter()) + ")\"", "\"");
+        if (escapeCharacter != CsvEscapeCharacter.QUOTE) {
+            result = result.replaceAll("(?:" + escapeCharacter.getRegexPattern() + ")" +
+                    escapeCharacter.getRegexPattern(), escapeCharacter.getRegexPattern());
+        }
+        result = result.replaceAll("(?:" + escapeCharacter.getRegexPattern() + ")\"", "\"");
         return result;
     }
 
-    private static boolean isQuotingRequired(String content, CsvValueSeparator valueSeparator) {
+    private static boolean isQuotingRequired(String content, CsvEscapeCharacter escapeCharacter, CsvValueSeparator valueSeparator) {
         return content != null &&
-                (content.contains(valueSeparator.getCharacter()) || content.contains("\"") || content.contains("\n") || content.startsWith(" ") || content.endsWith(" "));
+                (content.contains(valueSeparator.getCharacter()) || content.contains("\"") || content.contains("\n") || content.contains(escapeCharacter.getCharacter()) ||
+                        content.startsWith(" ") || content.endsWith(" "));
     }
 
     public static String quoteCsvField(String content,
@@ -237,8 +241,13 @@ public final class CsvHelper {
         if (content == null) {
             return "";
         }
-        if (quotingEnforced || isQuotingRequired(content, valueSeparator)) {
-            String result = content.replaceAll("\"", escapeCharacter.getCharacter() + "\"");
+        if (quotingEnforced || isQuotingRequired(content, escapeCharacter, valueSeparator)) {
+            String result = content;
+            if (escapeCharacter != CsvEscapeCharacter.QUOTE) {
+                result = result.replaceAll(escapeCharacter.getRegexPattern(),
+                        escapeCharacter.getRegexPattern() + escapeCharacter.getRegexPattern());
+            }
+            result = result.replaceAll("\"", escapeCharacter.getRegexPattern() + "\"");
             return "\"" + result + "\"";
         }
         return content;

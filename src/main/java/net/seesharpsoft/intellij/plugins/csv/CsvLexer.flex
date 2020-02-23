@@ -3,7 +3,7 @@ package net.seesharpsoft.intellij.plugins.csv;
 import com.intellij.psi.tree.IElementType;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
 import com.intellij.psi.TokenType;
-import com.intellij.lexer.FlexLexer;
+import com.intellij.lexer.FlexLexer;import org.intellij.grammar.livePreview.LivePreviewElementType;
 
 import java.util.regex.Pattern;
 
@@ -33,15 +33,17 @@ import java.util.regex.Pattern;
 %eof}
 
 TEXT=[^ ,;|\t\r\n\"\\]+
-ESCAPED_TEXT=[,;|\t\r\n\\]|\"\"|\\\"
+ESCAPED_TEXT=[,;|\t\r\n]|\"\"|\\\"
+ESCAPE_CHAR=\\
 QUOTE=\"
-SPECIAL_CHAR=[,;|\t\\]
+COMMA=[,;|\t]
 EOL=\n
 WHITE_SPACE=[ \f]+
 
 %state AFTER_TEXT
 %state ESCAPED_TEXT
 %state UNESCAPED_TEXT
+%state ESCAPING
 
 %%
 
@@ -68,6 +70,33 @@ WHITE_SPACE=[ \f]+
     return CsvTypes.TEXT;
 }
 
+<YYINITIAL, UNESCAPED_TEXT> {ESCAPE_CHAR}
+{
+    String text = yytext().toString();
+    if (myEscapeCharacter.getCharacter().equals(text)) {
+        return TokenType.BAD_CHARACTER;
+    }
+    yybegin(UNESCAPED_TEXT);
+    return CsvTypes.TEXT;
+}
+
+<ESCAPED_TEXT, ESCAPING> {ESCAPE_CHAR} {
+    String text = yytext().toString();
+    if (myEscapeCharacter.getCharacter().equals(text)) {
+        switch (yystate()) {
+            case ESCAPED_TEXT:
+                yybegin(ESCAPING);
+                break;
+            case ESCAPING:
+                yybegin(ESCAPED_TEXT);
+                break;
+            default:
+                throw new RuntimeException("unhandled state: " + yystate());
+        }
+    }
+    return CsvTypes.TEXT;
+}
+
 <ESCAPED_TEXT> {ESCAPED_TEXT}
 {
     String text = yytext().toString();
@@ -76,10 +105,15 @@ WHITE_SPACE=[ \f]+
      ) {
         return CsvTypes.ESCAPED_TEXT;
     }
+    if (!text.startsWith(CsvEscapeCharacter.QUOTE.getCharacter())) {
+        yypushback(1);
+        return CsvTypes.TEXT;
+    }
+
     return TokenType.BAD_CHARACTER;
 }
 
-<YYINITIAL, AFTER_TEXT, UNESCAPED_TEXT> {SPECIAL_CHAR}
+<YYINITIAL, AFTER_TEXT, UNESCAPED_TEXT> {COMMA}
 {
     if (myValueSeparator.isValueSeparator(yytext().toString())) {
         yybegin(YYINITIAL);
