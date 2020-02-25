@@ -93,6 +93,7 @@ WHITE_SPACE=[ \f]+
             default:
                 throw new RuntimeException("unhandled state: " + yystate());
         }
+        return CsvTypes.ESCAPED_TEXT;
     }
     return CsvTypes.TEXT;
 }
