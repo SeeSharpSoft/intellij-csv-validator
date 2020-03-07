@@ -41,6 +41,7 @@ public class CsvEditorSettingsProvider implements SearchableConfigurable {
     private JCheckBox cbAdjustColumnWidthOnOpen;
     private JComboBox comboEscapeCharacter;
     private JComboBox comboValueSeparator;
+    private JCheckBox cbKeepTrailingWhitespaces;
 
     @NotNull
     @Override
@@ -90,7 +91,8 @@ public class CsvEditorSettingsProvider implements SearchableConfigurable {
                 !tfDefaultColumnWidth.getValue().equals(csvEditorSettings.getTableDefaultColumnWidth()) ||
                 isModified(cbAdjustColumnWidthOnOpen, csvEditorSettings.isTableAutoColumnWidthOnOpen()) ||
                 !Objects.equals(comboEscapeCharacter.getSelectedItem(), csvEditorSettings.getDefaultEscapeCharacter()) ||
-                !Objects.equals(comboValueSeparator.getSelectedItem(), csvEditorSettings.getDefaultValueSeparator());
+                !Objects.equals(comboValueSeparator.getSelectedItem(), csvEditorSettings.getDefaultValueSeparator()) ||
+                isModified(cbKeepTrailingWhitespaces, csvEditorSettings.getKeepTrailingSpaces());
     }
 
     @Override
@@ -114,6 +116,7 @@ public class CsvEditorSettingsProvider implements SearchableConfigurable {
         cbAdjustColumnWidthOnOpen.setSelected(csvEditorSettings.isTableAutoColumnWidthOnOpen());
         comboEscapeCharacter.setSelectedItem(csvEditorSettings.getDefaultEscapeCharacter());
         comboValueSeparator.setSelectedItem(csvEditorSettings.getDefaultValueSeparator());
+        cbKeepTrailingWhitespaces.setSelected(csvEditorSettings.getKeepTrailingSpaces());
     }
 
     @Override
@@ -137,6 +140,7 @@ public class CsvEditorSettingsProvider implements SearchableConfigurable {
         csvEditorSettings.setTableAutoColumnWidthOnOpen(cbAdjustColumnWidthOnOpen.isSelected());
         csvEditorSettings.setDefaultEscapeCharacter((CsvEscapeCharacter)comboEscapeCharacter.getSelectedItem());
         csvEditorSettings.setDefaultValueSeparator((CsvValueSeparator)comboValueSeparator.getSelectedItem());
+        csvEditorSettings.setKeepTrailingSpaces(cbKeepTrailingWhitespaces.isSelected());
     }
 
     protected void createUIComponents() {
