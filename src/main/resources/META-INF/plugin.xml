@@ -151,6 +151,8 @@ FIX: NullPointerException thrown when trying to view CSV as table #185
             <category>CSV</category>
             <descriptionDirectoryName>UnquoteAll</descriptionDirectoryName>
         </intentionAction>
+
+        <stripTrailingSpacesFilterFactory implementation="net.seesharpsoft.intellij.plugins.csv.settings.CsvStripTrailingSpacesFilterFactory" />
     </extensions>
 
     <actions>
