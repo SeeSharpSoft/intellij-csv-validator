@@ -1,3 +1,9 @@
+2.9.3
+Mar 08, 2020
+
+NEW: option to keep trailing spaces for CSV/TSV/PSV files
+FIX: consider escape char inside quotes as escaped text
+
 2.9.2
 Feb 24, 2020
 

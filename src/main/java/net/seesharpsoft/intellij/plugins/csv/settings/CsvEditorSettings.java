@@ -56,6 +56,7 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
         public boolean FILE_END_LINE_BREAK;
         public CsvEscapeCharacter DEFAULT_ESCAPE_CHARACTER = ESCAPE_CHARACTER_DEFAULT;
         public CsvValueSeparator DEFAULT_VALUE_SEPARATOR = VALUE_SEPARATOR_DEFAULT;
+        public boolean KEEP_TRAILING_SPACES = false;
 
         public OptionSet() {
             EditorSettingsExternalizable editorSettingsExternalizable = EditorSettingsExternalizable.getInstance();
@@ -259,5 +260,13 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
 
     public CsvValueSeparator getDefaultValueSeparator() {
         return getState().DEFAULT_VALUE_SEPARATOR;
+    }
+
+    public void setKeepTrailingSpaces(boolean keepTrailingSpaces) {
+        getState().KEEP_TRAILING_SPACES = keepTrailingSpaces;
+    }
+
+    public boolean getKeepTrailingSpaces() {
+        return getState().KEEP_TRAILING_SPACES;
     }
 }
