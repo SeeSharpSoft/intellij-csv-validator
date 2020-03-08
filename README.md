@@ -144,7 +144,7 @@ _Default Escape Character_ defines which escape character is used as standard fo
 
 ###### Highlight caret row
 
-The highlighting of the current caret row might interfere with custom background color settings and can be enabled/disabled for CSV/TSV files here.
+The highlighting of the current caret row might interfere with custom background color settings and can be enabled/disabled for CSV/TSV/PSV files here.
 
 ###### Enable column highlighting
 
@@ -162,7 +162,13 @@ Enable/disable the info balloon that appears at the caret position in the text e
 
 ###### Use soft wraps
 
-Set whether soft wrapping should be activated for CSV/TSV. It still can be changed file specific with right-click on the editors left outer margin. 
+Set whether soft wrapping should be activated for CSV/TSV/PSV. It still can be changed file specific with right-click on the editors left outer margin. 
+
+###### Keep trailing whitespaces
+
+If enabled, it overrides the default editor settings for trailing whitespace handling to always keep them when editing CSV/TSV/PSV.
+
+**Note:** This setting has no effect on the table editor. Unquoted values will always be trimmed when opening the table editor. When edited in the table editor, values ending or starting with whitespace will be quoted.
 
 #### Table Editor
 

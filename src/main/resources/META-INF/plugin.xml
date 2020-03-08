@@ -48,8 +48,8 @@
 
     <change-notes><![CDATA[
         <pre style="font-family: sans-serif">
-FIX: Backslash in text is considered a special character #184
-FIX: NullPointerException thrown when trying to view CSV as table #185
+NEW: option to keep trailing spaces for CSV/TSV/PSV files
+FIX: consider escape char inside quotes as escaped text
       </pre>
     ]]>
     </change-notes>
