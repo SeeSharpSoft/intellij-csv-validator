@@ -71,7 +71,7 @@ idea {
 apply plugin: 'org.jetbrains.intellij'
 intellij {
     // IDE version - https://www.jetbrains.com/intellij-repository/releases
-    version = System.getenv().getOrDefault('IDEA_VERSION', 'IC-2019.1.3')
+    version = System.getenv().getOrDefault('IDEA_VERSION', 'IU-LATEST-EAP-SNAPSHOT')
     pluginName = 'CSV Plugin'
     instrumentCode = true
     updateSinceUntilBuild = false
@@ -98,7 +98,7 @@ grammarKit {
     jflexRelease = '1.7.0-1'
 
     // tag or short commit hash of Grammar-Kit to use - https://github.com/JetBrains/Grammar-Kit
-    grammarKitRelease = System.getenv().getOrDefault('GRAMMAR_KIT_VERSION', '2019.1.1')
+    grammarKitRelease = System.getenv().getOrDefault('GRAMMAR_KIT_VERSION', '2019.3')
 }
 
 import org.jetbrains.grammarkit.tasks.GenerateLexer
