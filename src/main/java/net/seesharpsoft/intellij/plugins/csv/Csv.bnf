@@ -17,7 +17,7 @@
     ESCAPED_TEXT='regexp:[,:;|\t\r\n]|""|\\"'
     ESCAPE_CHARACTER='regexp:\\'
     COMMA='regexp:[,:;|\t]'
-    QUOTE='"'
+    QUOTE='regexp:"'
     CRLF='regexp:\n'
    ]
 }

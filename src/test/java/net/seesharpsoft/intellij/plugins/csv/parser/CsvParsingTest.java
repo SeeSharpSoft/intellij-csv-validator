@@ -1,6 +1,7 @@
-package net.seesharpsoft.intellij.plugins.csv;
+package net.seesharpsoft.intellij.plugins.csv.parser;
 
 import com.intellij.testFramework.ParsingTestCase;
+import net.seesharpsoft.intellij.plugins.csv.CsvParserDefinition;
 
 public class CsvParsingTest extends ParsingTestCase {
 

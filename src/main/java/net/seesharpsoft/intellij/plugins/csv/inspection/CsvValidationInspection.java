@@ -80,7 +80,7 @@ public class CsvValidationInspection extends LocalInspectionTool {
                 IElementType elementType = CsvHelper.getElementType(element);
                 PsiElement firstChild = element.getFirstChild();
                 PsiElement nextSibling = element.getNextSibling();
-                if (elementType == TokenType.ERROR_ELEMENT && CsvHelper.getElementType(firstChild) == TokenType.BAD_CHARACTER) {
+                if (elementType == TokenType.ERROR_ELEMENT && firstChild != null && element.getText().equals(firstChild.getText())) {
                     CsvValidationInspection.this.registerError(holder, element, UNESCAPED_SEQUENCE, fixUnescapedSequence);
                     if (!"\"".equals(firstChild.getText())) {
                         CsvValidationInspection.this.registerError(holder, element, SEPARATOR_MISSING, fixSeparatorMissing);
@@ -127,7 +127,7 @@ public class CsvValidationInspection extends LocalInspectionTool {
                 if (quotePosition != -1) {
                     quotePositions.add(quotePosition);
                 }
-                PsiElement endSeparatorElement = CsvIntentionHelper.findQuotePositionsUntilSeparator(element, quotePositions);
+                PsiElement endSeparatorElement = CsvIntentionHelper.findQuotePositionsUntilSeparator(element, quotePositions, true);
                 if (endSeparatorElement == null) {
                     quotePositions.add(document.getTextLength());
                 } else {
