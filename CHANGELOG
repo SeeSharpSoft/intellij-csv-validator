@@ -1,4 +1,4 @@
-2.9.4
+2.10.0
 Apr 19, 2020
 
 FIX: resolve CSV/TSV file type conflict for versions 2020.* with Database plugin
