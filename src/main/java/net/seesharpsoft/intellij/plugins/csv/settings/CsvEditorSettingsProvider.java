@@ -1,7 +1,7 @@
 package net.seesharpsoft.intellij.plugins.csv.settings;
 
+import com.intellij.application.options.editor.EditorOptionsProvider;
 import com.intellij.openapi.options.ConfigurationException;
-import com.intellij.openapi.options.SearchableConfigurable;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.ui.CheckBoxWithColorChooser;
 import net.seesharpsoft.intellij.plugins.csv.CsvEscapeCharacter;
@@ -16,7 +16,7 @@ import java.awt.*;
 import java.text.NumberFormat;
 import java.util.Objects;
 
-public class CsvEditorSettingsProvider implements SearchableConfigurable {
+public class CsvEditorSettingsProvider implements EditorOptionsProvider {
 
     public static final String CSV_EDITOR_SETTINGS_ID = "Csv.Editor.Settings";
 
