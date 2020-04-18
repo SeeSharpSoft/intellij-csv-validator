@@ -36,7 +36,7 @@ This enables default editor features like syntax validation, highlighting and in
 
 Starting with **CSV Plugin 2.10.0**, _new features will only be developed for IntelliJ IDE 2019.3 and higher_.  
 
-Major bug fixes will still be release for previous IDE versions 2017.3.1 - 2019.2.\*, but no new features or cosmetic fixes.
+I will still release patches for major/critical bugs for previous IDE versions 2017.3.1 - 2019.2.\*, but no additional features or cosmetic fixes.
 
 ### Syntax parser & validation
 
