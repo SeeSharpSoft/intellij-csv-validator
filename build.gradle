@@ -24,7 +24,7 @@ jacocoTestReport {
 }
 
 group 'net.seesharpsoft.intellij.plugins'
-version '2.9.3'
+version '2.10.0'
 
 apply plugin: 'java'
 sourceCompatibility = javaVersion
@@ -71,7 +71,7 @@ idea {
 apply plugin: 'org.jetbrains.intellij'
 intellij {
     // IDE version - https://www.jetbrains.com/intellij-repository/releases
-    version = System.getenv().getOrDefault('IDEA_VERSION', 'IC-2019.1.3')
+    version = System.getenv().getOrDefault('IDEA_VERSION', 'IU-201.6668.121')
     pluginName = 'CSV Plugin'
     instrumentCode = true
     updateSinceUntilBuild = false
@@ -98,7 +98,7 @@ grammarKit {
     jflexRelease = '1.7.0-1'
 
     // tag or short commit hash of Grammar-Kit to use - https://github.com/JetBrains/Grammar-Kit
-    grammarKitRelease = System.getenv().getOrDefault('GRAMMAR_KIT_VERSION', '2019.1.1')
+    grammarKitRelease = System.getenv().getOrDefault('GRAMMAR_KIT_VERSION', '2019.3')
 }
 
 import org.jetbrains.grammarkit.tasks.GenerateLexer

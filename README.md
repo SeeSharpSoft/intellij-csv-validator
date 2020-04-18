@@ -32,9 +32,11 @@ This enables default editor features like syntax validation, highlighting and in
 
 (see [full changelog](./CHANGELOG))
 
-**Please note**
+**!!Please note!!**
 
-Due to a bug in all editions of IntelliJ 2019.2.\*, the plugin now comes in two versions. Both versions are identical except a configuration workaround, which is only part of the version ending with *-192*. This version is not compatible - and will therefore not work properly - with never versions (>= 2019.3.\*) of the IntelliJ IDE.
+Starting with **CSV Plugin 2.10.0**, _new features will only be developed for IntelliJ IDE 2019.3 and higher_.  
+
+I will still release patches for major/critical bugs for previous IDE versions 2017.3.1 - 2019.2.\*, but no additional features or cosmetic fixes.
 
 ### Syntax parser & validation
 

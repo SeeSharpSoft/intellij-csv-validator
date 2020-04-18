@@ -3,9 +3,8 @@ jdk:
   - openjdk8
 
 env:
-  - IDEA_VERSION=IC-2017.3.1 GRAMMAR_KIT_VERSION=2017.1.2
-  - IDEA_VERSION=IC-2018.3.2 GRAMMAR_KIT_VERSION=2017.1.7
-  - IDEA_VERSION=PC-LATEST-EAP-SNAPSHOT GRAMMAR_KIT_VERSION=2019.3
+  - IDEA_VERSION=PC-2019.3.3 GRAMMAR_KIT_VERSION=2019.3
+  - IDEA_VERSION=IU-LATEST-EAP-SNAPSHOT GRAMMAR_KIT_VERSION=2019.3
 
 script: xvfb-run gradle check
 
@@ -15,9 +14,9 @@ after_success:
 jobs:
   include:
     - if: (branch = master AND type = push) OR (type = pull_request)
-      env: IDEA_VERSION=IC-191.5701.16 GRAMMAR_KIT_VERSION=2017.1.7
+      env: IDEA_VERSION=IC-193.5233.102 GRAMMAR_KIT_VERSION=2019.3
       script: xvfb-run gradle check verifyPlugin
     - stage: deploy
       if: branch IN (Testing, Staging, Stable) AND type = push
-      env: IDEA_VERSION=IC-191.5701.16 GRAMMAR_KIT_VERSION=2017.1.7 JI_CHANNELS=$TRAVIS_BRANCH
+      env: IDEA_VERSION=IC-193.5233.102 GRAMMAR_KIT_VERSION=2019.3 JI_CHANNELS=$TRAVIS_BRANCH
       script: xvfb-run gradle publishPlugin
