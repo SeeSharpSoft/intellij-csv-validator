@@ -24,7 +24,7 @@ jacocoTestReport {
 }
 
 group 'net.seesharpsoft.intellij.plugins'
-version '2.9.3'
+version '2.9.4'
 
 apply plugin: 'java'
 sourceCompatibility = javaVersion
@@ -71,7 +71,7 @@ idea {
 apply plugin: 'org.jetbrains.intellij'
 intellij {
     // IDE version - https://www.jetbrains.com/intellij-repository/releases
-    version = System.getenv().getOrDefault('IDEA_VERSION', 'IU-LATEST-EAP-SNAPSHOT')
+    version = System.getenv().getOrDefault('IDEA_VERSION', 'IU-201.6668.121')
     pluginName = 'CSV Plugin'
     instrumentCode = true
     updateSinceUntilBuild = false

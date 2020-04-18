@@ -8,6 +8,7 @@
     <description><![CDATA[
 
         <p>Lightweight plugin for editing CSV/TSV/PSV files with a flexible table editor, syntax validation, structure highlighting, customizable coloring, new intentions and helpful inspections.</p><br>
+        <img width="600" height="297" src="https://plugins.jetbrains.com/files/10037/screenshot_21096.png" /><br><br>
         <p><b>Features:</b><br>
         <ul>
             <li>support for CSV/TSV/PSV file extensions</li>
@@ -38,7 +39,6 @@
         <em>Thanks to @royqh1979, @egoisticalgoat, @sabi0, @ptahchiev, @ghost, @MarkJeronimus, <a href="http://finevisuals.de" target="_blank">FineVisuals</a> and others for supporting me and the project!</em>
         <br><br><br>
         </p>
-        <img width="600" height="297" src="https://plugins.jetbrains.com/files/10037/screenshot_21096.png" /><br><br>
         <p>
         <span style="color: #555555">
             <b>IntelliJ IDEA Ultimate/PhpStorm/DataGrip/etc.:</b> The plugin is fully compatible with the <em>'Edit as Table...'</em> functionality.<br><br>
@@ -48,15 +48,12 @@
 
     <change-notes><![CDATA[
         <pre style="font-family: sans-serif">
-NEW: option to keep trailing spaces for CSV/TSV/PSV files
-FIX: consider escape char inside quotes as escaped text
+FIX: resolve CSV/TSV file type conflict for versions 2020.* with Database plugin
       </pre>
     ]]>
     </change-notes>
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
-<!--    <idea-version since-build="173.2099.1" />-->
-<!--    <idea-version since-build="192" until-build="192.*" />-->
 <!--    <idea-version since-build="173.2099.1" until-build="192.*" />-->
     <idea-version since-build="193" />
 
@@ -65,19 +62,18 @@ FIX: consider escape char inside quotes as escaped text
     <depends>com.intellij.modules.lang</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <!-- required for 192.* -->
+        <!-- version 173.* - 192.* -->
 <!--        <fileType name="FileType_CSV" implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvFileType" extensions="csv"/>-->
 <!--        <fileType name="FileType_TSV" implementationClass="net.seesharpsoft.intellij.plugins.tsv.TsvFileType" extensions="tsv;tab"/>-->
 <!--        <fileType name="FileType_PSV" implementationClass="net.seesharpsoft.intellij.plugins.psv.PsvFileType" extensions="psv"/>-->
-
 <!--        <fileTypeFactory implementation="net.seesharpsoft.intellij.plugins.csv.CsvFileTypeFactory"/>-->
 <!--        <fileTypeFactory implementation="net.seesharpsoft.intellij.plugins.tsv.TsvFileTypeFactory"/>-->
 <!--        <fileTypeFactory implementation="net.seesharpsoft.intellij.plugins.psv.PsvFileTypeFactory"/>-->
 
+        <!-- version 193.* -->
         <fileType name="CSV" language="csv" implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvFileType" extensions="csv" fieldName="INSTANCE"/>
         <fileType name="TSV" language="tsv" implementationClass="net.seesharpsoft.intellij.plugins.tsv.TsvFileType" extensions="tsv;tab" fieldName="INSTANCE"/>
         <fileType name="PSV" language="psv" implementationClass="net.seesharpsoft.intellij.plugins.psv.PsvFileType" extensions="psv" fieldName="INSTANCE"/>
-
         <fileTypeOverrider implementation="net.seesharpsoft.intellij.plugins.csv.CsvFileTypeOverrider" />
 
         <lang.parserDefinition language="csv"
