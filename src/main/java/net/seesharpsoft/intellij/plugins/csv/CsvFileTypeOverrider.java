@@ -23,6 +23,8 @@ public class CsvFileTypeOverrider implements FileTypeOverrider {
                         return TsvFileType.INSTANCE;
                     case "psv":
                         return PsvFileType.INSTANCE;
+                    default:
+                        return null;
                 }
             }
         }
