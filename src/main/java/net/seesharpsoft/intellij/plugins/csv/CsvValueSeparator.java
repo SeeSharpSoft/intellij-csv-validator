@@ -6,7 +6,8 @@ public enum CsvValueSeparator {
     COMMA(",", "Comma (,)"),
     SEMICOLON(";", "Semicolon (;)"),
     PIPE("|", "Pipe (|)"),
-    TAB("\t", "Tab (↹)");
+    TAB("\t", "Tab (↹)"),
+    COLON(":", "Colon (:)");
 
     private final String myCharacter;
     private final String myDisplay;
