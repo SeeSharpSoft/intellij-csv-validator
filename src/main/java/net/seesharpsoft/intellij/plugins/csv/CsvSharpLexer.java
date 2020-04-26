@@ -17,6 +17,18 @@ import java.util.stream.Collectors;
 
 public class CsvSharpLexer extends LexerBase {
 
+    private final Tokenizer<TokenType> tokenizer;
+    private final List<Tokenizer.Token<TokenType>> unquotedNextStateTokens;
+    private final List<Tokenizer.Token<TokenType>> quotedNextStateTokens;
+
+    private CharSequence buffer;
+    private int bufferEnd;
+    private int tokenStart;
+    private int tokenEnd;
+    private LexerState currentState;
+    private IElementType currentTokenType;
+    private boolean failed;
+
     private static final Map<TokenType, LexerState> UNQUOTED_NEXT_STATES = new HashMap<>();
     private static final Map<TokenType, LexerState> QUOTED_NEXT_STATES = new HashMap<>();
 
@@ -77,19 +89,6 @@ public class CsvSharpLexer extends LexerBase {
             this.quoteCharacter = Pattern.quote(quoteCharacter);
         }
     }
-
-    private final Tokenizer<TokenType> tokenizer;
-    private final List<Tokenizer.Token<TokenType>> unquotedNextStateTokens;
-    private final List<Tokenizer.Token<TokenType>> quotedNextStateTokens;
-
-    private CharSequence buffer;
-    private int bufferEnd;
-    private int tokenStart;
-    private int tokenEnd;
-    private LexerState currentState;
-    private IElementType currentTokenType;
-
-    private boolean failed;
 
     public CsvSharpLexer() {
         this(Configuration.DEFAULT);
@@ -223,7 +222,6 @@ public class CsvSharpLexer extends LexerBase {
                     currentTokenType = CsvTypes.COMMA;
                     break;
                 case TEXT:
-//                case TEXT:
                     currentTokenType = CsvTypes.TEXT;
                     break;
                 case WHITESPACE:

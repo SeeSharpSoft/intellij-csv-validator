@@ -3,6 +3,11 @@ package net.seesharpsoft.intellij.plugins.csv;
 import java.util.regex.Pattern;
 
 public class CsvValueSeparator {
+    private final String myCharacter;
+    private final String myDisplay;
+    private final Pattern myPattern;
+    private final String myName;
+
     private static final String CUSTOM_NAME = "CUSTOM";
     private static final String CUSTOM_DISPLAY = "Custom";
 
@@ -35,11 +40,6 @@ public class CsvValueSeparator {
     public static final CsvValueSeparator[] values() {
         return new CsvValueSeparator[]{COMMA, SEMICOLON, PIPE, TAB, COLON};
     }
-
-    private final String myCharacter;
-    private final String myDisplay;
-    private final Pattern myPattern;
-    private final String myName;
 
     public CsvValueSeparator(String myCharacter) {
         this(myCharacter, CUSTOM_DISPLAY + " (" + myCharacter + ")", CUSTOM_NAME);
