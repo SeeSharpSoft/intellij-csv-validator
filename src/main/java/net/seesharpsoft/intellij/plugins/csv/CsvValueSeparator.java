@@ -17,7 +17,7 @@ public class CsvValueSeparator {
     public static final CsvValueSeparator TAB = new CsvValueSeparator("\t", "Tab (↹)", "TAB");
     public static final CsvValueSeparator COLON = new CsvValueSeparator(":", "Colon (:)", "COLON");
 
-    public static final CsvValueSeparator create(String name, String character) {
+    public static CsvValueSeparator create(String name, String character) {
         if (name != null) {
             switch (name) {
                 case "COMMA":
@@ -34,10 +34,14 @@ public class CsvValueSeparator {
                     break;
             }
         }
+        return create(character);
+    }
+
+    public static CsvValueSeparator create(String character) {
         return new CsvValueSeparator(character);
     }
 
-    public static final CsvValueSeparator[] values() {
+    public static CsvValueSeparator[] values() {
         return new CsvValueSeparator[]{COMMA, SEMICOLON, PIPE, TAB, COLON};
     }
 
