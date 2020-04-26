@@ -9,9 +9,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.TokenType;
 import com.intellij.psi.tree.IElementType;
-import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
-import net.seesharpsoft.intellij.plugins.csv.CsvLexerAdapter;
-import net.seesharpsoft.intellij.plugins.csv.CsvSharpLexer;
+import net.seesharpsoft.intellij.plugins.csv.*;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
 import org.jetbrains.annotations.NotNull;
 
@@ -47,12 +45,7 @@ public class CsvSyntaxHighlighter extends SyntaxHighlighterBase {
     @NotNull
     @Override
     public Lexer getHighlightingLexer() {
-        return new CsvSharpLexer(new CsvSharpLexer.Configuration(
-                CsvHelper.getValueSeparator(myProject, myVirtualFile).getCharacter(),
-                "\n",
-                CsvHelper.getEscapeCharacter(myProject, myVirtualFile).getCharacter(),
-                "\""));
-//        return new CsvLexerAdapter(CsvHelper.getValueSeparator(myProject, myVirtualFile), CsvHelper.getEscapeCharacter(myProject, myVirtualFile));
+        return CsvLexerFactory.getInstance().createLexer(myProject, myVirtualFile);
     }
 
     @NotNull
