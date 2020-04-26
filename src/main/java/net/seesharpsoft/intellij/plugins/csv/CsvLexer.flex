@@ -32,11 +32,11 @@ import java.util.regex.Pattern;
 %eof{  return;
 %eof}
 
-TEXT=[^ ,;|\t\r\n\"\\]+
-ESCAPED_TEXT=[,;|\t\r\n]|\"\"|\\\"
+TEXT=[^ ,:;|\t\r\n\"\\]+
+ESCAPED_TEXT=[,:;|\t\r\n]|\"\"|\\\"
 ESCAPE_CHAR=\\
 QUOTE=\"
-COMMA=[,;|\t]
+COMMA=[,:;|\t]
 EOL=\n
 WHITE_SPACE=[ \f]+
 
