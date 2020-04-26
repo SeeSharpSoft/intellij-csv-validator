@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 public class CsvLexerFactory {
     protected static CsvLexerFactory INSTANCE = new CsvLexerFactory();
 
-    public static final CsvLexerFactory getInstance() {
+    public static CsvLexerFactory getInstance() {
         return INSTANCE;
     }
 

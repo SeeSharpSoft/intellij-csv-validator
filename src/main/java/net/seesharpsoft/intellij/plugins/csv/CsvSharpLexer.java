@@ -106,18 +106,18 @@ public class CsvSharpLexer extends LexerBase {
         if (configuration.escapeCharacter.equals(configuration.quoteCharacter)) {
             tokenizer.add(TokenType.END_QUOTE, String.format("%s(?!%s)", configuration.quoteCharacter, configuration.quoteCharacter));
             tokenizer.add(TokenType.ESCAPED_CHARACTER, String.format("(%s%s|%s|%s)+", configuration.quoteCharacter, configuration.quoteCharacter, configuration.valueSeparator, configuration.recordSeparator));
-            tokenizer.add(TokenType.TEXT, String.format("[^ \f%s%s%s]+",configuration.quoteCharacter, configuration.valueSeparator, configuration.recordSeparator));
+            tokenizer.add(TokenType.TEXT, String.format("((?!%s)[^ \f%s%s])+", configuration.valueSeparator, configuration.quoteCharacter, configuration.recordSeparator));
         } else {
             tokenizer.add(TokenType.END_QUOTE, String.format("%s", configuration.quoteCharacter));
             tokenizer.add(TokenType.ESCAPED_CHARACTER, String.format("(%s%s|%s%s|%s|%s)+", configuration.escapeCharacter, configuration.quoteCharacter, configuration.escapeCharacter, configuration.escapeCharacter, configuration.valueSeparator, configuration.recordSeparator));
-            tokenizer.add(TokenType.TEXT, String.format("[^ \f%s%s%s%s]+", configuration.escapeCharacter, configuration.quoteCharacter, configuration.valueSeparator, configuration.recordSeparator));
+            tokenizer.add(TokenType.TEXT, String.format("((?!%s)[^ \f%s%s%s])+", configuration.valueSeparator, configuration.escapeCharacter, configuration.quoteCharacter, configuration.recordSeparator));
         }
 
         unquotedNextStateTokens = LexerState.Unquoted.getPossibleTokens().stream()
-                .map(tokenType -> tokenizer.getToken(tokenType))
+                .map(tokenizer::getToken)
                 .collect(Collectors.toList());
         quotedNextStateTokens = LexerState.Quoted.getPossibleTokens().stream()
-                .map(tokenType -> tokenizer.getToken(tokenType))
+                .map(tokenizer::getToken)
                 .collect(Collectors.toList());
     }
 

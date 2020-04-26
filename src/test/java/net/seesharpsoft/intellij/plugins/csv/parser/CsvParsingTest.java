@@ -22,6 +22,12 @@ public class CsvParsingTest extends ParsingTestCase {
         CsvEditorSettings.getInstance().setDefaultValueSeparator(CsvEditorSettings.VALUE_SEPARATOR_DEFAULT);
     }
 
+    public void testCustomMultiSymbolSeparator() {
+        CsvEditorSettings.getInstance().setDefaultValueSeparator(CsvValueSeparator.create("~§"));
+        doTest(true);
+        CsvEditorSettings.getInstance().setDefaultValueSeparator(CsvEditorSettings.VALUE_SEPARATOR_DEFAULT);
+    }
+
     @Override
     protected String getTestDataPath() {
         return "./src/test/resources/parser";
