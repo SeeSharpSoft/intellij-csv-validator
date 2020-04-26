@@ -37,7 +37,7 @@ public class CsvSyntaxHighlighter extends SyntaxHighlighterBase {
     private final Project myProject;
     private final VirtualFile myVirtualFile;
 
-    public CsvSyntaxHighlighter(@NotNull Project project, @NotNull VirtualFile virtualFile) {
+    public CsvSyntaxHighlighter(Project project, VirtualFile virtualFile) {
         this.myProject = project;
         this.myVirtualFile = virtualFile;
     }

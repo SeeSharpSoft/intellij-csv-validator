@@ -13,7 +13,7 @@ public class CsvLexerFactory {
         return INSTANCE;
     }
 
-    protected Lexer createLexer(CsvValueSeparator separator, CsvEscapeCharacter escapeCharacter) {
+    protected Lexer createLexer(@NotNull CsvValueSeparator separator, @NotNull CsvEscapeCharacter escapeCharacter) {
         if (separator.isCustom()) {
             return new CsvSharpLexer(new CsvSharpLexer.Configuration(
                     separator.getCharacter(),
@@ -24,7 +24,7 @@ public class CsvLexerFactory {
         return new CsvLexerAdapter(separator, escapeCharacter);
     }
 
-    public Lexer createLexer(@NotNull Project project, @NotNull VirtualFile file) {
+    public Lexer createLexer(Project project, VirtualFile file) {
         return createLexer(CsvHelper.getValueSeparator(project, file), CsvHelper.getEscapeCharacter(project, file));
     }
 
