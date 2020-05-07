@@ -24,7 +24,7 @@ public class CsvQuoteAllIntentionAction extends CsvIntentionAction {
         }
 
         return !CsvIntentionHelper.getAllElements(element.getContainingFile()).stream()
-                .anyMatch(psiElement -> CsvHelper.getElementType(psiElement) == TokenType.BAD_CHARACTER);
+                .anyMatch(psiElement -> CsvHelper.getElementType(psiElement) == TokenType.ERROR_ELEMENT);
     }
 
     @Override

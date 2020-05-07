@@ -26,7 +26,8 @@ This enables default editor features like syntax validation, highlighting and in
 - quick fix inspections
 - intentions (Alt+Enter), e.g. Quote/Unquote (all), Shift Column Left/Right
 - structure view (header-entry layout)
-- support for ',', ';', '|' and '&#8633;' as value separator
+- support for ',', ';', ':', '|' and '&#8633;' as pre-defined value separator
+- support for freely defined value separators
 - highlight of active column values
 - tab (&#8633;) separator highlighting
 
@@ -59,13 +60,16 @@ Please note that if a document is syntactically incorrect, other features like c
 CSV files provide a high degree of flexibility and can be used universally for all kind of data.
 This led to a variety of CSV derivatives like semicolon or pipe separated values, which share the common format but make use of a different separator.
 
-The plugin supports project specific separator setting.
-New separators can be added fairly easy in the parser definition of the source code.
+The plugin supports file-specific separator settings.
+Predefined separators, like Comma (,), semicolon (;), colon (:), tab (&#8633;) and pipe (|), come with a precompiled lexer providing the best performance for working with CSV. 
+
+Since version 2.11.0, this plugin additionally comes with a runtime lexer implementation to support freely chosen separator. 
 
 #### TSV/PSV
 
-Comma (,), semicolon (;), tab (&#8633;) and pipe (|) can be explicitly set as a separator for CSV files.
-Additionally the file types TSV (Tab-Separated-Values) and PSV (Pipe-Separated-Values) were introduced as a kind of CSV language.
+A different separator can be chosen for each CSV file. 
+
+Additionally, the file types TSV (Tab-Separated-Values) and PSV (Pipe-Separated-Values) were introduced as a kind of CSV language.
 For TSV and PSV files the same formatter and code style settings are applied as for CSV itself, but the separator is considered to be a tab or a pipe respectively.
 All functionality that is available for plain CSV files (inspections, intentions, structure view, etc.) can be used for TSV and PSV as well.
 
@@ -126,7 +130,7 @@ Enable zero-based column numbering. This affects the tooltip info of the text ed
 
 ##### Default Value Separator (CSV only)
 
-The following separators are currently supported: **,** (Comma), **;** (Semicolon), **|** (Pipe) and **&#8633;** (Tab)
+The following separators are currently supported: **,** (Comma), **;** (Semicolon), **:** (Colon), **|** (Pipe) and **&#8633;** (Tab)
 
 _Default Value Separator_ defines which separator is used as standard for each newly opened CSV file. The separator character can be changed for each file individually in its editors context menu.
 
@@ -326,9 +330,10 @@ Annasusanna,Amsterdam,         1
 ![Context menu](./docs/contextmenu.png)
 
 The action to switch the value separator (or escape character) - *which is used for CSV syntax validation of a specific file* - is part of its editors context menu.
+Since version 2.11.0, also custom separator setting is available via this action.
 
 
-This action defines how the parser/validator/highlighter/etc. behaves. It does intentionally not change the file content.
+**Please note:** This action defines how the parser/validator/highlighter/etc. behaves. It does intentionally not change the file content.
 To be more precise: It **does not replace** previous separator/escape characters by new ones or adjust the escaped texts.
 
 #### Adjust column widths (table editor only)
@@ -394,15 +399,6 @@ Besides source code contributions, feel free to open bug reports or just suggest
 ### Code/feature contributors
 
 - zoom table-editor cells with Ctrl+Mouse Wheel @royqh1979
-
-## FAQ
-
-> Why can't I choose the separator freely?
-
-Having clearly defined symbols enables the syntax parser and language lexer to do its job properly.
-The code for those is generated during build time by using the [Grammar-Kit](https://github.com/JetBrains/Grammar-Kit).
-Adding a new kind of separator during development is fairly easy (please feel free to request a new commonly used one) in comparison to the implementation effort and usefulness of a freely defined separator. 
-
 
 ## Jetbrains Repository
 

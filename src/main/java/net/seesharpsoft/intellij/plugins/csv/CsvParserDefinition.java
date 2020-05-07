@@ -75,7 +75,7 @@ public class CsvParserDefinition implements FileParserDefinition {
 
     @Override
     public Lexer createLexer(@NotNull PsiFile file) {
-        return new CsvLexerAdapter(CsvHelper.getValueSeparator(file), CsvHelper.getEscapeCharacter(file));
+        return CsvLexerFactory.getInstance().createLexer(file);
     }
 
     @Override

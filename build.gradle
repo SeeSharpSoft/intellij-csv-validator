@@ -24,7 +24,7 @@ jacocoTestReport {
 }
 
 group 'net.seesharpsoft.intellij.plugins'
-version '2.10.0'
+version '2.11.0'
 
 apply plugin: 'java'
 sourceCompatibility = javaVersion
@@ -34,6 +34,7 @@ repositories {
     mavenCentral()
 }
 dependencies {
+    implementation 'net.seesharpsoft.sharping:sharping-commons:0.21.0'
     compileOnly 'org.apache.ant:ant:1.7.0'
     testCompile 'org.mockito:mockito-core:2.28.2'
 }

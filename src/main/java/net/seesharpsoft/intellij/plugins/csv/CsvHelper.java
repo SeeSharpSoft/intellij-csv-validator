@@ -1,6 +1,7 @@
 package net.seesharpsoft.intellij.plugins.csv;
 
 import com.intellij.ide.scratch.ScratchFileType;
+import com.intellij.ide.scratch.ScratchUtil;
 import com.intellij.lang.*;
 import com.intellij.lexer.Lexer;
 import com.intellij.openapi.fileTypes.FileType;
@@ -22,6 +23,7 @@ import net.seesharpsoft.intellij.plugins.csv.psi.CsvField;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvFile;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvRecord;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
+import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
@@ -50,7 +52,7 @@ public final class CsvHelper {
     public static boolean isCsvFile(Project project, VirtualFile file) {
         final FileType fileType = file.getFileType();
         return (fileType instanceof LanguageFileType && ((LanguageFileType) fileType).getLanguage().isKindOf(CsvLanguage.INSTANCE)) ||
-                (fileType == ScratchFileType.INSTANCE && LanguageUtil.getLanguageForPsi(project, file).isKindOf(CsvLanguage.INSTANCE));
+                (ScratchUtil.isScratch(file) && LanguageUtil.getLanguageForPsi(project, file).isKindOf(CsvLanguage.INSTANCE));
     }
 
     public static IElementType getElementType(PsiElement element) {
@@ -158,32 +160,36 @@ public final class CsvHelper {
         return psiFile == null ? null : psiFile.getProject();
     }
 
-    public static CsvValueSeparator getValueSeparator(CsvFile csvFile) {
+    public static @NotNull CsvValueSeparator getValueSeparator(CsvFile csvFile) {
         return getValueSeparator(csvFile.getContainingFile());
     }
 
-    public static CsvValueSeparator getValueSeparator(PsiFile psiFile) {
+    public static @NotNull CsvValueSeparator getValueSeparator(PsiFile psiFile) {
         return getValueSeparator(getProject(psiFile), getVirtualFile(psiFile));
     }
 
-    public static CsvValueSeparator getValueSeparator(Project project, VirtualFile virtualFile) {
-        return CsvFileAttributes.getInstance(project).getValueSeparator(project, virtualFile);
+    public static @NotNull CsvValueSeparator getValueSeparator(Project project, VirtualFile virtualFile) {
+        return project == null ?
+                CsvEditorSettings.getInstance().getDefaultValueSeparator() :
+                CsvFileAttributes.getInstance(project).getValueSeparator(project, virtualFile);
     }
 
     public static boolean hasValueSeparatorAttribute(@NotNull PsiFile psiFile) {
         return CsvFileAttributes.getInstance(getProject(psiFile)).hasValueSeparatorAttribute(getProject(psiFile), getVirtualFile(psiFile));
     }
 
-    public static CsvEscapeCharacter getEscapeCharacter(CsvFile csvFile) {
+    public static @NotNull CsvEscapeCharacter getEscapeCharacter(CsvFile csvFile) {
         return getEscapeCharacter(csvFile.getContainingFile());
     }
 
-    public static CsvEscapeCharacter getEscapeCharacter(PsiFile psiFile) {
+    public static @NotNull CsvEscapeCharacter getEscapeCharacter(PsiFile psiFile) {
         return getEscapeCharacter(getProject(psiFile), getVirtualFile(psiFile));
     }
 
-    public static CsvEscapeCharacter getEscapeCharacter(Project project, VirtualFile virtualFile) {
-        return CsvFileAttributes.getInstance(project).getEscapeCharacter(project, virtualFile);
+    public static @NotNull CsvEscapeCharacter getEscapeCharacter(Project project, VirtualFile virtualFile) {
+        return project == null ?
+                CsvEditorSettings.getInstance().getDefaultEscapeCharacter() :
+                CsvFileAttributes.getInstance(project).getEscapeCharacter(project, virtualFile);
     }
 
     public static boolean hasEscapeCharacterAttribute(@NotNull PsiFile psiFile) {
