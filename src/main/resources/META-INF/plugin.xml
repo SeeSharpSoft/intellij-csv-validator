@@ -48,7 +48,7 @@
 
     <change-notes><![CDATA[
         <pre style="font-family: sans-serif">
-FIX: resolve CSV/TSV file type conflict for versions 2020.* with Database plugin
+NEW: Adding custom separator #177
       </pre>
     ]]>
     </change-notes>
