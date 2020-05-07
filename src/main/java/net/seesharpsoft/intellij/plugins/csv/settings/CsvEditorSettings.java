@@ -30,6 +30,8 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
     public static final CsvEscapeCharacter ESCAPE_CHARACTER_DEFAULT = CsvEscapeCharacter.QUOTE;
     public static final CsvValueSeparator VALUE_SEPARATOR_DEFAULT = CsvValueSeparator.COMMA;
 
+    private static final CsvEditorSettings STATIC_INSTANCE = new CsvEditorSettings();
+
     public enum EditorPrio {
         TEXT_FIRST,
         TABLE_FIRST,
@@ -39,21 +41,21 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
     public static final class OptionSet {
         public boolean CARET_ROW_SHOWN;
         public boolean USE_SOFT_WRAP;
-        public boolean COLUMN_HIGHTLIGHTING;
-        public boolean HIGHTLIGHT_TAB_SEPARATOR;
-        public boolean SHOW_INFO_BALLOON;
-        public String TAB_HIGHLIGHT_COLOR;
-        public EditorPrio EDITOR_PRIO;
-        public int TABLE_EDITOR_ROW_HEIGHT;
-        public int TABLE_AUTO_MAX_COLUMN_WIDTH;
-        public int TABLE_DEFAULT_COLUMN_WIDTH;
-        public boolean TABLE_AUTO_COLUMN_WIDTH_ON_OPEN;
-        public boolean TABLE_COLUMN_HIGHTLIGHTING;
-        public boolean ZERO_BASED_COLUMN_NUMBERING;
+        public boolean COLUMN_HIGHTLIGHTING = true;
+        public boolean HIGHTLIGHT_TAB_SEPARATOR = true;
+        public boolean SHOW_INFO_BALLOON = true;
+        public String TAB_HIGHLIGHT_COLOR = "-7984";
+        public EditorPrio EDITOR_PRIO = EditorPrio.TEXT_FIRST;
+        public int TABLE_EDITOR_ROW_HEIGHT = TABLE_EDITOR_ROW_HEIGHT_DEFAULT;
+        public int TABLE_AUTO_MAX_COLUMN_WIDTH = TABLE_AUTO_MAX_COLUMN_WIDTH_DEFAULT;
+        public int TABLE_DEFAULT_COLUMN_WIDTH = TABLE_DEFAULT_COLUMN_WIDTH_DEFAULT;
+        public boolean TABLE_AUTO_COLUMN_WIDTH_ON_OPEN = false;
+        public boolean TABLE_COLUMN_HIGHTLIGHTING = true;
+        public boolean ZERO_BASED_COLUMN_NUMBERING = false;
 
-        public boolean SHOW_TABLE_EDITOR_INFO_PANEL;
-        public boolean QUOTING_ENFORCED;
-        public boolean FILE_END_LINE_BREAK;
+        public boolean SHOW_TABLE_EDITOR_INFO_PANEL = true;
+        public boolean QUOTING_ENFORCED = false;
+        public boolean FILE_END_LINE_BREAK = true;
         public CsvEscapeCharacter DEFAULT_ESCAPE_CHARACTER = ESCAPE_CHARACTER_DEFAULT;
         public CsvValueSeparator DEFAULT_VALUE_SEPARATOR = VALUE_SEPARATOR_DEFAULT;
         public boolean KEEP_TRAILING_SPACES = false;
@@ -62,20 +64,6 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
             EditorSettingsExternalizable editorSettingsExternalizable = EditorSettingsExternalizable.getInstance();
             CARET_ROW_SHOWN = editorSettingsExternalizable == null ? true : editorSettingsExternalizable.isCaretRowShown();
             USE_SOFT_WRAP = editorSettingsExternalizable == null ? false : editorSettingsExternalizable.isUseSoftWraps();
-            COLUMN_HIGHTLIGHTING = true;
-            HIGHTLIGHT_TAB_SEPARATOR = true;
-            SHOW_INFO_BALLOON = true;
-            TAB_HIGHLIGHT_COLOR = "-7984";
-            EDITOR_PRIO = EditorPrio.TEXT_FIRST;
-            SHOW_TABLE_EDITOR_INFO_PANEL = true;
-            TABLE_EDITOR_ROW_HEIGHT = TABLE_EDITOR_ROW_HEIGHT_DEFAULT;
-            TABLE_AUTO_MAX_COLUMN_WIDTH = TABLE_AUTO_MAX_COLUMN_WIDTH_DEFAULT;
-            TABLE_DEFAULT_COLUMN_WIDTH = TABLE_DEFAULT_COLUMN_WIDTH_DEFAULT;
-            TABLE_AUTO_COLUMN_WIDTH_ON_OPEN = false;
-            QUOTING_ENFORCED = false;
-            TABLE_COLUMN_HIGHTLIGHTING = true;
-            ZERO_BASED_COLUMN_NUMBERING = false;
-            FILE_END_LINE_BREAK = true;
         }
     }
 
@@ -87,7 +75,7 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
 
     public static CsvEditorSettings getInstance() {
         CsvEditorSettings instance = ServiceManager.getService(CsvEditorSettings.class);
-        return instance == null ? new CsvEditorSettings() : instance;
+        return instance == null ? STATIC_INSTANCE : instance;
     }
 
     public void addPropertyChangeListener(PropertyChangeListener listener) {

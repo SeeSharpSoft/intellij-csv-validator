@@ -30,7 +30,7 @@ public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttrib
 
     static class Attribute {
         public String separator;
-        public CsvValueSeparator valueSeparator;
+        public String valueSeparator;
         public CsvEscapeCharacter escapeCharacter;
     }
 
@@ -48,20 +48,6 @@ public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttrib
     @Override
     public void loadState(@NotNull CsvFileAttributes state) {
         XmlSerializerUtil.copyBean(state, this);
-        legacyTransformation();
-    }
-
-    @Deprecated
-    private void legacyTransformation() {
-        for(Map.Entry<String, Attribute> entry : attributeMap.entrySet()) {
-            Attribute attribute = entry.getValue();
-            if (attribute.valueSeparator == null && attribute.separator != null) {
-                attribute.valueSeparator = Arrays.stream(CsvValueSeparator.values())
-                        .filter(vs -> vs.getCharacter().equals(attribute.separator))
-                        .findFirst().orElse(null);
-                attribute.separator = null;
-            }
-        }
     }
 
     public void reset() {
@@ -105,7 +91,8 @@ public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttrib
             return;
         }
         Attribute attribute = getFileAttribute(psiFile.getProject(), psiFile.getOriginalFile().getVirtualFile(), true);
-        attribute.valueSeparator = separator;
+        attribute.valueSeparator = separator.getName();
+        attribute.separator = separator.getCharacter();
     }
 
     public void resetValueSeparator(@NotNull PsiFile psiFile) {
@@ -130,7 +117,7 @@ public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttrib
         Attribute attribute = getFileAttribute(project, virtualFile);
         return attribute == null || attribute.valueSeparator == null ?
                 CsvEditorSettings.getInstance().getDefaultValueSeparator() :
-                attribute.valueSeparator;
+                CsvValueSeparator.create(attribute.valueSeparator, attribute.separator);
     }
 
     public boolean hasValueSeparatorAttribute(@NotNull Project project, @NotNull VirtualFile virtualFile) {

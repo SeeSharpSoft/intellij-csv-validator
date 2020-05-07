@@ -195,15 +195,20 @@ public final class CsvIntentionHelper {
     }
 
     public static PsiElement findQuotePositionsUntilSeparator(final PsiElement element, List<Integer> quotePositions) {
+        return findQuotePositionsUntilSeparator(element, quotePositions, false);
+    }
+
+    public static PsiElement findQuotePositionsUntilSeparator(final PsiElement element, List<Integer> quotePositions, boolean stopAtEscapedTexts) {
         PsiElement currentElement = element;
         PsiElement separatorElement = null;
         while (separatorElement == null && currentElement != null) {
-            if (CsvHelper.getElementType(currentElement) == CsvTypes.COMMA || CsvHelper.getElementType(currentElement) == CsvTypes.CRLF) {
+            if (CsvHelper.getElementType(currentElement) == CsvTypes.COMMA || CsvHelper.getElementType(currentElement) == CsvTypes.CRLF ||
+                    (stopAtEscapedTexts && CsvHelper.getElementType(currentElement) == CsvTypes.ESCAPED_TEXT)) {
                 separatorElement = currentElement;
                 continue;
             }
             if (currentElement.getFirstChild() != null) {
-                separatorElement = findQuotePositionsUntilSeparator(currentElement.getFirstChild(), quotePositions);
+                separatorElement = findQuotePositionsUntilSeparator(currentElement.getFirstChild(), quotePositions, stopAtEscapedTexts);
             } else if (currentElement.getText().equals("\"")) {
                 quotePositions.add(currentElement.getTextOffset());
             }
