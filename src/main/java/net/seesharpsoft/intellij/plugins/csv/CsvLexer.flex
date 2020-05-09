@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
     private CsvValueSeparator myValueSeparator;
     private CsvEscapeCharacter myEscapeCharacter;
 
-    private static final Pattern ESCAPE_TEXT_PATTERN = Pattern.compile("[,;|\\t\\r\\n]");
+    private static final Pattern ESCAPE_TEXT_PATTERN = Pattern.compile("[,:;|\\t\\r\\n]");
 
     /**
      * Provide constructor that supports a Project as parameter.

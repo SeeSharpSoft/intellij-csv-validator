@@ -49,6 +49,7 @@
     <change-notes><![CDATA[
         <pre style="font-family: sans-serif">
 NEW: Adding custom separator #177
+FIX: Memory issues and freezes after updating #204
       </pre>
     ]]>
     </change-notes>
