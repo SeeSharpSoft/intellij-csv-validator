@@ -28,6 +28,18 @@ public class CsvParsingTest extends ParsingTestCase {
         CsvEditorSettings.getInstance().setDefaultValueSeparator(CsvEditorSettings.VALUE_SEPARATOR_DEFAULT);
     }
 
+    public void testColonSeparator() {
+        CsvEditorSettings.getInstance().setDefaultValueSeparator(CsvValueSeparator.COLON);
+        doTest(true);
+        CsvEditorSettings.getInstance().setDefaultValueSeparator(CsvEditorSettings.VALUE_SEPARATOR_DEFAULT);
+    }
+
+    public void testAllSeparators() {
+        CsvEditorSettings.getInstance().setDefaultValueSeparator(CsvValueSeparator.COMMA);
+        doTest(true);
+        CsvEditorSettings.getInstance().setDefaultValueSeparator(CsvEditorSettings.VALUE_SEPARATOR_DEFAULT);
+    }
+
     @Override
     protected String getTestDataPath() {
         return "./src/test/resources/parser";
