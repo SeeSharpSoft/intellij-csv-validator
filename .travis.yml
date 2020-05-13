@@ -1,6 +1,6 @@
 language: java
 jdk:
-  - openjdk9
+  - openjdk8
 
 env:
   - IDEA_VERSION=PC-2019.3.3 GRAMMAR_KIT_VERSION=2019.3
