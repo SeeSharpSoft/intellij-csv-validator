@@ -17,6 +17,10 @@ import java.beans.PropertyChangeListener;
 
 public class CsvFile extends PsiFileBase {
 
+    private final LanguageFileType myFileType;
+    private CsvColumnInfoMap<PsiElement> myColumnInfoMap;
+    private long myColumnInfoMapModifiedStamp;
+
     private class CsvEditorSettingsPropertyChangeListener implements PropertyChangeListener{
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
@@ -31,10 +35,6 @@ public class CsvFile extends PsiFileBase {
             }
         }
     }
-
-    private final LanguageFileType myFileType;
-    private CsvColumnInfoMap<PsiElement> myColumnInfoMap;
-    private long myColumnInfoMapModifiedStamp;
 
     public CsvFile(@NotNull FileViewProvider viewProvider, LanguageFileType fileType) {
         super(viewProvider, fileType.getLanguage());
