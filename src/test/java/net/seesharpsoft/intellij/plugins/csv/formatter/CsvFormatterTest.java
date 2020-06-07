@@ -3,7 +3,7 @@ package net.seesharpsoft.intellij.plugins.csv.formatter;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.psi.codeStyle.CodeStyleManager;
 import com.intellij.psi.codeStyle.CodeStyleSettingsManager;
-import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase;
+import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import com.intellij.util.containers.ContainerUtil;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvCodeStyleSettings;
 import org.junit.Assert;
@@ -12,7 +12,7 @@ import java.io.PrintWriter;
 import java.time.Instant;
 import java.util.Properties;
 
-public class CsvFormatterTest extends LightPlatformCodeInsightFixtureTestCase {
+public class CsvFormatterTest extends BasePlatformTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
@@ -60,7 +60,7 @@ public class CsvFormatterTest extends LightPlatformCodeInsightFixtureTestCase {
     private void executeTestConfiguration(int binarySettings, String relativeTargetPath) {
         executeTestConfiguration(binarySettings, relativeTargetPath, true);
     }
-    
+
     private void executeTestConfiguration(int binarySettings, String relativeTargetPath, boolean checkResults) {
         if (relativeTargetPath == null || relativeTargetPath.isEmpty()) {
             relativeTargetPath = ".";
@@ -139,7 +139,7 @@ public class CsvFormatterTest extends LightPlatformCodeInsightFixtureTestCase {
             }
         }
     }
-    
+
     public void testInvalidRangeException() throws Exception {
         executeTestConfiguration(0, "/invalidRange");
     }
@@ -148,7 +148,7 @@ public class CsvFormatterTest extends LightPlatformCodeInsightFixtureTestCase {
         Long threshold = 1000l;
         Properties runtime = new Properties();
         runtime.load(this.getClass().getResourceAsStream("/formatter/performance/runtime.prop"));
-        
+
         long start = Instant.now().toEpochMilli();
         executeTestConfiguration(0, "/performance", false);
         long end = Instant.now().toEpochMilli();
@@ -156,7 +156,7 @@ public class CsvFormatterTest extends LightPlatformCodeInsightFixtureTestCase {
 
         Assert.assertTrue(end - start <= Long.parseLong(runtime.getProperty("00000000")) + threshold);
     }
-    
+
     /**
      * This function should be executed (remove the underscore) if the current results are correct (manual testing).
      *

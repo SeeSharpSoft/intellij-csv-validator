@@ -3,6 +3,7 @@ package net.seesharpsoft.intellij.plugins.csv.editor;
 import com.intellij.codeInsight.daemon.impl.HighlightInfo;
 import com.intellij.codeInsight.daemon.impl.HighlightInfoType;
 import com.intellij.openapi.Disposable;
+import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Disposer;
@@ -14,7 +15,8 @@ import com.intellij.psi.impl.source.tree.FileElement;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.testFramework.EdtTestUtil;
 import com.intellij.testFramework.ExpectedHighlightingData;
-import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase;
+import com.intellij.testFramework.fixtures.BasePlatformTestCase;
+import net.seesharpsoft.intellij.plugins.csv.editor.table.ExpectedHighlightingDataWrapper;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
@@ -23,7 +25,7 @@ import java.util.List;
 
 import static net.seesharpsoft.intellij.plugins.csv.editor.CsvAnnotator.CSV_COLUMN_INFO_SEVERITY;
 
-public class CsvAnnotatorTest extends LightPlatformCodeInsightFixtureTestCase {
+public class CsvAnnotatorTest extends BasePlatformTestCase {
 
     @Override
     protected String getTestDataPath() {
@@ -36,7 +38,7 @@ public class CsvAnnotatorTest extends LightPlatformCodeInsightFixtureTestCase {
     }
 
     private long collectAndCheckHighlighting() {
-        ExpectedHighlightingData data = new ExpectedHighlightingData(myFixture.getEditor().getDocument(), false, false, true, false, this.getHostFile());
+        ExpectedHighlightingDataWrapper data = new ExpectedHighlightingDataWrapper(myFixture.getEditor().getDocument(), false, false, true);
         data.registerHighlightingType("csv_column_info", new ExpectedHighlightingData.ExpectedHighlightingSet(CSV_COLUMN_INFO_SEVERITY, false, true));
         data.init();
         return this.collectAndCheckHighlighting(data);
@@ -46,7 +48,7 @@ public class CsvAnnotatorTest extends LightPlatformCodeInsightFixtureTestCase {
         return myFixture.getFile();
     }
 
-    private long collectAndCheckHighlighting(@NotNull ExpectedHighlightingData data) {
+    private long collectAndCheckHighlighting(@NotNull ExpectedHighlightingDataWrapper data) {
         Project project = myFixture.getProject();
         EdtTestUtil.runInEdtAndWait(() -> {
             PsiDocumentManager.getInstance(project).commitAllDocuments();
@@ -54,13 +56,13 @@ public class CsvAnnotatorTest extends LightPlatformCodeInsightFixtureTestCase {
         PsiFileImpl file = (PsiFileImpl)this.getHostFile();
         FileElement hardRefToFileElement = file.calcTreeElement();
         if (!DumbService.isDumb(project)) {
-            CacheManager.SERVICE.getInstance(project).getFilesWithWord("XXX", (short)2, GlobalSearchScope.allScope(project), true);
+            ServiceManager.getService(project, CacheManager.class).getFilesWithWord("XXX", (short)2, GlobalSearchScope.allScope(project), true);
         }
 
         long start = System.currentTimeMillis();
         Disposable disposable = Disposer.newDisposable();
 
-        List infos;
+        List<HighlightInfo> infos;
         try {
             infos = myFixture.doHighlighting();
             this.removeDuplicatedRangesForInjected(infos);
@@ -69,7 +71,7 @@ public class CsvAnnotatorTest extends LightPlatformCodeInsightFixtureTestCase {
         }
 
         long elapsed = System.currentTimeMillis() - start;
-        data.checkResult(infos, file.getText());
+        data.checkResultWrapper(file, infos, file.getText());
         hardRefToFileElement.hashCode();
         return elapsed;
     }
