@@ -1,5 +1,7 @@
 package net.seesharpsoft.intellij.plugins.csv;
 
+import com.intellij.util.xmlb.Converter;
+
 import java.util.Objects;
 import java.util.regex.Pattern;
 
@@ -22,14 +24,19 @@ public class CsvValueSeparator {
         if (name != null) {
             switch (name) {
                 case "COMMA":
+                case ",":
                     return COMMA;
                 case "SEMICOLON":
+                case ";":
                     return SEMICOLON;
                 case "PIPE":
+                case "|":
                     return PIPE;
                 case "TAB":
+                case "\t":
                     return TAB;
                 case "COLON":
+                case ":":
                     return COLON;
                 default:
                     break;
@@ -55,6 +62,17 @@ public class CsvValueSeparator {
 
     public static CsvValueSeparator[] values() {
         return new CsvValueSeparator[]{COMMA, SEMICOLON, PIPE, TAB, COLON};
+    }
+
+    public static class CsvValueSeparatorConverter extends Converter<CsvValueSeparator> {
+        public CsvValueSeparator fromString(String value) {
+            int index = value.indexOf("@");
+            return index == -1 ? CsvValueSeparator.create(value, value) : CsvValueSeparator.create(value.substring(0, index), value.substring(index + 1));
+        }
+
+        public String toString(CsvValueSeparator value) {
+            return value.getName() + "@" + value.getCharacter();
+        }
     }
 
     public CsvValueSeparator(String myCharacter) {
