@@ -13,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import java.awt.*;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.util.Objects;
 
 @State(
         name = "CsvEditorSettings",
@@ -57,7 +58,7 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
         public boolean QUOTING_ENFORCED = false;
         public boolean FILE_END_LINE_BREAK = true;
         public CsvEscapeCharacter DEFAULT_ESCAPE_CHARACTER = ESCAPE_CHARACTER_DEFAULT;
-        public CsvValueSeparator DEFAULT_VALUE_SEPARATOR = VALUE_SEPARATOR_DEFAULT;
+        public String DEFAULT_VALUE_SEPARATOR = VALUE_SEPARATOR_DEFAULT.getCharacter();
         public boolean KEEP_TRAILING_SPACES = false;
 
         public OptionSet() {
@@ -235,7 +236,11 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
     }
 
     public void setDefaultEscapeCharacter(CsvEscapeCharacter defaultEscapeCharacter) {
+        CsvEscapeCharacter oldValue = getDefaultEscapeCharacter();
         getState().DEFAULT_ESCAPE_CHARACTER = defaultEscapeCharacter;
+        if (!Objects.equals(oldValue, defaultEscapeCharacter)) {
+            myPropertyChangeSupport.firePropertyChange("defaultEscapeCharacter", oldValue, defaultEscapeCharacter);
+        }
     }
 
     public CsvEscapeCharacter getDefaultEscapeCharacter() {
@@ -243,11 +248,16 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
     }
 
     public void setDefaultValueSeparator(CsvValueSeparator defaultValueSeparator) {
-        getState().DEFAULT_VALUE_SEPARATOR = defaultValueSeparator;
+        CsvValueSeparator oldValue = getDefaultValueSeparator();
+        getState().DEFAULT_VALUE_SEPARATOR = defaultValueSeparator.getName();
+        if (!Objects.equals(oldValue, defaultValueSeparator)) {
+            myPropertyChangeSupport.firePropertyChange("defaultValueSeparator", oldValue, defaultValueSeparator);
+        }
     }
 
     public CsvValueSeparator getDefaultValueSeparator() {
-        return getState().DEFAULT_VALUE_SEPARATOR;
+        CsvValueSeparator csvValueSeparator = CsvValueSeparator.getDefaultValueSeparator(getState().DEFAULT_VALUE_SEPARATOR);
+        return csvValueSeparator == null ? VALUE_SEPARATOR_DEFAULT : csvValueSeparator;
     }
 
     public void setKeepTrailingSpaces(boolean keepTrailingSpaces) {

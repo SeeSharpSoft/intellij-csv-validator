@@ -1,5 +1,6 @@
 package net.seesharpsoft.intellij.plugins.csv;
 
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 public class CsvValueSeparator {
@@ -17,7 +18,7 @@ public class CsvValueSeparator {
     public static final CsvValueSeparator TAB = new CsvValueSeparator("\t", "Tab (↹)", "TAB");
     public static final CsvValueSeparator COLON = new CsvValueSeparator(":", "Colon (:)", "COLON");
 
-    public static CsvValueSeparator create(String name, String character) {
+    public static CsvValueSeparator getDefaultValueSeparator(String name) {
         if (name != null) {
             switch (name) {
                 case "COMMA":
@@ -34,10 +35,21 @@ public class CsvValueSeparator {
                     break;
             }
         }
+        return null;
+    }
+
+    public static CsvValueSeparator create(String name, String character) {
+        CsvValueSeparator defaultValueSeparator = getDefaultValueSeparator(name);
+        if (defaultValueSeparator != null) {
+            return defaultValueSeparator;
+        }
         return create(character);
     }
 
     public static CsvValueSeparator create(String character) {
+        if (character == null) {
+            return null;
+        }
         return new CsvValueSeparator(character);
     }
 
@@ -74,5 +86,24 @@ public class CsvValueSeparator {
 
     public boolean isCustom() {
         return CUSTOM_NAME.equals(getName());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getCharacter(), isCustom());
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null || !(obj instanceof CsvValueSeparator)) {
+            return false;
+        }
+        CsvValueSeparator otherObj = (CsvValueSeparator)obj;
+        return Objects.equals(otherObj.getCharacter(), this.getCharacter()) && Objects.equals(otherObj.isCustom(), this.isCustom());
+    }
+
+    @Override
+    public String toString() {
+        return getDisplay();
     }
 }
