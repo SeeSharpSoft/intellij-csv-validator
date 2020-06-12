@@ -1,9 +1,9 @@
 package net.seesharpsoft.intellij.plugins.csv.inspection;
 
 import com.intellij.codeInsight.intention.IntentionAction;
-import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase;
+import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 
-public class CsvInspectionTest extends LightPlatformCodeInsightFixtureTestCase {
+public class CsvInspectionTest extends BasePlatformTestCase {
 
     @Override
     protected String getTestDataPath() {
@@ -15,17 +15,17 @@ public class CsvInspectionTest extends LightPlatformCodeInsightFixtureTestCase {
         super.setUp();
         myFixture.enableInspections(CsvValidationInspection.class);
     }
-    
+
     protected void doTestIntention(String testName, String hint) throws Throwable {
         myFixture.configureByFile(testName + "/before.csv");
         final IntentionAction action = myFixture.filterAvailableIntentions(hint).stream()
                 .filter(intentionAction -> intentionAction.getText().equals(hint))
                 .findFirst().get();
-        
+
         myFixture.launchAction(action);
         myFixture.checkResultByFile(testName + "/after.csv");
     }
-    
+
     public void testAddClosingQuote() throws Throwable {
         doTestIntention("AddClosingQuote", "Add closing quote");
     }

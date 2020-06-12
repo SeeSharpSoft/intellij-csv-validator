@@ -1,12 +1,12 @@
 package net.seesharpsoft.intellij.plugins.csv.actions;
 
 import com.intellij.openapi.actionSystem.Presentation;
-import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase;
+import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import net.seesharpsoft.intellij.plugins.csv.CsvEscapeCharacter;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvFileAttributes;
 
-public class CsvChangeEscapeCharacterActionTest extends LightPlatformCodeInsightFixtureTestCase {
+public class CsvChangeEscapeCharacterActionTest extends BasePlatformTestCase {
 
     @Override
     protected String getTestDataPath() {

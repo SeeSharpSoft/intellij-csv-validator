@@ -1,14 +1,14 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
 import com.intellij.testFramework.exceptionCases.AbstractExceptionCase;
-import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase;
+import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import com.intellij.util.ThrowableRunnable;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public abstract class CsvTableEditorSwingTestBase extends LightPlatformCodeInsightFixtureTestCase {
+public abstract class CsvTableEditorSwingTestBase extends BasePlatformTestCase {
 
     protected CsvTableEditorSwing fileEditor;
 

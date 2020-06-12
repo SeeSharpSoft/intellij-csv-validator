@@ -10,12 +10,12 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import com.intellij.util.xmlb.XmlSerializerUtil;
+import com.intellij.util.xmlb.annotations.OptionTag;
 import net.seesharpsoft.intellij.plugins.csv.*;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,8 +29,8 @@ public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttrib
     public Map<String, Attribute> attributeMap = new HashMap<>();
 
     static class Attribute {
-        public String separator;
-        public String valueSeparator;
+        @OptionTag(converter = CsvValueSeparator.CsvValueSeparatorConverter.class)
+        public CsvValueSeparator separator;
         public CsvEscapeCharacter escapeCharacter;
     }
 
@@ -91,8 +91,7 @@ public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttrib
             return;
         }
         Attribute attribute = getFileAttribute(psiFile.getProject(), psiFile.getOriginalFile().getVirtualFile(), true);
-        attribute.valueSeparator = separator.getName();
-        attribute.separator = separator.getCharacter();
+        attribute.separator = separator;
     }
 
     public void resetValueSeparator(@NotNull PsiFile psiFile) {
@@ -101,7 +100,7 @@ public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttrib
         }
         Attribute attribute = getFileAttribute(psiFile.getProject(), psiFile.getOriginalFile().getVirtualFile());
         if (attribute != null) {
-            attribute.valueSeparator = null;
+            attribute.separator = null;
         }
     }
 
@@ -115,14 +114,14 @@ public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttrib
                 return ((CsvSeparatorHolder) language).getSeparator();
         }
         Attribute attribute = getFileAttribute(project, virtualFile);
-        return attribute == null || attribute.valueSeparator == null ?
+        return attribute == null || attribute.separator == null ?
                 CsvEditorSettings.getInstance().getDefaultValueSeparator() :
-                CsvValueSeparator.create(attribute.valueSeparator, attribute.separator);
+                attribute.separator;
     }
 
     public boolean hasValueSeparatorAttribute(@NotNull Project project, @NotNull VirtualFile virtualFile) {
         Attribute attribute = getFileAttribute(project, virtualFile);
-        return attribute != null && attribute.valueSeparator != null;
+        return attribute != null && attribute.separator != null;
     }
 
     public void setEscapeCharacter(@NotNull PsiFile psiFile, @NotNull CsvEscapeCharacter escapeCharacter) {

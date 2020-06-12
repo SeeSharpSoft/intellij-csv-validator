@@ -24,7 +24,7 @@ jacocoTestReport {
 }
 
 group 'net.seesharpsoft.intellij.plugins'
-version '2.11.1'
+version '2.12.0'
 
 apply plugin: 'java'
 sourceCompatibility = javaVersion
@@ -76,7 +76,7 @@ intellij {
     pluginName = 'CSV Plugin'
     instrumentCode = true
     updateSinceUntilBuild = false
-    downloadSources = true
+    downloadSources = false
 }
 publishPlugin {
     token = System.getenv().getOrDefault('JI_TOKEN', '')

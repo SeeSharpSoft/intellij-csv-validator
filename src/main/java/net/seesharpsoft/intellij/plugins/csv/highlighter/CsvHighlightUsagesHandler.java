@@ -15,7 +15,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collections;
 import java.util.List;
 
-public class CsvHighlightUsagesHandler extends HighlightUsagesHandlerBase<PsiElement> {
+public class CsvHighlightUsagesHandler extends HighlightUsagesHandlerBase {
 
     protected CsvHighlightUsagesHandler(@NotNull Editor editor, @NotNull CsvFile file) {
         super(editor, file);
@@ -46,20 +46,21 @@ public class CsvHighlightUsagesHandler extends HighlightUsagesHandlerBase<PsiEle
     }
 
     @Override
-    protected void selectTargets(List<PsiElement> list, Consumer<List<PsiElement>> consumer) {
-        consumer.consume(list);
-    }
-
-    @Override
-    public void computeUsages(List<PsiElement> list) {
+    public void computeUsages(List list) {
         CsvColumnInfoMap<PsiElement> columnInfoMap = getCsvFile().getColumnInfoMap();
-        for (PsiElement listElement : list) {
+        for (PsiElement listElement : (List<PsiElement>)list) {
             CsvColumnInfo<PsiElement> csvColumnInfo = getCsvFile().getColumnInfoMap().getColumnInfo(listElement);
             if (csvColumnInfo == null) {
                 continue;
             }
             csvColumnInfo.getElements().forEach(element -> this.addOccurrence(columnInfoMap.getRowInfo(element)));
         }
+
+    }
+
+    @Override
+    protected void selectTargets(List list, Consumer consumer) {
+        consumer.consume(list);
     }
 
     protected void addOccurrence(CsvColumnInfo<PsiElement>.RowInfo rowInfo) {
