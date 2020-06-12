@@ -48,8 +48,8 @@
 
     <change-notes><![CDATA[
         <pre style="font-family: sans-serif">
-NEW: Adding custom separator #177
-FIX: Memory issues and freezes after updating #204
+FIX: no accessors for class CsvValueSeparator #221
+FIX: Default Value Separator get frequently reset to comma, changes only applied after restart #222
       </pre>
     ]]>
     </change-notes>

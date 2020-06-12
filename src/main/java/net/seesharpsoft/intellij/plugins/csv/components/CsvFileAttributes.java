@@ -29,7 +29,6 @@ public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttrib
     public Map<String, Attribute> attributeMap = new HashMap<>();
 
     static class Attribute {
-        // holds the actual separator character
         @OptionTag(converter = CsvValueSeparator.CsvValueSeparatorConverter.class)
         public CsvValueSeparator separator;
         public CsvEscapeCharacter escapeCharacter;

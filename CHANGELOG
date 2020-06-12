@@ -1,3 +1,9 @@
+2.12.0
+Jun 13, 2020
+
+FIX: no accessors for class CsvValueSeparator #221
+FIX: Default Value Separator get frequently reset to comma, changes only applied after restart #222
+
 2.11.1
 May 9, 2020
 
