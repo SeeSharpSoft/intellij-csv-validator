@@ -1,5 +1,8 @@
 package net.seesharpsoft.intellij.plugins.csv;
 
+import com.intellij.util.xmlb.Converter;
+
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 public class CsvValueSeparator {
@@ -17,32 +20,59 @@ public class CsvValueSeparator {
     public static final CsvValueSeparator TAB = new CsvValueSeparator("\t", "Tab (↹)", "TAB");
     public static final CsvValueSeparator COLON = new CsvValueSeparator(":", "Colon (:)", "COLON");
 
-    public static CsvValueSeparator create(String name, String character) {
+    public static CsvValueSeparator getDefaultValueSeparator(String name) {
         if (name != null) {
             switch (name) {
                 case "COMMA":
+                case ",":
                     return COMMA;
                 case "SEMICOLON":
+                case ";":
                     return SEMICOLON;
                 case "PIPE":
+                case "|":
                     return PIPE;
                 case "TAB":
+                case "\t":
                     return TAB;
                 case "COLON":
+                case ":":
                     return COLON;
                 default:
                     break;
             }
         }
+        return null;
+    }
+
+    public static CsvValueSeparator create(String name, String character) {
+        CsvValueSeparator defaultValueSeparator = getDefaultValueSeparator(name);
+        if (defaultValueSeparator != null) {
+            return defaultValueSeparator;
+        }
         return create(character);
     }
 
     public static CsvValueSeparator create(String character) {
+        if (character == null) {
+            return null;
+        }
         return new CsvValueSeparator(character);
     }
 
     public static CsvValueSeparator[] values() {
         return new CsvValueSeparator[]{COMMA, SEMICOLON, PIPE, TAB, COLON};
+    }
+
+    public static class CsvValueSeparatorConverter extends Converter<CsvValueSeparator> {
+        public CsvValueSeparator fromString(String value) {
+            int index = value.indexOf("@");
+            return index == -1 ? CsvValueSeparator.create(value, value) : CsvValueSeparator.create(value.substring(0, index), value.substring(index + 1));
+        }
+
+        public String toString(CsvValueSeparator value) {
+            return value.getName() + "@" + value.getCharacter();
+        }
     }
 
     public CsvValueSeparator(String myCharacter) {
@@ -74,5 +104,24 @@ public class CsvValueSeparator {
 
     public boolean isCustom() {
         return CUSTOM_NAME.equals(getName());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getCharacter(), isCustom());
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null || !(obj instanceof CsvValueSeparator)) {
+            return false;
+        }
+        CsvValueSeparator otherObj = (CsvValueSeparator)obj;
+        return Objects.equals(otherObj.getCharacter(), this.getCharacter()) && Objects.equals(otherObj.isCustom(), this.isCustom());
+    }
+
+    @Override
+    public String toString() {
+        return getDisplay();
     }
 }
