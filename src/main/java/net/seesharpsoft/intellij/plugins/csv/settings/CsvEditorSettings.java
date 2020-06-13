@@ -58,6 +58,7 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
         public boolean SHOW_TABLE_EDITOR_INFO_PANEL = true;
         public boolean QUOTING_ENFORCED = false;
         public boolean FILE_END_LINE_BREAK = true;
+        @OptionTag(converter = CsvEscapeCharacter.CsvEscapeCharacterConverter.class)
         public CsvEscapeCharacter DEFAULT_ESCAPE_CHARACTER = ESCAPE_CHARACTER_DEFAULT;
         @OptionTag(converter = CsvValueSeparator.CsvValueSeparatorConverter.class)
         public CsvValueSeparator DEFAULT_VALUE_SEPARATOR = VALUE_SEPARATOR_DEFAULT;
@@ -246,7 +247,8 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
     }
 
     public CsvEscapeCharacter getDefaultEscapeCharacter() {
-        return getState().DEFAULT_ESCAPE_CHARACTER;
+        CsvEscapeCharacter csvValueSeparator = getState().DEFAULT_ESCAPE_CHARACTER;
+        return csvValueSeparator == null ? ESCAPE_CHARACTER_DEFAULT : getState().DEFAULT_ESCAPE_CHARACTER;
     }
 
     public void setDefaultValueSeparator(CsvValueSeparator defaultValueSeparator) {

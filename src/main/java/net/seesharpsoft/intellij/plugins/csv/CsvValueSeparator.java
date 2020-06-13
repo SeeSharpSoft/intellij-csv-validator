@@ -20,9 +20,9 @@ public class CsvValueSeparator {
     public static final CsvValueSeparator TAB = new CsvValueSeparator("\t", "Tab (↹)", "TAB");
     public static final CsvValueSeparator COLON = new CsvValueSeparator(":", "Colon (:)", "COLON");
 
-    public static CsvValueSeparator getDefaultValueSeparator(String name) {
-        if (name != null) {
-            switch (name) {
+    public static CsvValueSeparator getDefaultValueSeparator(String character) {
+        if (character != null) {
+            switch (character) {
                 case "COMMA":
                 case ",":
                     return COMMA;
@@ -45,19 +45,12 @@ public class CsvValueSeparator {
         return null;
     }
 
-    public static CsvValueSeparator create(String name, String character) {
-        CsvValueSeparator defaultValueSeparator = getDefaultValueSeparator(name);
-        if (defaultValueSeparator != null) {
-            return defaultValueSeparator;
-        }
-        return create(character);
-    }
-
     public static CsvValueSeparator create(String character) {
         if (character == null) {
             return null;
         }
-        return new CsvValueSeparator(character);
+        CsvValueSeparator defaultValueSeparator = getDefaultValueSeparator(character);
+        return defaultValueSeparator == null ? new CsvValueSeparator(character) : defaultValueSeparator;
     }
 
     public static CsvValueSeparator[] values() {
@@ -66,12 +59,11 @@ public class CsvValueSeparator {
 
     public static class CsvValueSeparatorConverter extends Converter<CsvValueSeparator> {
         public CsvValueSeparator fromString(String value) {
-            int index = value.indexOf("@");
-            return index == -1 ? CsvValueSeparator.create(value, value) : CsvValueSeparator.create(value.substring(0, index), value.substring(index + 1));
+            return CsvValueSeparator.create(value);
         }
 
         public String toString(CsvValueSeparator value) {
-            return value.getName() + "@" + value.getCharacter();
+            return value.getCharacter();
         }
     }
 
