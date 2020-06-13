@@ -48,6 +48,7 @@
 
     <change-notes><![CDATA[
         <pre style="font-family: sans-serif">
+NEW: flexible settings format for value separator & escape character
 FIX: no accessors for class CsvValueSeparator #221
 FIX: Default Value Separator get frequently reset to comma, changes only applied after restart #222
       </pre>
