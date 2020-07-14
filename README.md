@@ -35,9 +35,9 @@ This enables default editor features like syntax validation, highlighting and in
 
 **!!Please note!!**
 
-Starting with **CSV Plugin 2.10.0**, _new features will only be developed for IntelliJ IDE 2019.3 and higher_.  
+- Starting with **CSV Plugin 2.10.0**, _new features will only be developed for IntelliJ IDE 2019.3 and higher_. I will still release patches for major/critical bugs for previous IDE versions 2017.3.1 - 2019.2.\*, but no additional features or cosmetic fixes.
 
-I will still release patches for major/critical bugs for previous IDE versions 2017.3.1 - 2019.2.\*, but no additional features or cosmetic fixes.
+- Starting with **CSV Plugin 2.11.0**, _Java 9 (53) or higher is required_. Previous versions can be downloaded and installed manually from the following locations: [GitHub Releases](https://github.com/SeeSharpSoft/intellij-csv-validator/releases), [Plugin Repository](https://plugins.jetbrains.com/plugin/10037-csv-plugin/versions) (see also section [Installation](https://github.com/SeeSharpSoft/intellij-csv-validator#installation)).
 
 ### Syntax parser & validation
 
