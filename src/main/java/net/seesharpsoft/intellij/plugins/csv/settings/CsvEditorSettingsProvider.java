@@ -42,6 +42,7 @@ public class CsvEditorSettingsProvider implements EditorOptionsProvider {
     private JComboBox comboEscapeCharacter;
     private JComboBox comboValueSeparator;
     private JCheckBox cbKeepTrailingWhitespaces;
+    private JTextField tfCommentIndicator;
 
     @NotNull
     @Override
@@ -92,7 +93,8 @@ public class CsvEditorSettingsProvider implements EditorOptionsProvider {
                 isModified(cbAdjustColumnWidthOnOpen, csvEditorSettings.isTableAutoColumnWidthOnOpen()) ||
                 !Objects.equals(comboEscapeCharacter.getSelectedItem(), csvEditorSettings.getDefaultEscapeCharacter()) ||
                 !Objects.equals(comboValueSeparator.getSelectedItem(), csvEditorSettings.getDefaultValueSeparator()) ||
-                isModified(cbKeepTrailingWhitespaces, csvEditorSettings.getKeepTrailingSpaces());
+                isModified(cbKeepTrailingWhitespaces, csvEditorSettings.getKeepTrailingSpaces()) ||
+                isModified(tfCommentIndicator, csvEditorSettings.getCommentIndicator());
     }
 
     @Override
@@ -117,6 +119,7 @@ public class CsvEditorSettingsProvider implements EditorOptionsProvider {
         comboEscapeCharacter.setSelectedItem(csvEditorSettings.getDefaultEscapeCharacter());
         comboValueSeparator.setSelectedItem(csvEditorSettings.getDefaultValueSeparator());
         cbKeepTrailingWhitespaces.setSelected(csvEditorSettings.getKeepTrailingSpaces());
+        tfCommentIndicator.setText(csvEditorSettings.getCommentIndicator());
     }
 
     @Override
@@ -141,6 +144,7 @@ public class CsvEditorSettingsProvider implements EditorOptionsProvider {
         csvEditorSettings.setDefaultEscapeCharacter((CsvEscapeCharacter)comboEscapeCharacter.getSelectedItem());
         csvEditorSettings.setDefaultValueSeparator((CsvValueSeparator)comboValueSeparator.getSelectedItem());
         csvEditorSettings.setKeepTrailingSpaces(cbKeepTrailingWhitespaces.isSelected());
+        csvEditorSettings.setCommentIndicator(tfCommentIndicator.getText());
     }
 
     protected void createUIComponents() {

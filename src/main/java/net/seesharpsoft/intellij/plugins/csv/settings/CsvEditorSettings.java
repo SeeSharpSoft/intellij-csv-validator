@@ -32,6 +32,8 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
     public static final CsvEscapeCharacter ESCAPE_CHARACTER_DEFAULT = CsvEscapeCharacter.QUOTE;
     public static final CsvValueSeparator VALUE_SEPARATOR_DEFAULT = CsvValueSeparator.COMMA;
 
+    public static final String COMMENT_INDICATOR_DEFAULT = "#";
+
     private static final CsvEditorSettings STATIC_INSTANCE = new CsvEditorSettings();
 
     public enum EditorPrio {
@@ -63,6 +65,7 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
         @OptionTag(converter = CsvValueSeparator.CsvValueSeparatorConverter.class)
         public CsvValueSeparator DEFAULT_VALUE_SEPARATOR = VALUE_SEPARATOR_DEFAULT;
         public boolean KEEP_TRAILING_SPACES = false;
+        public String COMMENT_INDICATOR = COMMENT_INDICATOR_DEFAULT;
 
         public OptionSet() {
             EditorSettingsExternalizable editorSettingsExternalizable = EditorSettingsExternalizable.getInstance();
@@ -270,5 +273,17 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
 
     public boolean getKeepTrailingSpaces() {
         return getState().KEEP_TRAILING_SPACES;
+    }
+
+    public void setCommentIndicator(String commentIndicator) {
+        String oldValue = getCommentIndicator();
+        getState().COMMENT_INDICATOR = commentIndicator.trim();
+        if (commentIndicator != oldValue) {
+            myPropertyChangeSupport.firePropertyChange("commentIndicator", oldValue, getCommentIndicator());
+        }
+    }
+
+    public String getCommentIndicator() {
+        return getState().COMMENT_INDICATOR;
     }
 }
