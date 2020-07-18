@@ -203,6 +203,11 @@ public final class CsvHelper {
         int row = 0;
         boolean hasComments = false;
         for (CsvRecord record : records) {
+            // skip comment records
+            if (record.getComment() != null) {
+                hasComments = true;
+                continue;
+            }
             int column = 0;
             for (CsvField field : record.getFieldList()) {
                 Integer length = CsvHelper.getMaxTextLineLength(unquoteCsvValue(field.getText(), escapeCharacter));
@@ -213,9 +218,6 @@ public final class CsvHelper {
                 }
                 columnInfoMap.get(column).addElement(field, row, getFieldStartOffset(field), getFieldEndOffset(field));
                 ++column;
-            }
-            if (record.getComment() != null) {
-                hasComments = true;
             }
             ++row;
         }
