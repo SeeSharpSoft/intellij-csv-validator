@@ -24,6 +24,8 @@ public class CsvSyntaxHighlighter extends SyntaxHighlighterBase {
             createTextAttributesKey("CSV_DEFAULT_STRING", DefaultLanguageHighlighterColors.STRING);
     public static final TextAttributesKey ESCAPED_TEXT =
             createTextAttributesKey("CSV_ESCAPED_STRING", DefaultLanguageHighlighterColors.VALID_STRING_ESCAPE);
+    public static final TextAttributesKey COMMENT =
+            createTextAttributesKey("CSV_DEFAULT_COMMENT", DefaultLanguageHighlighterColors.LINE_COMMENT);
     public static final TextAttributesKey BAD_CHARACTER =
             createTextAttributesKey("CSV_BAD_CHARACTER", HighlighterColors.BAD_CHARACTER);
 
@@ -32,6 +34,7 @@ public class CsvSyntaxHighlighter extends SyntaxHighlighterBase {
     private static final TextAttributesKey[] QUOTE_KEYS = new TextAttributesKey[] {QUOTE};
     private static final TextAttributesKey[] TEXT_KEYS = new TextAttributesKey[] {TEXT};
     private static final TextAttributesKey[] ESCAPED_TEXT_KEYS = new TextAttributesKey[] {ESCAPED_TEXT};
+    private static final TextAttributesKey[] COMMENT_KEYS = new TextAttributesKey[] {COMMENT};
     private static final TextAttributesKey[] EMPTY_KEYS = new TextAttributesKey[0];
 
     private final Project myProject;
@@ -57,6 +60,8 @@ public class CsvSyntaxHighlighter extends SyntaxHighlighterBase {
             return QUOTE_KEYS;
         } else if (tokenType.equals(CsvTypes.TEXT)) {
             return TEXT_KEYS;
+        } else if (tokenType.equals(CsvTypes.COMMENT)) {
+            return COMMENT_KEYS;
         } else if (tokenType.equals(CsvTypes.ESCAPED_TEXT)) {
             return ESCAPED_TEXT_KEYS;
         } else if (tokenType.equals(TokenType.BAD_CHARACTER)) {

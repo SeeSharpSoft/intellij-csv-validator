@@ -36,6 +36,7 @@ public class CsvColorSettings implements ColorSettingsPage {
         attributesDescriptors.add(new AttributesDescriptor("Quote", CsvSyntaxHighlighter.QUOTE));
         attributesDescriptors.add(new AttributesDescriptor("Text", CsvSyntaxHighlighter.TEXT));
         attributesDescriptors.add(new AttributesDescriptor("Escaped Text", CsvSyntaxHighlighter.ESCAPED_TEXT));
+        attributesDescriptors.add(new AttributesDescriptor("Comment", CsvSyntaxHighlighter.COMMENT));
 
         COLUMN_HIGHLIGHT_ATTRIBUTES = new ArrayList<>();
         for (int i = 0; i < MAX_COLUMN_HIGHLIGHT_COLORS; ++i) {

@@ -201,7 +201,13 @@ public final class CsvHelper {
         Map<Integer, CsvColumnInfo<PsiElement>> columnInfoMap = new HashMap<>();
         CsvRecord[] records = PsiTreeUtil.getChildrenOfType(csvFile, CsvRecord.class);
         int row = 0;
+        boolean hasComments = false;
         for (CsvRecord record : records) {
+            // skip comment records
+            if (record.getComment() != null) {
+                hasComments = true;
+                continue;
+            }
             int column = 0;
             for (CsvField field : record.getFieldList()) {
                 Integer length = CsvHelper.getMaxTextLineLength(unquoteCsvValue(field.getText(), escapeCharacter));
@@ -215,7 +221,7 @@ public final class CsvHelper {
             }
             ++row;
         }
-        return new CsvColumnInfoMap(columnInfoMap, PsiTreeUtil.hasErrorElements(csvFile));
+        return new CsvColumnInfoMap(columnInfoMap, PsiTreeUtil.hasErrorElements(csvFile), hasComments);
     }
 
     public static String unquoteCsvValue(String content, CsvEscapeCharacter escapeCharacter) {

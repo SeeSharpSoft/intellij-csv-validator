@@ -13,6 +13,18 @@ After that, create a pull request (PR).
 - Apply a proper code style that fits to the existing one
 - Do not change the plugin metadata information (e.g. name, version, description, etc.) in _src/main/resources/META-INF/plugin.xml_
 
+### Some guidance for opening an issue
+
+- Follow the single-purpose principle: Only one issue per thread
+- For a bug reports:
+  - Provide as many detailed information about your setup as possible
+  - Point out the expected behavior in comparison with the current behavior
+  - If possible, describe the steps on how to reproduce
+- For feature requests:
+  - Search for duplicates/already existing feature request
+  - Describe the wanted feature together with its use case and benefits
+  - Provide examples if possible
+
 ### Compiling the source code
 
 Since the project has been migrated to the Gradle and [Gradle IntelliJ plugin](https://github.com/JetBrains/gradle-intellij-plugin),
