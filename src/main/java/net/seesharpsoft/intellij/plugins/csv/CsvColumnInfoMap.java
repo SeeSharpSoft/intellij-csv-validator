@@ -10,16 +10,18 @@ public class CsvColumnInfoMap<T> {
     private final Map<T, CsvColumnInfo<T>> myReverseInfoColumnMap;
 
     private boolean hasErrors = false;
+    private boolean hasComments = false;
 
-    public CsvColumnInfoMap(Map<Integer, CsvColumnInfo<T>> infoColumnMap, boolean hasErrorsArg) {
+    public CsvColumnInfoMap(Map<Integer, CsvColumnInfo<T>> infoColumnMap, boolean hasErrorsArg, boolean hasCommentsArg) {
         this.myInfoColumnMap = infoColumnMap;
         this.myReverseInfoColumnMap = new HashMap<>();
         buildReverseMap();
         setHasErrors(hasErrorsArg);
+        setHasComments(hasCommentsArg);
     }
 
     public CsvColumnInfoMap(Map<Integer, CsvColumnInfo<T>> infoColumnMap) {
-        this(infoColumnMap, false);
+        this(infoColumnMap, false, false);
     }
 
     private void buildReverseMap() {
@@ -53,6 +55,14 @@ public class CsvColumnInfoMap<T> {
 
     public void setHasErrors(boolean hasErrorsArg) {
         hasErrors = hasErrorsArg;
+    }
+
+    public boolean hasComments() {
+        return hasComments;
+    }
+
+    public void setHasComments(boolean hasCommentsArg) {
+        hasComments = hasCommentsArg;
     }
 
     public boolean hasEmptyLastLine() {

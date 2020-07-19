@@ -102,7 +102,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
     }
 
     public boolean isEditable() {
-        return this.tableIsEditable && !this.hasErrors();
+        return this.tableIsEditable && !this.hasErrors() && !hasComments();
     }
 
     public CsvColumnInfoMap<PsiElement> getColumnInfoMap() {
@@ -116,6 +116,14 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
         }
         CsvColumnInfoMap columnInfoMap = getColumnInfoMap();
         return (columnInfoMap != null && columnInfoMap.hasErrors());
+    }
+
+    public boolean hasComments() {
+        if (!isValid()) {
+            return false;
+        }
+        CsvColumnInfoMap columnInfoMap = getColumnInfoMap();
+        return (columnInfoMap != null && columnInfoMap.hasComments());
     }
 
     protected Object[][] storeStateChange(Object[][] data) {

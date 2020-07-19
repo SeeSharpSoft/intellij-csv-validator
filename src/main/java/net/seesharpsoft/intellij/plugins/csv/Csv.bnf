@@ -19,12 +19,13 @@
     COMMA='regexp:[,:;|\t]'
     QUOTE='regexp:"'
     CRLF='regexp:\n'
+    COMMENT='regexp:#.*(\n|$)'
    ]
 }
 
 csvFile ::= record (CRLF record)* [CRLF]
 
-record ::= field (COMMA field)*
+record ::= (COMMENT | (field (COMMA field)*))
 
 field ::= (escaped | nonEscaped)
 

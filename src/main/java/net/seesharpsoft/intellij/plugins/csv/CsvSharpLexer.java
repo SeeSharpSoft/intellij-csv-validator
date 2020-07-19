@@ -5,6 +5,7 @@ import com.intellij.psi.tree.IElementType;
 import net.seesharpsoft.UnhandledSwitchCaseException;
 import net.seesharpsoft.commons.util.Tokenizer;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
+import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,6 +19,7 @@ import java.util.stream.Collectors;
 public class CsvSharpLexer extends LexerBase {
 
     private final Tokenizer<TokenType> tokenizer;
+    private final List<Tokenizer.Token<TokenType>> initialNextStateTokens;
     private final List<Tokenizer.Token<TokenType>> unquotedNextStateTokens;
     private final List<Tokenizer.Token<TokenType>> quotedNextStateTokens;
 
@@ -29,23 +31,34 @@ public class CsvSharpLexer extends LexerBase {
     private IElementType currentTokenType;
     private boolean failed;
 
+    private static final Map<TokenType, LexerState> INITIAL_NEXT_STATES = new HashMap<>();
     private static final Map<TokenType, LexerState> UNQUOTED_NEXT_STATES = new HashMap<>();
     private static final Map<TokenType, LexerState> QUOTED_NEXT_STATES = new HashMap<>();
 
     static {
+        INITIAL_NEXT_STATES.put(TokenType.WHITESPACE, LexerState.Initial);
+        INITIAL_NEXT_STATES.put(TokenType.TEXT, LexerState.Unquoted);
+        INITIAL_NEXT_STATES.put(TokenType.VALUE_SEPARATOR, LexerState.Unquoted);
+        INITIAL_NEXT_STATES.put(TokenType.BEGIN_QUOTE, LexerState.Quoted);
+        INITIAL_NEXT_STATES.put(TokenType.RECORD_SEPARATOR, LexerState.Initial);
+        INITIAL_NEXT_STATES.put(TokenType.COMMENT, LexerState.Initial);
+
         UNQUOTED_NEXT_STATES.put(TokenType.WHITESPACE, LexerState.Unquoted);
         UNQUOTED_NEXT_STATES.put(TokenType.TEXT, LexerState.Unquoted);
+        UNQUOTED_NEXT_STATES.put(TokenType.COMMENT_CHARACTER, LexerState.Unquoted);
         UNQUOTED_NEXT_STATES.put(TokenType.VALUE_SEPARATOR, LexerState.Unquoted);
-        UNQUOTED_NEXT_STATES.put(TokenType.RECORD_SEPARATOR, LexerState.Unquoted);
         UNQUOTED_NEXT_STATES.put(TokenType.BEGIN_QUOTE, LexerState.Quoted);
+        UNQUOTED_NEXT_STATES.put(TokenType.RECORD_SEPARATOR, LexerState.Initial);
 
         QUOTED_NEXT_STATES.put(TokenType.WHITESPACE, LexerState.Quoted);
         QUOTED_NEXT_STATES.put(TokenType.TEXT, LexerState.Quoted);
+        QUOTED_NEXT_STATES.put(TokenType.COMMENT_CHARACTER, LexerState.Quoted);
         QUOTED_NEXT_STATES.put(TokenType.ESCAPED_CHARACTER, LexerState.Quoted);
         QUOTED_NEXT_STATES.put(TokenType.END_QUOTE, LexerState.Unquoted);
     }
 
     enum LexerState {
+        Initial(INITIAL_NEXT_STATES),
         Unquoted(UNQUOTED_NEXT_STATES),
         Quoted(QUOTED_NEXT_STATES);
 
@@ -71,22 +84,26 @@ public class CsvSharpLexer extends LexerBase {
         ESCAPED_CHARACTER,
         VALUE_SEPARATOR,
         RECORD_SEPARATOR,
-        WHITESPACE
+        WHITESPACE,
+        COMMENT,
+        COMMENT_CHARACTER
     }
 
     public static class Configuration {
-        public static final Configuration DEFAULT = new Configuration(",", "\n", "\"", "\"");
+        public static final Configuration DEFAULT = new Configuration(",", "\n", "\"", "\"", "#");
 
         public String valueSeparator;
         public String recordSeparator;
         public String escapeCharacter;
         public String quoteCharacter;
+        public String commentCharacter;
 
-        public Configuration(String valueSeparator, String recordSeparator, String escapeCharacter, String quoteCharacter) {
+        public Configuration(String valueSeparator, String recordSeparator, String escapeCharacter, String quoteCharacter, String commentCharacter) {
             this.valueSeparator = Pattern.quote(valueSeparator);
             this.recordSeparator = Pattern.quote(recordSeparator);
             this.escapeCharacter = Pattern.quote(escapeCharacter);
             this.quoteCharacter = Pattern.quote(quoteCharacter);
+            this.commentCharacter = Pattern.quote(commentCharacter);
         }
     }
 
@@ -102,17 +119,32 @@ public class CsvSharpLexer extends LexerBase {
         tokenizer.add(TokenType.BEGIN_QUOTE, String.format("%s", configuration.quoteCharacter));
         tokenizer.add(TokenType.VALUE_SEPARATOR, configuration.valueSeparator);
         tokenizer.add(TokenType.RECORD_SEPARATOR, configuration.recordSeparator);
+        if (!configuration.commentCharacter.isEmpty()) {
+            tokenizer.add(TokenType.COMMENT_CHARACTER, configuration.commentCharacter);
+            tokenizer.add(TokenType.COMMENT, configuration.commentCharacter + ".*(?=(\n|$))");
+        }
 
         if (configuration.escapeCharacter.equals(configuration.quoteCharacter)) {
             tokenizer.add(TokenType.END_QUOTE, String.format("%s(?!%s)", configuration.quoteCharacter, configuration.quoteCharacter));
             tokenizer.add(TokenType.ESCAPED_CHARACTER, String.format("(%s%s|%s|%s)+", configuration.quoteCharacter, configuration.quoteCharacter, configuration.valueSeparator, configuration.recordSeparator));
-            tokenizer.add(TokenType.TEXT, String.format("((?!%s)[^ \f%s%s])+", configuration.valueSeparator, configuration.quoteCharacter, configuration.recordSeparator));
+            if (!configuration.commentCharacter.isEmpty()) {
+                tokenizer.add(TokenType.TEXT, String.format("((?!(%s|%s))[^ \f%s%s])+", configuration.commentCharacter, configuration.valueSeparator, configuration.quoteCharacter, configuration.recordSeparator));
+            } else {
+                tokenizer.add(TokenType.TEXT, String.format("((?!%s)[^ \f%s%s])+", configuration.valueSeparator, configuration.quoteCharacter, configuration.recordSeparator));
+            }
         } else {
             tokenizer.add(TokenType.END_QUOTE, String.format("%s", configuration.quoteCharacter));
             tokenizer.add(TokenType.ESCAPED_CHARACTER, String.format("(%s%s|%s%s|%s|%s)+", configuration.escapeCharacter, configuration.quoteCharacter, configuration.escapeCharacter, configuration.escapeCharacter, configuration.valueSeparator, configuration.recordSeparator));
-            tokenizer.add(TokenType.TEXT, String.format("((?!%s)[^ \f%s%s%s])+", configuration.valueSeparator, configuration.escapeCharacter, configuration.quoteCharacter, configuration.recordSeparator));
+            if (!configuration.commentCharacter.isEmpty()) {
+                tokenizer.add(TokenType.TEXT, String.format("((?!(%s|%s))[^ \f%s%s%s])+", configuration.commentCharacter, configuration.valueSeparator, configuration.escapeCharacter, configuration.quoteCharacter, configuration.recordSeparator));
+            } else {
+                tokenizer.add(TokenType.TEXT, String.format("((?!%s)[^ \f%s%s%s])+", configuration.valueSeparator, configuration.escapeCharacter, configuration.quoteCharacter, configuration.recordSeparator));
+            }
         }
 
+        initialNextStateTokens = LexerState.Initial.getPossibleTokens().stream()
+                .map(tokenizer::getToken)
+                .collect(Collectors.toList());
         unquotedNextStateTokens = LexerState.Unquoted.getPossibleTokens().stream()
                 .map(tokenizer::getToken)
                 .collect(Collectors.toList());
@@ -126,14 +158,14 @@ public class CsvSharpLexer extends LexerBase {
         this.buffer = buffer;
         this.tokenStart = this.tokenEnd = startOffset;
         this.bufferEnd = endOffset;
-        this.currentState = initialState == 0 ? LexerState.Unquoted : LexerState.Quoted;
+        this.currentState = LexerState.values()[initialState];
         this.currentTokenType = null;
     }
 
     @Override
     public int getState() {
         locateToken();
-        return currentState == LexerState.Unquoted ? 0 : 1;
+        return currentState.ordinal();
     }
 
     @Nullable
@@ -178,6 +210,19 @@ public class CsvSharpLexer extends LexerBase {
         tokenEnd = bufferEnd;
     }
 
+    protected Collection<Tokenizer.Token<TokenType>> getCurrentTokenCollection() {
+        switch(this.currentState) {
+            case Initial:
+                return initialNextStateTokens;
+            case Unquoted:
+                return unquotedNextStateTokens;
+            case Quoted:
+                return quotedNextStateTokens;
+            default:
+                throw new UnhandledSwitchCaseException(this.currentState);
+        }
+    }
+
     protected synchronized void locateToken() {
         if (currentTokenType != null) {
             return;
@@ -193,7 +238,7 @@ public class CsvSharpLexer extends LexerBase {
                     tokenizer.findToken(buffer,
                             tokenStart,
                             bufferEnd,
-                            currentState == LexerState.Unquoted ? unquotedNextStateTokens : quotedNextStateTokens,
+                            getCurrentTokenCollection(),
                             null
                     );
 
@@ -222,7 +267,11 @@ public class CsvSharpLexer extends LexerBase {
                     currentTokenType = CsvTypes.COMMA;
                     break;
                 case TEXT:
+                case COMMENT_CHARACTER:
                     currentTokenType = CsvTypes.TEXT;
+                    break;
+                case COMMENT:
+                    currentTokenType = CsvTypes.COMMENT;
                     break;
                 case WHITESPACE:
                     currentTokenType = com.intellij.psi.TokenType.WHITE_SPACE;

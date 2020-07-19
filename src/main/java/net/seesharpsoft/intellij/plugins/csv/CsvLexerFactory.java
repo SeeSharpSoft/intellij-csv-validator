@@ -4,6 +4,7 @@ import com.intellij.lexer.Lexer;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
+import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import org.jetbrains.annotations.NotNull;
 
 public class CsvLexerFactory {
@@ -14,12 +15,13 @@ public class CsvLexerFactory {
     }
 
     protected Lexer createLexer(@NotNull CsvValueSeparator separator, @NotNull CsvEscapeCharacter escapeCharacter) {
-        if (separator.isCustom()) {
+        if (separator.isCustom() || !CsvEditorSettings.getInstance().getCommentIndicator().isEmpty()) {
             return new CsvSharpLexer(new CsvSharpLexer.Configuration(
                     separator.getCharacter(),
                     "\n",
                     escapeCharacter.getCharacter(),
-                    "\""));
+                    "\"",
+                    CsvEditorSettings.getInstance().getCommentIndicator()));
         }
         return new CsvLexerAdapter(separator, escapeCharacter);
     }
