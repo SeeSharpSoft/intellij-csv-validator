@@ -6,9 +6,7 @@ import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.openapi.editor.ex.EditorSettingsExternalizable;
 import com.intellij.util.xmlb.annotations.OptionTag;
-import net.seesharpsoft.intellij.plugins.csv.CsvEscapeCharacter;
-import net.seesharpsoft.intellij.plugins.csv.CsvStorageHelper;
-import net.seesharpsoft.intellij.plugins.csv.CsvValueSeparator;
+import net.seesharpsoft.intellij.plugins.csv.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
@@ -58,6 +56,8 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
     }
 
     public static final class OptionSet {
+        public String CURRENT_PLUGIN_VERSION;
+
         public boolean CARET_ROW_SHOWN;
         public boolean USE_SOFT_WRAP;
         public boolean HIGHTLIGHT_TAB_SEPARATOR = true;
@@ -291,5 +291,14 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
 
     public void setColumnColoring(ColumnColoring columnColoring) {
         getState().COLUMN_COLORING = columnColoring;
+    }
+
+    public boolean checkCurrentPluginVersion(String actualVersion) {
+        return false;
+//        if (!actualVersion.equals(getState().CURRENT_PLUGIN_VERSION)) {
+//            getState().CURRENT_PLUGIN_VERSION = actualVersion;
+//            return false;
+//        }
+//        return true;
     }
 }

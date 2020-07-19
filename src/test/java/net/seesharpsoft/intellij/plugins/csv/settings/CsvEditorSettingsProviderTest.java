@@ -78,7 +78,7 @@ public class CsvEditorSettingsProviderTest extends BasePlatformTestCase {
         csvEditorSettings.setDefaultValueSeparator(CsvValueSeparator.PIPE);
         csvEditorSettings.setKeepTrailingSpaces(true);
         csvEditorSettings.setCommentIndicator("//");
-        csvEditorSettings.setColumnColoring(CsvEditorSettings.ColumnColoring.TEXT);
+        csvEditorSettings.setColumnColoring(CsvEditorSettings.ColumnColoring.SIMPLE);
 
         assertEquals(true, editorSettingsPanel.isModified());
 
@@ -101,7 +101,7 @@ public class CsvEditorSettingsProviderTest extends BasePlatformTestCase {
         assertEquals(CsvValueSeparator.PIPE, csvEditorSettings.getDefaultValueSeparator());
         assertEquals(true, csvEditorSettings.getKeepTrailingSpaces());
         assertEquals("//", csvEditorSettings.getCommentIndicator());
-        assertEquals( CsvEditorSettings.ColumnColoring.TEXT, csvEditorSettings.getColumnColoring());
+        assertEquals( CsvEditorSettings.ColumnColoring.SIMPLE, csvEditorSettings.getColumnColoring());
 
         editorSettingsPanel.disposeUIResources();
     }

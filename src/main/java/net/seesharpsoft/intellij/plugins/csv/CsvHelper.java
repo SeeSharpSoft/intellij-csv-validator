@@ -1,6 +1,5 @@
 package net.seesharpsoft.intellij.plugins.csv;
 
-import com.intellij.ide.scratch.ScratchFileType;
 import com.intellij.ide.scratch.ScratchUtil;
 import com.intellij.lang.*;
 import com.intellij.lexer.Lexer;

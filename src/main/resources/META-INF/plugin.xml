@@ -33,7 +33,7 @@
         <p>
         <b>TSV/PSV file support:</b> <em>TSV/PSV files are recognized as such but treated as a variant of CSV files, the same syntax highlighting and code style settings are applied.</em>
         <br><br>
-        <b>Code formatting:</b> <em>Default code formatting is 'Tabularize'. Can be changed in Settings -> Editor -> Code Style -> CSV</em>
+        <b>Code formatting:</b> <em>Default code formatting is 'Tabularize'. Can be changed in Settings -> Editor -> Code Style -> CSV/TSV/PSV</em>
         <br><br>
         For more detailed information please have a look at the <a href="https://github.com/SeeSharpSoft/intellij-csv-validator/blob/master/README.md">README</a>.
         <br><br><br>
@@ -49,7 +49,9 @@
 
     <change-notes><![CDATA[
         <pre style="font-family: sans-serif">
-NEW: Support for customizable line comments ('#' indicates a line comment per default - can be customized/deactivated via settings)
+NEW: Predefined column colors (Rainbow-style)
+NEW: Enhanced color scheme switch
+NEW: Table Editor coloring
       </pre>
     ]]>
     </change-notes>
@@ -161,6 +163,8 @@ NEW: Support for customizable line comments ('#' indicates a line comment per de
         </intentionAction>
 
         <stripTrailingSpacesFilterFactory implementation="net.seesharpsoft.intellij.plugins.csv.settings.CsvStripTrailingSpacesFilterFactory" />
+
+        <postStartupActivity implementation="net.seesharpsoft.intellij.plugins.csv.CsvPlugin" />
     </extensions>
 
     <actions>
