@@ -65,12 +65,10 @@ public class CsvEditorSettingsProviderTest extends BasePlatformTestCase {
         csvEditorSettings.loadState(new CsvEditorSettings.OptionSet());
         csvEditorSettings.setCaretRowShown(false);
         csvEditorSettings.setUseSoftWraps(true);
-        csvEditorSettings.setColumnHighlightingEnabled(true);
         csvEditorSettings.setHighlightTabSeparator(false);
         csvEditorSettings.setShowInfoBalloon(false);
         csvEditorSettings.setTabHighlightColor(Color.BLACK);
         csvEditorSettings.setQuotingEnforced(true);
-        csvEditorSettings.setTableColumnHighlightingEnabled(false);
         csvEditorSettings.setZeroBasedColumnNumbering(true);
         csvEditorSettings.setFileEndLineBreak(false);
         csvEditorSettings.setTableDefaultColumnWidth(500);
@@ -78,6 +76,9 @@ public class CsvEditorSettingsProviderTest extends BasePlatformTestCase {
         csvEditorSettings.setTableAutoColumnWidthOnOpen(false);
         csvEditorSettings.setDefaultEscapeCharacter(CsvEscapeCharacter.BACKSLASH);
         csvEditorSettings.setDefaultValueSeparator(CsvValueSeparator.PIPE);
+        csvEditorSettings.setKeepTrailingSpaces(true);
+        csvEditorSettings.setCommentIndicator("//");
+        csvEditorSettings.setColumnColoring(CsvEditorSettings.ColumnColoring.TEXT);
 
         assertEquals(true, editorSettingsPanel.isModified());
 
@@ -87,12 +88,10 @@ public class CsvEditorSettingsProviderTest extends BasePlatformTestCase {
 
         assertEquals(false, csvEditorSettings.isCaretRowShown());
         assertEquals(true, csvEditorSettings.isUseSoftWraps());
-        assertEquals(true, csvEditorSettings.isColumnHighlightingEnabled());
         assertEquals(false, csvEditorSettings.isHighlightTabSeparator());
         assertEquals(false, csvEditorSettings.isShowInfoBalloon());
         assertEquals(Color.BLACK, csvEditorSettings.getTabHighlightColor());
         assertEquals(true, csvEditorSettings.isQuotingEnforced());
-        assertEquals(false, csvEditorSettings.isTableColumnHighlightingEnabled());
         assertEquals(true, csvEditorSettings.isZeroBasedColumnNumbering());
         assertEquals(false, csvEditorSettings.isFileEndLineBreak());
         assertEquals(500, csvEditorSettings.getTableDefaultColumnWidth());
@@ -100,6 +99,9 @@ public class CsvEditorSettingsProviderTest extends BasePlatformTestCase {
         assertEquals(false, csvEditorSettings.isTableAutoColumnWidthOnOpen());
         assertEquals(CsvEscapeCharacter.BACKSLASH, csvEditorSettings.getDefaultEscapeCharacter());
         assertEquals(CsvValueSeparator.PIPE, csvEditorSettings.getDefaultValueSeparator());
+        assertEquals(true, csvEditorSettings.getKeepTrailingSpaces());
+        assertEquals("//", csvEditorSettings.getCommentIndicator());
+        assertEquals( CsvEditorSettings.ColumnColoring.TEXT, csvEditorSettings.getColumnColoring());
 
         editorSettingsPanel.disposeUIResources();
     }
@@ -112,12 +114,10 @@ public class CsvEditorSettingsProviderTest extends BasePlatformTestCase {
         editorSettingsPanel.reset();
         csvEditorSettings.setCaretRowShown(false);
         csvEditorSettings.setUseSoftWraps(true);
-        csvEditorSettings.setColumnHighlightingEnabled(true);
         csvEditorSettings.setHighlightTabSeparator(false);
         csvEditorSettings.setShowInfoBalloon(false);
         csvEditorSettings.setTabHighlightColor(Color.BLACK);
         csvEditorSettings.setQuotingEnforced(true);
-        csvEditorSettings.setTableColumnHighlightingEnabled(false);
         csvEditorSettings.setZeroBasedColumnNumbering(true);
         csvEditorSettings.setFileEndLineBreak(false);
         csvEditorSettings.setTableDefaultColumnWidth(500);
@@ -133,12 +133,10 @@ public class CsvEditorSettingsProviderTest extends BasePlatformTestCase {
         assertEquals(false, editorSettingsPanel.isModified());
         assertEquals(freshOptionSet.CARET_ROW_SHOWN, csvEditorSettings.isCaretRowShown());
         assertEquals(freshOptionSet.USE_SOFT_WRAP, csvEditorSettings.isUseSoftWraps());
-        assertEquals(freshOptionSet.COLUMN_HIGHTLIGHTING, csvEditorSettings.isColumnHighlightingEnabled());
         assertEquals(freshOptionSet.HIGHTLIGHT_TAB_SEPARATOR, csvEditorSettings.isHighlightTabSeparator());
         assertEquals(freshOptionSet.SHOW_INFO_BALLOON, csvEditorSettings.isShowInfoBalloon());
         assertEquals(freshOptionSet.TAB_HIGHLIGHT_COLOR, "" + csvEditorSettings.getTabHighlightColor().getRGB());
         assertEquals(freshOptionSet.QUOTING_ENFORCED, csvEditorSettings.isQuotingEnforced());
-        assertEquals(freshOptionSet.TABLE_COLUMN_HIGHTLIGHTING, csvEditorSettings.isTableColumnHighlightingEnabled());
         assertEquals(freshOptionSet.ZERO_BASED_COLUMN_NUMBERING, csvEditorSettings.isZeroBasedColumnNumbering());
         assertEquals(freshOptionSet.FILE_END_LINE_BREAK, csvEditorSettings.isFileEndLineBreak());
         assertEquals(freshOptionSet.TABLE_DEFAULT_COLUMN_WIDTH, csvEditorSettings.getTableDefaultColumnWidth());
@@ -146,6 +144,9 @@ public class CsvEditorSettingsProviderTest extends BasePlatformTestCase {
         assertEquals(freshOptionSet.TABLE_AUTO_COLUMN_WIDTH_ON_OPEN, csvEditorSettings.isTableAutoColumnWidthOnOpen());
         assertEquals(freshOptionSet.DEFAULT_ESCAPE_CHARACTER, csvEditorSettings.getDefaultEscapeCharacter());
         assertEquals(freshOptionSet.DEFAULT_VALUE_SEPARATOR, csvEditorSettings.getDefaultValueSeparator());
+        assertEquals(freshOptionSet.KEEP_TRAILING_SPACES, csvEditorSettings.getKeepTrailingSpaces());
+        assertEquals(freshOptionSet.COMMENT_INDICATOR, csvEditorSettings.getCommentIndicator());
+        assertEquals(freshOptionSet.COLUMN_COLORING, csvEditorSettings.getColumnColoring());
 
         editorSettingsPanel.disposeUIResources();
     }

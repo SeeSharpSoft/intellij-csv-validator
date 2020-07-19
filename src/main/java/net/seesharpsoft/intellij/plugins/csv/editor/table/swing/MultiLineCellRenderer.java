@@ -1,13 +1,13 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
 import com.intellij.openapi.editor.colors.EditorColorsManager;
+import com.intellij.openapi.editor.colors.EditorColorsScheme;
 import com.intellij.openapi.editor.colors.EditorFontType;
 import com.intellij.openapi.editor.impl.FontFallbackIterator;
 import com.intellij.openapi.editor.markup.TextAttributes;
 import com.intellij.openapi.util.UserDataHolder;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.util.ui.UIUtil;
-import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvColorSettings;
 import org.jetbrains.annotations.NotNull;
 
@@ -46,10 +46,7 @@ public class MultiLineCellRenderer extends JBScrollPane implements TableCellRend
     }
 
     private TextAttributes getColumnTextAttributes(int column) {
-        if (CsvEditorSettings.getInstance().isTableColumnHighlightingEnabled()) {
-            return CsvColorSettings.getTextAttributesOfColumn(column, myUserDataHolder);
-        }
-        return null;
+        return CsvColorSettings.getTextAttributesOfColumn(column, myUserDataHolder);
     }
 
     private Color getColumnForegroundColor(int column, Color fallback) {
@@ -64,6 +61,8 @@ public class MultiLineCellRenderer extends JBScrollPane implements TableCellRend
 
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+        EditorColorsScheme editorColorsScheme = EditorColorsManager.getInstance().getGlobalScheme();
+
         if (isSelected) {
             myTextArea.setForeground(table.getSelectionForeground());
             myTextArea.setBackground(table.getSelectionBackground());
@@ -74,8 +73,8 @@ public class MultiLineCellRenderer extends JBScrollPane implements TableCellRend
         if (hasFocus) {
             myTextArea.setBorder(UIManager.getBorder("Table.focusCellHighlightBorder"));
             if (table.isCellEditable(row, column)) {
-                myTextArea.setForeground(UIManager.getColor("Table.focusCellForeground"));
-                myTextArea.setBackground(UIManager.getColor("Table.focusCellBackground"));
+                myTextArea.setForeground(UIManager.getColor(editorColorsScheme.getDefaultForeground()));
+                myTextArea.setBackground(UIManager.getColor(editorColorsScheme.getDefaultBackground()));
             }
         } else {
             myTextArea.setBorder(new EmptyBorder(1, 2, 1, 2));

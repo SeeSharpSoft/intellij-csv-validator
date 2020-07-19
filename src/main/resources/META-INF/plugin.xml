@@ -93,6 +93,9 @@ NEW: Support for customizable line comments ('#' indicates a line comment per de
 
         <colorSettingsPage implementation="net.seesharpsoft.intellij.plugins.csv.settings.CsvColorSettings"/>
 
+        <additionalTextAttributes scheme="Default" file="misc/column_coloring_default.xml" />
+        <additionalTextAttributes scheme="Darcula" file="misc/column_coloring_default_dark.xml" />
+
         <applicationService
                 serviceImplementation="net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings"/>
         <projectService serviceImplementation="net.seesharpsoft.intellij.plugins.csv.components.CsvFileAttributes"/>

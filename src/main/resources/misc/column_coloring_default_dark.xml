@@ -1,0 +1,53 @@
+<?xml version='1.0'?>
+<list>
+    <option name="CSV_PLUGIN_COLUMN_COLORING_ATTRIBUTE_0">
+        <value>
+            <option name="FOREGROUND" value="FFA000" />
+        </value>
+    </option>
+    <option name="CSV_PLUGIN_COLUMN_COLORING_ATTRIBUTE_1">
+        <value>
+            <option name="FOREGROUND" value="D32F2F" />
+        </value>
+    </option>
+    <option name="CSV_PLUGIN_COLUMN_COLORING_ATTRIBUTE_2">
+        <value>
+            <option name="FOREGROUND" value="CE93D8" />
+        </value>
+    </option>
+    <option name="CSV_PLUGIN_COLUMN_COLORING_ATTRIBUTE_3">
+        <value>
+            <option name="FOREGROUND" value="00897B" />
+        </value>
+    </option>
+    <option name="CSV_PLUGIN_COLUMN_COLORING_ATTRIBUTE_4">
+        <value>
+            <option name="FOREGROUND" value="BCAAA4" />
+        </value>
+    </option>
+    <option name="CSV_PLUGIN_COLUMN_COLORING_ATTRIBUTE_5">
+        <value>
+            <option name="FOREGROUND" value="8BC34A" />
+        </value>
+    </option>
+    <option name="CSV_PLUGIN_COLUMN_COLORING_ATTRIBUTE_6">
+        <value>
+            <option name="FOREGROUND" value="80D8FF" />
+        </value>
+    </option>
+    <option name="CSV_PLUGIN_COLUMN_COLORING_ATTRIBUTE_7">
+        <value>
+            <option name="FOREGROUND" value="E6EE9C" />
+        </value>
+    </option>
+    <option name="CSV_PLUGIN_COLUMN_COLORING_ATTRIBUTE_8">
+        <value>
+            <option name="FOREGROUND" value="CFD8DC" />
+        </value>
+    </option>
+    <option name="CSV_PLUGIN_COLUMN_COLORING_ATTRIBUTE_9">
+        <value>
+            <option name="FOREGROUND" value="B388FF" />
+        </value>
+    </option>
+</list>
