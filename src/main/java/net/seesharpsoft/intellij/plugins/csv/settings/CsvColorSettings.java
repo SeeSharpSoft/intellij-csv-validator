@@ -42,7 +42,7 @@ public class CsvColorSettings implements ColorSettingsPage {
         for (int i = 0; i < MAX_COLUMN_COLORING_COLORS; ++i) {
             TextAttributesKey textAttributesKey = createTextAttributesKey(String.format("CSV_PLUGIN_COLUMN_COLORING_ATTRIBUTE_%d", i + 1), CsvSyntaxHighlighter.TEXT);
             COLUMN_COLORING_ATTRIBUTES.add(textAttributesKey);
-            attributesDescriptors.add(new AttributesDescriptor(String.format("Rainbow column color %d", i + 1), textAttributesKey));
+            attributesDescriptors.add(new AttributesDescriptor(String.format("Rainbow Coloring %d", i + 1), textAttributesKey));
         }
         DESCRIPTORS = attributesDescriptors.toArray(new AttributesDescriptor[attributesDescriptors.size()]);
     }
