@@ -42,7 +42,7 @@ public class CsvColorSettings implements ColorSettingsPage {
         for (int i = 0; i < MAX_COLUMN_COLORING_COLORS; ++i) {
             TextAttributesKey textAttributesKey = createTextAttributesKey(String.format("CSV_PLUGIN_COLUMN_COLORING_ATTRIBUTE_%d", i + 1), CsvSyntaxHighlighter.TEXT);
             COLUMN_COLORING_ATTRIBUTES.add(textAttributesKey);
-            attributesDescriptors.add(new AttributesDescriptor(String.format("Rainbow Coloring %d", i + 1), textAttributesKey));
+            attributesDescriptors.add(new AttributesDescriptor(String.format("Column Color %d", i + 1), textAttributesKey));
         }
         DESCRIPTORS = attributesDescriptors.toArray(new AttributesDescriptor[attributesDescriptors.size()]);
     }
@@ -53,7 +53,7 @@ public class CsvColorSettings implements ColorSettingsPage {
             EditorColorsScheme editorColorsScheme = EditorColorsManager.getInstance().getGlobalScheme();
             textAttributeList = new ArrayList<>();
             int maxIndex = 0;
-            switch(CsvEditorSettings.getInstance().getColumnColoring()) {
+            switch(CsvEditorSettings.getInstance().getValueColoring()) {
                 case RAINBOW:
                     maxIndex = applyColumnTextAttributes(editorColorsScheme, textAttributeList);
                     break;
@@ -61,7 +61,7 @@ public class CsvColorSettings implements ColorSettingsPage {
                     textAttributeList.add(editorColorsScheme.getAttributes(CsvSyntaxHighlighter.TEXT));
                     break;
                 default:
-                    throw new UnhandledSwitchCaseException(CsvEditorSettings.getInstance().getColumnColoring());
+                    throw new UnhandledSwitchCaseException(CsvEditorSettings.getInstance().getValueColoring());
             }
             textAttributeList = textAttributeList.subList(0, maxIndex + 1);
             userDataHolder.putUserData(COLUMN_COLORING_TEXT_ATTRIBUTES_KEY, textAttributeList);

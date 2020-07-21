@@ -40,13 +40,13 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
         TEXT_ONLY
     }
 
-    public enum ColumnColoring {
-        RAINBOW("Rainbow (colorful columns)"),
-        SIMPLE("Simple (single text color)");
+    public enum ValueColoring {
+        RAINBOW("Rainbow (Column Color)"),
+        SIMPLE("Simple (Text Color)");
 
         private final String display;
 
-        ColumnColoring(String displayArg) {
+        ValueColoring(String displayArg) {
             this.display = displayArg;
         }
 
@@ -79,7 +79,7 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
         public CsvValueSeparator DEFAULT_VALUE_SEPARATOR = VALUE_SEPARATOR_DEFAULT;
         public boolean KEEP_TRAILING_SPACES = false;
         public String COMMENT_INDICATOR = COMMENT_INDICATOR_DEFAULT;
-        public ColumnColoring COLUMN_COLORING = ColumnColoring.RAINBOW;
+        public ValueColoring VALUE_COLORING = ValueColoring.RAINBOW;
 
         public OptionSet() {
             EditorSettingsExternalizable editorSettingsExternalizable = EditorSettingsExternalizable.getInstance();
@@ -285,20 +285,19 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
         return getState().COMMENT_INDICATOR;
     }
 
-    public ColumnColoring getColumnColoring() {
-        return getState().COLUMN_COLORING;
+    public ValueColoring getValueColoring() {
+        return getState().VALUE_COLORING;
     }
 
-    public void setColumnColoring(ColumnColoring columnColoring) {
-        getState().COLUMN_COLORING = columnColoring;
+    public void setValueColoring(ValueColoring valueColoring) {
+        getState().VALUE_COLORING = valueColoring;
     }
 
     public boolean checkCurrentPluginVersion(String actualVersion) {
-        return false;
-//        if (!actualVersion.equals(getState().CURRENT_PLUGIN_VERSION)) {
-//            getState().CURRENT_PLUGIN_VERSION = actualVersion;
-//            return false;
-//        }
-//        return true;
+        if (!actualVersion.equals(getState().CURRENT_PLUGIN_VERSION)) {
+            getState().CURRENT_PLUGIN_VERSION = actualVersion;
+            return false;
+        }
+        return true;
     }
 }

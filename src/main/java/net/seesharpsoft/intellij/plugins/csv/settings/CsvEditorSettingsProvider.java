@@ -41,7 +41,7 @@ public class CsvEditorSettingsProvider implements EditorOptionsProvider {
     private JComboBox comboValueSeparator;
     private JCheckBox cbKeepTrailingWhitespaces;
     private JTextField tfCommentIndicator;
-    private JComboBox comboColumnColoring;
+    private JComboBox comboValueColoring;
 
     @NotNull
     @Override
@@ -92,7 +92,7 @@ public class CsvEditorSettingsProvider implements EditorOptionsProvider {
                 !Objects.equals(comboValueSeparator.getSelectedItem(), csvEditorSettings.getDefaultValueSeparator()) ||
                 isModified(cbKeepTrailingWhitespaces, csvEditorSettings.getKeepTrailingSpaces()) ||
                 isModified(tfCommentIndicator, csvEditorSettings.getCommentIndicator()) ||
-                !Objects.equals(comboColumnColoring.getSelectedItem(), csvEditorSettings.getColumnColoring());
+                !Objects.equals(comboValueColoring.getSelectedItem(), csvEditorSettings.getValueColoring());
     }
 
     @Override
@@ -116,7 +116,7 @@ public class CsvEditorSettingsProvider implements EditorOptionsProvider {
         comboValueSeparator.setSelectedItem(csvEditorSettings.getDefaultValueSeparator());
         cbKeepTrailingWhitespaces.setSelected(csvEditorSettings.getKeepTrailingSpaces());
         tfCommentIndicator.setText(csvEditorSettings.getCommentIndicator());
-        comboColumnColoring.setSelectedItem(csvEditorSettings.getColumnColoring());
+        comboValueColoring.setSelectedItem(csvEditorSettings.getValueColoring());
     }
 
     @Override
@@ -140,7 +140,7 @@ public class CsvEditorSettingsProvider implements EditorOptionsProvider {
         csvEditorSettings.setDefaultValueSeparator((CsvValueSeparator)comboValueSeparator.getSelectedItem());
         csvEditorSettings.setKeepTrailingSpaces(cbKeepTrailingWhitespaces.isSelected());
         csvEditorSettings.setCommentIndicator(tfCommentIndicator.getText());
-        csvEditorSettings.setColumnColoring((CsvEditorSettings.ColumnColoring)comboColumnColoring.getSelectedItem());
+        csvEditorSettings.setValueColoring((CsvEditorSettings.ValueColoring) comboValueColoring.getSelectedItem());
     }
 
     protected void createUIComponents() {
@@ -150,8 +150,8 @@ public class CsvEditorSettingsProvider implements EditorOptionsProvider {
         comboValueSeparator = new ComboBox(CsvValueSeparator.values());
         comboValueSeparator.setRenderer(new CustomDisplayListCellRenderer<CsvValueSeparator>(ec -> ec.getDisplay()));
 
-        comboColumnColoring = new ComboBox(CsvEditorSettings.ColumnColoring.values());
-        comboColumnColoring.setRenderer(new CustomDisplayListCellRenderer<CsvEditorSettings.ColumnColoring>(ec -> ec.getDisplay()));
+        comboValueColoring = new ComboBox(CsvEditorSettings.ValueColoring.values());
+        comboValueColoring.setRenderer(new CustomDisplayListCellRenderer<CsvEditorSettings.ValueColoring>(ec -> ec.getDisplay()));
 
         cbTabHighlightColor = new CheckBoxWithColorChooser("Highlight tab separator   ");
         cbTabHighlightColor.setColor(Color.CYAN);

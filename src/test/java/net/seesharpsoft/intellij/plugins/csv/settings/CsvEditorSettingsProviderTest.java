@@ -78,7 +78,7 @@ public class CsvEditorSettingsProviderTest extends BasePlatformTestCase {
         csvEditorSettings.setDefaultValueSeparator(CsvValueSeparator.PIPE);
         csvEditorSettings.setKeepTrailingSpaces(true);
         csvEditorSettings.setCommentIndicator("//");
-        csvEditorSettings.setColumnColoring(CsvEditorSettings.ColumnColoring.SIMPLE);
+        csvEditorSettings.setValueColoring(CsvEditorSettings.ValueColoring.SIMPLE);
 
         assertEquals(true, editorSettingsPanel.isModified());
 
@@ -101,7 +101,7 @@ public class CsvEditorSettingsProviderTest extends BasePlatformTestCase {
         assertEquals(CsvValueSeparator.PIPE, csvEditorSettings.getDefaultValueSeparator());
         assertEquals(true, csvEditorSettings.getKeepTrailingSpaces());
         assertEquals("//", csvEditorSettings.getCommentIndicator());
-        assertEquals( CsvEditorSettings.ColumnColoring.SIMPLE, csvEditorSettings.getColumnColoring());
+        assertEquals( CsvEditorSettings.ValueColoring.SIMPLE, csvEditorSettings.getValueColoring());
 
         editorSettingsPanel.disposeUIResources();
     }
@@ -146,7 +146,7 @@ public class CsvEditorSettingsProviderTest extends BasePlatformTestCase {
         assertEquals(freshOptionSet.DEFAULT_VALUE_SEPARATOR, csvEditorSettings.getDefaultValueSeparator());
         assertEquals(freshOptionSet.KEEP_TRAILING_SPACES, csvEditorSettings.getKeepTrailingSpaces());
         assertEquals(freshOptionSet.COMMENT_INDICATOR, csvEditorSettings.getCommentIndicator());
-        assertEquals(freshOptionSet.COLUMN_COLORING, csvEditorSettings.getColumnColoring());
+        assertEquals(freshOptionSet.VALUE_COLORING, csvEditorSettings.getValueColoring());
 
         editorSettingsPanel.disposeUIResources();
     }

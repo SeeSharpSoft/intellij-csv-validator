@@ -155,6 +155,15 @@ Please note:
 
 Enable zero-based column numbering. This affects the tooltip info of the text editor as well as column numbering of the table editor.
 
+##### Value coloring
+
+Choose the coloring method of values. Possible options are:
+
+- _Rainbow (Column Color)_ - values are colored based on their column.
+- _Simple (Text Color)_ - values are colored based on the defined text color.
+
+All colors can be adjusted via [CSV Color Scheme](#color-scheme) settings.
+
 #### Text Editor
 
 ##### Highlighting
@@ -162,10 +171,6 @@ Enable zero-based column numbering. This affects the tooltip info of the text ed
 ###### Highlight caret row
 
 The highlighting of the current caret row might interfere with custom background color settings and can be enabled/disabled for CSV/TSV/PSV files here.
-
-###### Enable column highlighting
-
-An easy way to switch *Column Highlighting* on or off (in text editor).
 
 ###### Highlight tab separator
 
@@ -205,7 +210,7 @@ The maximum width of a single table column in _px_, which is used when adjusting
 
 If selected, the table column widths are adjusted based on the column contents automatically when the table editor is opened. This setting can be changed in the table editor itself per file. 
 
-##### Keep/ignore linebreak at end of file
+##### Keep/ignore linebreak at file end
 
 If the file ends with a completely empty line (no spaces or tabs either), the table editor will not show this line as empty values but ignore it. When table data is serialized, an existing empty line is kept at the end of the file.
 
@@ -217,23 +222,22 @@ Enables/disables the info panel at the bottom of the table editor.
 
 Always quotes a single value on save - even if not required.
 
-##### Enable column highlighting
-
-An easy way to switch *Column Highlighting* on or off (in table editor).
-
 ### Color Scheme
 
-The different symbols of a CSV document, namely the separator (comma), the quotes, the escaped literals and the text elements itself, are highlighted by a coloring scheme that can be customized:
+The different symbols of a CSV document, namely the *separator* (e.g. comma, pipe, semicolon), the *quote* character, the *escaped literals* and the *text* elements itself, are colored based on the CSV color scheme settings:
 
-- _File > Settings > Editor > Color Scheme > CSV_
+- _File > Settings > Editor > Color Scheme > CSV/TSV/PSV_
 
 Preset colors are based on Jetbrains IDE defaults and support the different UI themes.
 
 ![Color scheme settings](./docs/colorsettings.png)
 
-#### Column Highlighting Colors
+#### Column Colors
 
-Besides defining colors and font-style variants for the different CSV symbols, additionally up to 10 different column highlight colors can be defined. Those colors are applied to the columns round robin. Undefined column highlight colors will be skipped if they are not followed by any other color definition.
+Besides the colors and font-style variants for the different CSV symbols, additionally up to 10 different column colors can be defined.
+Those colors are applied to the columns round robin.
+Column colors are taken into account when **Rainbow** is selected as [**Value Coloring**](#value-coloring) option in the [Editor Settings](#editor-settings).
+
 
 ### Formatting
 

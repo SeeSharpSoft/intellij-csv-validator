@@ -67,7 +67,7 @@ public class CsvAnnotator implements Annotator {
 
             Annotation annotation = holder.createAnnotation(CSV_COLUMN_INFO_SEVERITY, textRange, message, tooltip);
             annotation.setEnforcedTextAttributes(
-                    CsvEditorSettings.getInstance().getColumnColoring() == CsvEditorSettings.ColumnColoring.RAINBOW ?
+                    CsvEditorSettings.getInstance().getValueColoring() == CsvEditorSettings.ValueColoring.RAINBOW ?
                             CsvColorSettings.getTextAttributesOfColumn(columnInfo.getColumnIndex(), holder.getCurrentAnnotationSession()) :
                             null
             );

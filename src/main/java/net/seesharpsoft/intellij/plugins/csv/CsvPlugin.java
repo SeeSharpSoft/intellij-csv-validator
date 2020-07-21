@@ -31,8 +31,6 @@ public class CsvPlugin implements StartupActivity {
         return getPluginDescriptor().getChangeNotes();
     }
 
-    private static final String SETTINGS_URL = "#Settings";
-
     private static void openLink(Project project, String link) {
         if (!project.isDisposed() && link.startsWith("#")) {
             ((ShowSettingsUtilImpl)ShowSettingsUtil.getInstance()).showSettingsDialog(project, link.substring(1), null);
