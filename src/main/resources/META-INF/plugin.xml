@@ -8,7 +8,7 @@
     <description><![CDATA[
 
         <p>Lightweight plugin for editing CSV/TSV/PSV files with a flexible Table Editor, syntax validation, structure highlighting, customizable coloring, new intentions and helpful inspections.</p><br>
-        <img width="600" height="297" src="https://plugins.jetbrains.com/files/10037/screenshot_21096.png" /><br><br>
+        <img width="600" height="297" src="https://plugins.jetbrains.com/files/10037/screenshot_22766.png" /><br><br>
         <p><b>Features:</b><br>
         <ul>
             <li>support for CSV/TSV/PSV file extensions</li>
@@ -33,7 +33,7 @@
         <p>
         <b>TSV/PSV file support:</b> <em>TSV/PSV files are recognized as such but treated as a variant of CSV files, the same syntax highlighting and code style settings are applied.</em>
         <br><br>
-        <b>Code formatting:</b> <em>Default code formatting is 'Tabularize'. Can be changed in Settings -> Editor -> Code Style -> CSV</em>
+        <b>Code formatting:</b> <em>Default code formatting is 'Tabularize'. Can be changed in Settings -> Editor -> Code Style -> CSV/TSV/PSV</em>
         <br><br>
         For more detailed information please have a look at the <a href="https://github.com/SeeSharpSoft/intellij-csv-validator/blob/master/README.md">README</a>.
         <br><br><br>
@@ -49,7 +49,9 @@
 
     <change-notes><![CDATA[
         <pre style="font-family: sans-serif">
-NEW: Support for customizable line comments ('#' indicates a line comment per default - can be customized/deactivated via settings)
+NEW: Predefined column colors (Rainbow-style)
+NEW: Enhanced color scheme switch
+NEW: Table Editor coloring
       </pre>
     ]]>
     </change-notes>
@@ -92,6 +94,9 @@ NEW: Support for customizable line comments ('#' indicates a line comment per de
                 implementation="net.seesharpsoft.intellij.plugins.csv.highlighter.CsvHighlightUsagesHandlerFactory"/>
 
         <colorSettingsPage implementation="net.seesharpsoft.intellij.plugins.csv.settings.CsvColorSettings"/>
+
+        <additionalTextAttributes scheme="Default" file="misc/column_coloring_default.xml" />
+        <additionalTextAttributes scheme="Darcula" file="misc/column_coloring_default_dark.xml" />
 
         <applicationService
                 serviceImplementation="net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings"/>
@@ -158,6 +163,8 @@ NEW: Support for customizable line comments ('#' indicates a line comment per de
         </intentionAction>
 
         <stripTrailingSpacesFilterFactory implementation="net.seesharpsoft.intellij.plugins.csv.settings.CsvStripTrailingSpacesFilterFactory" />
+
+        <postStartupActivity implementation="net.seesharpsoft.intellij.plugins.csv.CsvPlugin" />
     </extensions>
 
     <actions>

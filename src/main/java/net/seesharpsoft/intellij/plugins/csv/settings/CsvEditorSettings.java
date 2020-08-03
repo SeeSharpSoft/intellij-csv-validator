@@ -6,9 +6,7 @@ import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.openapi.editor.ex.EditorSettingsExternalizable;
 import com.intellij.util.xmlb.annotations.OptionTag;
-import net.seesharpsoft.intellij.plugins.csv.CsvEscapeCharacter;
-import net.seesharpsoft.intellij.plugins.csv.CsvStorageHelper;
-import net.seesharpsoft.intellij.plugins.csv.CsvValueSeparator;
+import net.seesharpsoft.intellij.plugins.csv.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
@@ -42,10 +40,26 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
         TEXT_ONLY
     }
 
+    public enum ValueColoring {
+        RAINBOW("Rainbow (Column Color)"),
+        SIMPLE("Simple (Text Color)");
+
+        private final String display;
+
+        ValueColoring(String displayArg) {
+            this.display = displayArg;
+        }
+
+        public String getDisplay() {
+            return this.display;
+        }
+    }
+
     public static final class OptionSet {
+        public String CURRENT_PLUGIN_VERSION;
+
         public boolean CARET_ROW_SHOWN;
         public boolean USE_SOFT_WRAP;
-        public boolean COLUMN_HIGHTLIGHTING = true;
         public boolean HIGHTLIGHT_TAB_SEPARATOR = true;
         public boolean SHOW_INFO_BALLOON = true;
         public String TAB_HIGHLIGHT_COLOR = "-7984";
@@ -54,7 +68,6 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
         public int TABLE_AUTO_MAX_COLUMN_WIDTH = TABLE_AUTO_MAX_COLUMN_WIDTH_DEFAULT;
         public int TABLE_DEFAULT_COLUMN_WIDTH = TABLE_DEFAULT_COLUMN_WIDTH_DEFAULT;
         public boolean TABLE_AUTO_COLUMN_WIDTH_ON_OPEN = false;
-        public boolean TABLE_COLUMN_HIGHTLIGHTING = true;
         public boolean ZERO_BASED_COLUMN_NUMBERING = false;
 
         public boolean SHOW_TABLE_EDITOR_INFO_PANEL = true;
@@ -66,6 +79,7 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
         public CsvValueSeparator DEFAULT_VALUE_SEPARATOR = VALUE_SEPARATOR_DEFAULT;
         public boolean KEEP_TRAILING_SPACES = false;
         public String COMMENT_INDICATOR = COMMENT_INDICATOR_DEFAULT;
+        public ValueColoring VALUE_COLORING = ValueColoring.RAINBOW;
 
         public OptionSet() {
             EditorSettingsExternalizable editorSettingsExternalizable = EditorSettingsExternalizable.getInstance();
@@ -119,14 +133,6 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
 
     public void setUseSoftWraps(boolean useSoftWraps) {
         getState().USE_SOFT_WRAP = useSoftWraps;
-    }
-
-    public boolean isColumnHighlightingEnabled() {
-        return getState().COLUMN_HIGHTLIGHTING;
-    }
-
-    public void setColumnHighlightingEnabled(boolean columnHighlightingEnabled) {
-        getState().COLUMN_HIGHTLIGHTING = columnHighlightingEnabled;
     }
 
     public boolean isHighlightTabSeparator() {
@@ -191,14 +197,6 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
 
     public void setQuotingEnforced(boolean quotingEnforced) {
         getState().QUOTING_ENFORCED = quotingEnforced;
-    }
-
-    public boolean isTableColumnHighlightingEnabled() {
-        return getState().TABLE_COLUMN_HIGHTLIGHTING;
-    }
-
-    public void setTableColumnHighlightingEnabled(boolean columnHighlightingEnabled) {
-        getState().TABLE_COLUMN_HIGHTLIGHTING = columnHighlightingEnabled;
     }
 
     public boolean isZeroBasedColumnNumbering() {
@@ -285,5 +283,21 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
 
     public String getCommentIndicator() {
         return getState().COMMENT_INDICATOR;
+    }
+
+    public ValueColoring getValueColoring() {
+        return getState().VALUE_COLORING;
+    }
+
+    public void setValueColoring(ValueColoring valueColoring) {
+        getState().VALUE_COLORING = valueColoring;
+    }
+
+    public boolean checkCurrentPluginVersion(String actualVersion) {
+        if (!actualVersion.equals(getState().CURRENT_PLUGIN_VERSION)) {
+            getState().CURRENT_PLUGIN_VERSION = actualVersion;
+            return false;
+        }
+        return true;
     }
 }
