@@ -405,6 +405,19 @@ You can also download the JAR package from the [Jetbrains plugin repository](htt
 
 - _File > Settings > Plugins > Install plugin from disk..._
 
+## Troubleshooting
+
+#### CSV Plugin causes the IDE to stop working properly
+
+Since version 2.11.0, the plugins requires the IntelliJ platform to be executed on JRE9 or higher. If this is not the case, the following error log can be noticed:
+
+`com.intellij.diagnostic.PluginException: While loading class net.seesharpsoft.intellij.plugins.csv.CsvFileTypeOverrider: net/seesharpsoft/intellij/plugins/csv/CsvFileTypeOverrider has been compiled by a more recent version of the Java Runtime (class file version 53.0), this version of the Java Runtime only recognizes class file versions up to 52.0 [Plugin: net.seesharpsoft.intellij.plugins.csv]`
+
+In some cases the error log doesn't seem to point this out in a noticable manner, but the IDE doesn't work correctly after enabling the plugin. Always disable the plugin first before continuing with the following steps.
+
+Please read the [official instructions](https://intellij-support.jetbrains.com/hc/en-us/articles/206544879-Selecting-the-JDK-version-the-IDE-will-run-under) on how to switch to a newer JRE, or [manually install](https://github.com/SeeSharpSoft/intellij-csv-validator#installation) a [prior CSV plugin version](https://github.com/SeeSharpSoft/intellij-csv-validator/releases/tag/2.10.0).
+
+
 ## Contribution
 
 Contributions are welcome. Please check [CONTRIBUTING.md](./CONTRIBUTING.md) for more information.
