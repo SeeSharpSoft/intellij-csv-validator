@@ -1,6 +1,7 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
 import com.intellij.openapi.editor.colors.EditorColorsManager;
+import com.intellij.openapi.editor.colors.EditorColorsScheme;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
@@ -94,6 +95,8 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
     }
 
     private void initializedUIComponents() {
+        EditorColorsScheme editorColorsScheme = EditorColorsManager.getInstance().getGlobalScheme();
+
         btnRedo.addActionListener(tableEditorActions.redo);
         btnUndo.addActionListener(tableEditorActions.undo);
         btnAddRow.addActionListener(tableEditorActions.addRow);
@@ -129,6 +132,8 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
         tblEditor.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         tblEditor.setShowColumns(true);
         tblEditor.setFont(getFont());
+        tblEditor.setBackground(editorColorsScheme.getDefaultBackground());
+        tblEditor.setForeground(editorColorsScheme.getDefaultForeground());
         setTableRowHeight(0);
 
         tblEditor.getColumnModel().addColumnModelListener(tableEditorListener);

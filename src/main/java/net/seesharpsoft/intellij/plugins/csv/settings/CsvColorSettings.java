@@ -1,6 +1,5 @@
 package net.seesharpsoft.intellij.plugins.csv.settings;
 
-import com.intellij.openapi.editor.DefaultLanguageHighlighterColors;
 import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.editor.colors.EditorColorsScheme;
 import com.intellij.openapi.editor.colors.TextAttributesKey;
@@ -11,6 +10,7 @@ import com.intellij.openapi.options.colors.ColorDescriptor;
 import com.intellij.openapi.options.colors.ColorSettingsPage;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.UserDataHolder;
+import net.seesharpsoft.UnhandledSwitchCaseException;
 import net.seesharpsoft.intellij.plugins.csv.CsvIconProvider;
 import net.seesharpsoft.intellij.plugins.csv.highlighter.CsvSyntaxHighlighter;
 import org.jetbrains.annotations.NotNull;
@@ -25,10 +25,10 @@ import static com.intellij.openapi.editor.colors.TextAttributesKey.createTextAtt
 
 public class CsvColorSettings implements ColorSettingsPage {
 
-    private static final Integer MAX_COLUMN_HIGHLIGHT_COLORS = 10;
+    private static final Integer MAX_COLUMN_COLORING_COLORS = 10;
     private static final AttributesDescriptor[] DESCRIPTORS;
-    private static final List<TextAttributesKey> COLUMN_HIGHLIGHT_ATTRIBUTES;
-    private static final Key<List<TextAttributes>> COLUMN_HIGHLIGHT_TEXT_ATTRIBUTES_KEY = Key.create("CSV_PLUGIN_COLUMN_HIGHLIGHT_ATTRIBUTES");
+    private static final List<TextAttributesKey> COLUMN_COLORING_ATTRIBUTES;
+    private static final Key<List<TextAttributes>> COLUMN_COLORING_TEXT_ATTRIBUTES_KEY = Key.create("CSV_PLUGIN_COLUMN_COLORING_ATTRIBUTES");
 
     static {
         List<AttributesDescriptor> attributesDescriptors = new ArrayList();
@@ -38,33 +38,49 @@ public class CsvColorSettings implements ColorSettingsPage {
         attributesDescriptors.add(new AttributesDescriptor("Escaped Text", CsvSyntaxHighlighter.ESCAPED_TEXT));
         attributesDescriptors.add(new AttributesDescriptor("Comment", CsvSyntaxHighlighter.COMMENT));
 
-        COLUMN_HIGHLIGHT_ATTRIBUTES = new ArrayList<>();
-        for (int i = 0; i < MAX_COLUMN_HIGHLIGHT_COLORS; ++i) {
-            TextAttributesKey textAttributesKey = createTextAttributesKey(String.format("CSV_COLUMN_HIGHLIGHT_ATTRIBUTE_%d", i + 1), DefaultLanguageHighlighterColors.STRING);
-            COLUMN_HIGHLIGHT_ATTRIBUTES.add(textAttributesKey);
-            attributesDescriptors.add(new AttributesDescriptor(String.format("Column Highlighting Color %d", i + 1), textAttributesKey));
+        COLUMN_COLORING_ATTRIBUTES = new ArrayList<>();
+        for (int i = 0; i < MAX_COLUMN_COLORING_COLORS; ++i) {
+            TextAttributesKey textAttributesKey = createTextAttributesKey(String.format("CSV_PLUGIN_COLUMN_COLORING_ATTRIBUTE_%d", i + 1), CsvSyntaxHighlighter.TEXT);
+            COLUMN_COLORING_ATTRIBUTES.add(textAttributesKey);
+            attributesDescriptors.add(new AttributesDescriptor(String.format("Column Color %d", i + 1), textAttributesKey));
         }
         DESCRIPTORS = attributesDescriptors.toArray(new AttributesDescriptor[attributesDescriptors.size()]);
     }
 
     public static TextAttributes getTextAttributesOfColumn(int columnIndex, UserDataHolder userDataHolder) {
-        List<TextAttributes> textAttributeList = userDataHolder.getUserData(COLUMN_HIGHLIGHT_TEXT_ATTRIBUTES_KEY);
+        List<TextAttributes> textAttributeList = userDataHolder.getUserData(COLUMN_COLORING_TEXT_ATTRIBUTES_KEY);
         if (textAttributeList == null) {
             EditorColorsScheme editorColorsScheme = EditorColorsManager.getInstance().getGlobalScheme();
             textAttributeList = new ArrayList<>();
             int maxIndex = 0;
-            for (int colorDescriptorIndex = 0; colorDescriptorIndex < MAX_COLUMN_HIGHLIGHT_COLORS; ++colorDescriptorIndex) {
-                TextAttributesKey textAttributesKey = COLUMN_HIGHLIGHT_ATTRIBUTES.get(colorDescriptorIndex);
-                TextAttributes textAttributes = editorColorsScheme.getAttributes(textAttributesKey);
-                textAttributeList.add(textAttributes);
-                if (!textAttributesKey.getDefaultAttributes().equals(textAttributes)) {
-                    maxIndex = colorDescriptorIndex;
-                }
+            switch(CsvEditorSettings.getInstance().getValueColoring()) {
+                case RAINBOW:
+                    maxIndex = applyColumnTextAttributes(editorColorsScheme, textAttributeList);
+                    break;
+                case SIMPLE:
+                    textAttributeList.add(editorColorsScheme.getAttributes(CsvSyntaxHighlighter.TEXT));
+                    break;
+                default:
+                    throw new UnhandledSwitchCaseException(CsvEditorSettings.getInstance().getValueColoring());
             }
             textAttributeList = textAttributeList.subList(0, maxIndex + 1);
-            userDataHolder.putUserData(COLUMN_HIGHLIGHT_TEXT_ATTRIBUTES_KEY, textAttributeList);
+            userDataHolder.putUserData(COLUMN_COLORING_TEXT_ATTRIBUTES_KEY, textAttributeList);
         }
         return textAttributeList.isEmpty() ? null : textAttributeList.get(columnIndex % textAttributeList.size());
+    }
+
+    private static int applyColumnTextAttributes(EditorColorsScheme editorColorsScheme, List<TextAttributes> textAttributeList) {
+        int maxIndex = 0;
+        TextAttributes defaultTextAttributes = editorColorsScheme.getAttributes(CsvSyntaxHighlighter.TEXT);
+        for (int colorDescriptorIndex = 0; colorDescriptorIndex < MAX_COLUMN_COLORING_COLORS; ++colorDescriptorIndex) {
+            TextAttributesKey textAttributesKey = COLUMN_COLORING_ATTRIBUTES.get(colorDescriptorIndex);
+            TextAttributes textAttributes = editorColorsScheme.getAttributes(textAttributesKey);
+            textAttributeList.add(textAttributes);
+            if (!textAttributes.equals(defaultTextAttributes)) {
+                maxIndex = colorDescriptorIndex;
+            }
+        }
+        return maxIndex;
     }
 
     @Nullable
@@ -85,7 +101,7 @@ public class CsvColorSettings implements ColorSettingsPage {
         return "1,\"Eldon Base for stackable storage shelf, platinum\",Muhammed MacIntyre,3,-213.25,38.94,35,Nunavut,Storage & Organization,0.8\n" +
                 "2,\"1.7 Cubic Foot Compact \"\"Cube\"\" Office Refrigerators\",Barry French,293,457.81,208.16,68.02,Nunavut,Appliances,0.58\n" +
                 "3,\"Cardinal Slant-D® Ring Binder, Heavy Gauge Vinyl\",Barry French,293,46.71,8.69,2.99,Nunavut,Binders and Binder Accessories,0.39\n" +
-                "4,R380,Clay Rozendal,483,1198.97,195.99,3.99,Nunavut,Telephones and Communication,0.58\n" +
+                "#4,R380,Clay Rozendal,483,1198.97,195.99,3.99,Nunavut,Telephones and Communication,0.58\n" +
                 "5,Holmes HEPA Air Purifier,Carlos Soltero,515,30.94,21.78,5.94,Nunavut,Appliances,0.5";
     }
 
