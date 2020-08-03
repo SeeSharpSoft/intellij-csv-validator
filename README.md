@@ -417,6 +417,9 @@ In some cases the error log doesn't seem to point this out in a noticable manner
 
 Please read the [official instructions](https://intellij-support.jetbrains.com/hc/en-us/articles/206544879-Selecting-the-JDK-version-the-IDE-will-run-under) on how to switch to a newer JRE, or [manually install](https://github.com/SeeSharpSoft/intellij-csv-validator#installation) a [prior CSV plugin version](https://github.com/SeeSharpSoft/intellij-csv-validator/releases/tag/2.10.0).
 
+#### Features of the CSV Plugin are not available
+
+If another plugin for CSV files like [Rainbow CSV](https://plugins.jetbrains.com/plugin/12896-rainbow-csv) is enabled, this plugin might not be taken into account for parsing and presenting CSV file content. 
 
 ## Contribution
 
