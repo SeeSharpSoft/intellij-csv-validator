@@ -49,9 +49,7 @@
 
     <change-notes><![CDATA[
         <pre style="font-family: sans-serif">
-NEW: Predefined column colors (Rainbow-style)
-NEW: Enhanced color scheme switch
-NEW: Table Editor coloring
+FIX: Performance for indexing large CSV files #239
       </pre>
     ]]>
     </change-notes>
@@ -163,6 +161,10 @@ NEW: Table Editor coloring
         </intentionAction>
 
         <stripTrailingSpacesFilterFactory implementation="net.seesharpsoft.intellij.plugins.csv.settings.CsvStripTrailingSpacesFilterFactory" />
+
+        <todoIndexer implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvTodoIndexer" filetype="CSV" />
+        <todoIndexer implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvTodoIndexer" filetype="TSV" />
+        <todoIndexer implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvTodoIndexer" filetype="PSV" />
 
         <postStartupActivity implementation="net.seesharpsoft.intellij.plugins.csv.CsvPlugin" />
     </extensions>
