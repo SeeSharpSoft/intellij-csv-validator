@@ -3,8 +3,9 @@ jdk:
   - openjdk9
 
 env:
-  - IDEA_VERSION=PC-2019.3.3 GRAMMAR_KIT_VERSION=2019.3
-  - IDEA_VERSION=IU-LATEST-EAP-SNAPSHOT GRAMMAR_KIT_VERSION=2019.3
+  - IDEA_VERSION=PC-2019.3.3 GRAMMAR_KIT_VERSION=2019.3 GIT_PLUGIN_VERSION=Git4Idea:193.6494.42 GITHUB_PLUGIN_VERSION=org.jetbrains.plugins.github:193.5233.139
+  - IDEA_VERSION=CL-2020.1.3 GRAMMAR_KIT_VERSION=2019.3 GIT_PLUGIN_VERSION=Git4Idea:201.6668.74 GITHUB_PLUGIN_VERSION=org.jetbrains.plugins.github:201.6668.74
+#  - IDEA_VERSION=IU-LATEST-EAP-SNAPSHOT GRAMMAR_KIT_VERSION=2019.3 GIT_PLUGIN_VERSION=Git4Idea GITHUB_PLUGIN_VERSION=org.jetbrains.plugins.github
 
 script: xvfb-run gradle check
 
@@ -14,9 +15,9 @@ after_success:
 jobs:
   include:
     - if: (branch = master AND type = push) OR (type = pull_request)
-      env: IDEA_VERSION=IC-193.5233.102 GRAMMAR_KIT_VERSION=2019.3
+      env: IDEA_VERSION=IC-2019.3.3 GRAMMAR_KIT_VERSION=2019.3 GIT_PLUGIN_VERSION=Git4Idea:193.6494.42 GITHUB_PLUGIN_VERSION=org.jetbrains.plugins.github:193.5233.139
       script: xvfb-run gradle check verifyPlugin
     - stage: deploy
       if: branch IN (Testing, Staging, Stable) AND type = push
-      env: IDEA_VERSION=IC-193.5233.102 GRAMMAR_KIT_VERSION=2019.3 JI_CHANNELS=$TRAVIS_BRANCH
+      env: IDEA_VERSION=IC-2019.3.3 GRAMMAR_KIT_VERSION=2019.3 JI_CHANNELS=$TRAVIS_BRANCH GIT_PLUGIN_VERSION=Git4Idea:193.6494.42 GITHUB_PLUGIN_VERSION=org.jetbrains.plugins.github:193.5233.139
       script: xvfb-run gradle publishPlugin

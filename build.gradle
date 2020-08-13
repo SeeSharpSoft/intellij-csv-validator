@@ -14,7 +14,7 @@ plugins {
     id 'org.jetbrains.intellij' version '0.4.10'
     id 'jacoco'
     id 'com.github.kt3k.coveralls' version '2.8.2'
-    id "com.github.ManifestClasspath" version "0.1.0-RELEASE"
+    id 'com.github.ManifestClasspath' version '0.1.0-RELEASE'
 }
 
 jacocoTestReport {
@@ -77,6 +77,11 @@ intellij {
     instrumentCode = true
     updateSinceUntilBuild = false
     downloadSources = false
+
+    plugins = [
+            System.getenv().getOrDefault('GIT_PLUGIN_VERSION', 'Git4Idea:201.6668.74'),
+            System.getenv().getOrDefault('GITHUB_PLUGIN_VERSION', 'org.jetbrains.plugins.github:201.6668.74')
+    ]
 }
 publishPlugin {
     token = System.getenv().getOrDefault('JI_TOKEN', '')
