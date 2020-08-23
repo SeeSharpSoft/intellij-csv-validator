@@ -18,6 +18,8 @@ import java.util.stream.Collectors;
 
 public class CsvSharpLexer extends LexerBase {
 
+    private final static String NON_MATCHING_REGEX = "[^\\w\\W]";
+
     private final Tokenizer<TokenType> tokenizer;
     private final List<Tokenizer.Token<TokenType>> initialNextStateTokens;
     private final List<Tokenizer.Token<TokenType>> unquotedNextStateTokens;
@@ -122,6 +124,9 @@ public class CsvSharpLexer extends LexerBase {
         if (!configuration.commentCharacter.isEmpty()) {
             tokenizer.add(TokenType.COMMENT_CHARACTER, configuration.commentCharacter);
             tokenizer.add(TokenType.COMMENT, configuration.commentCharacter + ".*(?=(\n|$))");
+        } else {
+            tokenizer.add(TokenType.COMMENT_CHARACTER, NON_MATCHING_REGEX);
+            tokenizer.add(TokenType.COMMENT, NON_MATCHING_REGEX);
         }
 
         if (configuration.escapeCharacter.equals(configuration.quoteCharacter)) {

@@ -1,5 +1,7 @@
 package net.seesharpsoft.intellij.plugins.csv.settings;
 
+import com.intellij.openapi.application.Application;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.components.State;
@@ -32,7 +34,8 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
 
     public static final String COMMENT_INDICATOR_DEFAULT = "#";
 
-    private static final CsvEditorSettings STATIC_INSTANCE = new CsvEditorSettings();
+    // only required for testing
+    private static final CsvEditorSettings STATIC_TEST_INSTANCE = new CsvEditorSettings();
 
     public enum EditorPrio {
         TEXT_FIRST,
@@ -95,8 +98,11 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
     }
 
     public static CsvEditorSettings getInstance() {
-        CsvEditorSettings instance = ServiceManager.getService(CsvEditorSettings.class);
-        return instance == null ? STATIC_INSTANCE : instance;
+        Application application = ApplicationManager.getApplication();
+        if (application.isUnitTestMode()) {
+            return CsvEditorSettings.STATIC_TEST_INSTANCE;
+        }
+        return application.isDisposed() ? new CsvEditorSettings() :  ServiceManager.getService(CsvEditorSettings.class);
     }
 
     public void addPropertyChangeListener(PropertyChangeListener listener) {
