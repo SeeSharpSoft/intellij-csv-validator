@@ -20,6 +20,7 @@ This enables default editor features like syntax validation, highlighting and in
 - flexible Table Editor
 - customizable text editor
 - customizable column coloring
+- customizable line comment
 - syntax validation
 - syntax highlighting (customizable)
 - content formatting (customizable)
@@ -145,11 +146,11 @@ _Default Escape Character_ defines which escape character is used as standard fo
 
 Define the character(s) that should be used to mark a line as a comment within a CSV document.
 
-Please note:
+**Please note:**
 
 - If not set, comments are disabled, which also will increase lexer/parser performance on large files.
 - If a line starts with those characters (leading whitespaces are ignored), the whole line isn't considered data and skipped e.g. for formatting, structure view and the table editor.
-- Files containing comments can't be edited but still viewed via the **Table Editor** (without showing the comments).
+- Files containing comments **can't be edited** - but still viewed - via the **Table Editor** (without showing the comments)!
 
 ##### Column numbering
 
@@ -209,6 +210,10 @@ The maximum width of a single table column in _px_, which is used when adjusting
 ##### Adjust column width on open (default)
 
 If selected, the table column widths are adjusted based on the column contents automatically when the table editor is opened. This setting can be changed in the table editor itself per file. 
+
+##### Header row fixed (default)
+
+If selected, the first record of CSV files will be considered the header per default, which affects the column names in the table editor. This setting can be changed in the table editor itself per file. 
 
 ##### Keep/ignore linebreak at file end
 
