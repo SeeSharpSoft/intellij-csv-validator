@@ -42,6 +42,7 @@ public class CsvEditorSettingsProvider implements EditorOptionsProvider {
     private JCheckBox cbKeepTrailingWhitespaces;
     private JTextField tfCommentIndicator;
     private JComboBox comboValueColoring;
+    private JCheckBox cbHeaderRowFixed;
 
     @NotNull
     @Override
@@ -92,7 +93,8 @@ public class CsvEditorSettingsProvider implements EditorOptionsProvider {
                 !Objects.equals(comboValueSeparator.getSelectedItem(), csvEditorSettings.getDefaultValueSeparator()) ||
                 isModified(cbKeepTrailingWhitespaces, csvEditorSettings.getKeepTrailingSpaces()) ||
                 isModified(tfCommentIndicator, csvEditorSettings.getCommentIndicator()) ||
-                !Objects.equals(comboValueColoring.getSelectedItem(), csvEditorSettings.getValueColoring());
+                !Objects.equals(comboValueColoring.getSelectedItem(), csvEditorSettings.getValueColoring()) ||
+                isModified(cbHeaderRowFixed, csvEditorSettings.isHeaderRowFixed());
     }
 
     @Override
@@ -117,6 +119,7 @@ public class CsvEditorSettingsProvider implements EditorOptionsProvider {
         cbKeepTrailingWhitespaces.setSelected(csvEditorSettings.getKeepTrailingSpaces());
         tfCommentIndicator.setText(csvEditorSettings.getCommentIndicator());
         comboValueColoring.setSelectedItem(csvEditorSettings.getValueColoring());
+        cbHeaderRowFixed.setSelected(csvEditorSettings.isHeaderRowFixed());
     }
 
     @Override
@@ -141,6 +144,7 @@ public class CsvEditorSettingsProvider implements EditorOptionsProvider {
         csvEditorSettings.setKeepTrailingSpaces(cbKeepTrailingWhitespaces.isSelected());
         csvEditorSettings.setCommentIndicator(tfCommentIndicator.getText());
         csvEditorSettings.setValueColoring((CsvEditorSettings.ValueColoring) comboValueColoring.getSelectedItem());
+        csvEditorSettings.setHeaderRowFixed(cbHeaderRowFixed.isSelected());
     }
 
     protected void createUIComponents() {

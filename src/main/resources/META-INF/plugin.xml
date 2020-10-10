@@ -15,6 +15,7 @@
             <li>customizable Table Editor</li>
             <li>customizable text editor</li>
             <li>customizable column coloring</li>
+            <li>customizable line comment</li>
             <li>syntax validation</li>
             <li>syntax highlighting</li>
             <li>content formatting</li>
@@ -49,8 +50,9 @@
 
     <change-notes><![CDATA[
         <pre style="font-family: sans-serif">
-FIX: Settings reset every update #245
-FIX: Removing comment indicator causes parsing errors
+NEW: Added default "Header row fixed" setting
+NEW: Support "Comment with line comment" #247
+FIX: "Value coloring" change not applied to open files
       </pre>
     ]]>
     </change-notes>
@@ -168,6 +170,8 @@ FIX: Removing comment indicator causes parsing errors
         <todoIndexer implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvTodoIndexer" filetype="PSV" />
 
         <postStartupActivity implementation="net.seesharpsoft.intellij.plugins.csv.CsvPlugin" />
+
+        <lang.commenter implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvCommenter" language="csv" />
     </extensions>
 
     <actions>
