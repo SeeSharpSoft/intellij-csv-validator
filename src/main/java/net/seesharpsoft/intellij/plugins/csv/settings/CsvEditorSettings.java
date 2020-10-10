@@ -72,7 +72,7 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
         public int TABLE_DEFAULT_COLUMN_WIDTH = TABLE_DEFAULT_COLUMN_WIDTH_DEFAULT;
         public boolean TABLE_AUTO_COLUMN_WIDTH_ON_OPEN = false;
         public boolean ZERO_BASED_COLUMN_NUMBERING = false;
-        public boolean TABLE_HEADER_ROW_FIXED = true;
+        public boolean TABLE_HEADER_ROW_FIXED = false;
 
         public boolean SHOW_TABLE_EDITOR_INFO_PANEL = true;
         public boolean QUOTING_ENFORCED = false;

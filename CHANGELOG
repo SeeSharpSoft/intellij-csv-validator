@@ -1,7 +1,7 @@
 2.14.3
 Oct 10, 2020
 
-NEW: Added default "Header row fixed" setting (enabled)
+NEW: Added default "Header row fixed" setting
 NEW: Support "Comment with line comment" #247
 FIX: "Value coloring" change not applied to open files
 

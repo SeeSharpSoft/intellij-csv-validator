@@ -79,7 +79,7 @@ public class CsvEditorSettingsProviderTest extends BasePlatformTestCase {
         csvEditorSettings.setKeepTrailingSpaces(true);
         csvEditorSettings.setCommentIndicator("//");
         csvEditorSettings.setValueColoring(CsvEditorSettings.ValueColoring.SIMPLE);
-        csvEditorSettings.setHeaderRowFixed(false);
+        csvEditorSettings.setHeaderRowFixed(true);
 
         assertEquals(true, editorSettingsPanel.isModified());
 
@@ -103,7 +103,7 @@ public class CsvEditorSettingsProviderTest extends BasePlatformTestCase {
         assertEquals(true, csvEditorSettings.getKeepTrailingSpaces());
         assertEquals("//", csvEditorSettings.getCommentIndicator());
         assertEquals( CsvEditorSettings.ValueColoring.SIMPLE, csvEditorSettings.getValueColoring());
-        assertEquals(false, csvEditorSettings.isHeaderRowFixed());
+        assertEquals(true, csvEditorSettings.isHeaderRowFixed());
 
         editorSettingsPanel.disposeUIResources();
     }
@@ -131,7 +131,7 @@ public class CsvEditorSettingsProviderTest extends BasePlatformTestCase {
         csvEditorSettings.setKeepTrailingSpaces(true);
         csvEditorSettings.setCommentIndicator("//");
         csvEditorSettings.setValueColoring(CsvEditorSettings.ValueColoring.SIMPLE);
-        csvEditorSettings.setHeaderRowFixed(false);
+        csvEditorSettings.setHeaderRowFixed(true);
 
         editorSettingsPanel.apply();
 
