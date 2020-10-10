@@ -28,6 +28,7 @@ public class CsvFile extends PsiFileBase {
                 case "defaultEscapeCharacter":
                 case "defaultValueSeparator":
                 case "commentIndicator":
+                case "valueColoring":
                     FileContentUtilCore.reparseFiles(CsvFile.this.getVirtualFile());
                     break;
                 default:
