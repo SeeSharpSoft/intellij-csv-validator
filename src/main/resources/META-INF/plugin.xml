@@ -49,8 +49,7 @@
 
     <change-notes><![CDATA[
         <pre style="font-family: sans-serif">
-FIX: Settings reset every update #245
-FIX: Removing comment indicator causes parsing errors
+NEW: Support "Comment with line comment" #247
       </pre>
     ]]>
     </change-notes>
@@ -168,6 +167,8 @@ FIX: Removing comment indicator causes parsing errors
         <todoIndexer implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvTodoIndexer" filetype="PSV" />
 
         <postStartupActivity implementation="net.seesharpsoft.intellij.plugins.csv.CsvPlugin" />
+
+        <lang.commenter implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvCommenter" language="csv" />
     </extensions>
 
     <actions>
