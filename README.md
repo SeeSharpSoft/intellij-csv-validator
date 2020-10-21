@@ -41,6 +41,8 @@ This enables default editor features like syntax validation, highlighting and in
 
 - Starting with **CSV Plugin 2.11.0**, _Java 9 (53) or higher is required_. Previous versions can be downloaded and installed manually from the following locations: [GitHub Releases](https://github.com/SeeSharpSoft/intellij-csv-validator/releases), [Plugin Repository](https://plugins.jetbrains.com/plugin/10037-csv-plugin/versions) (see also section [Installation](https://github.com/SeeSharpSoft/intellij-csv-validator#installation)).
 
+- Starting with **CSV Plugin 2.14.0**, _Java 11 (55) or higher is required_. Previous versions can be downloaded and installed manually from the following locations: [GitHub Releases](https://github.com/SeeSharpSoft/intellij-csv-validator/releases), [Plugin Repository](https://plugins.jetbrains.com/plugin/10037-csv-plugin/versions) (see also section [Installation](https://github.com/SeeSharpSoft/intellij-csv-validator#installation)).
+
 ### Syntax parser & validation
 
 The CSV syntax parser follows the standard defined in [IETF 4180](https://www.ietf.org/rfc/rfc4180.txt) but tolerates leading and trailing whitespaces of escaped text and accepts basically every literal as text data.
@@ -414,11 +416,11 @@ You can also download the JAR package from the [Jetbrains plugin repository](htt
 
 #### CSV Plugin causes the IDE to stop working properly
 
-Since version 2.11.0, the plugins requires the IntelliJ platform to be executed on JRE9 or higher. If this is not the case, the following error log can be noticed:
+Since version 2.14.0, the plugins requires the IntelliJ platform to be executed on JRE11 or higher. If this is not the case, the following error log can be noticed:
 
-`com.intellij.diagnostic.PluginException: While loading class net.seesharpsoft.intellij.plugins.csv.CsvFileTypeOverrider: net/seesharpsoft/intellij/plugins/csv/CsvFileTypeOverrider has been compiled by a more recent version of the Java Runtime (class file version 53.0), this version of the Java Runtime only recognizes class file versions up to 52.0 [Plugin: net.seesharpsoft.intellij.plugins.csv]`
+`com.intellij.diagnostic.PluginException: While loading class net.seesharpsoft.intellij.plugins.csv.CsvFileTypeOverrider: net/seesharpsoft/intellij/plugins/csv/CsvFileTypeOverrider has been compiled by a more recent version of the Java Runtime (class file version 55.0), this version of the Java Runtime only recognizes class file versions up to 52.0 [Plugin: net.seesharpsoft.intellij.plugins.csv]`
 
-In some cases the error log doesn't seem to point this out in a noticable manner, but the IDE doesn't work correctly after enabling the plugin. Always disable the plugin first before continuing with the following steps.
+In some cases the error log doesn't seem to point this out in a noticeable manner, but the IDE doesn't work correctly after enabling the plugin. Always disable the plugin first before continuing with the following steps.
 
 Please read the [official instructions](https://intellij-support.jetbrains.com/hc/en-us/articles/206544879-Selecting-the-JDK-version-the-IDE-will-run-under) on how to switch to a newer JRE, or [manually install](https://github.com/SeeSharpSoft/intellij-csv-validator#installation) a [prior CSV plugin version](https://github.com/SeeSharpSoft/intellij-csv-validator/releases/tag/2.10.0).
 
