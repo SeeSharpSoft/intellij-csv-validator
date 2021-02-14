@@ -132,9 +132,16 @@ The preferred editor usage can be switched between "Text Editor first", "Table E
 
 The following separators are currently supported: **,** (Comma), **;** (Semicolon), **:** (Colon), **|** (Pipe) and **&#8633;** (Tab)
 
-_Default Value Separator_ defines which separator is used as standard for each newly opened CSV file. The separator character can be changed for each file individually in its editors context menu.
+_Default Value Separator_ defines which separator is used as standard for each newly created or opened CSV file.
+The separator character can be changed for each file individually in its editors context menu.
 
-This option has no effect on TSV/PSV files, the separator is pre-defined by their file- and language-type.
+###### Auto Detect
+
+The value separator of a newly opened CSV file can be detected automatically based on the number of predefined separator occurrences.
+
+If _Auto Detect_ is enabled (default), the _Default Value Separator_ setting is only taken into account for newly created files.
+
+**Note:** This option has no effect on TSV/PSV files, the separator is pre-defined by their file- and language-type.
 
 ##### Default Escape Character
 
