@@ -84,7 +84,7 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
         public boolean KEEP_TRAILING_SPACES = false;
         public String COMMENT_INDICATOR = COMMENT_INDICATOR_DEFAULT;
         public ValueColoring VALUE_COLORING = ValueColoring.RAINBOW;
-        public boolean GUESS_VALUE_SEPARATOR = true;
+        public boolean AUTO_DETECT_VALUE_SEPARATOR = true;
 
         public OptionSet() {
             EditorSettingsExternalizable editorSettingsExternalizable = EditorSettingsExternalizable.getInstance();
@@ -313,12 +313,12 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
         getState().TABLE_HEADER_ROW_FIXED = headerRowFixed;
     }
 
-    public boolean isGuessValueSeparator() {
-        return getState().GUESS_VALUE_SEPARATOR;
+    public boolean isAutoDetectValueSeparator() {
+        return getState().AUTO_DETECT_VALUE_SEPARATOR;
     }
 
-    public void setGuessValueSeparator(boolean guessValueSeparator) {
-        getState().GUESS_VALUE_SEPARATOR = guessValueSeparator;
+    public void setAutoDetectValueSeparator(boolean autoDetectValueSeparator) {
+        getState().AUTO_DETECT_VALUE_SEPARATOR = autoDetectValueSeparator;
     }
 
     public boolean checkCurrentPluginVersion(String actualVersion) {

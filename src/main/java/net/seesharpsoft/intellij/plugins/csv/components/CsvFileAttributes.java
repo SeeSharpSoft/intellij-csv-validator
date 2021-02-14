@@ -117,14 +117,14 @@ public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttrib
     }
 
     private @NotNull
-    CsvValueSeparator guessOrGetValueSeparator(Project project, VirtualFile virtualFile) {
-        return CsvEditorSettings.getInstance().isGuessValueSeparator() ?
-                guessValueSeparator(project, virtualFile) :
+    CsvValueSeparator autoDetectOrGetDefaultValueSeparator(Project project, VirtualFile virtualFile) {
+        return CsvEditorSettings.getInstance().isAutoDetectValueSeparator() ?
+                autoDetectSeparator(project, virtualFile) :
                 CsvEditorSettings.getInstance().getDefaultValueSeparator();
     }
 
     private @NotNull
-    CsvValueSeparator guessValueSeparator(Project project, VirtualFile virtualFile) {
+    CsvValueSeparator autoDetectSeparator(Project project, VirtualFile virtualFile) {
         Document document = FileDocumentManager.getInstance().getDocument(virtualFile);
         final String text = document == null ? "" : document.getText();
         Pair<CsvValueSeparator, Integer> separatorWithCount =
@@ -160,7 +160,7 @@ public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttrib
         }
         Attribute attribute = getFileAttribute(project, virtualFile);
         return attribute == null || attribute.separator == null ?
-                guessOrGetValueSeparator(project, virtualFile) :
+                autoDetectOrGetDefaultValueSeparator(project, virtualFile) :
                 attribute.separator;
     }
 

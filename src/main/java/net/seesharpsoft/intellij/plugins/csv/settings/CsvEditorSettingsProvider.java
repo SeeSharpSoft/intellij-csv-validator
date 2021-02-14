@@ -43,7 +43,7 @@ public class CsvEditorSettingsProvider implements EditorOptionsProvider {
     private JTextField tfCommentIndicator;
     private JComboBox comboValueColoring;
     private JCheckBox cbHeaderRowFixed;
-    private JCheckBox cbGuessSeparator;
+    private JCheckBox cbAutoDetectSeparator;
 
     @NotNull
     @Override
@@ -96,7 +96,7 @@ public class CsvEditorSettingsProvider implements EditorOptionsProvider {
                 isModified(tfCommentIndicator, csvEditorSettings.getCommentIndicator()) ||
                 !Objects.equals(comboValueColoring.getSelectedItem(), csvEditorSettings.getValueColoring()) ||
                 isModified(cbHeaderRowFixed, csvEditorSettings.isHeaderRowFixed()) ||
-                isModified(cbGuessSeparator, csvEditorSettings.isGuessValueSeparator());
+                isModified(cbAutoDetectSeparator, csvEditorSettings.isAutoDetectValueSeparator());
     }
 
     @Override
@@ -122,7 +122,7 @@ public class CsvEditorSettingsProvider implements EditorOptionsProvider {
         tfCommentIndicator.setText(csvEditorSettings.getCommentIndicator());
         comboValueColoring.setSelectedItem(csvEditorSettings.getValueColoring());
         cbHeaderRowFixed.setSelected(csvEditorSettings.isHeaderRowFixed());
-        cbGuessSeparator.setSelected(csvEditorSettings.isGuessValueSeparator());
+        cbAutoDetectSeparator.setSelected(csvEditorSettings.isAutoDetectValueSeparator());
     }
 
     @Override
@@ -148,7 +148,7 @@ public class CsvEditorSettingsProvider implements EditorOptionsProvider {
         csvEditorSettings.setCommentIndicator(tfCommentIndicator.getText());
         csvEditorSettings.setValueColoring((CsvEditorSettings.ValueColoring) comboValueColoring.getSelectedItem());
         csvEditorSettings.setHeaderRowFixed(cbHeaderRowFixed.isSelected());
-        csvEditorSettings.setGuessValueSeparator(cbGuessSeparator.isSelected());
+        csvEditorSettings.setAutoDetectValueSeparator(cbAutoDetectSeparator.isSelected());
     }
 
     protected void createUIComponents() {
