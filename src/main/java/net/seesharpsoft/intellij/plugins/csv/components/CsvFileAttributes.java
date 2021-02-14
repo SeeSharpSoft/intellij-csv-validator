@@ -5,17 +5,22 @@ import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
+import com.intellij.openapi.editor.Document;
+import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.fileTypes.LanguageFileType;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import com.intellij.util.xmlb.XmlSerializerUtil;
 import com.intellij.util.xmlb.annotations.OptionTag;
+import net.seesharpsoft.commons.collection.Pair;
 import net.seesharpsoft.intellij.plugins.csv.*;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
+import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -87,12 +92,18 @@ public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttrib
         return language.isKindOf(CsvLanguage.INSTANCE) && !(language instanceof CsvSeparatorHolder);
     }
 
+    private void setFileSeparator(@NotNull Project project, @NotNull VirtualFile virtualFile, @NotNull CsvValueSeparator separator) {
+        Attribute attribute = getFileAttribute(project, virtualFile, true);
+        if (attribute != null) {
+            attribute.separator = separator;
+        }
+    }
+
     public void setFileSeparator(@NotNull PsiFile psiFile, @NotNull CsvValueSeparator separator) {
         if (!canChangeValueSeparator(psiFile)) {
             return;
         }
-        Attribute attribute = getFileAttribute(psiFile.getProject(), psiFile.getOriginalFile().getVirtualFile(), true);
-        attribute.separator = separator;
+        setFileSeparator(psiFile.getProject(), psiFile.getOriginalFile().getVirtualFile(), separator);
     }
 
     public void resetValueSeparator(@NotNull PsiFile psiFile) {
@@ -105,6 +116,39 @@ public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttrib
         }
     }
 
+    private @NotNull
+    CsvValueSeparator autoDetectOrGetDefaultValueSeparator(Project project, VirtualFile virtualFile) {
+        return CsvEditorSettings.getInstance().isAutoDetectValueSeparator() ?
+                autoDetectSeparator(project, virtualFile) :
+                CsvEditorSettings.getInstance().getDefaultValueSeparator();
+    }
+
+    private @NotNull
+    CsvValueSeparator autoDetectSeparator(Project project, VirtualFile virtualFile) {
+        Document document = FileDocumentManager.getInstance().getDocument(virtualFile);
+        final String text = document == null ? "" : document.getText();
+        Pair<CsvValueSeparator, Integer> separatorWithCount =
+                Arrays.stream(CsvValueSeparator.values())
+                        // count
+                        .map(separator -> {
+                            String character = separator.getCharacter();
+                            return Pair.of(separator, StringUtils.countMatches(text, character));
+                        })
+                        // ignore non-matched separators
+                        .filter(p -> p.getSecond() > 0)
+                        // get the one with most hits
+                        .max((p1, p2) -> p1.getSecond() - p2.getSecond())
+                        // failsafe (e.g. empty document)
+                        .orElse(null);
+
+        CsvValueSeparator valueSeparator = separatorWithCount != null ?
+                separatorWithCount.getFirst() :
+                CsvEditorSettings.getInstance().getDefaultValueSeparator();
+
+        setFileSeparator(project, virtualFile, valueSeparator);
+        return valueSeparator;
+    }
+
     public @NotNull
     CsvValueSeparator getValueSeparator(Project project, VirtualFile virtualFile) {
         if (project == null || virtualFile == null || !(virtualFile.getFileType() instanceof LanguageFileType)) {
@@ -112,11 +156,11 @@ public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttrib
         }
         Language language = ((LanguageFileType) virtualFile.getFileType()).getLanguage();
         if (language instanceof CsvSeparatorHolder) {
-                return ((CsvSeparatorHolder) language).getSeparator();
+            return ((CsvSeparatorHolder) language).getSeparator();
         }
         Attribute attribute = getFileAttribute(project, virtualFile);
         return attribute == null || attribute.separator == null ?
-                CsvEditorSettings.getInstance().getDefaultValueSeparator() :
+                autoDetectOrGetDefaultValueSeparator(project, virtualFile) :
                 attribute.separator;
     }
 
@@ -127,7 +171,9 @@ public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttrib
 
     public void setEscapeCharacter(@NotNull PsiFile psiFile, @NotNull CsvEscapeCharacter escapeCharacter) {
         Attribute attribute = getFileAttribute(psiFile.getProject(), psiFile.getOriginalFile().getVirtualFile(), true);
-        attribute.escapeCharacter = escapeCharacter;
+        if (attribute != null) {
+            attribute.escapeCharacter = escapeCharacter;
+        }
     }
 
     public void resetEscapeSeparator(@NotNull PsiFile psiFile) {
