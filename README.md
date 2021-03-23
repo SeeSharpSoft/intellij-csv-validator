@@ -7,7 +7,7 @@
 
 # Lightweight CSV Plugin for JetBrains IDE family
 
-Compatible with _IntelliJ IDEA  PhpStorm  WebStorm  PyCharm  RubyMine  AppCode  CLion  Gogland  DataGrip  Rider  MPS  Android Studio_ - __2017.3.1 and newer__
+Compatible with _IntelliJ IDEA  PhpStorm  WebStorm  PyCharm  RubyMine  AppCode  CLion  Gogland  DataGrip  Rider  MPS  Android Studio_ - __2019.3.5 and newer__
 
 This plugin introduces CSV (_Comma-Separated Values_) as a language to Jetbrains IDE with a syntax definition, structured language elements and associated file types (.csv/.tsv/.psv).
 This enables default editor features like syntax validation, highlighting and inspections for CSV-alike files.
@@ -37,7 +37,7 @@ This enables default editor features like syntax validation, highlighting and in
 
 **!!Please note!!**
 
-- Starting with **CSV Plugin 2.10.0**, _new features will only be developed for IntelliJ IDE 2019.3 and higher_. I will still release patches for major/critical bugs for previous IDE versions 2017.3.1 - 2019.2.\*, but no additional features or cosmetic fixes.
+- Starting with **CSV Plugin 2.10.0**, _new features will only be developed for IntelliJ IDE 2019.3.5 and higher_. ~~I will still release patches for major/critical bugs for previous IDE versions 2017.3.1 - 2019.3.4\*, but no additional features or cosmetic fixes.~~
 
 - Starting with **CSV Plugin 2.11.0**, _Java 9 (53) or higher is required_. Previous versions can be downloaded and installed manually from the following locations: [GitHub Releases](https://github.com/SeeSharpSoft/intellij-csv-validator/releases), [Plugin Repository](https://plugins.jetbrains.com/plugin/10037-csv-plugin/versions) (see also section [Installation](https://github.com/SeeSharpSoft/intellij-csv-validator#installation)).
 
@@ -131,6 +131,8 @@ The preferred editor usage can be switched between "Text Editor first", "Table E
 ##### Default Value Separator (CSV only)
 
 The following separators are currently supported: **,** (Comma), **;** (Semicolon), **:** (Colon), **|** (Pipe) and **&#8633;** (Tab)
+
+**since 2.15.0:** The default value separator can also be a user defined character sequence.
 
 _Default Value Separator_ defines which separator is used as standard for each newly created or opened CSV file.
 The separator character can be changed for each file individually in its editors context menu.

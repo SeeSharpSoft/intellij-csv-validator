@@ -65,7 +65,14 @@ public class CsvAnnotator implements Annotator {
                 textRange = TextRange.from(textRange.getStartOffset() - 1, 1);
             }
 
-            Annotation annotation = holder.createAnnotation(CSV_COLUMN_INFO_SEVERITY, textRange, message, tooltip);
+            final Annotation annotation =
+                    new Annotation(
+                            textRange.getStartOffset(),
+                            textRange.getEndOffset(),
+                            CSV_COLUMN_INFO_SEVERITY,
+                            message,
+                            tooltip
+                    );
             annotation.setEnforcedTextAttributes(
                     CsvEditorSettings.getInstance().getValueColoring() == CsvEditorSettings.ValueColoring.RAINBOW ?
                             CsvColorSettings.getTextAttributesOfColumn(columnInfo.getColumnIndex(), holder.getCurrentAnnotationSession()) :
@@ -98,11 +105,15 @@ public class CsvAnnotator implements Annotator {
                 }
             }
             if (textAttributes != null) {
-                Annotation annotation = holder.createAnnotation(
-                        CSV_COLUMN_INFO_SEVERITY,
-                        element.getTextRange(),
-                        showInfoBalloon(holder.getCurrentAnnotationSession()) ? "↹" : null
-                );
+                final TextRange textRange = element.getTextRange();
+                final Annotation annotation =
+                        new Annotation(
+                                textRange.getStartOffset(),
+                                textRange.getEndOffset(),
+                                CSV_COLUMN_INFO_SEVERITY,
+                                showInfoBalloon(holder.getCurrentAnnotationSession()) ? "↹" : null,
+                                null
+                        );
                 annotation.setEnforcedTextAttributes(textAttributes);
                 annotation.setNeedsUpdateOnTyping(false);
             }
