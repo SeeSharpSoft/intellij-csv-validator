@@ -1,5 +1,6 @@
 package net.seesharpsoft.intellij.plugins.csv.formatter;
 
+import com.intellij.formatting.FormattingContext;
 import com.intellij.formatting.FormattingModel;
 import com.intellij.formatting.FormattingModelBuilder;
 import com.intellij.formatting.FormattingModelProvider;
@@ -14,7 +15,9 @@ import org.jetbrains.annotations.Nullable;
 public class CsvFormattingModelBuilder implements FormattingModelBuilder {
     @NotNull
     @Override
-    public FormattingModel createModel(PsiElement element, CodeStyleSettings settings) {
+    public FormattingModel createModel(@NotNull FormattingContext formattingContext) {
+        PsiElement element = formattingContext.getPsiElement();
+        CodeStyleSettings settings = formattingContext.getCodeStyleSettings();
         ASTNode root = CsvFormatHelper.getRoot(element.getNode());
         CsvFormattingInfo formattingInfo = new CsvFormattingInfo(
                 settings,

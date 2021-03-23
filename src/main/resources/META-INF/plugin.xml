@@ -57,13 +57,15 @@ FIX: Removal of deprecated function usage
     </change-notes>
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
-    <idea-version since-build="193.5233.102" />
+    <idea-version since-build="203.3645.34" />
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
          on how to target different products -->
     <depends>com.intellij.modules.lang</depends>
 
     <extensions defaultExtensionNs="com.intellij">
+        <notificationGroup displayType="STICKY_BALLOON" id="net.seesharpsoft.intellij.plugins.csv" />
+
         <fileType name="CSV" language="csv" implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvFileType" extensions="csv" fieldName="INSTANCE"/>
         <fileType name="TSV" language="tsv" implementationClass="net.seesharpsoft.intellij.plugins.tsv.TsvFileType" extensions="tsv;tab" fieldName="INSTANCE"/>
         <fileType name="PSV" language="psv" implementationClass="net.seesharpsoft.intellij.plugins.psv.PsvFileType" extensions="psv" fieldName="INSTANCE"/>
