@@ -20,6 +20,7 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.text.BadLocationException;
 import java.awt.*;
 import java.awt.event.FocusEvent;
+import java.awt.geom.Rectangle2D;
 import java.util.EventObject;
 import java.util.Iterator;
 import java.util.Set;
@@ -96,10 +97,10 @@ public class MultiLineCellRenderer extends JBScrollPane implements TableCellRend
     @Override
     public Dimension getPreferredSize() {
         try {
-            final Rectangle rectangle = myTextArea.modelToView(myTextArea.getDocument().getLength());
+            final Rectangle2D rectangle = myTextArea.modelToView2D(myTextArea.getDocument().getLength());
             if (rectangle != null) {
                 return new Dimension(this.getWidth(),
-                        this.getInsets().top + rectangle.y + rectangle.height + this.getInsets().bottom);
+                        (int)(this.getInsets().top + rectangle.getY() + rectangle.getHeight() + this.getInsets().bottom));
             }
         } catch (BadLocationException e) {
             e.printStackTrace();

@@ -25,7 +25,7 @@ public class CsvCodeStyleSettingsProvider extends CodeStyleSettingsProvider {
 
     @NotNull
     @Override
-    public Configurable createSettingsPage(CodeStyleSettings settings, CodeStyleSettings originalSettings) {
+    public CodeStyleConfigurable createConfigurable(CodeStyleSettings settings, CodeStyleSettings originalSettings) {
         return new CodeStyleAbstractConfigurable(settings, originalSettings, CsvLanguage.INSTANCE.getDisplayName()) {
             @Override
             protected CodeStyleAbstractPanel createPanel(CodeStyleSettings settings) {
