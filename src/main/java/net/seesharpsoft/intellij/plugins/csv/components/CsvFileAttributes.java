@@ -20,9 +20,7 @@ import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @State(
         name = "CsvFileAttributes",
@@ -125,10 +123,15 @@ public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttrib
 
     private @NotNull
     CsvValueSeparator autoDetectSeparator(Project project, VirtualFile virtualFile) {
-        Document document = FileDocumentManager.getInstance().getDocument(virtualFile);
+        final Document document = FileDocumentManager.getInstance().getDocument(virtualFile);
         final String text = document == null ? "" : document.getText();
+        final List<CsvValueSeparator> applicableValueSeparators = new ArrayList(Arrays.asList(CsvValueSeparator.values()));
+        final CsvValueSeparator defaultValueSeparator = CsvEditorSettings.getInstance().getDefaultValueSeparator();
+        if (defaultValueSeparator.isCustom()) {
+            applicableValueSeparators.add(defaultValueSeparator);
+        }
         Pair<CsvValueSeparator, Integer> separatorWithCount =
-                Arrays.stream(CsvValueSeparator.values())
+                applicableValueSeparators.parallelStream()
                         // count
                         .map(separator -> {
                             String character = separator.getCharacter();
@@ -143,7 +146,7 @@ public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttrib
 
         CsvValueSeparator valueSeparator = separatorWithCount != null ?
                 separatorWithCount.getFirst() :
-                CsvEditorSettings.getInstance().getDefaultValueSeparator();
+                defaultValueSeparator;
 
         setFileSeparator(project, virtualFile, valueSeparator);
         return valueSeparator;

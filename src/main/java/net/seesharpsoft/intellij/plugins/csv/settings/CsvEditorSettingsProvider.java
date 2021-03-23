@@ -143,7 +143,11 @@ public class CsvEditorSettingsProvider implements EditorOptionsProvider {
         csvEditorSettings.setTableDefaultColumnWidth((int) tfDefaultColumnWidth.getValue());
         csvEditorSettings.setTableAutoColumnWidthOnOpen(cbAdjustColumnWidthOnOpen.isSelected());
         csvEditorSettings.setDefaultEscapeCharacter((CsvEscapeCharacter)comboEscapeCharacter.getSelectedItem());
-        csvEditorSettings.setDefaultValueSeparator((CsvValueSeparator)comboValueSeparator.getSelectedItem());
+        csvEditorSettings.setDefaultValueSeparator(
+                comboValueSeparator.getSelectedItem() instanceof CsvValueSeparator ?
+                        (CsvValueSeparator)comboValueSeparator.getSelectedItem() :
+                        CsvValueSeparator.create((String)comboValueSeparator.getSelectedItem())
+                );
         csvEditorSettings.setKeepTrailingSpaces(cbKeepTrailingWhitespaces.isSelected());
         csvEditorSettings.setCommentIndicator(tfCommentIndicator.getText());
         csvEditorSettings.setValueColoring((CsvEditorSettings.ValueColoring) comboValueColoring.getSelectedItem());
