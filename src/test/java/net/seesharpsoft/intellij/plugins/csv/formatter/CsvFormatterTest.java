@@ -32,7 +32,8 @@ public class CsvFormatterTest extends BasePlatformTestCase {
                                           boolean LEADING_WHITE_SPACES,
                                           boolean ENABLE_WIDE_CHARACTER_DETECTION,
                                           boolean TREAT_AMBIGUOUS_CHARACTERS_AS_WIDE) {
-        CsvCodeStyleSettings csvCodeStyleSettings = CodeStyleSettingsManager.getSettings(getProject()).getCustomSettings(CsvCodeStyleSettings.class);
+//        CsvCodeStyleSettings csvCodeStyleSettings = CodeStyleSettingsManager.getSettings(getProject()).getCustomSettings(CsvCodeStyleSettings.class);
+        CsvCodeStyleSettings csvCodeStyleSettings = CodeStyleSettingsManager.getInstance(getProject()).getTemporarySettings().getCustomSettings(CsvCodeStyleSettings.class);
         csvCodeStyleSettings.SPACE_BEFORE_SEPARATOR = SPACE_BEFORE_SEPARATOR;
         csvCodeStyleSettings.SPACE_AFTER_SEPARATOR = SPACE_AFTER_SEPARATOR;
         csvCodeStyleSettings.TRIM_LEADING_WHITE_SPACES = TRIM_LEADING_WHITE_SPACES;
@@ -70,13 +71,10 @@ public class CsvFormatterTest extends BasePlatformTestCase {
 
         initCsvCodeStyleSettings(binarySettings);
 
-        new WriteCommandAction.Simple(getProject()) {
-            @Override
-            protected void run() throws Throwable {
-                CodeStyleManager.getInstance(getProject()).reformatText(myFixture.getFile(),
-                        ContainerUtil.newArrayList(myFixture.getFile().getTextRange()));
-            }
-        }.execute();
+        WriteCommandAction.writeCommandAction(getProject()).run(() -> {
+            CodeStyleManager.getInstance(getProject()).reformatText(myFixture.getFile(),
+                    ContainerUtil.newArrayList(myFixture.getFile().getTextRange()));
+        });
         if (checkResults) {
             myFixture.checkResultByFile(relativeTargetPath + String.format("/TestResult%08d.csv", binarySettings));
         }
@@ -171,13 +169,10 @@ public class CsvFormatterTest extends BasePlatformTestCase {
 
             initCsvCodeStyleSettings(binarySettings);
 
-            new WriteCommandAction.Simple(getProject()) {
-                @Override
-                protected void run() throws Throwable {
-                    CodeStyleManager.getInstance(getProject()).reformatText(myFixture.getFile(),
-                            ContainerUtil.newArrayList(myFixture.getFile().getTextRange()));
-                }
-            }.execute();
+            WriteCommandAction.writeCommandAction(getProject()).run(() -> {
+                CodeStyleManager.getInstance(getProject()).reformatText(myFixture.getFile(),
+                        ContainerUtil.newArrayList(myFixture.getFile().getTextRange()));
+            });
 
             try (PrintWriter writer = new PrintWriter(getTestDataPath() + String.format("/generated/TestResult%08d.csv", binarySettings))
             ) {
