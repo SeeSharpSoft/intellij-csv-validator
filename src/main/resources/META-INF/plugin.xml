@@ -50,7 +50,8 @@
 
     <change-notes><![CDATA[
         <pre style="font-family: sans-serif">
-NEW: Auto detect value separator (by count)
+NEW: Default value separator #259
+FIX: Removal of deprecated function usage
       </pre>
     ]]>
     </change-notes>

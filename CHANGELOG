@@ -1,3 +1,9 @@
+2.15.0
+Mar 23, 2021
+
+NEW: Default value separator #259
+FIX: Removal of deprecated function usage
+
 2.14.4
 Feb 14, 2021
 
