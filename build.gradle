@@ -17,6 +17,10 @@ plugins {
     id "com.github.ManifestClasspath" version "0.1.0-RELEASE"
 }
 
+jacoco {
+    toolVersion = "0.8.6"
+}
+
 jacocoTestReport {
     reports {
         xml.enabled true
@@ -29,7 +33,10 @@ version '2.14.4'
 apply plugin: 'java'
 project.sourceCompatibility = JavaVersion.VERSION_11
 project.targetCompatibility = JavaVersion.VERSION_11
-tasks.withType(JavaCompile) { options.encoding = 'UTF-8' }
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+    options.compilerArgs << "-Xlint:deprecation"
+}
 repositories {
     mavenCentral()
 }

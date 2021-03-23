@@ -12,11 +12,11 @@ import javax.swing.*;
 
 public class CsvIconProvider extends IconProvider {
 
-    public static final Icon FILE = IconLoader.getIcon("/media/icons/csv-icon.png");
+    public static final Icon FILE = IconLoader.getIcon("/media/icons/csv-icon.png", CsvIconProvider.class);
 
-    public static final Icon HEADER = IconLoader.getIcon("/media/icons/csv-header-icon.png");
+    public static final Icon HEADER = IconLoader.getIcon("/media/icons/csv-header-icon.png", CsvIconProvider.class);
 
-    public static final Icon FIELD = IconLoader.getIcon("/media/icons/csv-field-icon.png");
+    public static final Icon FIELD = IconLoader.getIcon("/media/icons/csv-field-icon.png", CsvIconProvider.class);
 
     @Nullable
     @Override

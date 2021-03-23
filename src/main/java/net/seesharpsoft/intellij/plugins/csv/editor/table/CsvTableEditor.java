@@ -144,7 +144,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
         }
         ApplicationManager.getApplication().invokeLater(() -> {
             if (project == null || project.isDisposed() ||
-                    (!this.document.isWritable() && ReadonlyStatusHandler.getInstance(this.project).ensureFilesWritable(this.file).hasReadonlyFiles())) {
+                    (!this.document.isWritable() && ReadonlyStatusHandler.getInstance(this.project).ensureFilesWritable(Collections.singleton(this.file)).hasReadonlyFiles())) {
                 return;
             }
             ApplicationManager.getApplication().runWriteAction(() ->
