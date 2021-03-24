@@ -1,8 +1,7 @@
 package net.seesharpsoft.intellij.plugins.csv;
 
 import com.intellij.ide.actions.ShowSettingsUtilImpl;
-import com.intellij.ide.plugins.IdeaPluginDescriptorImpl;
-import com.intellij.ide.plugins.PluginManager;
+import com.intellij.ide.plugins.IdeaPluginDescriptor;
 import com.intellij.ide.plugins.PluginManagerCore;
 import com.intellij.notification.*;
 import com.intellij.openapi.extensions.PluginId;
@@ -20,8 +19,8 @@ import java.net.URI;
 
 public class CsvPlugin implements StartupActivity {
 
-    protected static IdeaPluginDescriptorImpl getPluginDescriptor() {
-        return (IdeaPluginDescriptorImpl)PluginManagerCore.getPlugin(PluginId.getId("net.seesharpsoft.intellij.plugins.csv"));
+    protected static IdeaPluginDescriptor getPluginDescriptor() {
+        return PluginManagerCore.getPlugin(PluginId.getId("net.seesharpsoft.intellij.plugins.csv"));
     }
 
     protected static String getVersion() {

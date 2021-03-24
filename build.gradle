@@ -42,8 +42,8 @@ repositories {
 }
 dependencies {
     implementation 'net.seesharpsoft.sharping:sharping-commons:0.21.0'
-    compileOnly 'org.apache.ant:ant:1.7.0'
-    testCompile 'org.mockito:mockito-core:2.28.2'
+    compileOnly 'org.apache.ant:ant:1.10.9'
+    testCompile 'org.mockito:mockito-core:3.8.0'
 }
 sourceSets {
     main {
@@ -79,11 +79,11 @@ idea {
 apply plugin: 'org.jetbrains.intellij'
 intellij {
     // IDE version - https://www.jetbrains.com/intellij-repository/releases
-    version = System.getenv().getOrDefault('IDEA_VERSION', 'IU-201.6668.121')
+    version = System.getenv().getOrDefault('IDEA_VERSION', 'IC-193.5233.102')
     pluginName = 'CSV Plugin'
     instrumentCode = true
     updateSinceUntilBuild = false
-    downloadSources = false
+    downloadSources = System.getenv().getOrDefault('IDEA_SOURCES', 'true')
 }
 publishPlugin {
     token = System.getenv().getOrDefault('JI_TOKEN', '')

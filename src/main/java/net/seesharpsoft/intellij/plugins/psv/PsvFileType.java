@@ -10,7 +10,7 @@ import javax.swing.*;
 public final class PsvFileType extends LanguageFileType {
     public static final PsvFileType INSTANCE = new PsvFileType();
 
-    public static final Icon ICON = IconLoader.getIcon("/media/icons/psv-icon.png");
+    public static final Icon ICON = IconLoader.getIcon("/media/icons/psv-icon.png", PsvFileType.class);
 
     private PsvFileType() {
         super(PsvLanguage.INSTANCE);
