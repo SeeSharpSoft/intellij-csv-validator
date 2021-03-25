@@ -7,7 +7,7 @@
 
 # Lightweight CSV Plugin for JetBrains IDE family
 
-Compatible with _IntelliJ IDEA  PhpStorm  WebStorm  PyCharm  RubyMine  AppCode  CLion  Gogland  DataGrip  Rider  MPS  Android Studio_ - __2019.3.5 and newer__
+Compatible with _IntelliJ IDEA  PhpStorm  WebStorm  PyCharm  RubyMine  AppCode  CLion  Gogland  DataGrip  Rider  MPS  Android Studio_ - __2019.3.2 and newer__
 
 This plugin introduces CSV (_Comma-Separated Values_) as a language to Jetbrains IDE with a syntax definition, structured language elements and associated file types (.csv/.tsv/.psv).
 This enables default editor features like syntax validation, highlighting and inspections for CSV-alike files.
@@ -37,11 +37,11 @@ This enables default editor features like syntax validation, highlighting and in
 
 **!!Please note!!**
 
-- Starting with **CSV Plugin 2.10.0**, _new features will only be developed for IntelliJ IDE 2019.3.5 and higher_. ~~I will still release patches for major/critical bugs for previous IDE versions 2017.3.1 - 2019.3.4\*, but no additional features or cosmetic fixes.~~
+- Starting with **CSV Plugin 2.14.0**, _Java 11 (55) or higher is required_. Previous versions can be downloaded and installed manually from the following locations: [GitHub Releases](https://github.com/SeeSharpSoft/intellij-csv-validator/releases), [Plugin Repository](https://plugins.jetbrains.com/plugin/10037-csv-plugin/versions) (see also section [Installation](https://github.com/SeeSharpSoft/intellij-csv-validator#installation)).
 
 - Starting with **CSV Plugin 2.11.0**, _Java 9 (53) or higher is required_. Previous versions can be downloaded and installed manually from the following locations: [GitHub Releases](https://github.com/SeeSharpSoft/intellij-csv-validator/releases), [Plugin Repository](https://plugins.jetbrains.com/plugin/10037-csv-plugin/versions) (see also section [Installation](https://github.com/SeeSharpSoft/intellij-csv-validator#installation)).
 
-- Starting with **CSV Plugin 2.14.0**, _Java 11 (55) or higher is required_. Previous versions can be downloaded and installed manually from the following locations: [GitHub Releases](https://github.com/SeeSharpSoft/intellij-csv-validator/releases), [Plugin Repository](https://plugins.jetbrains.com/plugin/10037-csv-plugin/versions) (see also section [Installation](https://github.com/SeeSharpSoft/intellij-csv-validator#installation)).
+- Starting with **CSV Plugin 2.10.0**, _new features will only be developed for IntelliJ IDE 2019.3.2 and higher_. ~~I will still release patches for major/critical bugs for previous IDE versions 2017.3.1 - 2019.3.1\*, but no additional features or cosmetic fixes.~~
 
 ### Syntax parser & validation
 
@@ -55,7 +55,7 @@ Being strict, the following CSV snippet is actually incorrect cause of the leadi
 "firstName", "lastName", "birthday"
 ```
 Besides the mentioned diversion from the standard definition, syntax errors will be detected and can be inspected.
-Please note that if a document is syntactically incorrect, other features like code formatting or the structure view can not function properly.
+Please note that if a document is syntactically incorrect, other features like the table editor, code formatting or the structure view can not function properly.
 
 ![Editor with syntax validation and highlighting](./docs/editor.png)
 

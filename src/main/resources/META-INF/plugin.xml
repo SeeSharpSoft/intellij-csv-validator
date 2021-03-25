@@ -50,8 +50,7 @@
 
     <change-notes><![CDATA[
         <pre style="font-family: sans-serif">
-NEW: Default value separator #259
-FIX: Removal of deprecated function usage
+FIX: Rainbow Values no longer works #265
       </pre>
     ]]>
     </change-notes>
