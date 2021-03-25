@@ -10,7 +10,7 @@ import javax.swing.*;
 public final class TsvFileType extends LanguageFileType {
     public static final TsvFileType INSTANCE = new TsvFileType();
 
-    public static final Icon ICON = IconLoader.getIcon("/media/icons/tsv-icon.png");
+    public static final Icon ICON = IconLoader.getIcon("/media/icons/tsv-icon.png", TsvFileType.class);
 
     private TsvFileType() {
         super(TsvLanguage.INSTANCE);

@@ -3,8 +3,8 @@ jdk:
   - openjdk11
 
 env:
-  - IDEA_VERSION=PC-2020.3.3 GRAMMAR_KIT_VERSION=2019.3
-  - IDEA_VERSION=IU-LATEST-EAP-SNAPSHOT GRAMMAR_KIT_VERSION=2019.3
+  - IDEA_VERSION=PC-2020.3.3 GRAMMAR_KIT_VERSION=2019.3 IDEA_SOURCES=false
+  - IDEA_VERSION=IU-LATEST-EAP-SNAPSHOT GRAMMAR_KIT_VERSION=2019.3 IDEA_SOURCES=false
 
 script: xvfb-run gradle check
 
@@ -14,9 +14,9 @@ after_success:
 jobs:
   include:
     - if: (branch = master AND type = push) OR (type = pull_request)
-      env: IDEA_VERSION=IC-193.5233.102 GRAMMAR_KIT_VERSION=2019.3
+      env: IDEA_VERSION=IC-193.5233.102 GRAMMAR_KIT_VERSION=2019.3 IDEA_SOURCES=false
       script: xvfb-run gradle check verifyPlugin
     - stage: deploy
       if: branch IN (Testing, Staging, Stable) AND type = push
-      env: IDEA_VERSION=IC-193.5233.102 GRAMMAR_KIT_VERSION=2019.3 JI_CHANNELS=$TRAVIS_BRANCH
+      env: IDEA_VERSION=IC-193.5233.102 GRAMMAR_KIT_VERSION=2019.3 IDEA_SOURCES=false JI_CHANNELS=$TRAVIS_BRANCH
       script: xvfb-run gradle publishPlugin
