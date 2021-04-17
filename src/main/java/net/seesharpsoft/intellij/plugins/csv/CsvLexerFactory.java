@@ -15,7 +15,7 @@ public class CsvLexerFactory {
     }
 
     protected Lexer createLexer(@NotNull CsvValueSeparator separator, @NotNull CsvEscapeCharacter escapeCharacter) {
-        if (separator.isCustom() || !CsvEditorSettings.getInstance().getCommentIndicator().isEmpty()) {
+        if (separator.requiresCustomLexer() || !CsvEditorSettings.getInstance().getCommentIndicator().isEmpty()) {
             return new CsvSharpLexer(new CsvSharpLexer.Configuration(
                     separator.getCharacter(),
                     "\n",
