@@ -39,6 +39,11 @@ public class CsvParsingTest extends ParsingTestCase {
         doTest(true);
     }
 
+    public void testRecordSeparator() {
+        CsvEditorSettings.getInstance().setDefaultValueSeparator(CsvValueSeparator.create("\u001E"));
+        doTest(true);
+    }
+
     public void testCustomMultiSymbolSeparator() {
         CsvEditorSettings.getInstance().setDefaultValueSeparator(CsvValueSeparator.create("~§"));
         doTest(true);
