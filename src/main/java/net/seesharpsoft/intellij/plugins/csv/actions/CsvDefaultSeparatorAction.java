@@ -19,7 +19,7 @@ public class CsvDefaultSeparatorAction extends ToggleAction {
     @Override
     public boolean isSelected(@NotNull AnActionEvent anActionEvent) {
         PsiFile psiFile = anActionEvent.getData(CommonDataKeys.PSI_FILE);
-        if (psiFile == null) {
+        if (!CsvHelper.isCsvFile(psiFile)) {
             return false;
         }
         return !CsvHelper.hasValueSeparatorAttribute(psiFile);
@@ -28,7 +28,7 @@ public class CsvDefaultSeparatorAction extends ToggleAction {
     @Override
     public void setSelected(@NotNull AnActionEvent anActionEvent, boolean selected) {
         PsiFile psiFile = anActionEvent.getData(CommonDataKeys.PSI_FILE);
-        if (psiFile == null) {
+        if (!CsvHelper.isCsvFile(psiFile)) {
             return;
         }
         CsvFileAttributes.getInstance(psiFile.getProject()).resetValueSeparator(psiFile);

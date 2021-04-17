@@ -5,6 +5,9 @@ import com.intellij.openapi.util.Key;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.PathUtil;
 
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.regex.Pattern;
 
 public final class CsvStorageHelper {
@@ -24,6 +27,14 @@ public final class CsvStorageHelper {
             virtualFile.putUserData(RELATIVE_FILE_URL, url);
         }
         return url;
+    }
+
+    public static boolean fileExistsInProject(Project project, String fileName) {
+        if (project == null || fileName == null) {
+            return false;
+        }
+        Path filePath = Paths.get(project.getBasePath()).resolve(fileName.startsWith(File.separator) ? fileName.substring(1) : fileName);
+        return filePath != null ? filePath.toFile().exists() : false;
     }
 
     private CsvStorageHelper() {
