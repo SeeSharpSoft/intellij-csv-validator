@@ -1,16 +1,24 @@
 # This workflow will build a Java project with Gradle
 # For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-gradle
 
-name: CI Build
+name: Pull Request Validation
 
 on:
-  push:
+  pull_request:
     branches: [ master ]
 
 jobs:
   build:
 
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        include:
+          - ideaVersion: IC-193.5233.102
+            gkVersion: 2019.3
+          - ideaVersion: PY-LATEST-EAP-SNAPSHOT
+            gkVersion: 2019.3
 
     steps:
     - uses: actions/checkout@v2
@@ -23,5 +31,7 @@ jobs:
       run: chmod +x gradlew
     - name: Build with Gradle
       env:
+        IDEA_VERSION: ${{ matrix.ideaVersion }}
+        GRAMMAR_KIT_VERSION: ${{ matrix.gkVersion }}
         IDEA_SOURCES: false
       run: xvfb-run ./gradlew build
