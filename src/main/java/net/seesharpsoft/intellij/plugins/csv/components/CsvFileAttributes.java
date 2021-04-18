@@ -57,14 +57,18 @@ public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttrib
     }
 
     public void cleanupAttributeMap(@NotNull Project project) {
-        List<String> missingFiles = new ArrayList<>();
+        List<String> faultyFiles = new ArrayList<>();
         attributeMap.forEach((fileName, attribute) -> {
-            if (!CsvStorageHelper.fileExistsInProject(project, fileName)) {
+            VirtualFile virtualFile = CsvStorageHelper.getFileInProject(project, fileName);
+            if (virtualFile == null) {
                 LOG.debug(fileName + " not found");
-                missingFiles.add(fileName);
+                faultyFiles.add(fileName);
+            } else if (!CsvHelper.isCsvFile(project, virtualFile)) {
+                LOG.debug(fileName + " is not a csv file");
+                faultyFiles.add(fileName);
             }
         });
-        missingFiles.forEach(missingFile -> attributeMap.remove(missingFile));
+        faultyFiles.forEach(attributeMap::remove);
     }
 
     public void reset() {
@@ -131,15 +135,15 @@ public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttrib
         }
     }
 
-    private @NotNull
-    CsvValueSeparator autoDetectOrGetDefaultValueSeparator(Project project, VirtualFile virtualFile) {
+    @NotNull
+    private CsvValueSeparator autoDetectOrGetDefaultValueSeparator(Project project, VirtualFile virtualFile) {
         return CsvEditorSettings.getInstance().isAutoDetectValueSeparator() ?
                 autoDetectSeparator(project, virtualFile) :
                 CsvEditorSettings.getInstance().getDefaultValueSeparator();
     }
 
-    private @NotNull
-    CsvValueSeparator autoDetectSeparator(Project project, VirtualFile virtualFile) {
+    @NotNull
+    private CsvValueSeparator autoDetectSeparator(Project project, VirtualFile virtualFile) {
         final Document document = FileDocumentManager.getInstance().getDocument(virtualFile);
         final String text = document == null ? "" : document.getText();
         final List<CsvValueSeparator> applicableValueSeparators = new ArrayList(Arrays.asList(CsvValueSeparator.values()));
@@ -169,9 +173,9 @@ public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttrib
         return valueSeparator;
     }
 
-    public @NotNull
-    CsvValueSeparator getValueSeparator(Project project, VirtualFile virtualFile) {
-        if (project == null || virtualFile == null || !(virtualFile.getFileType() instanceof LanguageFileType)) {
+    @NotNull
+    public CsvValueSeparator getValueSeparator(Project project, VirtualFile virtualFile) {
+        if (!CsvHelper.isCsvFile(project, virtualFile)) {
             return CsvEditorSettings.getInstance().getDefaultValueSeparator();
         }
         Language language = ((LanguageFileType) virtualFile.getFileType()).getLanguage();
@@ -203,9 +207,9 @@ public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttrib
         }
     }
 
-    public @NotNull
-    CsvEscapeCharacter getEscapeCharacter(Project project, VirtualFile virtualFile) {
-        if (project == null || virtualFile == null) {
+    @NotNull
+    public CsvEscapeCharacter getEscapeCharacter(Project project, VirtualFile virtualFile) {
+        if (!CsvHelper.isCsvFile(project, virtualFile)) {
             return CsvEditorSettings.getInstance().getDefaultEscapeCharacter();
         }
         Attribute attribute = getFileAttribute(project, virtualFile);
