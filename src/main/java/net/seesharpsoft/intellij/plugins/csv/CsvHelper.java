@@ -1,10 +1,7 @@
 package net.seesharpsoft.intellij.plugins.csv;
 
-import com.intellij.ide.scratch.ScratchUtil;
 import com.intellij.lang.*;
 import com.intellij.lexer.Lexer;
-import com.intellij.openapi.fileTypes.FileType;
-import com.intellij.openapi.fileTypes.LanguageFileType;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
@@ -49,9 +46,18 @@ public final class CsvHelper {
     }
 
     public static boolean isCsvFile(Project project, VirtualFile file) {
-        final FileType fileType = file.getFileType();
-        return (fileType instanceof LanguageFileType && ((LanguageFileType) fileType).getLanguage().isKindOf(CsvLanguage.INSTANCE)) ||
-                (ScratchUtil.isScratch(file) && LanguageUtil.getLanguageForPsi(project, file).isKindOf(CsvLanguage.INSTANCE));
+        if (project == null || file == null) {
+            return false;
+        }
+        final Language language = LanguageUtil.getLanguageForPsi(project, file);
+        return language != null && language.isKindOf(CsvLanguage.INSTANCE);
+    }
+
+    public static boolean isCsvFile(PsiFile file) {
+        if (file == null) {
+            return false;
+        }
+        return isCsvFile(file.getProject(), file.getOriginalFile().getVirtualFile());
     }
 
     public static IElementType getElementType(PsiElement element) {

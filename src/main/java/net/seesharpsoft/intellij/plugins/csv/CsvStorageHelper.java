@@ -3,8 +3,12 @@ package net.seesharpsoft.intellij.plugins.csv;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.util.PathUtil;
 
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.regex.Pattern;
 
 public final class CsvStorageHelper {
@@ -24,6 +28,18 @@ public final class CsvStorageHelper {
             virtualFile.putUserData(RELATIVE_FILE_URL, url);
         }
         return url;
+    }
+
+    public static Path getFilePath(Project project, String fileName) {
+        if (project == null || fileName == null) {
+            return null;
+        }
+        return Paths.get(project.getBasePath()).resolve(fileName.startsWith(File.separator) ? fileName.substring(1) : fileName);
+    }
+
+    public static VirtualFile getFileInProject(Project project, String fileName) {
+        Path filePath = getFilePath(project, fileName);
+        return VirtualFileManager.getInstance().findFileByUrl(filePath.toAbsolutePath().toString());
     }
 
     private CsvStorageHelper() {

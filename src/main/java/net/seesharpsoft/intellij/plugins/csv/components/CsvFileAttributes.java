@@ -5,6 +5,7 @@ import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.fileTypes.LanguageFileType;
@@ -28,6 +29,7 @@ import java.util.*;
 )
 @SuppressWarnings("all")
 public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttributes> {
+    private final static Logger LOG = Logger.getInstance(CsvFileAttributes.class);
 
     public Map<String, Attribute> attributeMap = new HashMap<>();
 
@@ -54,6 +56,21 @@ public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttrib
         XmlSerializerUtil.copyBean(state, this);
     }
 
+    public void cleanupAttributeMap(@NotNull Project project) {
+        List<String> faultyFiles = new ArrayList<>();
+        attributeMap.forEach((fileName, attribute) -> {
+            VirtualFile virtualFile = CsvStorageHelper.getFileInProject(project, fileName);
+            if (virtualFile == null) {
+                LOG.debug(fileName + " not found");
+                faultyFiles.add(fileName);
+            } else if (!CsvHelper.isCsvFile(project, virtualFile)) {
+                LOG.debug(fileName + " is not a csv file");
+                faultyFiles.add(fileName);
+            }
+        });
+        faultyFiles.forEach(attributeMap::remove);
+    }
+
     public void reset() {
         attributeMap.clear();
     }
@@ -75,7 +92,11 @@ public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttrib
         Attribute attribute = key != null ? attributeMap.get(key) : null;
         if (attribute == null && createIfMissing) {
             attribute = new Attribute();
-            attributeMap.put(key, attribute);
+            if (!CsvHelper.isCsvFile(project, virtualFile)) {
+                LOG.error("CSV file attribute requested for non CSV file: " + virtualFile.toString());
+            } else {
+                attributeMap.put(key, attribute);
+            }
         }
         return attribute;
     }
@@ -114,15 +135,15 @@ public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttrib
         }
     }
 
-    private @NotNull
-    CsvValueSeparator autoDetectOrGetDefaultValueSeparator(Project project, VirtualFile virtualFile) {
+    @NotNull
+    private CsvValueSeparator autoDetectOrGetDefaultValueSeparator(Project project, VirtualFile virtualFile) {
         return CsvEditorSettings.getInstance().isAutoDetectValueSeparator() ?
                 autoDetectSeparator(project, virtualFile) :
                 CsvEditorSettings.getInstance().getDefaultValueSeparator();
     }
 
-    private @NotNull
-    CsvValueSeparator autoDetectSeparator(Project project, VirtualFile virtualFile) {
+    @NotNull
+    private CsvValueSeparator autoDetectSeparator(Project project, VirtualFile virtualFile) {
         final Document document = FileDocumentManager.getInstance().getDocument(virtualFile);
         final String text = document == null ? "" : document.getText();
         final List<CsvValueSeparator> applicableValueSeparators = new ArrayList(Arrays.asList(CsvValueSeparator.values()));
@@ -152,9 +173,9 @@ public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttrib
         return valueSeparator;
     }
 
-    public @NotNull
-    CsvValueSeparator getValueSeparator(Project project, VirtualFile virtualFile) {
-        if (project == null || virtualFile == null || !(virtualFile.getFileType() instanceof LanguageFileType)) {
+    @NotNull
+    public CsvValueSeparator getValueSeparator(Project project, VirtualFile virtualFile) {
+        if (!CsvHelper.isCsvFile(project, virtualFile)) {
             return CsvEditorSettings.getInstance().getDefaultValueSeparator();
         }
         Language language = ((LanguageFileType) virtualFile.getFileType()).getLanguage();
@@ -162,7 +183,7 @@ public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttrib
             return ((CsvSeparatorHolder) language).getSeparator();
         }
         Attribute attribute = getFileAttribute(project, virtualFile);
-        return attribute == null || attribute.separator == null ?
+        return attribute == null || attribute.separator == null || attribute.separator.getCharacter().isEmpty() ?
                 autoDetectOrGetDefaultValueSeparator(project, virtualFile) :
                 attribute.separator;
     }
@@ -186,9 +207,9 @@ public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttrib
         }
     }
 
-    public @NotNull
-    CsvEscapeCharacter getEscapeCharacter(Project project, VirtualFile virtualFile) {
-        if (project == null || virtualFile == null) {
+    @NotNull
+    public CsvEscapeCharacter getEscapeCharacter(Project project, VirtualFile virtualFile) {
+        if (!CsvHelper.isCsvFile(project, virtualFile)) {
             return CsvEditorSettings.getInstance().getDefaultEscapeCharacter();
         }
         Attribute attribute = getFileAttribute(project, virtualFile);

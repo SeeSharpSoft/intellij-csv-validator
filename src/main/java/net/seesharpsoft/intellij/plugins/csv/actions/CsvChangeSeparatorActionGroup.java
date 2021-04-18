@@ -7,7 +7,6 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.psi.PsiFile;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
-import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
 import net.seesharpsoft.intellij.plugins.csv.CsvSeparatorHolder;
 import net.seesharpsoft.intellij.plugins.csv.CsvValueSeparator;
 import org.jetbrains.annotations.NotNull;
@@ -29,12 +28,11 @@ public class CsvChangeSeparatorActionGroup extends ActionGroup {
     @Override
     public void update(AnActionEvent anActionEvent) {
         PsiFile psiFile = anActionEvent.getData(CommonDataKeys.PSI_FILE);
+        boolean isCsvFile = CsvHelper.isCsvFile(psiFile);
         Language language = psiFile == null ? null : psiFile.getLanguage();
-        anActionEvent.getPresentation().setEnabledAndVisible(psiFile != null && language != null &&
-                language.isKindOf(CsvLanguage.INSTANCE) && !(language instanceof CsvSeparatorHolder)
-        );
+        anActionEvent.getPresentation().setEnabledAndVisible(isCsvFile && !(language instanceof CsvSeparatorHolder));
 
-        if (psiFile != null) {
+        if (isCsvFile) {
             anActionEvent.getPresentation()
                     .setText(String.format("CSV Value Separator: %s",
                             CsvHelper.getValueSeparator(psiFile).getDisplay())
