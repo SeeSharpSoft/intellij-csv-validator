@@ -23,10 +23,6 @@ public class CsvFileAttributesTest extends BasePlatformTestCase {
 
     @Override
     protected void tearDown() throws Exception {
-        Paths.get(this.getProject().getBasePath(), "csv_file_test.csv").toFile().delete();
-        Paths.get(this.getProject().getBasePath(), "test/py_file_test.py").toFile().delete();
-        Paths.get(this.getProject().getBasePath(), "test").toFile().delete();
-
         CsvFileAttributes.getInstance(this.getProject()).reset();
         super.tearDown();
     }
@@ -59,11 +55,11 @@ public class CsvFileAttributesTest extends BasePlatformTestCase {
         fileAttributes.attributeMap.put("\\test\\py_file_test.py", new CsvFileAttributes.Attribute());
         fileAttributes.attributeMap.put("\\not_existing_csv_file_test.csv", new CsvFileAttributes.Attribute());
 
-        assertEquals(fileAttributes.attributeMap.size(), 3);
+        assertEquals(3, fileAttributes.attributeMap.size());
 
         fileAttributes.cleanupAttributeMap(this.getProject());
 
-        assertEquals(fileAttributes.attributeMap.size(), 1);
+        assertEquals(1, fileAttributes.attributeMap.size());
         assertNotNull(fileAttributes.attributeMap.get("\\csv_file_test.csv"));
     }
 

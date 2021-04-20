@@ -17,9 +17,10 @@ public class CsvStorageHelperTest extends BasePlatformTestCase {
 
     @Override
     protected void tearDown() throws Exception {
-        Paths.get(this.getProject().getBasePath(), "csv_file_test.csv").toFile().delete();
-        Paths.get(this.getProject().getBasePath(), "test/py_file_test.py").toFile().delete();
-        Paths.get(this.getProject().getBasePath(), "test").toFile().delete();
+        // TODO delete or not delete, that's the question
+        // Paths.get(this.getProject().getBasePath(), "csv_file_test.csv").toFile().delete();
+        // Paths.get(this.getProject().getBasePath(), "test/py_file_test.py").toFile().delete();
+        // Paths.get(this.getProject().getBasePath(), "test").toFile().delete();
         super.tearDown();
     }
 
