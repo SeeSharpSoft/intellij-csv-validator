@@ -23,8 +23,8 @@ public final class CsvStorageHelper {
         String url = virtualFile.getUserData(RELATIVE_FILE_URL);
         if (url == null && project.getBasePath() != null) {
             String projectDir = PathUtil.getLocalPath(project.getBasePath());
-            url = PathUtil.getLocalPath(virtualFile.getPath())
-                    .replaceFirst("^" + Pattern.quote(projectDir), "");
+            url = Paths.get(PathUtil.getLocalPath(virtualFile.getPath())
+                    .replaceFirst("^" + Pattern.quote(projectDir), "")).toString();
             virtualFile.putUserData(RELATIVE_FILE_URL, url);
         }
         return url;
