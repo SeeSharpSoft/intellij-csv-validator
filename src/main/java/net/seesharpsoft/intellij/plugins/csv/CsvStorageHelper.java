@@ -34,7 +34,8 @@ public final class CsvStorageHelper {
         if (project == null || fileName == null) {
             return null;
         }
-        return Paths.get(project.getBasePath()).resolve(fileName.startsWith(File.separator) ? fileName.substring(1) : fileName);
+        String formattedFileName = Paths.get(fileName).toString();
+        return Paths.get(project.getBasePath()).resolve(formattedFileName.startsWith(File.separator) ? formattedFileName.substring(1) : formattedFileName);
     }
 
     public static VirtualFile getFileInProject(Project project, String fileName) {
