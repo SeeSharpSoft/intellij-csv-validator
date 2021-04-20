@@ -1,3 +1,8 @@
+2.16.1
+Apr 20, 2021
+
+FIX: keep existing & correct entries in CSV attributes map
+
 2.16.0
 Apr 18, 2021
 

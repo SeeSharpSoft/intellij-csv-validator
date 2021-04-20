@@ -39,7 +39,7 @@ public final class CsvStorageHelper {
 
     public static VirtualFile getFileInProject(Project project, String fileName) {
         Path filePath = getFilePath(project, fileName);
-        return VirtualFileManager.getInstance().findFileByUrl(filePath.toAbsolutePath().toString());
+        return VirtualFileManager.getInstance().findFileByUrl(filePath.toUri().toString());
     }
 
     private CsvStorageHelper() {
