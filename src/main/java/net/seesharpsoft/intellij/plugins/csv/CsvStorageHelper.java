@@ -23,8 +23,8 @@ public final class CsvStorageHelper {
         String url = virtualFile.getUserData(RELATIVE_FILE_URL);
         if (url == null && project.getBasePath() != null) {
             String projectDir = PathUtil.getLocalPath(project.getBasePath());
-            url = PathUtil.getLocalPath(virtualFile.getPath())
-                    .replaceFirst("^" + Pattern.quote(projectDir), "");
+            url = Paths.get(PathUtil.getLocalPath(virtualFile.getPath())
+                    .replaceFirst("^" + Pattern.quote(projectDir), "")).toString();
             virtualFile.putUserData(RELATIVE_FILE_URL, url);
         }
         return url;
@@ -34,12 +34,13 @@ public final class CsvStorageHelper {
         if (project == null || fileName == null) {
             return null;
         }
-        return Paths.get(project.getBasePath()).resolve(fileName.startsWith(File.separator) ? fileName.substring(1) : fileName);
+        String formattedFileName = Paths.get(fileName).toString();
+        return Paths.get(project.getBasePath()).resolve(formattedFileName.startsWith(File.separator) ? formattedFileName.substring(1) : formattedFileName);
     }
 
     public static VirtualFile getFileInProject(Project project, String fileName) {
         Path filePath = getFilePath(project, fileName);
-        return VirtualFileManager.getInstance().findFileByUrl(filePath.toAbsolutePath().toString());
+        return VirtualFileManager.getInstance().findFileByUrl(filePath.toUri().toString());
     }
 
     private CsvStorageHelper() {
