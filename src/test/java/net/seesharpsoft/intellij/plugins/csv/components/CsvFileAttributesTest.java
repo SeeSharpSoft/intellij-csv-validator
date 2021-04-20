@@ -5,6 +5,8 @@ import net.seesharpsoft.intellij.plugins.csv.CsvEscapeCharacter;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 
+import java.nio.file.Paths;
+
 public class CsvFileAttributesTest extends BasePlatformTestCase {
     @Override
     protected String getTestDataPath() {
@@ -12,7 +14,19 @@ public class CsvFileAttributesTest extends BasePlatformTestCase {
     }
 
     @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        Paths.get(this.getProject().getBasePath(), "csv_file_test.csv").toFile().createNewFile();
+        Paths.get(this.getProject().getBasePath(), "test").toFile().mkdir();
+        Paths.get(this.getProject().getBasePath(), "test/py_file_test.py").toFile().createNewFile();
+    }
+
+    @Override
     protected void tearDown() throws Exception {
+        Paths.get(this.getProject().getBasePath(), "csv_file_test.csv").toFile().delete();
+        Paths.get(this.getProject().getBasePath(), "test/py_file_test.py").toFile().delete();
+        Paths.get(this.getProject().getBasePath(), "test").toFile().delete();
+
         CsvFileAttributes.getInstance(this.getProject()).reset();
         super.tearDown();
     }
@@ -37,6 +51,20 @@ public class CsvFileAttributesTest extends BasePlatformTestCase {
         csvFileAttributes.setEscapeCharacter(myFixture.getFile(), CsvEscapeCharacter.BACKSLASH);
 
         assertEquals(CsvEscapeCharacter.BACKSLASH, csvFileAttributes.getEscapeCharacter(this.getProject(), myFixture.getFile().getOriginalFile().getVirtualFile()));
+    }
+
+    public void testCleanupAttributeMap() {
+        CsvFileAttributes fileAttributes = CsvFileAttributes.getInstance(this.getProject());
+        fileAttributes.attributeMap.put("\\csv_file_test.csv", new CsvFileAttributes.Attribute());
+        fileAttributes.attributeMap.put("\\test\\py_file_test.py", new CsvFileAttributes.Attribute());
+        fileAttributes.attributeMap.put("\\not_existing_csv_file_test.csv", new CsvFileAttributes.Attribute());
+
+        assertEquals(fileAttributes.attributeMap.size(), 3);
+
+        fileAttributes.cleanupAttributeMap(this.getProject());
+
+        assertEquals(fileAttributes.attributeMap.size(), 1);
+        assertNotNull(fileAttributes.attributeMap.get("\\csv_file_test.csv"));
     }
 
 }
