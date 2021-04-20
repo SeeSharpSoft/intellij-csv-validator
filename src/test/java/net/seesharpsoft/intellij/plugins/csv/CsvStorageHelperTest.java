@@ -10,6 +10,7 @@ public class CsvStorageHelperTest extends BasePlatformTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+        Paths.get(this.getProject().getBasePath()).toFile().mkdirs();
         Paths.get(this.getProject().getBasePath(), "csv_file_test.csv").toFile().createNewFile();
         Paths.get(this.getProject().getBasePath(), "test").toFile().mkdir();
         Paths.get(this.getProject().getBasePath(), "test", "py_file_test.py").toFile().createNewFile();
