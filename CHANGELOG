@@ -1,3 +1,8 @@
+2.16.2
+Apr 21, 2021
+
+FIX: Editor complaining about crashes on PyCharm 2021.1 #274
+
 2.16.1
 Apr 20, 2021
 

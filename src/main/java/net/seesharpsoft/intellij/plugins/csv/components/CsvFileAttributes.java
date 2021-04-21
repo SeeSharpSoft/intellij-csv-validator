@@ -63,7 +63,7 @@ public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttrib
             if (virtualFile == null) {
                 LOG.debug(fileName + " not found");
                 faultyFiles.add(fileName);
-            } else if (!CsvHelper.isCsvFile(project, virtualFile)) {
+            } else if (!CsvHelper.isCsvFile(virtualFile.getExtension())) {
                 LOG.debug(fileName + " is not a csv file");
                 faultyFiles.add(fileName);
             }

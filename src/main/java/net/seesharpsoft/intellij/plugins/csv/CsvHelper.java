@@ -2,6 +2,9 @@ package net.seesharpsoft.intellij.plugins.csv;
 
 import com.intellij.lang.*;
 import com.intellij.lexer.Lexer;
+import com.intellij.openapi.fileTypes.FileType;
+import com.intellij.openapi.fileTypes.FileTypeManager;
+import com.intellij.openapi.fileTypes.FileTypeRegistry;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
@@ -20,6 +23,8 @@ import net.seesharpsoft.intellij.plugins.csv.psi.CsvFile;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvRecord;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
+import net.seesharpsoft.intellij.plugins.psv.PsvFileType;
+import net.seesharpsoft.intellij.plugins.tsv.TsvFileType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
@@ -43,6 +48,20 @@ public final class CsvHelper {
         final ASTNode node = parserDefinition.createParser(project).parse(type, psiBuilder);
         fileElement.rawAddChildren((com.intellij.psi.impl.source.tree.TreeElement) node);
         return node.getPsi();
+    }
+
+    public static boolean isCsvFile(String extension) {
+        switch(extension.toLowerCase()) {
+            case "csv":
+            case "tsv":
+            case "tab":
+            case "psv":
+                return true;
+        }
+        FileType fileType = FileTypeRegistry.getInstance().getFileTypeByExtension(extension);
+        return fileType == CsvFileType.INSTANCE ||
+                fileType == TsvFileType.INSTANCE ||
+                fileType == PsvFileType.INSTANCE;
     }
 
     public static boolean isCsvFile(Project project, VirtualFile file) {
