@@ -55,6 +55,7 @@ NEW: "General" settings group
 FIX: Lower annotator severity to not appear as problem
 FIX: Prevent non CSV entries in CSV attributes map #268
 FIX: keep existing & correct entries in CSV attributes map
+HOTFIX: Editor complaining about crashes on PyCharm 2021.1 #274
       </pre>
     ]]>
     </change-notes>
