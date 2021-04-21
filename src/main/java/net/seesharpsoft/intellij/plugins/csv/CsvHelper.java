@@ -3,7 +3,6 @@ package net.seesharpsoft.intellij.plugins.csv;
 import com.intellij.lang.*;
 import com.intellij.lexer.Lexer;
 import com.intellij.openapi.fileTypes.FileType;
-import com.intellij.openapi.fileTypes.FileTypeManager;
 import com.intellij.openapi.fileTypes.FileTypeRegistry;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -51,17 +50,23 @@ public final class CsvHelper {
     }
 
     public static boolean isCsvFile(String extension) {
+        if (extension == null) {
+            return false;
+        }
+        // simple check to always in include the defaults even if association was removed
         switch(extension.toLowerCase()) {
             case "csv":
             case "tsv":
             case "tab":
             case "psv":
                 return true;
+            default:
+                // but also consider other extensions that are associated manually
+                FileType fileType = FileTypeRegistry.getInstance().getFileTypeByExtension(extension);
+                return fileType == CsvFileType.INSTANCE ||
+                        fileType == TsvFileType.INSTANCE ||
+                        fileType == PsvFileType.INSTANCE;
         }
-        FileType fileType = FileTypeRegistry.getInstance().getFileTypeByExtension(extension);
-        return fileType == CsvFileType.INSTANCE ||
-                fileType == TsvFileType.INSTANCE ||
-                fileType == PsvFileType.INSTANCE;
     }
 
     public static boolean isCsvFile(Project project, VirtualFile file) {
