@@ -56,16 +56,18 @@ public class CsvFileAttributesTest extends BasePlatformTestCase {
 
     public void testCleanupAttributeMap() {
         CsvFileAttributes fileAttributes = CsvFileAttributes.getInstance(this.getProject());
-        fileAttributes.attributeMap.put(Paths.get("/csv_file_test.csv").toString(), new CsvFileAttributes.Attribute());
-        fileAttributes.attributeMap.put(Paths.get("/test/py_file_test.py").toString(), new CsvFileAttributes.Attribute());
-        fileAttributes.attributeMap.put(Paths.get("/not_existing_csv_file_test.csv").toString(), new CsvFileAttributes.Attribute());
+        fileAttributes.attributeMap.put("/csv_file_test.csv", new CsvFileAttributes.Attribute());
+        fileAttributes.attributeMap.put("/test/py_file_test.py", new CsvFileAttributes.Attribute());
+        fileAttributes.attributeMap.put("/not_existing_csv_file_test.csv", new CsvFileAttributes.Attribute());
+        fileAttributes.attributeMap.put("/<835d7ae1-4344-4666-bc29-31fb457b610e>\\raid\\someRemotePath\\someFileName.csv", new CsvFileAttributes.Attribute());
+        fileAttributes.attributeMap.put("/<$.}>^\\ra*id\\someRemote \"Path\\someFileName.json", new CsvFileAttributes.Attribute());
 
-        assertEquals(3, fileAttributes.attributeMap.size());
+        assertEquals(5, fileAttributes.attributeMap.size());
 
         fileAttributes.cleanupAttributeMap(this.getProject());
 
         assertEquals(1, fileAttributes.attributeMap.size());
-        assertNotNull(fileAttributes.attributeMap.get(Paths.get("/csv_file_test.csv").toString()));
+        assertNotNull(fileAttributes.attributeMap.get("/csv_file_test.csv"));
     }
 
 }

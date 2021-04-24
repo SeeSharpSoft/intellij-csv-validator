@@ -2,13 +2,10 @@ package net.seesharpsoft.intellij.plugins.csv;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
+import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.util.PathUtil;
 
-import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.regex.Pattern;
 
 public final class CsvStorageHelper {
@@ -16,31 +13,33 @@ public final class CsvStorageHelper {
 
     public static final Key<String> RELATIVE_FILE_URL = Key.create("CSV_PLUGIN_RELATIVE_URL");
 
-    public static String getRelativeFileUrl(Project project, VirtualFile virtualFile) {
+    public static String getRelativeFilePath(Project project, VirtualFile virtualFile) {
         if (project == null || virtualFile == null) {
             return null;
         }
-        String url = virtualFile.getUserData(RELATIVE_FILE_URL);
-        if (url == null && project.getBasePath() != null) {
+        String filePath = virtualFile.getUserData(RELATIVE_FILE_URL);
+        if (filePath == null && project.getBasePath() != null) {
             String projectDir = PathUtil.getLocalPath(project.getBasePath());
-            url = Paths.get(PathUtil.getLocalPath(virtualFile.getPath())
-                    .replaceFirst("^" + Pattern.quote(projectDir), "")).toString();
-            virtualFile.putUserData(RELATIVE_FILE_URL, url);
+            filePath = PathUtil.getLocalPath(virtualFile)
+                    .replaceFirst("^" + Pattern.quote(projectDir), "");
+            virtualFile.putUserData(RELATIVE_FILE_URL, filePath);
         }
-        return url;
+        return filePath;
     }
 
-    public static Path getFilePath(Project project, String fileName) {
-        if (project == null || fileName == null) {
-            return null;
+    public static boolean csvFileExists(Project project, String fileName) {
+        if (fileName == null) {
+            return false;
         }
-        String formattedFileName = Paths.get(fileName).toString();
-        return Paths.get(project.getBasePath()).resolve(formattedFileName.startsWith(File.separator) ? formattedFileName.substring(1) : formattedFileName);
-    }
-
-    public static VirtualFile getFileInProject(Project project, String fileName) {
-        Path filePath = getFilePath(project, fileName);
-        return VirtualFileManager.getInstance().findFileByUrl(filePath.toUri().toString());
+        String filePath = PathUtil.getLocalPath(fileName);
+        if (filePath == null ||
+                !CsvHelper.isCsvFile(PathUtil.getFileExtension(filePath))) {
+            return false;
+        }
+        if (project != null && FileUtil.exists(PathUtil.getLocalPath(project.getBasePath()) + filePath)) {
+            return true;
+        }
+        return FileUtil.exists(filePath);
     }
 
     private CsvStorageHelper() {
