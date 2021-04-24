@@ -1,3 +1,8 @@
+2.16.3
+Apr 24, 2021
+
+HOTFIX: Exception in CSV plugin when using with remote SSH host #279
+
 2.16.2
 Apr 21, 2021
 

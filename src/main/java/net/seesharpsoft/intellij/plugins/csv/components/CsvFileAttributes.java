@@ -12,6 +12,7 @@ import com.intellij.openapi.fileTypes.LanguageFileType;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
+import com.intellij.util.PathUtil;
 import com.intellij.util.xmlb.XmlSerializerUtil;
 import com.intellij.util.xmlb.annotations.OptionTag;
 import net.seesharpsoft.commons.collection.Pair;
@@ -58,13 +59,10 @@ public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttrib
 
     public void cleanupAttributeMap(@NotNull Project project) {
         List<String> faultyFiles = new ArrayList<>();
+        final String projectBasePath = PathUtil.getLocalPath(project.getBasePath());
         attributeMap.forEach((fileName, attribute) -> {
-            VirtualFile virtualFile = CsvStorageHelper.getFileInProject(project, fileName);
-            if (virtualFile == null) {
-                LOG.debug(fileName + " not found");
-                faultyFiles.add(fileName);
-            } else if (!CsvHelper.isCsvFile(virtualFile.getExtension())) {
-                LOG.debug(fileName + " is not a csv file");
+            if (!CsvStorageHelper.csvFileExists(project, fileName)) {
+                LOG.debug(fileName + " not found or not CSV file");
                 faultyFiles.add(fileName);
             }
         });
@@ -80,7 +78,7 @@ public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttrib
     }
 
     protected String generateMapKey(@NotNull Project project, @NotNull VirtualFile virtualFile) {
-        return CsvStorageHelper.getRelativeFileUrl(project, virtualFile);
+        return CsvStorageHelper.getRelativeFilePath(project, virtualFile);
     }
 
     @Nullable
