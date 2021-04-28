@@ -360,7 +360,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
 
     protected int[] calculateDistributedColumnWidths() {
         CsvColumnInfoMap csvColumnInfoMap = this.getColumnInfoMap();
-        if (csvColumnInfoMap == null) {
+        if (csvColumnInfoMap == null || csvColumnInfoMap.hasErrors()) {
             return null;
         }
         Map<Integer, CsvColumnInfo<PsiElement>> columnInfos = csvColumnInfoMap.getColumnInfos();
