@@ -50,6 +50,7 @@
 
     <change-notes><![CDATA[
         <pre style="font-family: sans-serif">
+FIX: fully prevent calculateDistributedColumnWidth on erroneous CSV #283
 FIX: Memory leak of PsiFile #284
       </pre>
     ]]>

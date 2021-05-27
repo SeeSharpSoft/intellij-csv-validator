@@ -1,6 +1,7 @@
 2.16.4
 May 27, 2021
 
+FIX: fully prevent calculateDistributedColumnWidth on erroneous CSV #283
 FIX: Memory leak of PsiFile #284
 
 2.16.3
