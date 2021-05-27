@@ -50,13 +50,7 @@
 
     <change-notes><![CDATA[
         <pre style="font-family: sans-serif">
-NEW: Ability to split on ASCII separator character \x1e #267
-NEW: "General" settings group
-FIX: Lower annotator severity to not appear as problem
-FIX: Prevent non CSV entries in CSV attributes map #268
-FIX: keep existing & correct entries in CSV attributes map
-HOTFIX: Editor complaining about crashes on PyCharm 2021.1 #274
-HOTFIX: Exception in CSV plugin when using with remote SSH host #279
+FIX: Memory leak of PsiFile #284
       </pre>
     ]]>
     </change-notes>
