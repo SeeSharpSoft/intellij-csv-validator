@@ -1,3 +1,10 @@
+2.17.0
+Jun 20, 2021
+
+NEW: Plugin name change: CSV
+FIX: Null pointer when using csv rendering in Markdown documentation #292
+FIX: NullPointerException on startup #295
+
 2.16.4
 May 27, 2021
 
