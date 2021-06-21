@@ -1,6 +1,6 @@
 <idea-plugin>
     <id>net.seesharpsoft.intellij.plugins.csv</id>
-    <name>CSV Plugin</name>
+    <name>CSV</name>
     <vendor url="https://github.com/SeeSharpSoft/intellij-csv-validator">
         Martin Sommer
     </vendor>
@@ -50,8 +50,9 @@
 
     <change-notes><![CDATA[
         <pre style="font-family: sans-serif">
-FIX: fully prevent calculateDistributedColumnWidth on erroneous CSV #283
-FIX: Memory leak of PsiFile #284
+NEW: Plugin name change: CSV
+FIX: Null pointer when using csv rendering in Markdown documentation #292
+FIX: NullPointerException on startup #295
       </pre>
     ]]>
     </change-notes>

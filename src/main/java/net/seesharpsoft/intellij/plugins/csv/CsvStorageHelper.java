@@ -1,5 +1,6 @@
 package net.seesharpsoft.intellij.plugins.csv;
 
+import com.intellij.injected.editor.VirtualFileWindow;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.io.FileUtil;
@@ -17,11 +18,17 @@ public final class CsvStorageHelper {
         if (project == null || virtualFile == null) {
             return null;
         }
+        if (virtualFile instanceof VirtualFileWindow) {
+            virtualFile = ((VirtualFileWindow) virtualFile).getDelegate();
+        }
         String filePath = virtualFile.getUserData(RELATIVE_FILE_URL);
         if (filePath == null && project.getBasePath() != null) {
+            String localFilePath = PathUtil.getLocalPath(virtualFile);
+            if (localFilePath == null) {
+                return null;
+            }
             String projectDir = PathUtil.getLocalPath(project.getBasePath());
-            filePath = PathUtil.getLocalPath(virtualFile)
-                    .replaceFirst("^" + Pattern.quote(projectDir), "");
+            filePath = localFilePath.replaceFirst("^" + Pattern.quote(projectDir), "");
             virtualFile.putUserData(RELATIVE_FILE_URL, filePath);
         }
         return filePath;
