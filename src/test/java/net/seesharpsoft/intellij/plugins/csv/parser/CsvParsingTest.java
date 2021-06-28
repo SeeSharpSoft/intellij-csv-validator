@@ -13,24 +13,40 @@ public class CsvParsingTest extends ParsingTestCase {
         super("", "csv", new CsvParserDefinition());
     }
 
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        CsvEditorSettings.getInstance().setAutoDetectValueSeparator(false);
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        CsvEditorSettings.getInstance().setAutoDetectValueSeparator(true);
+        CsvEditorSettings.getInstance().setDefaultValueSeparator(CsvEditorSettings.VALUE_SEPARATOR_DEFAULT);
+        CsvEditorSettings.getInstance().setCommentIndicator(COMMENT_INDICATOR_DEFAULT);
+        super.tearDown();
+    }
+
     public void testParsingTestData() {
         // without comment support, default lexer is used
         CsvEditorSettings.getInstance().setCommentIndicator("");
         doTest(true);
-        CsvEditorSettings.getInstance().setCommentIndicator(COMMENT_INDICATOR_DEFAULT);
     }
 
     public void testParsingTestDataWithCustomParser() {
         setName("ParsingTestData");
         CsvEditorSettings.getInstance().setDefaultValueSeparator(CsvValueSeparator.create(","));
         doTest(true);
-        CsvEditorSettings.getInstance().setDefaultValueSeparator(CsvEditorSettings.VALUE_SEPARATOR_DEFAULT);
+    }
+
+    public void testRecordSeparator() {
+        CsvEditorSettings.getInstance().setDefaultValueSeparator(CsvValueSeparator.create("\u001E"));
+        doTest(true);
     }
 
     public void testCustomMultiSymbolSeparator() {
         CsvEditorSettings.getInstance().setDefaultValueSeparator(CsvValueSeparator.create("~§"));
         doTest(true);
-        CsvEditorSettings.getInstance().setDefaultValueSeparator(CsvEditorSettings.VALUE_SEPARATOR_DEFAULT);
     }
 
     public void testColonSeparator() {
@@ -38,8 +54,6 @@ public class CsvParsingTest extends ParsingTestCase {
         CsvEditorSettings.getInstance().setCommentIndicator("");
         CsvEditorSettings.getInstance().setDefaultValueSeparator(CsvValueSeparator.COLON);
         doTest(true);
-        CsvEditorSettings.getInstance().setDefaultValueSeparator(CsvEditorSettings.VALUE_SEPARATOR_DEFAULT);
-        CsvEditorSettings.getInstance().setCommentIndicator(COMMENT_INDICATOR_DEFAULT);
     }
 
     public void testAllSeparators() {
@@ -47,15 +61,27 @@ public class CsvParsingTest extends ParsingTestCase {
         CsvEditorSettings.getInstance().setCommentIndicator("");
         CsvEditorSettings.getInstance().setDefaultValueSeparator(CsvValueSeparator.COMMA);
         doTest(true);
-        CsvEditorSettings.getInstance().setDefaultValueSeparator(CsvEditorSettings.VALUE_SEPARATOR_DEFAULT);
-        CsvEditorSettings.getInstance().setCommentIndicator(COMMENT_INDICATOR_DEFAULT);
     }
 
     public void testCsvWithComments() {
         // comment support by default (custom lexer is used)
         CsvEditorSettings.getInstance().setDefaultValueSeparator(CsvValueSeparator.COMMA);
         doTest(true);
-        CsvEditorSettings.getInstance().setDefaultValueSeparator(CsvEditorSettings.VALUE_SEPARATOR_DEFAULT);
+    }
+
+    public void testParsingTestDataWithAutoDetect() {
+        setName("ParsingTestData");
+        CsvEditorSettings.getInstance().setDefaultValueSeparator(CsvValueSeparator.PIPE);
+        CsvEditorSettings.getInstance().setAutoDetectValueSeparator(true);
+        doTest(true);
+    }
+
+    public void testColonSeparatorWithAutoDetect() {
+        setName("ColonSeparator");
+        CsvEditorSettings.getInstance().setCommentIndicator("");
+        CsvEditorSettings.getInstance().setDefaultValueSeparator(CsvValueSeparator.PIPE);
+        CsvEditorSettings.getInstance().setAutoDetectValueSeparator(true);
+        doTest(true);
     }
 
     @Override

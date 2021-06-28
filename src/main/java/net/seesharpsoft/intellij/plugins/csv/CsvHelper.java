@@ -1,10 +1,9 @@
 package net.seesharpsoft.intellij.plugins.csv;
 
-import com.intellij.ide.scratch.ScratchUtil;
 import com.intellij.lang.*;
 import com.intellij.lexer.Lexer;
 import com.intellij.openapi.fileTypes.FileType;
-import com.intellij.openapi.fileTypes.LanguageFileType;
+import com.intellij.openapi.fileTypes.FileTypeRegistry;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
@@ -23,6 +22,8 @@ import net.seesharpsoft.intellij.plugins.csv.psi.CsvFile;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvRecord;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
+import net.seesharpsoft.intellij.plugins.psv.PsvFileType;
+import net.seesharpsoft.intellij.plugins.tsv.TsvFileType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
@@ -48,10 +49,39 @@ public final class CsvHelper {
         return node.getPsi();
     }
 
+    public static boolean isCsvFile(String extension) {
+        if (extension == null) {
+            return false;
+        }
+        // simple check to always in include the defaults even if association was removed
+        switch(extension.toLowerCase()) {
+            case "csv":
+            case "tsv":
+            case "tab":
+            case "psv":
+                return true;
+            default:
+                // but also consider other extensions that are associated manually
+                FileType fileType = FileTypeRegistry.getInstance().getFileTypeByExtension(extension);
+                return fileType == CsvFileType.INSTANCE ||
+                        fileType == TsvFileType.INSTANCE ||
+                        fileType == PsvFileType.INSTANCE;
+        }
+    }
+
     public static boolean isCsvFile(Project project, VirtualFile file) {
-        final FileType fileType = file.getFileType();
-        return (fileType instanceof LanguageFileType && ((LanguageFileType) fileType).getLanguage().isKindOf(CsvLanguage.INSTANCE)) ||
-                (ScratchUtil.isScratch(file) && LanguageUtil.getLanguageForPsi(project, file).isKindOf(CsvLanguage.INSTANCE));
+        if (project == null || file == null) {
+            return false;
+        }
+        final Language language = LanguageUtil.getLanguageForPsi(project, file);
+        return language != null && language.isKindOf(CsvLanguage.INSTANCE);
+    }
+
+    public static boolean isCsvFile(PsiFile file) {
+        if (file == null) {
+            return false;
+        }
+        return isCsvFile(file.getProject(), file.getOriginalFile().getVirtualFile());
     }
 
     public static IElementType getElementType(PsiElement element) {

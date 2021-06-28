@@ -63,11 +63,6 @@ public class CsvParserDefinition implements FileParserDefinition {
     }
 
     @Override
-    public SpaceRequirements spaceExistanceTypeBetweenTokens(ASTNode left, ASTNode right) {
-        return SpaceRequirements.MAY;
-    }
-
-    @Override
     @NotNull
     public PsiElement createElement(ASTNode node) {
         return CsvTypes.Factory.createElement(node);

@@ -33,10 +33,7 @@ public class CsvTableEditorState implements FileEditorState {
     }
 
     public boolean showInfoPanel() {
-        if (showInfoPanel == null) {
-            return CsvEditorSettings.getInstance().showTableEditorInfoPanel();
-        }
-        return showInfoPanel;
+        return showInfoPanel == null ? CsvEditorSettings.getInstance().showTableEditorInfoPanel() : showInfoPanel;
     }
 
     public void setShowInfoPanel(boolean showInfoPanelArg) {
@@ -44,7 +41,7 @@ public class CsvTableEditorState implements FileEditorState {
     }
 
     public boolean getFixedHeaders() {
-        return fixedHeaders == null ? false : fixedHeaders;
+        return fixedHeaders == null ? CsvEditorSettings.getInstance().isHeaderRowFixed() : fixedHeaders;
     }
 
     public void setFixedHeaders(boolean fixedHeadersArg) {

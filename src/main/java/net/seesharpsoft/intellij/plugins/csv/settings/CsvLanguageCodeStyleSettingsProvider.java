@@ -77,18 +77,15 @@ public class CsvLanguageCodeStyleSettingsProvider extends LanguageCodeStyleSetti
                 "5 ,Holmes HEPA Air Purifier,Carlos Soltero,汉字宋,30.94,21.78";
     }
 
-    @Override
-    public CommonCodeStyleSettings getDefaultCommonSettings() {
-        CommonCodeStyleSettings commonSettings = new CommonCodeStyleSettings(getLanguage());
-        commonSettings.initIndentOptions();
-        commonSettings.getIndentOptions().TAB_SIZE = 1;
-        commonSettings.getIndentOptions().INDENT_SIZE = 1;
-        commonSettings.getIndentOptions().USE_TAB_CHARACTER = true;
-        commonSettings.getIndentOptions().SMART_TABS = false;
-        commonSettings.getIndentOptions().KEEP_INDENTS_ON_EMPTY_LINES = true;
+    protected void customizeDefaults(@NotNull CommonCodeStyleSettings commonSettings, @NotNull CommonCodeStyleSettings.IndentOptions indentOptions) {
+        super.customizeDefaults(commonSettings, indentOptions);
+        indentOptions.TAB_SIZE = 1;
+        indentOptions.INDENT_SIZE = 1;
+        indentOptions.USE_TAB_CHARACTER = true;
+        indentOptions.SMART_TABS = false;
+        indentOptions.KEEP_INDENTS_ON_EMPTY_LINES = true;
         commonSettings.WRAP_ON_TYPING = CommonCodeStyleSettings.WrapOnTyping.NO_WRAP.intValue;
         commonSettings.WRAP_LONG_LINES = false;
         commonSettings.RIGHT_MARGIN = Integer.MAX_VALUE;
-        return commonSettings;
     }
 }

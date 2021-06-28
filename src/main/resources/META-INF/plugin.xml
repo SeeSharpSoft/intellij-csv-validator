@@ -1,6 +1,6 @@
 <idea-plugin>
     <id>net.seesharpsoft.intellij.plugins.csv</id>
-    <name>CSV Plugin</name>
+    <name>CSV</name>
     <vendor url="https://github.com/SeeSharpSoft/intellij-csv-validator">
         Martin Sommer
     </vendor>
@@ -15,6 +15,7 @@
             <li>customizable Table Editor</li>
             <li>customizable text editor</li>
             <li>customizable column coloring</li>
+            <li>customizable line comment</li>
             <li>syntax validation</li>
             <li>syntax highlighting</li>
             <li>content formatting</li>
@@ -49,14 +50,15 @@
 
     <change-notes><![CDATA[
         <pre style="font-family: sans-serif">
-FIX: Performance for indexing large CSV files #239
+NEW: Plugin name change: CSV
+FIX: Null pointer when using csv rendering in Markdown documentation #292
+FIX: NullPointerException on startup #295
       </pre>
     ]]>
     </change-notes>
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
-<!--    <idea-version since-build="173.2099.1" until-build="192.*" />-->
-    <idea-version since-build="193" />
+    <idea-version since-build="193.5233.102" />
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
          on how to target different products -->
@@ -64,15 +66,6 @@ FIX: Performance for indexing large CSV files #239
     <depends optional="true" config-file="withGithub.xml">org.jetbrains.plugins.github</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <!-- version 173.* - 192.* -->
-<!--        <fileType name="FileType_CSV" implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvFileType" extensions="csv"/>-->
-<!--        <fileType name="FileType_TSV" implementationClass="net.seesharpsoft.intellij.plugins.tsv.TsvFileType" extensions="tsv;tab"/>-->
-<!--        <fileType name="FileType_PSV" implementationClass="net.seesharpsoft.intellij.plugins.psv.PsvFileType" extensions="psv"/>-->
-<!--        <fileTypeFactory implementation="net.seesharpsoft.intellij.plugins.csv.CsvFileTypeFactory"/>-->
-<!--        <fileTypeFactory implementation="net.seesharpsoft.intellij.plugins.tsv.TsvFileTypeFactory"/>-->
-<!--        <fileTypeFactory implementation="net.seesharpsoft.intellij.plugins.psv.PsvFileTypeFactory"/>-->
-
-        <!-- version 193.* -->
         <fileType name="CSV" language="csv" implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvFileType" extensions="csv" fieldName="INSTANCE"/>
         <fileType name="TSV" language="tsv" implementationClass="net.seesharpsoft.intellij.plugins.tsv.TsvFileType" extensions="tsv;tab" fieldName="INSTANCE"/>
         <fileType name="PSV" language="psv" implementationClass="net.seesharpsoft.intellij.plugins.psv.PsvFileType" extensions="psv" fieldName="INSTANCE"/>
@@ -168,6 +161,8 @@ FIX: Performance for indexing large CSV files #239
         <todoIndexer implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvTodoIndexer" filetype="PSV" />
 
         <postStartupActivity implementation="net.seesharpsoft.intellij.plugins.csv.CsvPlugin" />
+
+        <lang.commenter implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvCommenter" language="csv" />
     </extensions>
 
     <actions>

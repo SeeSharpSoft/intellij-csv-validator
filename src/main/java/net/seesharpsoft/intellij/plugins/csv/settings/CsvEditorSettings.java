@@ -1,5 +1,7 @@
 package net.seesharpsoft.intellij.plugins.csv.settings;
 
+import com.intellij.openapi.application.Application;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.components.State;
@@ -32,7 +34,8 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
 
     public static final String COMMENT_INDICATOR_DEFAULT = "#";
 
-    private static final CsvEditorSettings STATIC_INSTANCE = new CsvEditorSettings();
+    // only required for testing
+    private static final CsvEditorSettings STATIC_TEST_INSTANCE = new CsvEditorSettings();
 
     public enum EditorPrio {
         TEXT_FIRST,
@@ -69,6 +72,7 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
         public int TABLE_DEFAULT_COLUMN_WIDTH = TABLE_DEFAULT_COLUMN_WIDTH_DEFAULT;
         public boolean TABLE_AUTO_COLUMN_WIDTH_ON_OPEN = false;
         public boolean ZERO_BASED_COLUMN_NUMBERING = false;
+        public boolean TABLE_HEADER_ROW_FIXED = false;
 
         public boolean SHOW_TABLE_EDITOR_INFO_PANEL = true;
         public boolean QUOTING_ENFORCED = false;
@@ -80,6 +84,7 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
         public boolean KEEP_TRAILING_SPACES = false;
         public String COMMENT_INDICATOR = COMMENT_INDICATOR_DEFAULT;
         public ValueColoring VALUE_COLORING = ValueColoring.RAINBOW;
+        public boolean AUTO_DETECT_VALUE_SEPARATOR = true;
 
         public OptionSet() {
             EditorSettingsExternalizable editorSettingsExternalizable = EditorSettingsExternalizable.getInstance();
@@ -95,8 +100,11 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
     }
 
     public static CsvEditorSettings getInstance() {
-        CsvEditorSettings instance = ServiceManager.getService(CsvEditorSettings.class);
-        return instance == null ? STATIC_INSTANCE : instance;
+        Application application = ApplicationManager.getApplication();
+        if (application.isUnitTestMode()) {
+            return CsvEditorSettings.STATIC_TEST_INSTANCE;
+        }
+        return application.isDisposed() ? new CsvEditorSettings() :  ServiceManager.getService(CsvEditorSettings.class);
     }
 
     public void addPropertyChangeListener(PropertyChangeListener listener) {
@@ -290,7 +298,27 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
     }
 
     public void setValueColoring(ValueColoring valueColoring) {
+        ValueColoring oldValue = getValueColoring();
         getState().VALUE_COLORING = valueColoring;
+        if (valueColoring != oldValue) {
+            myPropertyChangeSupport.firePropertyChange("valueColoring", oldValue, getValueColoring());
+        }
+    }
+
+    public boolean isHeaderRowFixed() {
+        return getState().TABLE_HEADER_ROW_FIXED;
+    }
+
+    public void setHeaderRowFixed(boolean headerRowFixed) {
+        getState().TABLE_HEADER_ROW_FIXED = headerRowFixed;
+    }
+
+    public boolean isAutoDetectValueSeparator() {
+        return getState().AUTO_DETECT_VALUE_SEPARATOR;
+    }
+
+    public void setAutoDetectValueSeparator(boolean autoDetectValueSeparator) {
+        getState().AUTO_DETECT_VALUE_SEPARATOR = autoDetectValueSeparator;
     }
 
     public boolean checkCurrentPluginVersion(String actualVersion) {

@@ -1,7 +1,9 @@
 package net.seesharpsoft.intellij.plugins.csv;
 
+import com.intellij.injected.editor.VirtualFileWindow;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
+import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.PathUtil;
 
@@ -12,18 +14,39 @@ public final class CsvStorageHelper {
 
     public static final Key<String> RELATIVE_FILE_URL = Key.create("CSV_PLUGIN_RELATIVE_URL");
 
-    public static String getRelativeFileUrl(Project project, VirtualFile virtualFile) {
+    public static String getRelativeFilePath(Project project, VirtualFile virtualFile) {
         if (project == null || virtualFile == null) {
             return null;
         }
-        String url = virtualFile.getUserData(RELATIVE_FILE_URL);
-        if (url == null && project.getBasePath() != null) {
-            String projectDir = PathUtil.getLocalPath(project.getBasePath());
-            url = PathUtil.getLocalPath(virtualFile.getPath())
-                    .replaceFirst("^" + Pattern.quote(projectDir), "");
-            virtualFile.putUserData(RELATIVE_FILE_URL, url);
+        if (virtualFile instanceof VirtualFileWindow) {
+            virtualFile = ((VirtualFileWindow) virtualFile).getDelegate();
         }
-        return url;
+        String filePath = virtualFile.getUserData(RELATIVE_FILE_URL);
+        if (filePath == null && project.getBasePath() != null) {
+            String localFilePath = PathUtil.getLocalPath(virtualFile);
+            if (localFilePath == null) {
+                return null;
+            }
+            String projectDir = PathUtil.getLocalPath(project.getBasePath());
+            filePath = localFilePath.replaceFirst("^" + Pattern.quote(projectDir), "");
+            virtualFile.putUserData(RELATIVE_FILE_URL, filePath);
+        }
+        return filePath;
+    }
+
+    public static boolean csvFileExists(Project project, String fileName) {
+        if (fileName == null) {
+            return false;
+        }
+        String filePath = PathUtil.getLocalPath(fileName);
+        if (filePath == null ||
+                !CsvHelper.isCsvFile(PathUtil.getFileExtension(filePath))) {
+            return false;
+        }
+        if (project != null && FileUtil.exists(PathUtil.getLocalPath(project.getBasePath()) + filePath)) {
+            return true;
+        }
+        return FileUtil.exists(filePath);
     }
 
     private CsvStorageHelper() {

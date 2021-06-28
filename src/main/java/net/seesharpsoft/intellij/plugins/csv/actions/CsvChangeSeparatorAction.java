@@ -10,7 +10,6 @@ import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.psi.PsiFile;
 import com.intellij.util.FileContentUtilCore;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
-import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
 import net.seesharpsoft.intellij.plugins.csv.CsvSeparatorHolder;
 import net.seesharpsoft.intellij.plugins.csv.CsvValueSeparator;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvFileAttributes;
@@ -27,7 +26,7 @@ public class CsvChangeSeparatorAction extends ToggleAction {
     @Override
     public boolean isSelected(@NotNull AnActionEvent anActionEvent) {
         PsiFile psiFile = anActionEvent.getData(CommonDataKeys.PSI_FILE);
-        if (psiFile == null) {
+        if (!CsvHelper.isCsvFile(psiFile)) {
             return false;
         }
         return CsvHelper.hasValueSeparatorAttribute(psiFile) && CsvHelper.getValueSeparator(psiFile).equals(mySeparator);
@@ -36,11 +35,11 @@ public class CsvChangeSeparatorAction extends ToggleAction {
     @Override
     public void setSelected(@NotNull AnActionEvent anActionEvent, boolean selected) {
         PsiFile psiFile = anActionEvent.getData(CommonDataKeys.PSI_FILE);
-        if (psiFile == null) {
+        if (!CsvHelper.isCsvFile(psiFile)) {
             return;
         }
         Language language = psiFile.getLanguage();
-        if (!language.isKindOf(CsvLanguage.INSTANCE) || language instanceof CsvSeparatorHolder) {
+        if (language instanceof CsvSeparatorHolder) {
             return;
         }
         CsvFileAttributes csvFileAttributes = ServiceManager.getService(psiFile.getProject(), CsvFileAttributes.class);

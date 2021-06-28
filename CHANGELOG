@@ -1,3 +1,68 @@
+2.17.0
+Jun 20, 2021
+
+NEW: Plugin name change: CSV
+FIX: Null pointer when using csv rendering in Markdown documentation #292
+FIX: NullPointerException on startup #295
+
+2.16.4
+May 27, 2021
+
+FIX: fully prevent calculateDistributedColumnWidth on erroneous CSV #283
+FIX: Memory leak of PsiFile #284
+
+2.16.3
+Apr 24, 2021
+
+HOTFIX: Exception in CSV plugin when using with remote SSH host #279
+
+2.16.2
+Apr 21, 2021
+
+FIX: Editor complaining about crashes on PyCharm 2021.1 #274
+
+2.16.1
+Apr 20, 2021
+
+FIX: keep existing & correct entries in CSV attributes map
+
+2.16.0
+Apr 18, 2021
+
+NEW: Ability to split on ASCII separator character \x1e #267
+NEW: "General" settings group
+FIX: Lower annotator severity to not appear as problem
+FIX: Prevent non CSV entries in CSV attributes map #268
+
+2.15.1
+Mar 25, 2021
+
+FIX: Rainbow Values no longer works #265
+
+2.15.0
+Mar 23, 2021
+
+NEW: Default value separator #259
+FIX: Removal of deprecated function usage
+
+2.14.4
+Feb 14, 2021
+
+NEW: Auto detect value separator (by count)
+
+2.14.3
+Oct 10, 2020
+
+NEW: Added default "Header row fixed" setting
+NEW: Support "Comment with line comment" #247
+FIX: "Value coloring" change not applied to open files
+
+2.14.2
+Sep 17, 2020
+
+FIX: Settings reset every update #245
+FIX: Removing comment indicator causes parsing errors
+
 2.14.1
 Aug 14, 2020
 

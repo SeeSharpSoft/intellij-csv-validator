@@ -5,6 +5,8 @@ import net.seesharpsoft.intellij.plugins.csv.CsvEscapeCharacter;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 
+import java.nio.file.Paths;
+
 public class CsvFileAttributesTest extends BasePlatformTestCase {
     @Override
     protected String getTestDataPath() {
@@ -12,7 +14,20 @@ public class CsvFileAttributesTest extends BasePlatformTestCase {
     }
 
     @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        Paths.get(this.getProject().getBasePath()).toFile().mkdirs();
+        Paths.get(this.getProject().getBasePath(), "csv_file_test.csv").toFile().createNewFile();
+        Paths.get(this.getProject().getBasePath(), "test").toFile().mkdir();
+        Paths.get(this.getProject().getBasePath(), "test", "py_file_test.py").toFile().createNewFile();
+    }
+
+    @Override
     protected void tearDown() throws Exception {
+        Paths.get(this.getProject().getBasePath(), "test", "py_file_test.py").toFile().delete();
+        Paths.get(this.getProject().getBasePath(), "test").toFile().delete();
+        Paths.get(this.getProject().getBasePath(), "csv_file_test.csv").toFile().delete();
+
         CsvFileAttributes.getInstance(this.getProject()).reset();
         super.tearDown();
     }
@@ -37,6 +52,22 @@ public class CsvFileAttributesTest extends BasePlatformTestCase {
         csvFileAttributes.setEscapeCharacter(myFixture.getFile(), CsvEscapeCharacter.BACKSLASH);
 
         assertEquals(CsvEscapeCharacter.BACKSLASH, csvFileAttributes.getEscapeCharacter(this.getProject(), myFixture.getFile().getOriginalFile().getVirtualFile()));
+    }
+
+    public void testCleanupAttributeMap() {
+        CsvFileAttributes fileAttributes = CsvFileAttributes.getInstance(this.getProject());
+        fileAttributes.attributeMap.put("/csv_file_test.csv", new CsvFileAttributes.Attribute());
+        fileAttributes.attributeMap.put("/test/py_file_test.py", new CsvFileAttributes.Attribute());
+        fileAttributes.attributeMap.put("/not_existing_csv_file_test.csv", new CsvFileAttributes.Attribute());
+        fileAttributes.attributeMap.put("/<835d7ae1-4344-4666-bc29-31fb457b610e>\\raid\\someRemotePath\\someFileName.csv", new CsvFileAttributes.Attribute());
+        fileAttributes.attributeMap.put("/<$.}>^\\ra*id\\someRemote \"Path\\someFileName.json", new CsvFileAttributes.Attribute());
+
+        assertEquals(5, fileAttributes.attributeMap.size());
+
+        fileAttributes.cleanupAttributeMap(this.getProject());
+
+        assertEquals(1, fileAttributes.attributeMap.size());
+        assertNotNull(fileAttributes.attributeMap.get("/csv_file_test.csv"));
     }
 
 }

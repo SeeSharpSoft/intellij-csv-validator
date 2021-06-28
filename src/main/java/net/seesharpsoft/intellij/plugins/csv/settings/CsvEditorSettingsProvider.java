@@ -1,9 +1,12 @@
 package net.seesharpsoft.intellij.plugins.csv.settings;
 
 import com.intellij.application.options.editor.EditorOptionsProvider;
+import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.options.ConfigurationException;
+import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.ui.CheckBoxWithColorChooser;
+import com.intellij.util.FileContentUtilCore;
 import net.seesharpsoft.intellij.plugins.csv.CsvEscapeCharacter;
 import net.seesharpsoft.intellij.plugins.csv.CsvValueSeparator;
 import net.seesharpsoft.intellij.ui.CustomDisplayListCellRenderer;
@@ -14,7 +17,9 @@ import javax.swing.*;
 import javax.swing.text.NumberFormatter;
 import java.awt.*;
 import java.text.NumberFormat;
+import java.util.Arrays;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class CsvEditorSettingsProvider implements EditorOptionsProvider {
 
@@ -42,6 +47,8 @@ public class CsvEditorSettingsProvider implements EditorOptionsProvider {
     private JCheckBox cbKeepTrailingWhitespaces;
     private JTextField tfCommentIndicator;
     private JComboBox comboValueColoring;
+    private JCheckBox cbHeaderRowFixed;
+    private JCheckBox cbAutoDetectSeparator;
 
     @NotNull
     @Override
@@ -92,7 +99,9 @@ public class CsvEditorSettingsProvider implements EditorOptionsProvider {
                 !Objects.equals(comboValueSeparator.getSelectedItem(), csvEditorSettings.getDefaultValueSeparator()) ||
                 isModified(cbKeepTrailingWhitespaces, csvEditorSettings.getKeepTrailingSpaces()) ||
                 isModified(tfCommentIndicator, csvEditorSettings.getCommentIndicator()) ||
-                !Objects.equals(comboValueColoring.getSelectedItem(), csvEditorSettings.getValueColoring());
+                !Objects.equals(comboValueColoring.getSelectedItem(), csvEditorSettings.getValueColoring()) ||
+                isModified(cbHeaderRowFixed, csvEditorSettings.isHeaderRowFixed()) ||
+                isModified(cbAutoDetectSeparator, csvEditorSettings.isAutoDetectValueSeparator());
     }
 
     @Override
@@ -117,6 +126,8 @@ public class CsvEditorSettingsProvider implements EditorOptionsProvider {
         cbKeepTrailingWhitespaces.setSelected(csvEditorSettings.getKeepTrailingSpaces());
         tfCommentIndicator.setText(csvEditorSettings.getCommentIndicator());
         comboValueColoring.setSelectedItem(csvEditorSettings.getValueColoring());
+        cbHeaderRowFixed.setSelected(csvEditorSettings.isHeaderRowFixed());
+        cbAutoDetectSeparator.setSelected(csvEditorSettings.isAutoDetectValueSeparator());
     }
 
     @Override
@@ -136,11 +147,28 @@ public class CsvEditorSettingsProvider implements EditorOptionsProvider {
         csvEditorSettings.setTableAutoMaxColumnWidth((int) tfMaxColumnWidth.getValue());
         csvEditorSettings.setTableDefaultColumnWidth((int) tfDefaultColumnWidth.getValue());
         csvEditorSettings.setTableAutoColumnWidthOnOpen(cbAdjustColumnWidthOnOpen.isSelected());
-        csvEditorSettings.setDefaultEscapeCharacter((CsvEscapeCharacter)comboEscapeCharacter.getSelectedItem());
-        csvEditorSettings.setDefaultValueSeparator((CsvValueSeparator)comboValueSeparator.getSelectedItem());
+        csvEditorSettings.setDefaultEscapeCharacter((CsvEscapeCharacter) comboEscapeCharacter.getSelectedItem());
+        csvEditorSettings.setDefaultValueSeparator(
+                comboValueSeparator.getSelectedItem() instanceof CsvValueSeparator ?
+                        (CsvValueSeparator) comboValueSeparator.getSelectedItem() :
+                        CsvValueSeparator.create((String) comboValueSeparator.getSelectedItem())
+        );
         csvEditorSettings.setKeepTrailingSpaces(cbKeepTrailingWhitespaces.isSelected());
         csvEditorSettings.setCommentIndicator(tfCommentIndicator.getText());
         csvEditorSettings.setValueColoring((CsvEditorSettings.ValueColoring) comboValueColoring.getSelectedItem());
+        csvEditorSettings.setHeaderRowFixed(cbHeaderRowFixed.isSelected());
+        csvEditorSettings.setAutoDetectValueSeparator(cbAutoDetectSeparator.isSelected());
+
+        this.refreshOpenEditors();
+    }
+
+    protected void refreshOpenEditors() {
+        FileContentUtilCore.reparseFiles(
+                Arrays.stream(ProjectManager.getInstance().getOpenProjects())
+                        .map(FileEditorManager::getInstance)
+                        .flatMap(manager -> Arrays.stream(manager.getOpenFiles()))
+                        .collect(Collectors.toList())
+        );
     }
 
     protected void createUIComponents() {

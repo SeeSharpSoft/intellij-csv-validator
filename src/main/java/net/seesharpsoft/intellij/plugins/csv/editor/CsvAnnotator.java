@@ -17,7 +17,7 @@ import net.seesharpsoft.intellij.plugins.csv.settings.CsvColorSettings;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import org.jetbrains.annotations.NotNull;
 
-import static com.intellij.spellchecker.SpellCheckerSeveritiesProvider.TYPO;
+import static com.intellij.lang.annotation.HighlightSeverity.INFORMATION;
 
 @SuppressWarnings("MagicNumber")
 public class CsvAnnotator implements Annotator {
@@ -27,7 +27,7 @@ public class CsvAnnotator implements Annotator {
     protected static final Key<Boolean> SHOW_INFO_BALLOON_KEY = Key.create("CSV_PLUGIN_SHOW_INFO_BALLOON");
 
     public static final HighlightSeverity CSV_COLUMN_INFO_SEVERITY =
-            new HighlightSeverity("CSV_COLUMN_INFO_SEVERITY", TYPO.myVal + 5);
+            new HighlightSeverity("CSV_COLUMN_INFO_SEVERITY", INFORMATION.myVal - 1);
 
     @Override
     public void annotate(@NotNull final PsiElement element, @NotNull final AnnotationHolder holder) {
@@ -53,7 +53,7 @@ public class CsvAnnotator implements Annotator {
                 tooltip = XmlStringUtil.wrapInHtml(
                         String.format("%s<br /><br />Header: %s<br />Index: %d",
                                 FontUtil.getHtmlWithFonts(
-                                    XmlStringUtil.escapeString(element.getText(), true)
+                                        XmlStringUtil.escapeString(element.getText(), true)
                                 ),
                                 message,
                                 columnInfo.getColumnIndex() + (CsvEditorSettings.getInstance().isZeroBasedColumnNumbering() ? 0 : 1)
@@ -65,7 +65,7 @@ public class CsvAnnotator implements Annotator {
                 textRange = TextRange.from(textRange.getStartOffset() - 1, 1);
             }
 
-            Annotation annotation = holder.createAnnotation(CSV_COLUMN_INFO_SEVERITY, textRange, message, tooltip);
+            final Annotation annotation = holder.createAnnotation(CSV_COLUMN_INFO_SEVERITY, textRange, message, tooltip);
             annotation.setEnforcedTextAttributes(
                     CsvEditorSettings.getInstance().getValueColoring() == CsvEditorSettings.ValueColoring.RAINBOW ?
                             CsvColorSettings.getTextAttributesOfColumn(columnInfo.getColumnIndex(), holder.getCurrentAnnotationSession()) :
@@ -98,11 +98,8 @@ public class CsvAnnotator implements Annotator {
                 }
             }
             if (textAttributes != null) {
-                Annotation annotation = holder.createAnnotation(
-                        CSV_COLUMN_INFO_SEVERITY,
-                        element.getTextRange(),
-                        showInfoBalloon(holder.getCurrentAnnotationSession()) ? "↹" : null
-                );
+                final TextRange textRange = element.getTextRange();
+                final Annotation annotation = holder.createAnnotation(CSV_COLUMN_INFO_SEVERITY, textRange, showInfoBalloon(holder.getCurrentAnnotationSession()) ? "↹" : null);
                 annotation.setEnforcedTextAttributes(textAttributes);
                 annotation.setNeedsUpdateOnTyping(false);
             }

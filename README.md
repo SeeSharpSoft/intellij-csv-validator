@@ -1,5 +1,6 @@
 [![Plugin version](https://img.shields.io/jetbrains/plugin/d/10037-csv-plugin.svg)](https://plugins.jetbrains.com/plugin/10037-csv-plugin)
-[![Build Status](https://travis-ci.com/SeeSharpSoft/intellij-csv-validator.svg?branch=master)](https://travis-ci.com/SeeSharpSoft/intellij-csv-validator)
+[![Build Action Status](https://github.com/SeeSharpSoft/intellij-csv-validator/actions/workflows/CIBuild.yml/badge.svg)](https://github.com/SeeSharpSoft/intellij-csv-validator/actions)
+[![EAP Status](https://github.com/SeeSharpSoft/intellij-csv-validator/actions/workflows/CronEAP.yml/badge.svg)](https://github.com/SeeSharpSoft/intellij-csv-validator/actions)
 [![Coverage Status](https://coveralls.io/repos/github/SeeSharpSoft/intellij-csv-validator/badge.svg?branch=master)](https://coveralls.io/github/SeeSharpSoft/intellij-csv-validator?branch=master)
 [![Known Vulnerabilities](https://snyk.io/test/github/SeeSharpSoft/intellij-csv-validator/badge.svg?targetFile=build.gradle)](https://snyk.io/test/github/SeeSharpSoft/intellij-csv-validator?targetFile=build.gradle)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/97769359388e44bfb7101346d510fccf)](https://www.codacy.com/app/github_124/intellij-csv-validator?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=SeeSharpSoft/intellij-csv-validator&amp;utm_campaign=Badge_Grade)
@@ -7,7 +8,7 @@
 
 # Lightweight CSV Plugin for JetBrains IDE family
 
-Compatible with _IntelliJ IDEA  PhpStorm  WebStorm  PyCharm  RubyMine  AppCode  CLion  Gogland  DataGrip  Rider  MPS  Android Studio_ - __2017.3.1 and newer__
+Compatible with _IntelliJ IDEA  PhpStorm  WebStorm  PyCharm  RubyMine  AppCode  CLion  Gogland  DataGrip  Rider  MPS  Android Studio_ - __2019.3.2 and newer__
 
 This plugin introduces CSV (_Comma-Separated Values_) as a language to Jetbrains IDE with a syntax definition, structured language elements and associated file types (.csv/.tsv/.psv).
 This enables default editor features like syntax validation, highlighting and inspections for CSV-alike files.
@@ -20,6 +21,7 @@ This enables default editor features like syntax validation, highlighting and in
 - flexible Table Editor
 - customizable text editor
 - customizable column coloring
+- customizable line comment
 - syntax validation
 - syntax highlighting (customizable)
 - content formatting (customizable)
@@ -36,9 +38,11 @@ This enables default editor features like syntax validation, highlighting and in
 
 **!!Please note!!**
 
-- Starting with **CSV Plugin 2.10.0**, _new features will only be developed for IntelliJ IDE 2019.3 and higher_. I will still release patches for major/critical bugs for previous IDE versions 2017.3.1 - 2019.2.\*, but no additional features or cosmetic fixes.
+- Starting with **CSV Plugin 2.14.0**, _Java 11 (55) or higher is required_. Previous versions can be downloaded and installed manually from the following locations: [GitHub Releases](https://github.com/SeeSharpSoft/intellij-csv-validator/releases), [Plugin Repository](https://plugins.jetbrains.com/plugin/10037-csv-plugin/versions) (see also section [Installation](https://github.com/SeeSharpSoft/intellij-csv-validator#installation)).
 
 - Starting with **CSV Plugin 2.11.0**, _Java 9 (53) or higher is required_. Previous versions can be downloaded and installed manually from the following locations: [GitHub Releases](https://github.com/SeeSharpSoft/intellij-csv-validator/releases), [Plugin Repository](https://plugins.jetbrains.com/plugin/10037-csv-plugin/versions) (see also section [Installation](https://github.com/SeeSharpSoft/intellij-csv-validator#installation)).
+
+- Starting with **CSV Plugin 2.10.0**, _new features will only be developed for IntelliJ IDE 2019.3.2 and higher_. ~~I will still release patches for major/critical bugs for previous IDE versions 2017.3.1 - 2019.3.1\*, but no additional features or cosmetic fixes.~~
 
 ### Syntax parser & validation
 
@@ -52,7 +56,7 @@ Being strict, the following CSV snippet is actually incorrect cause of the leadi
 "firstName", "lastName", "birthday"
 ```
 Besides the mentioned diversion from the standard definition, syntax errors will be detected and can be inspected.
-Please note that if a document is syntactically incorrect, other features like code formatting or the structure view can not function properly.
+Please note that if a document is syntactically incorrect, other features like the table editor, code formatting or the structure view can not function properly.
 
 ![Editor with syntax validation and highlighting](./docs/editor.png)
 
@@ -129,9 +133,18 @@ The preferred editor usage can be switched between "Text Editor first", "Table E
 
 The following separators are currently supported: **,** (Comma), **;** (Semicolon), **:** (Colon), **|** (Pipe) and **&#8633;** (Tab)
 
-_Default Value Separator_ defines which separator is used as standard for each newly opened CSV file. The separator character can be changed for each file individually in its editors context menu.
+**since 2.15.0:** The default value separator can also be a user defined character sequence.
 
-This option has no effect on TSV/PSV files, the separator is pre-defined by their file- and language-type.
+_Default Value Separator_ defines which separator is used as standard for each newly created or opened CSV file.
+The separator character can be changed for each file individually in its editors context menu.
+
+###### Auto Detect
+
+The value separator of a newly opened CSV file can be detected automatically based on the number of predefined separator occurrences.
+
+If _Auto Detect_ is enabled (default), the _Default Value Separator_ setting is only taken into account for newly created files.
+
+**Note:** This option has no effect on TSV/PSV files, the separator is pre-defined by their file- and language-type.
 
 ##### Default Escape Character
 
@@ -145,11 +158,11 @@ _Default Escape Character_ defines which escape character is used as standard fo
 
 Define the character(s) that should be used to mark a line as a comment within a CSV document.
 
-Please note:
+**Please note:**
 
 - If not set, comments are disabled, which also will increase lexer/parser performance on large files.
 - If a line starts with those characters (leading whitespaces are ignored), the whole line isn't considered data and skipped e.g. for formatting, structure view and the table editor.
-- Files containing comments can't be edited but still viewed via the **Table Editor** (without showing the comments).
+- Files containing comments **can't be edited** - but still viewed - via the **Table Editor** (without showing the comments)!
 
 ##### Column numbering
 
@@ -209,6 +222,10 @@ The maximum width of a single table column in _px_, which is used when adjusting
 ##### Adjust column width on open (default)
 
 If selected, the table column widths are adjusted based on the column contents automatically when the table editor is opened. This setting can be changed in the table editor itself per file. 
+
+##### Header row fixed (default)
+
+If selected, the first record of CSV files will be considered the header per default, which affects the column names in the table editor. This setting can be changed in the table editor itself per file. 
 
 ##### Keep/ignore linebreak at file end
 
@@ -409,11 +426,11 @@ You can also download the JAR package from the [Jetbrains plugin repository](htt
 
 #### CSV Plugin causes the IDE to stop working properly
 
-Since version 2.11.0, the plugins requires the IntelliJ platform to be executed on JRE9 or higher. If this is not the case, the following error log can be noticed:
+Since version 2.14.0, the plugins requires the IntelliJ platform to be executed on JRE11 or higher. If this is not the case, the following error log can be noticed:
 
-`com.intellij.diagnostic.PluginException: While loading class net.seesharpsoft.intellij.plugins.csv.CsvFileTypeOverrider: net/seesharpsoft/intellij/plugins/csv/CsvFileTypeOverrider has been compiled by a more recent version of the Java Runtime (class file version 53.0), this version of the Java Runtime only recognizes class file versions up to 52.0 [Plugin: net.seesharpsoft.intellij.plugins.csv]`
+`com.intellij.diagnostic.PluginException: While loading class net.seesharpsoft.intellij.plugins.csv.CsvFileTypeOverrider: net/seesharpsoft/intellij/plugins/csv/CsvFileTypeOverrider has been compiled by a more recent version of the Java Runtime (class file version 55.0), this version of the Java Runtime only recognizes class file versions up to 52.0 [Plugin: net.seesharpsoft.intellij.plugins.csv]`
 
-In some cases the error log doesn't seem to point this out in a noticable manner, but the IDE doesn't work correctly after enabling the plugin. Always disable the plugin first before continuing with the following steps.
+In some cases the error log doesn't seem to point this out in a noticeable manner, but the IDE doesn't work correctly after enabling the plugin. Always disable the plugin first before continuing with the following steps.
 
 Please read the [official instructions](https://intellij-support.jetbrains.com/hc/en-us/articles/206544879-Selecting-the-JDK-version-the-IDE-will-run-under) on how to switch to a newer JRE, or [manually install](https://github.com/SeeSharpSoft/intellij-csv-validator#installation) a [prior CSV plugin version](https://github.com/SeeSharpSoft/intellij-csv-validator/releases/tag/2.10.0).
 
