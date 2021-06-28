@@ -14,7 +14,7 @@ plugins {
     id 'org.jetbrains.intellij' version '0.7.2'
     id 'jacoco'
     id 'com.github.kt3k.coveralls' version '2.8.4'
-    id "com.github.ManifestClasspath" version "0.1.0-RELEASE"
+    id 'com.github.ManifestClasspath' version '0.1.0-RELEASE'
 }
 
 jacoco {
@@ -79,11 +79,16 @@ idea {
 apply plugin: 'org.jetbrains.intellij'
 intellij {
     // IDE version - https://www.jetbrains.com/intellij-repository/releases
-    version = System.getenv().getOrDefault('IDEA_VERSION', 'IC-193.5233.102')
+    version = System.getenv().getOrDefault('IDEA_VERSION', 'IU-201.6668.121')
     pluginName = 'CSV Plugin'
     instrumentCode = true
     updateSinceUntilBuild = false
     downloadSources = System.getenv().getOrDefault('IDEA_SOURCES', 'true')
+
+    plugins = [
+            System.getenv().getOrDefault('GIT_PLUGIN_VERSION', 'Git4Idea:201.6668.74'),
+            System.getenv().getOrDefault('GITHUB_PLUGIN_VERSION', 'org.jetbrains.plugins.github:201.6668.74')
+    ]
 }
 publishPlugin {
     token = System.getenv().getOrDefault('JI_TOKEN', '')
