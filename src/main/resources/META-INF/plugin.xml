@@ -50,9 +50,8 @@
 
     <change-notes><![CDATA[
         <pre style="font-family: sans-serif">
-NEW: Plugin name change: CSV
-FIX: Null pointer when using csv rendering in Markdown documentation #292
-FIX: NullPointerException on startup #295
+FIX: Plugin not showing column at caret Ctr+F1 #300
+FIX: Past few versions of this plugin don't show colors #298
       </pre>
     ]]>
     </change-notes>
