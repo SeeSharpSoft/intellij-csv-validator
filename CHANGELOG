@@ -1,5 +1,11 @@
+2.17.1
+Jun 30, 2021
+
+FIX: Plugin not showing column at caret Ctr+F1 #300
+FIX: Past few versions of this plugin don't show colors #298
+
 2.17.0
-Jun 20, 2021
+Jun 21, 2021
 
 NEW: Plugin name change: CSV
 FIX: Null pointer when using csv rendering in Markdown documentation #292

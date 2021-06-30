@@ -27,7 +27,7 @@ public class CsvAnnotator implements Annotator {
     protected static final Key<Boolean> SHOW_INFO_BALLOON_KEY = Key.create("CSV_PLUGIN_SHOW_INFO_BALLOON");
 
     public static final HighlightSeverity CSV_COLUMN_INFO_SEVERITY =
-            new HighlightSeverity("CSV_COLUMN_INFO_SEVERITY", INFORMATION.myVal - 1);
+            new HighlightSeverity("CSV_COLUMN_INFO_SEVERITY", INFORMATION.myVal);
 
     @Override
     public void annotate(@NotNull final PsiElement element, @NotNull final AnnotationHolder holder) {
