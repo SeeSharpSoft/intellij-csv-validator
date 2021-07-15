@@ -16,7 +16,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - ideaVersion: IC-193.5233.102
+          - ideaVersion: IC-2020.1.1
             gkVersion: 2019.3
           - ideaVersion: PY-LATEST-EAP-SNAPSHOT
             gkVersion: 2019.3
