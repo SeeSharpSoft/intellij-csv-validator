@@ -82,7 +82,7 @@ intellij {
     pluginName = 'CSV Plugin'
     instrumentCode = true
     updateSinceUntilBuild = false
-    downloadSources = System.getenv().getOrDefault('IDEA_SOURCES', true)
+    downloadSources = Boolean.parseBoolean(System.getenv().getOrDefault('IDEA_SOURCES', "true"))
 }
 publishPlugin {
     token = System.getenv().getOrDefault('JI_TOKEN', '')
