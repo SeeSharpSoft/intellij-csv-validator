@@ -23,7 +23,7 @@ jobs:
       run: chmod +x gradlew
     - name: Build with Gradle
       env:
-        IDEA_VERSION: PY-LATEST-EAP-SNAPSHOT
+        IDEA_VERSION: LATEST-EAP-SNAPSHOT
         GRAMMAR_KIT_VERSION: 2019.3
         IDEA_SOURCES: false
       run: xvfb-run ./gradlew build
