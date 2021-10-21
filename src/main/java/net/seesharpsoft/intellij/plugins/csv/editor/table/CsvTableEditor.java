@@ -102,7 +102,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
     }
 
     public boolean isEditable() {
-        return this.tableIsEditable && !this.hasErrors() && !hasComments();
+        return this.tableIsEditable && !this.hasErrors() && !hasComments() && file.isWritable();
     }
 
     public CsvColumnInfoMap<PsiElement> getColumnInfoMap() {
