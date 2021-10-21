@@ -3,7 +3,6 @@ package net.seesharpsoft.intellij.plugins.csv.editor;
 import com.intellij.lang.annotation.*;
 import com.intellij.openapi.editor.markup.TextAttributes;
 import com.intellij.openapi.util.Key;
-import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.vcs.ui.FontUtil;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.tree.IElementType;
@@ -60,18 +59,17 @@ public class CsvAnnotator implements Annotator {
                         )
                 );
             }
-            TextRange textRange = columnInfo.getRowInfo(element).getTextRange();
-            if (textRange.getStartOffset() - csvFile.getTextLength() == 0 && textRange.getStartOffset() > 0) {
-                textRange = TextRange.from(textRange.getStartOffset() - 1, 1);
-            }
 
-            final Annotation annotation = holder.createAnnotation(CSV_COLUMN_INFO_SEVERITY, textRange, message, tooltip);
-            annotation.setEnforcedTextAttributes(
-                    CsvEditorSettings.getInstance().getValueColoring() == CsvEditorSettings.ValueColoring.RAINBOW ?
-                            CsvColorSettings.getTextAttributesOfColumn(columnInfo.getColumnIndex(), holder.getCurrentAnnotationSession()) :
-                            null
-            );
-            annotation.setNeedsUpdateOnTyping(false);
+            holder.newAnnotation(CSV_COLUMN_INFO_SEVERITY, message)
+                    .range(element)
+                    .tooltip(tooltip)
+                    .enforcedTextAttributes(
+                            CsvEditorSettings.getInstance().getValueColoring() == CsvEditorSettings.ValueColoring.RAINBOW ?
+                                    CsvColorSettings.getTextAttributesOfColumn(columnInfo.getColumnIndex(), holder.getCurrentAnnotationSession()) :
+                                    null
+                    )
+                    .needsUpdateOnTyping(false)
+                    .create();
         }
     }
 
@@ -98,10 +96,11 @@ public class CsvAnnotator implements Annotator {
                 }
             }
             if (textAttributes != null) {
-                final TextRange textRange = element.getTextRange();
-                final Annotation annotation = holder.createAnnotation(CSV_COLUMN_INFO_SEVERITY, textRange, showInfoBalloon(holder.getCurrentAnnotationSession()) ? "↹" : null);
-                annotation.setEnforcedTextAttributes(textAttributes);
-                annotation.setNeedsUpdateOnTyping(false);
+                holder.newAnnotation(CSV_COLUMN_INFO_SEVERITY, showInfoBalloon(holder.getCurrentAnnotationSession()) ? "↹" : null)
+                        .range(element)
+                        .enforcedTextAttributes(textAttributes)
+                        .needsUpdateOnTyping(false)
+                        .create();
             }
             return true;
         }

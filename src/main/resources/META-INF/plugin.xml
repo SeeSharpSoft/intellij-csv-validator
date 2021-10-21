@@ -50,14 +50,14 @@
 
     <change-notes><![CDATA[
         <pre style="font-family: sans-serif">
-FIX: Plugin not showing column at caret Ctr+F1 #300
-FIX: Past few versions of this plugin don't show colors #298
+NOTE: Minimum version requirement changed to v2020.1 and newer
+FIX: Show diff opens an empty window #306
       </pre>
     ]]>
     </change-notes>
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
-    <idea-version since-build="193.5233.102" />
+    <idea-version since-build="201" />
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
          on how to target different products -->

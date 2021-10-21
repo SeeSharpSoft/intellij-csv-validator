@@ -1,17 +1,16 @@
 buildscript {
     repositories {
         mavenCentral()
-        maven { url 'http://dl.bintray.com/jetbrains/intellij-plugin-service' }
         maven { url 'https://jitpack.io' }
     }
     dependencies {
-        classpath 'com.github.hurricup:gradle-grammar-kit-plugin:2018.1.1'
+        classpath 'com.github.hurricup:gradle-grammar-kit-plugin:2021.1.3'
     }
 }
 
 plugins {
     // https://github.com/JetBrains/gradle-intellij-plugin
-    id 'org.jetbrains.intellij' version '0.7.2'
+    id 'org.jetbrains.intellij' version '1.2.0'
     id 'jacoco'
     id 'com.github.kt3k.coveralls' version '2.8.4'
     id "com.github.ManifestClasspath" version "0.1.0-RELEASE"
@@ -28,7 +27,7 @@ jacocoTestReport {
 }
 
 group 'net.seesharpsoft.intellij.plugins'
-version '2.17.1'
+version '2.18.0'
 
 apply plugin: 'java'
 project.sourceCompatibility = JavaVersion.VERSION_11
@@ -79,11 +78,10 @@ idea {
 apply plugin: 'org.jetbrains.intellij'
 intellij {
     // IDE version - https://www.jetbrains.com/intellij-repository/releases
-    version = System.getenv().getOrDefault('IDEA_VERSION', 'IC-193.5233.102')
+    version = System.getenv().getOrDefault('IDEA_VERSION', 'IC-2020.1.1')
     pluginName = 'CSV Plugin'
-    instrumentCode = true
     updateSinceUntilBuild = false
-    downloadSources = System.getenv().getOrDefault('IDEA_SOURCES', 'true')
+    downloadSources = Boolean.parseBoolean(System.getenv().getOrDefault('IDEA_SOURCES', "true"))
 }
 publishPlugin {
     token = System.getenv().getOrDefault('JI_TOKEN', '')
