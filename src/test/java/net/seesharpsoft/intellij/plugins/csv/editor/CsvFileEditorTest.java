@@ -1,12 +1,18 @@
 package net.seesharpsoft.intellij.plugins.csv.editor;
 
+import com.intellij.diff.editor.DiffVirtualFile;
+import com.intellij.diff.impl.DiffRequestProcessor;
 import com.intellij.openapi.editor.EditorSettings;
 import com.intellij.openapi.fileEditor.*;
 import com.intellij.openapi.fileEditor.ex.FileEditorProviderManager;
 import com.intellij.openapi.fileEditor.impl.text.TextEditorState;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vcs.changes.PreviewDiffVirtualFile;
+import com.intellij.testFramework.LightVirtualFile;
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import org.jdom.Element;
+import org.jetbrains.annotations.NotNull;
 
 public class CsvFileEditorTest extends BasePlatformTestCase {
 
@@ -93,4 +99,19 @@ public class CsvFileEditorTest extends BasePlatformTestCase {
         disposeTextEditor(textEditor);
     }
 
+    private static class DiffVirtualFileDummy extends DiffVirtualFile {
+        public DiffVirtualFileDummy(@NotNull String name) {
+            super(name);
+        }
+
+        @Override
+        public DiffRequestProcessor createProcessor(@NotNull Project project) {
+            return null;
+        }
+    }
+
+    public void testAcceptCsvFile() {
+        assertTrue(CsvFileEditorProvider.acceptCsvFile(myFixture.getProject(), new LightVirtualFile(myFixture.getFile().getName())));
+        assertFalse(CsvFileEditorProvider.acceptCsvFile(myFixture.getProject(), new DiffVirtualFileDummy(myFixture.getFile().getName())));
+    }
 }
