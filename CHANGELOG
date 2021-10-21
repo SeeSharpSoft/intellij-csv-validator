@@ -1,6 +1,7 @@
-2.17.2
+2.18.0
 Oct 21, 2021
 
+NOTE: Minimum version requirement changed to v2020.1 and newer
 FIX: Show diff opens an empty window #306
 
 2.17.1

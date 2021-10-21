@@ -8,7 +8,7 @@
 
 # Lightweight CSV Plugin for JetBrains IDE family
 
-Compatible with _IntelliJ IDEA  PhpStorm  WebStorm  PyCharm  RubyMine  AppCode  CLion  Gogland  DataGrip  Rider  MPS  Android Studio_ - __2019.3.2 and newer__
+Compatible with _IntelliJ IDEA  PhpStorm  WebStorm  PyCharm  RubyMine  AppCode  CLion  Gogland  DataGrip  Rider  MPS  Android Studio_ - __2020.1 and newer__
 
 This plugin introduces CSV (_Comma-Separated Values_) as a language to Jetbrains IDE with a syntax definition, structured language elements and associated file types (.csv/.tsv/.psv).
 This enables default editor features like syntax validation, highlighting and inspections for CSV-alike files.
@@ -37,6 +37,8 @@ This enables default editor features like syntax validation, highlighting and in
 (see [full changelog](./CHANGELOG))
 
 **!!Please note!!**
+
+- Starting with **CSV Plugin 2.18.0**, _minimum IntelliJ IDE v2020.1 is required_. Previous versions can be downloaded and installed manually from the following locations: [GitHub Releases](https://github.com/SeeSharpSoft/intellij-csv-validator/releases), [Plugin Repository](https://plugins.jetbrains.com/plugin/10037-csv-plugin/versions) (see also section [Installation](https://github.com/SeeSharpSoft/intellij-csv-validator#installation)).
 
 - Starting with **CSV Plugin 2.14.0**, _Java 11 (55) or higher is required_. Previous versions can be downloaded and installed manually from the following locations: [GitHub Releases](https://github.com/SeeSharpSoft/intellij-csv-validator/releases), [Plugin Repository](https://plugins.jetbrains.com/plugin/10037-csv-plugin/versions) (see also section [Installation](https://github.com/SeeSharpSoft/intellij-csv-validator#installation)).
 

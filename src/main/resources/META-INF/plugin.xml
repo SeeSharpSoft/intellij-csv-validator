@@ -50,6 +50,7 @@
 
     <change-notes><![CDATA[
         <pre style="font-family: sans-serif">
+NOTE: Minimum version requirement changed to v2020.1 and newer
 FIX: Show diff opens an empty window #306
       </pre>
     ]]>
