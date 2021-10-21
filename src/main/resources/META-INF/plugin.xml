@@ -50,8 +50,7 @@
 
     <change-notes><![CDATA[
         <pre style="font-family: sans-serif">
-FIX: Plugin not showing column at caret Ctr+F1 #300
-FIX: Past few versions of this plugin don't show colors #298
+FIX: Show diff opens an empty window #306
       </pre>
     ]]>
     </change-notes>
