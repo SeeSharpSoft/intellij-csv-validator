@@ -161,6 +161,8 @@ FIX: Show diff opens an empty window #306
         <postStartupActivity implementation="net.seesharpsoft.intellij.plugins.csv.CsvPlugin" />
 
         <lang.commenter implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvCommenter" language="csv" />
+
+        <psi.referenceContributor language="csv" implementation="net.seesharpsoft.intellij.plugins.csv.psi.CsvPsiReferenceContributor" />
     </extensions>
 
     <actions>
