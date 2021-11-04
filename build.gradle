@@ -27,7 +27,7 @@ jacocoTestReport {
 }
 
 group 'net.seesharpsoft.intellij.plugins'
-version '2.18.0'
+version '2.18.1'
 
 apply plugin: 'java'
 project.sourceCompatibility = JavaVersion.VERSION_11

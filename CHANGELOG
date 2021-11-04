@@ -1,3 +1,9 @@
+2.18.1
+Nov 04, 2021
+
+FIX: set require-restart attribute
+NEW: Ability to open urls from IntelliJ CSV view #312
+
 2.18.0
 Oct 21, 2021
 
