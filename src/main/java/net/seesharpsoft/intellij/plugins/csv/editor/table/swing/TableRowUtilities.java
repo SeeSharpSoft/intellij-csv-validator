@@ -39,6 +39,7 @@ import java.awt.event.AdjustmentListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.util.ArrayList;
+import java.util.Objects;
 
 
 /**
@@ -154,7 +155,7 @@ public final class TableRowUtilities {
                 // Make certain we are the viewPort's view and not, for  example, the rowHeaderView of the scrollPane - an implementor of fixed columns might do this.
                 JViewport viewport = scrollPane.getViewport();
 
-                if (viewport == null || viewport.getView() != userTable) {
+                if (viewport == null || !Objects.equals(viewport.getView(), userTable)) {
                     return null;
                 }
 
@@ -318,7 +319,7 @@ public final class TableRowUtilities {
         }
 
         public void valueChanged(ListSelectionEvent e) {
-            if (e.getSource() == userTable.getSelectionModel()) {
+            if (Objects.equals(e.getSource(), userTable.getSelectionModel())) {
                 rowHeadersTable.getSelectionModel().removeListSelectionListener(this);
                 rowHeadersTable.getSelectionModel().clearSelection();
 
@@ -330,7 +331,7 @@ public final class TableRowUtilities {
                 }
 
                 rowHeadersTable.getSelectionModel().addListSelectionListener(this);
-            } else if (e.getSource() == rowHeadersTable.getSelectionModel()) {
+            } else if (Objects.equals(e.getSource(), rowHeadersTable.getSelectionModel())) {
                 boolean isColumnSelectionAllowed = userTable.getColumnSelectionAllowed();
                 boolean isRowSelectionAllowed = userTable.getRowSelectionAllowed();
                 boolean isCellSelectionAllowed = userTable.getCellSelectionEnabled();

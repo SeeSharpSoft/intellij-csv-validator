@@ -1,4 +1,4 @@
-<idea-plugin>
+<idea-plugin require-restart="true">
     <id>net.seesharpsoft.intellij.plugins.csv</id>
     <name>CSV</name>
     <vendor url="https://github.com/SeeSharpSoft/intellij-csv-validator">
@@ -50,8 +50,8 @@
 
     <change-notes><![CDATA[
         <pre style="font-family: sans-serif">
-NOTE: Minimum version requirement changed to v2020.1 and newer
-FIX: Show diff opens an empty window #306
+FIX: set require-restart attribute
+NEW: Ability to open urls from IntelliJ CSV view #312
       </pre>
     ]]>
     </change-notes>
@@ -161,6 +161,8 @@ FIX: Show diff opens an empty window #306
         <postStartupActivity implementation="net.seesharpsoft.intellij.plugins.csv.CsvPlugin" />
 
         <lang.commenter implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvCommenter" language="csv" />
+
+        <psi.referenceContributor language="csv" implementation="net.seesharpsoft.intellij.plugins.csv.psi.CsvPsiReferenceContributor" />
     </extensions>
 
     <actions>
