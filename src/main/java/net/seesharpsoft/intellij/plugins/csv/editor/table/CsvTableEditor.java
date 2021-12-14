@@ -163,6 +163,8 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
     }
 
     protected String generateCsv(Object[][] data) {
+        CsvColumnInfoMap columnInfoMap = getColumnInfoMap();
+        boolean newLineAtEnd = CsvEditorSettings.getInstance().isFileEndLineBreak() && (columnInfoMap == null || columnInfoMap.hasEmptyLastLine());
         StringBuilder result = new StringBuilder();
         for (int row = 0; row < data.length; ++row) {
             for (int column = 0; column < data[row].length; ++column) {
@@ -172,8 +174,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
                     result.append(this.currentSeparator.getCharacter());
                 }
             }
-            if (row < data.length - 1 ||
-                    (CsvEditorSettings.getInstance().isFileEndLineBreak() && getColumnInfoMap().hasEmptyLastLine())) {
+            if (row < data.length - 1 || newLineAtEnd) {
                 result.append("\n");
             }
         }
