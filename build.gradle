@@ -27,7 +27,7 @@ jacocoTestReport {
 }
 
 group 'net.seesharpsoft.intellij.plugins'
-version '2.18.1'
+version '2.18.2'
 
 apply plugin: 'java'
 project.sourceCompatibility = JavaVersion.VERSION_11
@@ -79,9 +79,15 @@ apply plugin: 'org.jetbrains.intellij'
 intellij {
     // IDE version - https://www.jetbrains.com/intellij-repository/releases
     version = System.getenv().getOrDefault('IDEA_VERSION', 'IC-2020.1.1')
-    pluginName = 'CSV Plugin'
+    pluginName = 'CSV'
     updateSinceUntilBuild = false
     downloadSources = Boolean.parseBoolean(System.getenv().getOrDefault('IDEA_SOURCES', "true"))
+}
+patchPluginXml {
+    changeNotes = """<pre style="font-family: sans-serif">
+FIX: java.lang.NullPointerException #320
+FIX: Exception when Show info balloon is not selected #318
+      </pre>"""
 }
 publishPlugin {
     token = System.getenv().getOrDefault('JI_TOKEN', '')

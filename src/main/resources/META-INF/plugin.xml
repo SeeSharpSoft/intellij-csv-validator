@@ -48,14 +48,6 @@
         </p>
     ]]></description>
 
-    <change-notes><![CDATA[
-        <pre style="font-family: sans-serif">
-FIX: set require-restart attribute
-NEW: Ability to open urls from IntelliJ CSV view #312
-      </pre>
-    ]]>
-    </change-notes>
-
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
     <idea-version since-build="201" />
 
