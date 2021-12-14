@@ -60,16 +60,18 @@ public class CsvAnnotator implements Annotator {
                 );
             }
 
-            holder.newAnnotation(CSV_COLUMN_INFO_SEVERITY, message)
+            AnnotationBuilder annotationBuilder = holder.newAnnotation(CSV_COLUMN_INFO_SEVERITY, message)
                     .range(element)
-                    .tooltip(tooltip)
-                    .enforcedTextAttributes(
-                            CsvEditorSettings.getInstance().getValueColoring() == CsvEditorSettings.ValueColoring.RAINBOW ?
-                                    CsvColorSettings.getTextAttributesOfColumn(columnInfo.getColumnIndex(), holder.getCurrentAnnotationSession()) :
-                                    null
-                    )
-                    .needsUpdateOnTyping(false)
-                    .create();
+                    .needsUpdateOnTyping(false);
+
+            if (CsvEditorSettings.getInstance().getValueColoring() == CsvEditorSettings.ValueColoring.RAINBOW) {
+                annotationBuilder.enforcedTextAttributes(CsvColorSettings.getTextAttributesOfColumn(columnInfo.getColumnIndex(), holder.getCurrentAnnotationSession()));
+            }
+            if (tooltip != null) {
+                annotationBuilder.tooltip(tooltip);
+            }
+
+            annotationBuilder.create();
         }
     }
 
@@ -95,8 +97,8 @@ public class CsvAnnotator implements Annotator {
                     holder.getCurrentAnnotationSession().putUserData(TAB_SEPARATOR_HIGHLIGHT_COLOR_DETERMINED_KEY, Boolean.TRUE);
                 }
             }
-            if (textAttributes != null) {
-                holder.newAnnotation(CSV_COLUMN_INFO_SEVERITY, showInfoBalloon(holder.getCurrentAnnotationSession()) ? "↹" : null)
+            if (textAttributes != null && showInfoBalloon(holder.getCurrentAnnotationSession())) {
+                holder.newAnnotation(CSV_COLUMN_INFO_SEVERITY, "↹")
                         .range(element)
                         .enforcedTextAttributes(textAttributes)
                         .needsUpdateOnTyping(false)
