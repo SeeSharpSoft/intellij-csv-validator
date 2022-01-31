@@ -110,7 +110,7 @@ grammarKit {
     jflexRelease = '1.7.0-1'
 
     // tag or short commit hash of Grammar-Kit to use - https://github.com/JetBrains/Grammar-Kit
-    grammarKitRelease = System.getenv().getOrDefault('GRAMMAR_KIT_VERSION', '2019.3')
+    grammarKitRelease = System.getenv().getOrDefault('GRAMMAR_KIT_VERSION', '2021.1.2')
 }
 
 import org.jetbrains.grammarkit.tasks.GenerateLexer
@@ -122,6 +122,8 @@ task generateCsvParser(type: GenerateParser) {
     pathToParser = '/net/seesharpsoft/intellij/plugins/csv/parser/CsvParser.java'
     pathToPsiRoot = '/net/seesharpsoft/intellij/plugins/csv/psi'
     purgeOldFiles = true
+
+    classpath += files("${intellij.ideaDependency.get().classes}/lib/app.jar")
 }
 
 task generateCsvLexer(dependsOn: generateCsvParser, type: GenerateLexer) {
@@ -129,6 +131,8 @@ task generateCsvLexer(dependsOn: generateCsvParser, type: GenerateLexer) {
     targetDir = './gen/net/seesharpsoft/intellij/plugins/csv/'
     targetClass = 'CsvLexer'
     purgeOldFiles = true
+
+    classpath += files("${intellij.ideaDependency.get().classes}/lib/app.jar")
 }
 
 compileJava {

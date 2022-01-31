@@ -24,6 +24,6 @@ jobs:
     - name: Build with Gradle
       env:
         IDEA_VERSION: LATEST-EAP-SNAPSHOT
-        GRAMMAR_KIT_VERSION: 2019.3
+        GRAMMAR_KIT_VERSION: 2021.1.2
         IDEA_SOURCES: false
       run: xvfb-run ./gradlew build
