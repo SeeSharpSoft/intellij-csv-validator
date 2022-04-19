@@ -8,6 +8,8 @@ import com.intellij.openapi.command.CommandProcessor;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.editor.colors.EditorFontType;
+import com.intellij.openapi.editor.event.DocumentEvent;
+import com.intellij.openapi.editor.event.DocumentListener;
 import com.intellij.openapi.fileEditor.*;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
@@ -316,6 +318,9 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
         }
         if (this.psiFile == null || !this.psiFile.isValid()) {
             this.document = FileDocumentManager.getInstance().getDocument(this.file);
+            // add document listener to react to external changes
+            this.document.addDocumentListener(new MyDocumentListener(), this);
+
             PsiDocumentManager documentManager = PsiDocumentManager.getInstance(project);
             this.psiFile = documentManager.getPsiFile(this.document);
             this.currentSeparator = CsvHelper.getValueSeparator(this.psiFile);
@@ -446,5 +451,32 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
         }
         updateTableComponentData(dataHandler.addState(currentData));
         return currentData;
+    }
+
+    // original: com.intellij.openapi.fileEditor.impl.text.TextEditorComponent.MyDocumentListener
+    private final class MyDocumentListener implements DocumentListener {
+        /**
+         * We can reuse this runnable to decrease number of allocated object.
+         */
+        private final Runnable myUpdateRunnable;
+        private boolean myUpdateScheduled;
+
+        MyDocumentListener() {
+            myUpdateRunnable = () -> {
+                myUpdateScheduled = false;
+                // TODO
+                psiFile.clearCaches();
+                selectNotify();
+            };
+        }
+
+        @Override
+        public void documentChanged(@NotNull DocumentEvent e) {
+            if (!myUpdateScheduled) {
+                // document's timestamp is changed later on undo or PSI changes
+                ApplicationManager.getApplication().invokeLater(myUpdateRunnable);
+                myUpdateScheduled = true;
+            }
+        }
     }
 }
