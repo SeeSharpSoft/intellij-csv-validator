@@ -184,7 +184,9 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
     @Override
     protected void applyEditorState(CsvTableEditorState editorState) {
         cbFixedHeaders.setSelected(editorState.getFixedHeaders());
-        comboRowHeight.setSelectedIndex(editorState.getRowLines());
+        if (comboRowHeight.getEditor() != null) {
+            comboRowHeight.setSelectedIndex(editorState.getRowLines());
+        }
         cbAutoColumnWidthOnOpen.setSelected(editorState.getAutoColumnWidthOnOpen());
         setTableRowHeight(getPreferredRowHeight());
     }
