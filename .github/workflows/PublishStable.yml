@@ -24,7 +24,7 @@ jobs:
     - name: Build with Gradle
       env:
         IDEA_VERSION: IU-2020.3.3
-        GRAMMAR_KIT_VERSION: 2019.3
+        GRAMMAR_KIT_VERSION: 2021.1.2
         IDEA_SOURCES: false
         JI_CHANNELS: Stable
         JI_TOKEN: ${{ secrets.JI_TOKEN }}
