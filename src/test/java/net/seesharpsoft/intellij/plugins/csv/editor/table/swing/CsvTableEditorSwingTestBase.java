@@ -51,17 +51,4 @@ public abstract class CsvTableEditorSwingTestBase extends BasePlatformTestCase {
         copy[row][column] = newValue;
         return copy;
     }
-
-
-    public <T extends Throwable> void assertException(@NotNull final Class<? extends Throwable> exceptionClass, @Nullable String expectedErrorMsg, @NotNull final ThrowableRunnable<T> runnable) throws Throwable {
-        assertException(new AbstractExceptionCase() {
-            public Class<? extends Throwable> getExpectedExceptionClass() {
-                return exceptionClass;
-            }
-
-            public void tryClosure() throws Throwable {
-                runnable.run();
-            }
-        }, expectedErrorMsg);
-    }
 }
