@@ -17,9 +17,9 @@ jobs:
       matrix:
         include:
           - ideaVersion: PY-2020.1.1
-            gkVersion: 2019.3
+            gkVersion: 2021.1.2
           - ideaVersion: LATEST-EAP-SNAPSHOT
-            gkVersion: 2019.3
+            gkVersion: 2021.1.2
 
     steps:
     - uses: actions/checkout@v2
