@@ -8,8 +8,6 @@ import com.intellij.openapi.command.CommandProcessor;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.editor.colors.EditorFontType;
-import com.intellij.openapi.editor.event.DocumentEvent;
-import com.intellij.openapi.editor.event.DocumentListener;
 import com.intellij.openapi.fileEditor.*;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
@@ -17,9 +15,7 @@ import com.intellij.openapi.util.UserDataHolder;
 import com.intellij.openapi.util.UserDataHolderBase;
 import com.intellij.openapi.vfs.ReadonlyStatusHandler;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.psi.PsiDocumentManager;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiFile;
+import com.intellij.psi.*;
 import com.intellij.util.ArrayUtil;
 import com.intellij.util.ui.UIUtil;
 import net.seesharpsoft.intellij.plugins.csv.*;
@@ -50,6 +46,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
     protected final TableDataHandler dataManagement;
 
     protected Document document;
+    protected PsiTreeChangeListener psiTreeChangeListener;
     protected PsiFile psiFile;
     protected CsvValueSeparator currentSeparator;
     protected CsvEscapeCharacter currentEscapeCharacter;
@@ -65,6 +62,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
         this.userDataHolder = new UserDataHolderBase();
         this.changeSupport = new PropertyChangeSupport(this);
         this.dataManagement = new TableDataHandler(this, TableDataHandler.MAX_SIZE);
+        this.psiTreeChangeListener = new MyPsiTreeChangeListener();
     }
 
     @NotNull
@@ -247,6 +245,10 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
         // auto save on change - nothing to do here
     }
 
+    public boolean isEditorSelected() {
+        return FileEditorManager.getInstance(this.project).getSelectedEditor(this.getFile()) == this;
+    }
+
     @Override
     public void addPropertyChangeListener(@NotNull PropertyChangeListener propertyChangeListener) {
         this.changeSupport.addPropertyChangeListener(propertyChangeListener);
@@ -318,11 +320,16 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
         }
         if (this.psiFile == null || !this.psiFile.isValid()) {
             this.document = FileDocumentManager.getInstance().getDocument(this.file);
-            // add document listener to react to external changes
-            this.document.addDocumentListener(new MyDocumentListener(), this);
 
             PsiDocumentManager documentManager = PsiDocumentManager.getInstance(project);
+
+            // better safe than sorry: in case psiFile was invalidated
+            if (this.psiFile != null && this.psiFile.getManager() != null) {
+                this.psiFile.getManager().removePsiTreeChangeListener(this.psiTreeChangeListener);
+            }
             this.psiFile = documentManager.getPsiFile(this.document);
+            this.psiFile.getManager().addPsiTreeChangeListener(this.psiTreeChangeListener, this);
+
             this.currentSeparator = CsvHelper.getValueSeparator(this.psiFile);
             this.currentEscapeCharacter = CsvHelper.getEscapeCharacter(this.psiFile);
         }
@@ -337,12 +344,12 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
         return getDataHandler().getCurrentState().length;
     }
 
-    public Font getFont() {
+    public Font getEditorFont() {
         return UIUtil.getFontWithFallback(EditorColorsManager.getInstance().getGlobalScheme().getFont(EditorFontType.PLAIN));
     }
 
     protected int getStringWidth(String text) {
-        int fontSize = getFont().getSize();
+        int fontSize = getEditorFont().getSize();
         return CsvHelper.getMaxTextLineLength(text, input -> fontSize * input.length());
     }
 
@@ -453,30 +460,12 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
         return currentData;
     }
 
-    // original: com.intellij.openapi.fileEditor.impl.text.TextEditorComponent.MyDocumentListener
-    private final class MyDocumentListener implements DocumentListener {
-        /**
-         * We can reuse this runnable to decrease number of allocated object.
-         */
-        private final Runnable myUpdateRunnable;
-        private boolean myUpdateScheduled;
-
-        MyDocumentListener() {
-            myUpdateRunnable = () -> {
-                myUpdateScheduled = false;
-                // TODO
-                psiFile.clearCaches();
-                selectNotify();
-            };
-        }
-
+    private final class MyPsiTreeChangeListener extends PsiTreeChangeAdapter {
         @Override
-        public void documentChanged(@NotNull DocumentEvent e) {
-            if (!myUpdateScheduled) {
-                // document's timestamp is changed later on undo or PSI changes
-                ApplicationManager.getApplication().invokeLater(myUpdateRunnable);
-                myUpdateScheduled = true;
+        public void childrenChanged(@NotNull PsiTreeChangeEvent event) {
+            if (event.getFile() == psiFile) {
+                selectNotify();
             }
         }
-    }
+    };
 }
