@@ -15,9 +15,7 @@ import com.intellij.openapi.util.UserDataHolder;
 import com.intellij.openapi.util.UserDataHolderBase;
 import com.intellij.openapi.vfs.ReadonlyStatusHandler;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.psi.PsiDocumentManager;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiFile;
+import com.intellij.psi.*;
 import com.intellij.util.ArrayUtil;
 import com.intellij.util.ui.UIUtil;
 import net.seesharpsoft.intellij.plugins.csv.*;
@@ -48,6 +46,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
     protected final TableDataHandler dataManagement;
 
     protected Document document;
+    protected PsiTreeChangeListener psiTreeChangeListener;
     protected PsiFile psiFile;
     protected CsvValueSeparator currentSeparator;
     protected CsvEscapeCharacter currentEscapeCharacter;
@@ -63,6 +62,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
         this.userDataHolder = new UserDataHolderBase();
         this.changeSupport = new PropertyChangeSupport(this);
         this.dataManagement = new TableDataHandler(this, TableDataHandler.MAX_SIZE);
+        this.psiTreeChangeListener = new MyPsiTreeChangeListener();
     }
 
     @NotNull
@@ -245,6 +245,10 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
         // auto save on change - nothing to do here
     }
 
+    public boolean isEditorSelected() {
+        return ApplicationManager.getApplication().isUnitTestMode() || FileEditorManager.getInstance(this.project).getSelectedEditor(this.getFile()) == this;
+    }
+
     @Override
     public void addPropertyChangeListener(@NotNull PropertyChangeListener propertyChangeListener) {
         this.changeSupport.addPropertyChangeListener(propertyChangeListener);
@@ -316,8 +320,16 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
         }
         if (this.psiFile == null || !this.psiFile.isValid()) {
             this.document = FileDocumentManager.getInstance().getDocument(this.file);
+
             PsiDocumentManager documentManager = PsiDocumentManager.getInstance(project);
+
+            // better safe than sorry: in case psiFile was invalidated
+            if (this.psiFile != null && this.psiFile.getManager() != null) {
+                this.psiFile.getManager().removePsiTreeChangeListener(this.psiTreeChangeListener);
+            }
             this.psiFile = documentManager.getPsiFile(this.document);
+            this.psiFile.getManager().addPsiTreeChangeListener(this.psiTreeChangeListener, this);
+
             this.currentSeparator = CsvHelper.getValueSeparator(this.psiFile);
             this.currentEscapeCharacter = CsvHelper.getEscapeCharacter(this.psiFile);
         }
@@ -332,12 +344,12 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
         return getDataHandler().getCurrentState().length;
     }
 
-    public Font getFont() {
+    public Font getEditorFont() {
         return UIUtil.getFontWithFallback(EditorColorsManager.getInstance().getGlobalScheme().getFont(EditorFontType.PLAIN));
     }
 
     protected int getStringWidth(String text) {
-        int fontSize = getFont().getSize();
+        int fontSize = getEditorFont().getSize();
         return CsvHelper.getMaxTextLineLength(text, input -> fontSize * input.length());
     }
 
@@ -447,4 +459,13 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
         updateTableComponentData(dataHandler.addState(currentData));
         return currentData;
     }
+
+    private final class MyPsiTreeChangeListener extends PsiTreeChangeAdapter {
+        @Override
+        public void childrenChanged(@NotNull PsiTreeChangeEvent event) {
+            if (event.getFile() == psiFile) {
+                selectNotify();
+            }
+        }
+    };
 }
