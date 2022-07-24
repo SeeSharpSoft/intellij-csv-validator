@@ -246,7 +246,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
     }
 
     public boolean isEditorSelected() {
-        return FileEditorManager.getInstance(this.project).getSelectedEditor(this.getFile()) == this;
+        return ApplicationManager.getApplication().isUnitTestMode() || FileEditorManager.getInstance(this.project).getSelectedEditor(this.getFile()) == this;
     }
 
     @Override
