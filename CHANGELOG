@@ -1,3 +1,10 @@
+2.19.0
+Jul 24, 2022
+
+NEW: Ability to auto-reload changed files #316
+FIX: NullPointerException when applying editor state #327
+FIX: additional disposed checks
+
 2.18.2
 Dec 14, 2021
 

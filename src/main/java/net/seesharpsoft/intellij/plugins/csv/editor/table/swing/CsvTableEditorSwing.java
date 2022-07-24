@@ -17,6 +17,7 @@ import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditorState;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.api.TableActions;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.api.TableDataChangeEvent;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvFile;
+import net.seesharpsoft.intellij.util.DisposerAwareRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -131,7 +132,7 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
 
         tblEditor.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         tblEditor.setShowColumns(true);
-        tblEditor.setFont(getFont());
+        tblEditor.setFont(getEditorFont());
         tblEditor.setBackground(editorColorsScheme.getDefaultBackground());
         tblEditor.setForeground(editorColorsScheme.getDefaultForeground());
         setTableRowHeight(0);
@@ -184,7 +185,9 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
     @Override
     protected void applyEditorState(CsvTableEditorState editorState) {
         cbFixedHeaders.setSelected(editorState.getFixedHeaders());
-        comboRowHeight.setSelectedIndex(editorState.getRowLines());
+        if (comboRowHeight.getEditor() != null) {
+            comboRowHeight.setSelectedIndex(editorState.getRowLines());
+        }
         cbAutoColumnWidthOnOpen.setSelected(editorState.getAutoColumnWidthOnOpen());
         setTableRowHeight(getPreferredRowHeight());
     }
@@ -246,9 +249,7 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
             last = e.getLastRow() + 1;
         }
 
-        SwingUtilities.invokeLater(() -> {
-            updateRowHeights(first, last);
-        });
+        SwingUtilities.invokeLater(DisposerAwareRunnable.create(() -> updateRowHeights(first, last), this));
     }
 
     private void updateRowHeights(int first, int last) {
@@ -356,6 +357,9 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
 
     @Override
     protected void updateUIComponents() {
+        if (!isEditorSelected()) {
+            return;
+        }
         CsvFile csvFile = getCsvFile();
         if (csvFile == null) {
             return;
