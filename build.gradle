@@ -26,7 +26,7 @@ jacocoTestReport {
 }
 
 group 'net.seesharpsoft.intellij.plugins'
-version '2.18.2'
+version '2.19.0'
 
 apply plugin: 'java'
 project.sourceCompatibility = JavaVersion.VERSION_11
@@ -84,8 +84,9 @@ intellij {
 }
 patchPluginXml {
     changeNotes = """<pre style="font-family: sans-serif">
-FIX: java.lang.NullPointerException #320
-FIX: Exception when Show info balloon is not selected #318
+NEW: Ability to auto-reload changed files #316
+FIX: NullPointerException when applying editor state #327
+FIX: additional disposed checks
       </pre>"""
 }
 publishPlugin {
