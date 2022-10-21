@@ -7,7 +7,7 @@ buildscript {
 
 plugins {
     // https://github.com/JetBrains/gradle-intellij-plugin
-    id 'org.jetbrains.intellij' version '1.7.0'
+    id 'org.jetbrains.intellij' version '1.9.0'
     id 'jacoco'
     id 'com.github.kt3k.coveralls' version '2.8.4'
     id 'com.github.ManifestClasspath' version '0.1.0-RELEASE'
@@ -40,8 +40,8 @@ repositories {
 }
 dependencies {
     implementation 'net.seesharpsoft.sharping:sharping-commons:0.21.0'
-    compileOnly 'org.apache.ant:ant:1.10.9'
-    testCompile 'org.mockito:mockito-core:3.8.0'
+    compileOnly 'org.apache.ant:ant:1.10.12'
+    testImplementation 'org.mockito:mockito-core:4.8.0'
 }
 sourceSets {
     main {

@@ -341,7 +341,8 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
     }
 
     public final int getRowCount() {
-        return getDataHandler().getCurrentState().length;
+        Object[][] currentState = getDataHandler().getCurrentState();
+        return currentState == null ? 0 : getDataHandler().getCurrentState().length;
     }
 
     public Font getEditorFont() {
@@ -376,8 +377,11 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
         if (csvColumnInfoMap == null || csvColumnInfoMap.hasErrors()) {
             return null;
         }
-        Map<Integer, CsvColumnInfo<PsiElement>> columnInfos = csvColumnInfoMap.getColumnInfos();
         Object[][] data = getDataHandler().getCurrentState();
+        if (data == null) {
+            return null;
+        }
+        Map<Integer, CsvColumnInfo<PsiElement>> columnInfos = csvColumnInfoMap.getColumnInfos();
         int[] widths = new int[columnInfos.size()];
         int tableAutoMaxColumnWidth = CsvEditorSettings.getInstance().getTableAutoMaxColumnWidth();
 
@@ -395,7 +399,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
 
     public final int getColumnCount() {
         Object[][] currentData = getDataHandler().getCurrentState();
-        return currentData.length > 0 ? currentData[0].length : 0;
+        return currentData != null && currentData.length > 0 ? currentData[0].length : 0;
     }
 
     public final Object[][] addRow(int focusedRowIndex, boolean before) {
@@ -463,7 +467,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
     private final class MyPsiTreeChangeListener extends PsiTreeChangeAdapter {
         @Override
         public void childrenChanged(@NotNull PsiTreeChangeEvent event) {
-            if (event.getFile() == psiFile) {
+            if (event.getFile() == psiFile && isEditorSelected()) {
                 selectNotify();
             }
         }
