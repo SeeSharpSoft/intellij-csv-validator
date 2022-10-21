@@ -26,7 +26,7 @@ jacocoTestReport {
 }
 
 group 'net.seesharpsoft.intellij.plugins'
-version '2.19.0'
+version '2.19.1'
 
 apply plugin: 'java'
 project.sourceCompatibility = JavaVersion.VERSION_11
@@ -84,9 +84,7 @@ intellij {
 }
 patchPluginXml {
     changeNotes = """<pre style="font-family: sans-serif">
-NEW: Ability to auto-reload changed files #316
-FIX: NullPointerException when applying editor state #327
-FIX: additional disposed checks
+FIX: Cannot load from object array because "data" is null #335 #337
       </pre>"""
 }
 publishPlugin {

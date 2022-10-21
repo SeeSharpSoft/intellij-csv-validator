@@ -1,3 +1,8 @@
+2.19.1
+Oct 21, 2022
+
+FIX: Cannot load from object array because "data" is null #335 #337
+
 2.19.0
 Jul 24, 2022
 
