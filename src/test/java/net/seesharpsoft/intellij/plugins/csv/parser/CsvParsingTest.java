@@ -64,7 +64,14 @@ public class CsvParsingTest extends ParsingTestCase {
     }
 
     public void testCsvWithComments() {
-        // comment support by default (custom lexer is used)
+        // with default comment character #, default lexer is used
+        CsvEditorSettings.getInstance().setDefaultValueSeparator(CsvValueSeparator.COMMA);
+        doTest(true);
+    }
+
+    public void testCsvWithCommentsCustom() {
+        // with custom comment characters like //, custom lexer is used
+        CsvEditorSettings.getInstance().setCommentIndicator("//");
         CsvEditorSettings.getInstance().setDefaultValueSeparator(CsvValueSeparator.COMMA);
         doTest(true);
     }

@@ -39,15 +39,24 @@ QUOTE=\"
 COMMA=[,:;|\t]
 EOL=\n
 WHITE_SPACE=[ \f]+
+COMMENT=\#[^\n]*
 
 %state AFTER_TEXT
 %state ESCAPED_TEXT
 %state UNESCAPED_TEXT
 %state ESCAPING
+%state COMMENTING
+%state NEW_FIELD
 
 %%
 
-<YYINITIAL> {QUOTE}
+<YYINITIAL> {COMMENT}
+{
+    yybegin(COMMENTING);
+    return CsvTypes.COMMENT;
+}
+
+<YYINITIAL, NEW_FIELD> {QUOTE}
 {
     yybegin(ESCAPED_TEXT);
     return CsvTypes.QUOTE;
@@ -59,7 +68,7 @@ WHITE_SPACE=[ \f]+
     return CsvTypes.QUOTE;
 }
 
-<YYINITIAL> {TEXT}
+<YYINITIAL, NEW_FIELD> {TEXT}
 {
     yybegin(UNESCAPED_TEXT);
     return CsvTypes.TEXT;
@@ -70,7 +79,7 @@ WHITE_SPACE=[ \f]+
     return CsvTypes.TEXT;
 }
 
-<YYINITIAL, UNESCAPED_TEXT> {ESCAPE_CHAR}
+<YYINITIAL, NEW_FIELD, UNESCAPED_TEXT> {ESCAPE_CHAR}
 {
     String text = yytext().toString();
     if (myEscapeCharacter.getCharacter().equals(text)) {
@@ -114,10 +123,10 @@ WHITE_SPACE=[ \f]+
     return TokenType.BAD_CHARACTER;
 }
 
-<YYINITIAL, AFTER_TEXT, UNESCAPED_TEXT> {COMMA}
+<YYINITIAL, NEW_FIELD, AFTER_TEXT, UNESCAPED_TEXT> {COMMA}
 {
     if (myValueSeparator.isValueSeparator(yytext().toString())) {
-        yybegin(YYINITIAL);
+        yybegin(NEW_FIELD);
         return CsvTypes.COMMA;
     }
     if (yystate() != AFTER_TEXT) {
@@ -127,7 +136,7 @@ WHITE_SPACE=[ \f]+
     return TokenType.BAD_CHARACTER;
 }
 
-<YYINITIAL, AFTER_TEXT, UNESCAPED_TEXT> {EOL}
+<YYINITIAL, AFTER_TEXT, UNESCAPED_TEXT, COMMENTING> {EOL}
 {
     yybegin(YYINITIAL);
     return CsvTypes.CRLF;

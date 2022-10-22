@@ -47,14 +47,12 @@ public class CsvSharpLexer extends LexerBase {
 
         UNQUOTED_NEXT_STATES.put(TokenType.WHITESPACE, LexerState.Unquoted);
         UNQUOTED_NEXT_STATES.put(TokenType.TEXT, LexerState.Unquoted);
-        UNQUOTED_NEXT_STATES.put(TokenType.COMMENT_CHARACTER, LexerState.Unquoted);
         UNQUOTED_NEXT_STATES.put(TokenType.VALUE_SEPARATOR, LexerState.Unquoted);
         UNQUOTED_NEXT_STATES.put(TokenType.BEGIN_QUOTE, LexerState.Quoted);
         UNQUOTED_NEXT_STATES.put(TokenType.RECORD_SEPARATOR, LexerState.Initial);
 
         QUOTED_NEXT_STATES.put(TokenType.WHITESPACE, LexerState.Quoted);
         QUOTED_NEXT_STATES.put(TokenType.TEXT, LexerState.Quoted);
-        QUOTED_NEXT_STATES.put(TokenType.COMMENT_CHARACTER, LexerState.Quoted);
         QUOTED_NEXT_STATES.put(TokenType.ESCAPED_CHARACTER, LexerState.Quoted);
         QUOTED_NEXT_STATES.put(TokenType.END_QUOTE, LexerState.Unquoted);
     }
@@ -87,8 +85,7 @@ public class CsvSharpLexer extends LexerBase {
         VALUE_SEPARATOR,
         RECORD_SEPARATOR,
         WHITESPACE,
-        COMMENT,
-        COMMENT_CHARACTER
+        COMMENT
     }
 
     public static class Configuration {
@@ -122,11 +119,7 @@ public class CsvSharpLexer extends LexerBase {
         tokenizer.add(TokenType.VALUE_SEPARATOR, configuration.valueSeparator);
         tokenizer.add(TokenType.RECORD_SEPARATOR, configuration.recordSeparator);
         if (!configuration.commentCharacter.isEmpty()) {
-            tokenizer.add(TokenType.COMMENT_CHARACTER, configuration.commentCharacter);
-            tokenizer.add(TokenType.COMMENT, configuration.commentCharacter + ".*(?=(\n|$))");
-        } else {
-            tokenizer.add(TokenType.COMMENT_CHARACTER, NON_MATCHING_REGEX);
-            tokenizer.add(TokenType.COMMENT, NON_MATCHING_REGEX);
+            tokenizer.add(TokenType.COMMENT, configuration.commentCharacter + ".*[^\\n]");
         }
 
         if (configuration.escapeCharacter.equals(configuration.quoteCharacter)) {
@@ -272,7 +265,6 @@ public class CsvSharpLexer extends LexerBase {
                     currentTokenType = CsvTypes.COMMA;
                     break;
                 case TEXT:
-                case COMMENT_CHARACTER:
                     currentTokenType = CsvTypes.TEXT;
                     break;
                 case COMMENT:
