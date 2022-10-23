@@ -15,11 +15,11 @@
   tokens=[
     TEXT='regexp:[^ ,:;|\t\r\n"\\]+'
     ESCAPED_TEXT='regexp:[,:;|\t\r\n]|""|\\"'
-    ESCAPE_CHARACTER='regexp:\\'
+    BACKSLASH='regexp:\\'
     COMMA='regexp:[,:;|\t]'
     QUOTE='regexp:"'
     CRLF='regexp:\n'
-    COMMENT='regexp:#.*(\n|$)'
+    COMMENT='regexp:#[^\n]*'
    ]
 }
 
@@ -29,6 +29,8 @@ record ::= (COMMENT | (field (COMMA field)*))
 
 field ::= (escaped | nonEscaped)
 
-private escaped ::= QUOTE (TEXT | ESCAPE_CHARACTER | ESCAPED_TEXT)* QUOTE
+private escaped ::= QUOTE quotedText QUOTE
 
-private nonEscaped ::= (TEXT | ESCAPE_CHARACTER)*
+private quotedText ::= (TEXT | BACKSLASH | ESCAPED_TEXT)*
+
+private nonEscaped ::= (TEXT | BACKSLASH)*

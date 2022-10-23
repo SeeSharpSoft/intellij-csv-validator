@@ -34,7 +34,7 @@ import java.util.regex.Pattern;
 
 TEXT=[^ ,:;|\t\r\n\"\\]+
 ESCAPED_TEXT=[,:;|\t\r\n]|\"\"|\\\"
-ESCAPE_CHAR=\\
+BACKSLASH=\\
 QUOTE=\"
 COMMA=[,:;|\t]
 EOL=\n
@@ -79,7 +79,7 @@ COMMENT=\#[^\n]*
     return CsvTypes.TEXT;
 }
 
-<YYINITIAL, NEW_FIELD, UNESCAPED_TEXT> {ESCAPE_CHAR}
+<YYINITIAL, NEW_FIELD, UNESCAPED_TEXT> {BACKSLASH}
 {
     String text = yytext().toString();
     if (myEscapeCharacter.getCharacter().equals(text)) {
@@ -89,7 +89,7 @@ COMMENT=\#[^\n]*
     return CsvTypes.TEXT;
 }
 
-<ESCAPED_TEXT, ESCAPING> {ESCAPE_CHAR} {
+<ESCAPED_TEXT, ESCAPING> {BACKSLASH} {
     String text = yytext().toString();
     if (myEscapeCharacter.getCharacter().equals(text)) {
         switch (yystate()) {
@@ -136,7 +136,7 @@ COMMENT=\#[^\n]*
     return TokenType.BAD_CHARACTER;
 }
 
-<YYINITIAL, AFTER_TEXT, UNESCAPED_TEXT, COMMENTING> {EOL}
+<YYINITIAL, NEW_FIELD, AFTER_TEXT, UNESCAPED_TEXT, COMMENTING> {EOL}
 {
     yybegin(YYINITIAL);
     return CsvTypes.CRLF;

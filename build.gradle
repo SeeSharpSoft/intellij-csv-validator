@@ -16,7 +16,7 @@ plugins {
 }
 
 jacoco {
-    toolVersion = "0.8.6"
+    toolVersion = "0.8.8"
 }
 
 jacocoTestReport {
@@ -41,7 +41,7 @@ repositories {
 dependencies {
     implementation 'net.seesharpsoft.sharping:sharping-commons:0.21.0'
     compileOnly 'org.apache.ant:ant:1.10.12'
-    testImplementation 'org.mockito:mockito-core:4.8.0'
+    testImplementation 'org.mockito:mockito-core:4.8.1'
 }
 sourceSets {
     main {

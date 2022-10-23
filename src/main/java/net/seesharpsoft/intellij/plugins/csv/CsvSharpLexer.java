@@ -18,8 +18,6 @@ import java.util.stream.Collectors;
 
 public class CsvSharpLexer extends LexerBase {
 
-    private final static String NON_MATCHING_REGEX = "[^\\w\\W]";
-
     private final Tokenizer<TokenType> tokenizer;
     private final List<Tokenizer.Token<TokenType>> initialNextStateTokens;
     private final List<Tokenizer.Token<TokenType>> unquotedNextStateTokens;
