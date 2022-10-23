@@ -5,7 +5,6 @@ import com.intellij.psi.tree.IElementType;
 import net.seesharpsoft.UnhandledSwitchCaseException;
 import net.seesharpsoft.commons.util.Tokenizer;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
-import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

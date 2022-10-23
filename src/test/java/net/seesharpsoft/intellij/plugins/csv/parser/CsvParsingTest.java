@@ -1,6 +1,7 @@
 package net.seesharpsoft.intellij.plugins.csv.parser;
 
 import com.intellij.testFramework.ParsingTestCase;
+import net.seesharpsoft.intellij.plugins.csv.CsvEscapeCharacter;
 import net.seesharpsoft.intellij.plugins.csv.CsvParserDefinition;
 import net.seesharpsoft.intellij.plugins.csv.CsvValueSeparator;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
@@ -88,6 +89,11 @@ public class CsvParsingTest extends ParsingTestCase {
         CsvEditorSettings.getInstance().setCommentIndicator("");
         CsvEditorSettings.getInstance().setDefaultValueSeparator(CsvValueSeparator.PIPE);
         CsvEditorSettings.getInstance().setAutoDetectValueSeparator(true);
+        doTest(true);
+    }
+
+    public void testBackslashEscape() {
+        CsvEditorSettings.getInstance().setDefaultEscapeCharacter(CsvEscapeCharacter.BACKSLASH);
         doTest(true);
     }
 

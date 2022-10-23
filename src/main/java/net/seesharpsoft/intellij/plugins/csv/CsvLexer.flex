@@ -3,9 +3,7 @@ package net.seesharpsoft.intellij.plugins.csv;
 import com.intellij.psi.tree.IElementType;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
 import com.intellij.psi.TokenType;
-import com.intellij.lexer.FlexLexer;import org.intellij.grammar.livePreview.LivePreviewElementType;
-
-import java.util.regex.Pattern;
+import com.intellij.lexer.FlexLexer;
 
 %%
 
@@ -18,7 +16,9 @@ import java.util.regex.Pattern;
     private CsvValueSeparator myValueSeparator;
     private CsvEscapeCharacter myEscapeCharacter;
 
-    private static final Pattern ESCAPE_TEXT_PATTERN = Pattern.compile("[,:;|\\t\\r\\n]");
+    private boolean isActualValueSeparator() {
+        return myValueSeparator.isValueSeparator(yytext().toString());
+    }
 
     /**
      * Provide constructor that supports a Project as parameter.
@@ -33,113 +33,100 @@ import java.util.regex.Pattern;
 %eof}
 
 TEXT=[^ ,:;|\t\r\n\"\\]+
-ESCAPED_TEXT=[,:;|\t\r\n]|\"\"|\\\"
-BACKSLASH=\\
+ESCAPED_QUOTE=\"\"|\\\"
+BACKSLASH=\\+
 QUOTE=\"
-COMMA=[,:;|\t]
-EOL=\n
+VALUE_SEPARATOR=[,:;|\t]
+RECORD_SEPARATOR=\n
 WHITE_SPACE=[ \f]+
 COMMENT=\#[^\n]*
 
-%state AFTER_TEXT
-%state ESCAPED_TEXT
-%state UNESCAPED_TEXT
-%state ESCAPING
-%state COMMENTING
-%state NEW_FIELD
+%state UNQUOTED
+%state QUOTED
 
 %%
 
-<YYINITIAL> {COMMENT}
+<YYINITIAL, UNQUOTED> {TEXT}
 {
-    yybegin(COMMENTING);
-    return CsvTypes.COMMENT;
-}
-
-<YYINITIAL, NEW_FIELD> {QUOTE}
-{
-    yybegin(ESCAPED_TEXT);
-    return CsvTypes.QUOTE;
-}
-
-<ESCAPED_TEXT> {QUOTE}
-{
-    yybegin(AFTER_TEXT);
-    return CsvTypes.QUOTE;
-}
-
-<YYINITIAL, NEW_FIELD> {TEXT}
-{
-    yybegin(UNESCAPED_TEXT);
+    yybegin(UNQUOTED);
     return CsvTypes.TEXT;
 }
 
-<UNESCAPED_TEXT, ESCAPED_TEXT> {TEXT}
+<YYINITIAL, UNQUOTED> {BACKSLASH}
 {
+    yybegin(UNQUOTED);
     return CsvTypes.TEXT;
 }
 
-<YYINITIAL, NEW_FIELD, UNESCAPED_TEXT> {BACKSLASH}
+<YYINITIAL, UNQUOTED> {VALUE_SEPARATOR}
 {
-    String text = yytext().toString();
-    if (myEscapeCharacter.getCharacter().equals(text)) {
-        return TokenType.BAD_CHARACTER;
-    }
-    yybegin(UNESCAPED_TEXT);
-    return CsvTypes.TEXT;
-}
-
-<ESCAPED_TEXT, ESCAPING> {BACKSLASH} {
-    String text = yytext().toString();
-    if (myEscapeCharacter.getCharacter().equals(text)) {
-        switch (yystate()) {
-            case ESCAPED_TEXT:
-                yybegin(ESCAPING);
-                break;
-            case ESCAPING:
-                yybegin(ESCAPED_TEXT);
-                break;
-            default:
-                throw new RuntimeException("unhandled state: " + yystate());
-        }
-        return CsvTypes.ESCAPED_TEXT;
-    }
-    return CsvTypes.TEXT;
-}
-
-<ESCAPED_TEXT> {ESCAPED_TEXT}
-{
-    String text = yytext().toString();
-    if (myEscapeCharacter.isEscapedQuote(text)
-        || ESCAPE_TEXT_PATTERN.matcher(text).matches()
-     ) {
-        return CsvTypes.ESCAPED_TEXT;
-    }
-    if (!text.startsWith(CsvEscapeCharacter.QUOTE.getCharacter())) {
-        yypushback(1);
-        return CsvTypes.TEXT;
-    }
-
-    return TokenType.BAD_CHARACTER;
-}
-
-<YYINITIAL, NEW_FIELD, AFTER_TEXT, UNESCAPED_TEXT> {COMMA}
-{
-    if (myValueSeparator.isValueSeparator(yytext().toString())) {
-        yybegin(NEW_FIELD);
+    yybegin(UNQUOTED);
+    if (isActualValueSeparator()) {
         return CsvTypes.COMMA;
     }
-    if (yystate() != AFTER_TEXT) {
-        yybegin(UNESCAPED_TEXT);
-        return CsvTypes.TEXT;
-    }
-    return TokenType.BAD_CHARACTER;
+    return CsvTypes.TEXT;
 }
 
-<YYINITIAL, NEW_FIELD, AFTER_TEXT, UNESCAPED_TEXT, COMMENTING> {EOL}
+<YYINITIAL, UNQUOTED> {QUOTE}
+{
+    yybegin(QUOTED);
+    return CsvTypes.QUOTE;
+}
+
+<YYINITIAL, UNQUOTED> {RECORD_SEPARATOR}
 {
     yybegin(YYINITIAL);
     return CsvTypes.CRLF;
+}
+
+<YYINITIAL> {COMMENT}
+{
+    return CsvTypes.COMMENT;
+}
+
+<QUOTED> {TEXT}
+{
+    return CsvTypes.TEXT;
+}
+
+<QUOTED> {BACKSLASH}
+{
+    if (myEscapeCharacter == CsvEscapeCharacter.BACKSLASH) {
+        int backslashCount = yylength();
+        if (backslashCount > 1 && (backslashCount % 2 != 0)) {
+            yypushback(1);
+        }
+    }
+    return CsvTypes.TEXT;
+}
+
+<QUOTED> {RECORD_SEPARATOR}
+{
+    return CsvTypes.ESCAPED_TEXT;
+}
+
+<QUOTED> {VALUE_SEPARATOR}
+{
+    if (isActualValueSeparator()) {
+        return CsvTypes.ESCAPED_TEXT;
+    }
+    return CsvTypes.TEXT;
+}
+
+<QUOTED> {ESCAPED_QUOTE}
+{
+    String text = yytext().toString();
+    if (!myEscapeCharacter.isEscapedQuote(text)) {
+        yypushback(1);
+        return CsvTypes.TEXT;
+    }
+    return CsvTypes.ESCAPED_TEXT;
+}
+
+<QUOTED> {QUOTE}
+{
+    yybegin(UNQUOTED);
+    return CsvTypes.QUOTE;
 }
 
 {WHITE_SPACE}

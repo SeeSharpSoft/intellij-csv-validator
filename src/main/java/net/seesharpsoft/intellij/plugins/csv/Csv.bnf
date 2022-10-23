@@ -13,13 +13,12 @@
   tokenTypeClass="net.seesharpsoft.intellij.plugins.csv.psi.CsvTokenType"
 
   tokens=[
-    TEXT='regexp:[^ ,:;|\t\r\n"\\]+'
-    ESCAPED_TEXT='regexp:[,:;|\t\r\n]|""|\\"'
-    BACKSLASH='regexp:\\'
-    COMMA='regexp:[,:;|\t]'
-    QUOTE='regexp:"'
-    CRLF='regexp:\n'
-    COMMENT='regexp:#[^\n]*'
+    TEXT
+    ESCAPED_TEXT
+    COMMA
+    QUOTE
+    CRLF
+    COMMENT
    ]
 }
 
@@ -31,6 +30,6 @@ field ::= (escaped | nonEscaped)
 
 private escaped ::= QUOTE quotedText QUOTE
 
-private quotedText ::= (TEXT | BACKSLASH | ESCAPED_TEXT)*
+private quotedText ::= (TEXT | ESCAPED_TEXT)*
 
-private nonEscaped ::= (TEXT | BACKSLASH)*
+private nonEscaped ::= TEXT*
