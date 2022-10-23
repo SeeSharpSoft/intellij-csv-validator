@@ -15,30 +15,32 @@ import com.intellij.lexer.FlexLexer;
 %{
     private CsvValueSeparator myValueSeparator;
     private CsvEscapeCharacter myEscapeCharacter;
+    private boolean mySupportComments;
 
     private boolean isActualValueSeparator() {
         return myValueSeparator.isValueSeparator(yytext().toString());
     }
 
     /**
-     * Provide constructor that supports a Project as parameter.
+     * Provide constructor that support parameters to customize lexer.
      */
-    CsvLexer(java.io.Reader in, CsvValueSeparator valueSeparator, CsvEscapeCharacter escapeCharacter) {
+    CsvLexer(java.io.Reader in, CsvValueSeparator valueSeparator, CsvEscapeCharacter escapeCharacter, boolean supportComments) {
       this(in);
       myValueSeparator = valueSeparator;
       myEscapeCharacter = escapeCharacter;
+      mySupportComments = supportComments;
     }
 %}
 %eof{  return;
 %eof}
 
-TEXT=[^ ,:;|\t\r\n\"\\]+
-ESCAPED_QUOTE=\"\"|\\\"
-BACKSLASH=\\+
-QUOTE=\"
+WHITE_SPACE=[ \f]+
 VALUE_SEPARATOR=[,:;|\t]
 RECORD_SEPARATOR=\n
-WHITE_SPACE=[ \f]+
+ESCAPED_QUOTE=\"\"|\\\"
+QUOTE=\"
+TEXT=[^ ,:;|\t\r\n\"\\]+
+BACKSLASH=\\+
 COMMENT=\#[^\n]*
 
 %state UNQUOTED
@@ -81,7 +83,12 @@ COMMENT=\#[^\n]*
 
 <YYINITIAL> {COMMENT}
 {
-    return CsvTypes.COMMENT;
+    if (mySupportComments) {
+        return CsvTypes.COMMENT;
+    }
+    yypushback(yylength() - 1);
+    yybegin(UNQUOTED);
+    return CsvTypes.TEXT;
 }
 
 <QUOTED> {TEXT}

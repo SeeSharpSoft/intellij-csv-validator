@@ -28,7 +28,7 @@ public class CsvLexerFactory {
                     "\"",
                     commentIndicator));
         }
-        return new CsvLexerAdapter(separator, escapeCharacter);
+        return new CsvLexerAdapter(separator, escapeCharacter, !commentIndicator.isEmpty());
     }
 
     public Lexer createLexer(Project project, VirtualFile file) {
