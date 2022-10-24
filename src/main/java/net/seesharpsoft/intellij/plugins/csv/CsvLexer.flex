@@ -18,7 +18,7 @@ import com.intellij.lexer.FlexLexer;
     private boolean mySupportComments;
 
     private boolean isActualValueSeparator() {
-        return myValueSeparator.isValueSeparator(yytext().toString());
+        return myValueSeparator.isValueSeparator(yycharat(0));
     }
 
     /**
