@@ -19,7 +19,7 @@ jacocoTestReport {
 }
 
 group 'net.seesharpsoft.intellij.plugins'
-version '2.19.1'
+version '2.20.0'
 
 apply plugin: 'java'
 project.sourceCompatibility = JavaVersion.VERSION_11
@@ -78,6 +78,9 @@ intellij {
 patchPluginXml {
     changeNotes = """<pre style="font-family: sans-serif">
 FIX: Cannot load from object array because "data" is null #335 #337
+NEW: Support fast lexing for default comments
+NEW: Simplify & unify both lexers
+FIX: Empty comment indicator
       </pre>"""
 }
 publishPlugin {
