@@ -3,7 +3,6 @@ package net.seesharpsoft.intellij.plugins.csv.settings;
 import com.intellij.openapi.application.Application;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.openapi.editor.ex.EditorSettingsExternalizable;
@@ -104,7 +103,7 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
         if (application.isUnitTestMode()) {
             return CsvEditorSettings.STATIC_TEST_INSTANCE;
         }
-        return application.isDisposed() ? new CsvEditorSettings() :  ServiceManager.getService(CsvEditorSettings.class);
+        return application.isDisposed() ? new CsvEditorSettings() : application.getService(CsvEditorSettings.class);
     }
 
     public void addPropertyChangeListener(PropertyChangeListener listener) {

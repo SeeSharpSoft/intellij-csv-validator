@@ -19,7 +19,7 @@ jacocoTestReport {
 }
 
 group 'net.seesharpsoft.intellij.plugins'
-version '2.20.0'
+version '3.0.0'
 
 apply plugin: 'java'
 project.sourceCompatibility = JavaVersion.VERSION_11
@@ -70,17 +70,14 @@ idea {
 apply plugin: 'org.jetbrains.intellij'
 intellij {
     // IDE version - https://www.jetbrains.com/intellij-repository/releases
-    version = System.getenv().getOrDefault('IDEA_VERSION', 'IC-2020.1.1')
+    version = System.getenv().getOrDefault('IDEA_VERSION', 'IC-2022.1.1')
     pluginName = 'CSV'
     updateSinceUntilBuild = false
     downloadSources = Boolean.parseBoolean(System.getenv().getOrDefault('IDEA_SOURCES', "true"))
 }
 patchPluginXml {
     changeNotes = """<pre style="font-family: sans-serif">
-FIX: Cannot load from object array because "data" is null #335 #337
-NEW: Support fast lexing for default comments
-NEW: Simplify & unify both lexers
-FIX: Empty comment indicator
+NEW: major update release!
       </pre>"""
 }
 publishPlugin {

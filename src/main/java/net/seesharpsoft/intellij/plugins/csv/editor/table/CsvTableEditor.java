@@ -10,6 +10,7 @@ import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.editor.colors.EditorFontType;
 import com.intellij.openapi.fileEditor.*;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.CheckedDisposable;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.UserDataHolder;
 import com.intellij.openapi.util.UserDataHolderBase;
@@ -35,9 +36,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
+public abstract class CsvTableEditor implements FileEditor, FileEditorLocation, CheckedDisposable {
 
     public static final String EDITOR_NAME = "Table Editor";
+
+    private boolean myDisposed = false;
 
     protected final Project project;
     protected final VirtualFile file;
@@ -222,7 +225,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
 
     @Override
     public boolean isValid() {
-        if (file == null || !file.isValid()) {
+        if (this.isDisposed() || file == null || !file.isValid()) {
             return false;
         }
         CsvFile csvFile = this.getCsvFile();
@@ -273,7 +276,15 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
 
     @Override
     public void dispose() {
+        if (this.isDisposed()) return;
+
         this.deselectNotify();
+        this.myDisposed = true;
+    }
+
+    @Override
+    public boolean isDisposed() {
+        return this.myDisposed;
     }
 
     @Nullable

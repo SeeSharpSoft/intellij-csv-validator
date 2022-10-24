@@ -5,7 +5,6 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.actionSystem.ToggleAction;
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.psi.PsiFile;
 import com.intellij.util.FileContentUtilCore;
@@ -42,7 +41,7 @@ public class CsvChangeSeparatorAction extends ToggleAction {
         if (language instanceof CsvSeparatorHolder) {
             return;
         }
-        CsvFileAttributes csvFileAttributes = ServiceManager.getService(psiFile.getProject(), CsvFileAttributes.class);
+        CsvFileAttributes csvFileAttributes = psiFile.getProject().getService(CsvFileAttributes.class);
         csvFileAttributes.setFileSeparator(psiFile, this.mySeparator);
         FileContentUtilCore.reparseFiles(psiFile.getVirtualFile());
 

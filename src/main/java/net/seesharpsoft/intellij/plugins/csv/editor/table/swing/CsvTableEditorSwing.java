@@ -17,7 +17,7 @@ import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditorState;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.api.TableActions;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.api.TableDataChangeEvent;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvFile;
-import net.seesharpsoft.intellij.util.DisposerAwareRunnable;
+import net.seesharpsoft.intellij.util.CheckedDisposableAwareRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -249,7 +249,7 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
             last = e.getLastRow() + 1;
         }
 
-        SwingUtilities.invokeLater(DisposerAwareRunnable.create(() -> updateRowHeights(first, last), this));
+        SwingUtilities.invokeLater(CheckedDisposableAwareRunnable.create(() -> updateRowHeights(first, last), this));
     }
 
     private void updateRowHeights(int first, int last) {

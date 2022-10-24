@@ -2,7 +2,6 @@ package net.seesharpsoft.intellij.plugins.csv.components;
 
 import com.intellij.lang.Language;
 import com.intellij.openapi.components.PersistentStateComponent;
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.openapi.diagnostic.Logger;
@@ -42,7 +41,7 @@ public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttrib
     }
 
     public static CsvFileAttributes getInstance(Project project) {
-        CsvFileAttributes csvFileAttributes = project != null ? ServiceManager.getService(project, CsvFileAttributes.class) : null;
+        CsvFileAttributes csvFileAttributes = project != null ? project.getService(CsvFileAttributes.class) : null;
         return csvFileAttributes == null ? new CsvFileAttributes() : csvFileAttributes;
     }
 

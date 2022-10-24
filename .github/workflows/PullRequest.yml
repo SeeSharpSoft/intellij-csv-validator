@@ -16,9 +16,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - ideaVersion: PY-2020.1.1
+          - ideaVersion: PY-2022.1.1
             gkVersion: 2021.1.2
-          - ideaVersion: LATEST-EAP-SNAPSHOT
+          - ideaVersion: IC-2022.2.1
             gkVersion: 2021.1.2
 
     steps:

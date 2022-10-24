@@ -1,3 +1,13 @@
+# Release 3
+
+## Goals
+
+- PSI aware table editing
+- performance (!)
+- fix compatibility issues
+- localization? (maybe)
+
+
 [![Plugin version](https://img.shields.io/jetbrains/plugin/d/10037-csv-plugin.svg)](https://plugins.jetbrains.com/plugin/10037-csv-plugin)
 [![Build Action Status](https://github.com/SeeSharpSoft/intellij-csv-validator/actions/workflows/CIBuild.yml/badge.svg)](https://github.com/SeeSharpSoft/intellij-csv-validator/actions)
 [![EAP Status](https://github.com/SeeSharpSoft/intellij-csv-validator/actions/workflows/CronEAP.yml/badge.svg)](https://github.com/SeeSharpSoft/intellij-csv-validator/actions)
@@ -430,7 +440,7 @@ You can also download the JAR package from the [Jetbrains plugin repository](htt
 
 Since version 2.14.0, the plugins requires the IntelliJ platform to be executed on JRE11 or higher. If this is not the case, the following error log can be noticed:
 
-`com.intellij.diagnostic.PluginException: While loading class net.seesharpsoft.intellij.plugins.csv.CsvFileTypeOverrider: net/seesharpsoft/intellij/plugins/csv/CsvFileTypeOverrider has been compiled by a more recent version of the Java Runtime (class file version 55.0), this version of the Java Runtime only recognizes class file versions up to 52.0 [Plugin: net.seesharpsoft.intellij.plugins.csv]`
+`com.intellij.diagnostic.PluginException: While loading class <className>: <className> has been compiled by a more recent version of the Java Runtime (class file version 55.0), this version of the Java Runtime only recognizes class file versions up to 52.0 [Plugin: net.seesharpsoft.intellij.plugins.csv]`
 
 In some cases the error log doesn't seem to point this out in a noticeable manner, but the IDE doesn't work correctly after enabling the plugin. Always disable the plugin first before continuing with the following steps.
 

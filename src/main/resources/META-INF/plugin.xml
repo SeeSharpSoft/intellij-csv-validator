@@ -1,4 +1,4 @@
-<idea-plugin require-restart="true">
+<idea-plugin require-restart="false">
     <id>net.seesharpsoft.intellij.plugins.csv</id>
     <name>CSV</name>
     <vendor url="https://github.com/SeeSharpSoft/intellij-csv-validator">
@@ -49,7 +49,7 @@
     ]]></description>
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
-    <idea-version since-build="201" />
+    <idea-version since-build="221" />
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
          on how to target different products -->
@@ -59,7 +59,6 @@
         <fileType name="CSV" language="csv" implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvFileType" extensions="csv" fieldName="INSTANCE"/>
         <fileType name="TSV" language="tsv" implementationClass="net.seesharpsoft.intellij.plugins.tsv.TsvFileType" extensions="tsv;tab" fieldName="INSTANCE"/>
         <fileType name="PSV" language="psv" implementationClass="net.seesharpsoft.intellij.plugins.psv.PsvFileType" extensions="psv" fieldName="INSTANCE"/>
-        <fileTypeOverrider implementation="net.seesharpsoft.intellij.plugins.csv.CsvFileTypeOverrider" />
 
         <lang.parserDefinition language="csv"
                                implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvParserDefinition"/>
@@ -154,7 +153,10 @@
 
         <lang.commenter implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvCommenter" language="csv" />
 
+        <!-- support for URL referencing -->
         <psi.referenceContributor language="csv" implementation="net.seesharpsoft.intellij.plugins.csv.psi.CsvPsiReferenceContributor" />
+
+        <notificationGroup displayType="STICKY_BALLOON" id="net.seesharpsoft.intellij.plugins.csv" isLogByDefault="true" hideFromSettings="true" />
     </extensions>
 
     <actions>
