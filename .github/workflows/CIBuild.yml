@@ -24,4 +24,4 @@ jobs:
     - name: Build with Gradle
       env:
         IDEA_SOURCES: false
-      run: xvfb-run ./gradlew build
+      run: xvfb-run ./gradlew test

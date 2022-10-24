@@ -1,10 +1,3 @@
-buildscript {
-    repositories {
-        mavenCentral()
-        maven { url 'https://jitpack.io' }
-    }
-}
-
 plugins {
     // https://github.com/JetBrains/gradle-intellij-plugin
     id 'org.jetbrains.intellij' version '1.9.0'
@@ -16,7 +9,7 @@ plugins {
 }
 
 jacoco {
-    toolVersion = "0.8.6"
+    toolVersion = "0.8.8"
 }
 
 jacocoTestReport {
@@ -26,7 +19,7 @@ jacocoTestReport {
 }
 
 group 'net.seesharpsoft.intellij.plugins'
-version '2.19.1'
+version '2.20.0'
 
 apply plugin: 'java'
 project.sourceCompatibility = JavaVersion.VERSION_11
@@ -41,7 +34,7 @@ repositories {
 dependencies {
     implementation 'net.seesharpsoft.sharping:sharping-commons:0.21.0'
     compileOnly 'org.apache.ant:ant:1.10.12'
-    testImplementation 'org.mockito:mockito-core:4.8.0'
+    testImplementation 'org.mockito:mockito-core:4.8.1'
 }
 sourceSets {
     main {
@@ -85,6 +78,9 @@ intellij {
 patchPluginXml {
     changeNotes = """<pre style="font-family: sans-serif">
 FIX: Cannot load from object array because "data" is null #335 #337
+NEW: Support fast lexing for default comments
+NEW: Simplify & unify both lexers
+FIX: Empty comment indicator
       </pre>"""
 }
 publishPlugin {
@@ -128,4 +124,11 @@ tasks.named("generateLexer").configure {
 
 compileJava {
     dependsOn generateLexer
+}
+
+// TODO https://youtrack.jetbrains.com/issue/IDEA-298989 - remove after gradle plugin v1.9.1 or v1.10.0 released
+setupDependencies {
+    doLast {
+        fileTree("$buildDir/instrumented/instrumentCode") { include("**/*TableEditorSwing.class") }.files.forEach { delete(it) }
+    }
 }
