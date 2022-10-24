@@ -40,38 +40,32 @@ public class CsvAnnotator implements Annotator {
             return;
         }
 
-        CsvColumnInfo<PsiElement> columnInfo = csvFile.getColumnInfoMap().getColumnInfo(element);
-
-        if (columnInfo != null) {
-            PsiElement headerElement = columnInfo.getHeaderElement();
-            String message = FontUtil.getHtmlWithFonts(
-                    XmlStringUtil.escapeString(headerElement == null ? "" : headerElement.getText(), true)
-            );
-            String tooltip = null;
-            if (showInfoBalloon(holder.getCurrentAnnotationSession())) {
-                tooltip = XmlStringUtil.wrapInHtml(
-                        String.format("%s<br /><br />Header: %s<br />Index: %d",
-                                FontUtil.getHtmlWithFonts(
-                                        XmlStringUtil.escapeString(element.getText(), true)
-                                ),
-                                message,
-                                columnInfo.getColumnIndex() + (CsvEditorSettings.getInstance().isZeroBasedColumnNumbering() ? 0 : 1)
-                        )
+        if (showInfoBalloon(holder.getCurrentAnnotationSession())) {
+            CsvColumnInfo<PsiElement> columnInfo = csvFile.getColumnInfoMap().getColumnInfo(element);
+            if (columnInfo != null) {
+                PsiElement headerElement = columnInfo.getHeaderElement();
+                String message = FontUtil.getHtmlWithFonts(
+                        XmlStringUtil.escapeString(headerElement == null ? "" : headerElement.getText(), true)
                 );
-            }
+                String tooltip = XmlStringUtil.wrapInHtml(
+                    String.format("%s<br /><br />Header: %s<br />Index: %d",
+                        FontUtil.getHtmlWithFonts(
+                                XmlStringUtil.escapeString(element.getText(), true)
+                        ),
+                        message,
+                        columnInfo.getColumnIndex() + (CsvEditorSettings.getInstance().isZeroBasedColumnNumbering() ? 0 : 1)
+                    )
+                );
 
-            AnnotationBuilder annotationBuilder = holder.newAnnotation(CSV_COLUMN_INFO_SEVERITY, message)
-                    .range(element)
-                    .needsUpdateOnTyping(false);
+                AnnotationBuilder annotationBuilder = holder.newAnnotation(CSV_COLUMN_INFO_SEVERITY, message)
+                        .range(element)
+                        .needsUpdateOnTyping(false);
 
-            if (CsvEditorSettings.getInstance().getValueColoring() == CsvEditorSettings.ValueColoring.RAINBOW) {
-                annotationBuilder.enforcedTextAttributes(CsvColorSettings.getTextAttributesOfColumn(columnInfo.getColumnIndex(), holder.getCurrentAnnotationSession()));
+                if (tooltip != null) {
+                    annotationBuilder.tooltip(tooltip);
+                }
+                annotationBuilder.create();
             }
-            if (tooltip != null) {
-                annotationBuilder.tooltip(tooltip);
-            }
-
-            annotationBuilder.create();
         }
     }
 
@@ -94,8 +88,8 @@ public class CsvAnnotator implements Annotator {
                             CsvEditorSettings.getInstance().getTabHighlightColor(),
                             null, null, 0);
                     holder.getCurrentAnnotationSession().putUserData(TAB_SEPARATOR_HIGHLIGHT_COLOR_KEY, textAttributes);
-                    holder.getCurrentAnnotationSession().putUserData(TAB_SEPARATOR_HIGHLIGHT_COLOR_DETERMINED_KEY, Boolean.TRUE);
                 }
+                holder.getCurrentAnnotationSession().putUserData(TAB_SEPARATOR_HIGHLIGHT_COLOR_DETERMINED_KEY, Boolean.TRUE);
             }
             if (textAttributes != null && showInfoBalloon(holder.getCurrentAnnotationSession())) {
                 holder.newAnnotation(CSV_COLUMN_INFO_SEVERITY, "↹")
