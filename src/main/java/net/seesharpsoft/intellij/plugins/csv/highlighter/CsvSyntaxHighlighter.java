@@ -27,6 +27,9 @@ public class CsvSyntaxHighlighter extends SyntaxHighlighterBase {
     @NotNull
     @Override
     public TextAttributesKey[] getTokenHighlights(IElementType tokenType) {
-        return ((CsvHighlightingElement)tokenType).getTextAttributesKeys();
+        if (tokenType instanceof CsvHighlightingElement) {
+            return ((CsvHighlightingElement) tokenType).getTextAttributesKeys();
+        }
+        return TextAttributesKey.EMPTY_ARRAY;
     }
 }

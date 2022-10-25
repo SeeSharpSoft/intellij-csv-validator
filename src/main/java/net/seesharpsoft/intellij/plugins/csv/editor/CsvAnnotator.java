@@ -7,12 +7,9 @@ import com.intellij.openapi.vcs.ui.FontUtil;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.xml.util.XmlStringUtil;
-import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfo;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.CsvValueSeparator;
-import net.seesharpsoft.intellij.plugins.csv.psi.CsvFile;
-import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
-import net.seesharpsoft.intellij.plugins.csv.settings.CsvColorSettings;
+import net.seesharpsoft.intellij.plugins.csv.psi.*;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import org.jetbrains.annotations.NotNull;
 
@@ -41,32 +38,35 @@ public class CsvAnnotator implements Annotator {
         }
 
         if (showInfoBalloon(holder.getCurrentAnnotationSession())) {
-            CsvColumnInfo<PsiElement> columnInfo = csvFile.getColumnInfoMap().getColumnInfo(element);
-            if (columnInfo != null) {
-                PsiElement headerElement = columnInfo.getHeaderElement();
-                String message = FontUtil.getHtmlWithFonts(
-                        XmlStringUtil.escapeString(headerElement == null ? "" : headerElement.getText(), true)
-                );
-                String tooltip = XmlStringUtil.wrapInHtml(
-                    String.format("%s<br /><br />Header: %s<br />Index: %d",
-                        FontUtil.getHtmlWithFonts(
-                                XmlStringUtil.escapeString(element.getText(), true)
-                        ),
-                        message,
-                        columnInfo.getColumnIndex() + (CsvEditorSettings.getInstance().isZeroBasedColumnNumbering() ? 0 : 1)
-                    )
-                );
+            int fieldIndex = CsvHelper.getFieldIndex(element);
+            String header = getHeaderText(csvFile, fieldIndex);
+            String message = FontUtil.getHtmlWithFonts(
+                    XmlStringUtil.escapeString(header, true)
+            );
+            String tooltip = XmlStringUtil.wrapInHtml(
+                String.format("%s<br /><br />Header: %s<br />Index: %d",
+                    FontUtil.getHtmlWithFonts(
+                            XmlStringUtil.escapeString(element.getText(), true)
+                    ),
+                    message,
+                    fieldIndex + (CsvEditorSettings.getInstance().isZeroBasedColumnNumbering() ? 0 : 1)
+                )
+            );
 
-                AnnotationBuilder annotationBuilder = holder.newAnnotation(CSV_COLUMN_INFO_SEVERITY, message)
-                        .range(element)
-                        .needsUpdateOnTyping(false);
+            AnnotationBuilder annotationBuilder = holder.newAnnotation(CSV_COLUMN_INFO_SEVERITY, message)
+                    .range(element)
+                    .needsUpdateOnTyping(false);
 
-                if (tooltip != null) {
-                    annotationBuilder.tooltip(tooltip);
-                }
-                annotationBuilder.create();
+            if (tooltip != null) {
+                annotationBuilder.tooltip(tooltip);
             }
+            annotationBuilder.create();
         }
+    }
+
+    protected String getHeaderText(@NotNull final CsvFile csvFile, int index) {
+        PsiElement nthChild = CsvHelper.getNthChild(csvFile.getFirstChild(), index, CsvTypes.FIELD);
+        return nthChild instanceof CsvField ? nthChild.getText() : "";
     }
 
     protected boolean showInfoBalloon(@NotNull AnnotationSession annotationSession) {

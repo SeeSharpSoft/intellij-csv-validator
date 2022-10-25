@@ -96,6 +96,8 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
     }
 
     private void initializedUIComponents() {
+        applyEditorState(getFileEditorState());
+
         EditorColorsScheme editorColorsScheme = EditorColorsManager.getInstance().getGlobalScheme();
 
         btnRedo.addActionListener(tableEditorActions.redo);
@@ -155,13 +157,11 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
         setFontSize(getGlobalFontSize());
         baseFontHeight = getFontHeight();
 
-        applyEditorState(getFileEditorState());
-
         rowHeadersTable = TableRowUtilities.addNumberColumn(tblEditor, 1);
     }
 
     protected void applyTableChangeListener() {
-        if (!listenerApplied && isEditable()) {
+        if (!listenerApplied && isEditorSelected() && isEditable()) {
             listenerApplied = true;
             tblEditor.getModel().addTableModelListener(tableEditorListener);
             tblEditor.addMouseListener(this.tableEditorMouseListener);

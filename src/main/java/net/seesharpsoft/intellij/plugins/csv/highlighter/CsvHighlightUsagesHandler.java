@@ -6,10 +6,8 @@ import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
 import com.intellij.util.Consumer;
-import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfo;
-import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfoMap;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
-import net.seesharpsoft.intellij.plugins.csv.psi.CsvFile;
+import net.seesharpsoft.intellij.plugins.csv.psi.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
@@ -47,15 +45,11 @@ public class CsvHighlightUsagesHandler extends HighlightUsagesHandlerBase {
 
     @Override
     public void computeUsages(List list) {
-        CsvColumnInfoMap<PsiElement> columnInfoMap = getCsvFile().getColumnInfoMap();
-        for (PsiElement listElement : (List<PsiElement>)list) {
-            CsvColumnInfo<PsiElement> csvColumnInfo = getCsvFile().getColumnInfoMap().getColumnInfo(listElement);
-            if (csvColumnInfo == null) {
-                continue;
-            }
-            csvColumnInfo.getElements().forEach(element -> this.addOccurrence(columnInfoMap.getRowInfo(element)));
+        for (PsiElement psiElement : (List<PsiElement>) list) {
+            int index = CsvHelper.getFieldIndex(psiElement);
+            if (index == -1) continue;
+            addOccurrence((CsvFile) psiElement.getContainingFile(), index);
         }
-
     }
 
     @Override
@@ -63,13 +57,18 @@ public class CsvHighlightUsagesHandler extends HighlightUsagesHandlerBase {
         consumer.consume(list);
     }
 
-    protected void addOccurrence(CsvColumnInfo<PsiElement>.RowInfo rowInfo) {
-        if (rowInfo == null) {
-            return;
-        }
-        TextRange range = rowInfo.getTextRange();
-        if (range != null && range.getLength() > 0) {
-            this.myReadUsages.add(range);
-        }
+    protected void addOccurrence(@NotNull CsvFile csvFile, int index) {
+        csvFile.acceptChildren(new CsvVisitor() {
+            @Override
+            public void visitRecord(@NotNull CsvRecord record) {
+                PsiElement field = CsvHelper.getNthChild(record, index, CsvTypes.FIELD);
+                if (field != null) {
+                    TextRange range = field.getTextRange();
+                    if (range != null && range.getLength() > 0) {
+                        myReadUsages.add(range);
+                    }
+                }
+            }
+        });
     }
 }

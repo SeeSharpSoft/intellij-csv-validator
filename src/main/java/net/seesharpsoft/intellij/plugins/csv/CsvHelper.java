@@ -25,6 +25,7 @@ import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import net.seesharpsoft.intellij.plugins.psv.PsvFileType;
 import net.seesharpsoft.intellij.plugins.tsv.TsvFileType;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -119,6 +120,35 @@ public final class CsvHelper {
             }
         }
         return currentElement;
+    }
+
+    public static int getFieldIndex(@NotNull final PsiElement element) {
+        PsiElement fieldElement = getParentFieldElement(element);
+        return findIndex(fieldElement.getParent(), fieldElement, CsvTypes.FIELD);
+    }
+
+    @Nullable
+    public static PsiElement getNthChild(@Nullable final PsiElement parent, int n, @Nullable IElementType countable) {
+        if (parent != null) {
+            for (PsiElement child = parent.getFirstChild(); child != null; child = child.getNextSibling()) {
+                if (countable != null && getElementType(child) != countable) continue;
+                if (n == 0) return child;
+                --n;
+            }
+        }
+        return null;
+    }
+
+    public static int findIndex(@Nullable final PsiElement parent, @NotNull PsiElement needle, @Nullable IElementType countable) {
+        int index = 0;
+        if (parent != null) {
+            for (PsiElement child = parent.getFirstChild(); child != null; child = child.getNextSibling()) {
+                if (countable != null && getElementType(child) != countable) continue;
+                if (needle == child) return index;
+                ++index;
+            }
+        }
+        return -1;
     }
 
     public static PsiElement getPreviousCRLF(final PsiElement element) {
