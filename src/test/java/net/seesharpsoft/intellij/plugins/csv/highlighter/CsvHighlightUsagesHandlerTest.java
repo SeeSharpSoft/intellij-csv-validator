@@ -39,16 +39,16 @@ public class CsvHighlightUsagesHandlerTest extends BasePlatformTestCase {
         RangeHighlighter[] rangeHighlighters = testHighlightUsages("HighlightUsagesTestData01.csv");
 
         assertSize(2, rangeHighlighters);
-        assertHighlightedText(rangeHighlighters[0], " Header 2");
-        assertHighlightedText(rangeHighlighters[1], " Value 2");
+        assertHighlightedText(rangeHighlighters[0], "Header 2");
+        assertHighlightedText(rangeHighlighters[1], "Value 2");
     }
 
     public void testHighlightUsages02() {
         RangeHighlighter[] rangeHighlighters = testHighlightUsages("HighlightUsagesTestData02.csv");
 
         assertSize(2, rangeHighlighters);
-        assertHighlightedText(rangeHighlighters[0], " Header 2");
-        assertHighlightedText(rangeHighlighters[1], " Value 2");
+        assertHighlightedText(rangeHighlighters[0], "Header 2");
+        assertHighlightedText(rangeHighlighters[1], "Value 2");
     }
 
     public void testHighlightUsages03() {
@@ -63,22 +63,22 @@ public class CsvHighlightUsagesHandlerTest extends BasePlatformTestCase {
         RangeHighlighter[] rangeHighlighters = testHighlightUsages("HighlightUsagesTestData04.csv");
 
         assertSize(1, rangeHighlighters);
-        assertHighlightedText(rangeHighlighters[0], " Value 3");
+        assertHighlightedText(rangeHighlighters[0], "Value 3");
     }
 
     public void testHighlightUsages05() {
         RangeHighlighter[] rangeHighlighters = testHighlightUsages("HighlightUsagesTestData05.csv");
 
         assertSize(2, rangeHighlighters);
-        assertHighlightedText(rangeHighlighters[0], " Header 2");
-        assertHighlightedText(rangeHighlighters[1], " Value 2");
+        assertHighlightedText(rangeHighlighters[0], "Header 2");
+        assertHighlightedText(rangeHighlighters[1], "Value 2");
     }
 
     public void testHighlightUsages06() {
         RangeHighlighter[] rangeHighlighters = testHighlightUsages("HighlightUsagesTestData06.csv");
 
         assertSize(1, rangeHighlighters);
-        assertHighlightedText(rangeHighlighters[0], " Value 3");
+        assertHighlightedText(rangeHighlighters[0], "Value 3");
     }
 
     public void testHighlightUsages07() {

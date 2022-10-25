@@ -6,16 +6,16 @@ import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
 import com.intellij.util.Consumer;
-import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfo;
-import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfoMap;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
-import net.seesharpsoft.intellij.plugins.csv.psi.CsvFile;
+import net.seesharpsoft.intellij.plugins.csv.psi.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.List;
 
 public class CsvHighlightUsagesHandler extends HighlightUsagesHandlerBase {
+
+    private static int MAX_HIGHLIGHTING_ROWS = 200;
 
     protected CsvHighlightUsagesHandler(@NotNull Editor editor, @NotNull CsvFile file) {
         super(editor, file);
@@ -47,15 +47,13 @@ public class CsvHighlightUsagesHandler extends HighlightUsagesHandlerBase {
 
     @Override
     public void computeUsages(List list) {
-        CsvColumnInfoMap<PsiElement> columnInfoMap = getCsvFile().getColumnInfoMap();
-        for (PsiElement listElement : (List<PsiElement>)list) {
-            CsvColumnInfo<PsiElement> csvColumnInfo = getCsvFile().getColumnInfoMap().getColumnInfo(listElement);
-            if (csvColumnInfo == null) {
-                continue;
-            }
-            csvColumnInfo.getElements().forEach(element -> this.addOccurrence(columnInfoMap.getRowInfo(element)));
+        for (PsiElement psiElement : (List<PsiElement>) list) {
+            int index = CsvHelper.getFieldIndex(psiElement);
+            if (index == -1) continue;
+            CsvRecord csvRecord = (CsvRecord) psiElement.getParent();
+            int leftOverRows = addOccurrence(csvRecord, index, MAX_HIGHLIGHTING_ROWS / 2, true);
+            addOccurrence(csvRecord, index, MAX_HIGHLIGHTING_ROWS / 2 + leftOverRows, false);
         }
-
     }
 
     @Override
@@ -63,13 +61,19 @@ public class CsvHighlightUsagesHandler extends HighlightUsagesHandlerBase {
         consumer.consume(list);
     }
 
-    protected void addOccurrence(CsvColumnInfo<PsiElement>.RowInfo rowInfo) {
-        if (rowInfo == null) {
-            return;
+    protected int addOccurrence(@NotNull CsvRecord csvRecord, int index, int noOfSiblings, boolean backward) {
+        int count = noOfSiblings;
+        for (PsiElement sibling = backward ? csvRecord.getPrevSibling() : csvRecord.getNextSibling();
+             count != 0 && sibling != null;
+             sibling = backward ? sibling.getPrevSibling() : sibling.getNextSibling(), --count) {
+            PsiElement field = CsvHelper.getNthChild(sibling, index, CsvTypes.FIELD);
+            if (field != null) {
+                TextRange range = field.getTextRange();
+                if (range != null && range.getLength() > 0) {
+                    myReadUsages.add(range);
+                }
+            }
         }
-        TextRange range = rowInfo.getTextRange();
-        if (range != null && range.getLength() > 0) {
-            this.myReadUsages.add(range);
-        }
+        return count;
     }
 }

@@ -101,6 +101,10 @@ public class CsvValueSeparator {
         return myPattern.matcher(text).matches();
     }
 
+    public boolean isValueSeparator(char c) {
+        return myCharacter.charAt(0) == c;
+    }
+
     public String getName() {
         return myName;
     }
