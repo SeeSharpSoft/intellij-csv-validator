@@ -19,7 +19,7 @@ jacocoTestReport {
 }
 
 group 'net.seesharpsoft.intellij.plugins'
-version '2.20.0'
+version '2.21.0'
 
 apply plugin: 'java'
 project.sourceCompatibility = JavaVersion.VERSION_11
@@ -77,10 +77,12 @@ intellij {
 }
 patchPluginXml {
     changeNotes = """<pre style="font-family: sans-serif">
-FIX: Cannot load from object array because "data" is null #335 #337
-NEW: Support fast lexing for default comments
-NEW: Simplify & unify both lexers
-FIX: Empty comment indicator
+PERF: support comments in fast lexer
+PERF: reworked (rainbow) coloring
+PERF: avoid formatting while typing
+PERF: limit column highlighting to 1000 entries around caret
+PERF: limit calculation and buffering of CSV column info data
+FIX: short comments
       </pre>"""
 }
 publishPlugin {
