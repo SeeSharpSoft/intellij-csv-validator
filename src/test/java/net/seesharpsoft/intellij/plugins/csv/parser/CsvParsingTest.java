@@ -85,7 +85,6 @@ public class CsvParsingTest extends ParsingTestCase {
     }
 
     public void testCsvWithCommentsWithoutCommentSupportCustom() {
-        setName("CsvWithCommentsWithoutCommentSupport");
         // enforce custom lexer
         CsvEditorSettings.getInstance().setDefaultValueSeparator(new CsvValueSeparator(","));
         CsvEditorSettings.getInstance().setCommentIndicator("");

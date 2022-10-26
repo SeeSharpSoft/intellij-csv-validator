@@ -26,8 +26,8 @@ public class CsvFile extends PsiFileBase {
 
     public CsvColumnInfoMap<PsiElement> getColumnInfoMap() {
         if (myColumnInfoMap == null || this.getModificationStamp() != myColumnInfoMapModifiedStamp) {
-            myColumnInfoMap = CsvHelper.createColumnInfoMap(this);
             myColumnInfoMapModifiedStamp = getModificationStamp();
+            myColumnInfoMap = CsvHelper.createColumnInfoMap(this);
         }
         return myColumnInfoMap;
     }
