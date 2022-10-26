@@ -13,10 +13,10 @@ public interface CsvHighlightingElement {
     TextAttributesKey[] getTextAttributesKeys();
 
     class TokenBased extends IElementType implements CsvHighlightingElement {
-        public static final TokenBased COMMA = new TokenBased(CsvTypes.COMMA.getDebugName(), CsvColorSettings.COMMA);
-        public static final TokenBased QUOTE = new TokenBased(CsvTypes.QUOTE.getDebugName(), CsvColorSettings.QUOTE);
-        public static final TokenBased TEXT = new TokenBased(CsvTypes.TEXT.getDebugName(), CsvColorSettings.TEXT);
-        public static final TokenBased COMMENT = new TokenBased(CsvTypes.COMMENT.getDebugName(), CsvColorSettings.COMMENT);
+        public static final TokenBased COMMA = new TokenBased(CsvTypes.COMMA.toString(), CsvColorSettings.COMMA);
+        public static final TokenBased QUOTE = new TokenBased(CsvTypes.QUOTE.toString(), CsvColorSettings.QUOTE);
+        public static final TokenBased TEXT = new TokenBased(CsvTypes.TEXT.toString(), CsvColorSettings.TEXT);
+        public static final TokenBased COMMENT = new TokenBased(CsvTypes.COMMENT.toString(), CsvColorSettings.COMMENT);
         public static final TokenBased BAD_CHARACTER = new TokenBased(HighlighterColors.BAD_CHARACTER.getExternalName(), CsvColorSettings.BAD_CHARACTER);
 
         private final TextAttributesKey[] myTextAttributesKeys;

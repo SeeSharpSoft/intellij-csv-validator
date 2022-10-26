@@ -130,18 +130,19 @@ public final class CsvHelper {
     @Nullable
     public static PsiElement getNthChild(@Nullable final PsiElement parent, int n, @Nullable IElementType countable) {
         if (parent != null) {
+            int count = 0;
             for (PsiElement child = parent.getFirstChild(); child != null; child = child.getNextSibling()) {
                 if (countable != null && getElementType(child) != countable) continue;
-                if (n == 0) return child;
-                --n;
+                if (count == n) return child;
+                ++count;
             }
         }
         return null;
     }
 
     public static int findIndex(@Nullable final PsiElement parent, @NotNull PsiElement needle, @Nullable IElementType countable) {
-        int index = 0;
         if (parent != null) {
+            int index = 0;
             for (PsiElement child = parent.getFirstChild(); child != null; child = child.getNextSibling()) {
                 if (countable != null && getElementType(child) != countable) continue;
                 if (needle == child) return index;
@@ -258,15 +259,17 @@ public final class CsvHelper {
     public static CsvColumnInfoMap<PsiElement> createColumnInfoMap(CsvFile csvFile) {
         CsvEscapeCharacter escapeCharacter = getEscapeCharacter(csvFile);
         Map<Integer, CsvColumnInfo<PsiElement>> columnInfoMap = new HashMap<>();
-        CsvRecord[] records = PsiTreeUtil.getChildrenOfType(csvFile, CsvRecord.class);
         int row = 0;
         boolean hasComments = false;
-        for (CsvRecord record : records) {
-            // skip comment records
-            if (record.getComment() != null) {
-                hasComments = true;
+        for (PsiElement child = csvFile.getFirstChild(); child != null; child = child.getNextSibling()) {
+            if (!(child instanceof CsvRecord)) {
+                if (getElementType(child) == CsvTypes.COMMENT) {
+                    hasComments = true;
+                }
                 continue;
             }
+
+            CsvRecord record = (CsvRecord) child;
             int column = 0;
             for (CsvField field : record.getFieldList()) {
                 Integer length = CsvHelper.getMaxTextLineLength(unquoteCsvValue(field.getText(), escapeCharacter));

@@ -15,6 +15,8 @@ import java.util.List;
 
 public class CsvHighlightUsagesHandler extends HighlightUsagesHandlerBase {
 
+    private static int MAX_HIGHLIGHTING_ROWS = 1000;
+
     protected CsvHighlightUsagesHandler(@NotNull Editor editor, @NotNull CsvFile file) {
         super(editor, file);
     }
@@ -48,7 +50,9 @@ public class CsvHighlightUsagesHandler extends HighlightUsagesHandlerBase {
         for (PsiElement psiElement : (List<PsiElement>) list) {
             int index = CsvHelper.getFieldIndex(psiElement);
             if (index == -1) continue;
-            addOccurrence((CsvFile) psiElement.getContainingFile(), index);
+            CsvRecord csvRecord = (CsvRecord) psiElement.getParent();
+            int leftOverRows = addOccurrence(csvRecord, index, MAX_HIGHLIGHTING_ROWS / 2, false);
+            addOccurrence(csvRecord, index, MAX_HIGHLIGHTING_ROWS / 2 + leftOverRows, true);
         }
     }
 
@@ -57,18 +61,19 @@ public class CsvHighlightUsagesHandler extends HighlightUsagesHandlerBase {
         consumer.consume(list);
     }
 
-    protected void addOccurrence(@NotNull CsvFile csvFile, int index) {
-        csvFile.acceptChildren(new CsvVisitor() {
-            @Override
-            public void visitRecord(@NotNull CsvRecord record) {
-                PsiElement field = CsvHelper.getNthChild(record, index, CsvTypes.FIELD);
-                if (field != null) {
-                    TextRange range = field.getTextRange();
-                    if (range != null && range.getLength() > 0) {
-                        myReadUsages.add(range);
-                    }
+    protected int addOccurrence(@NotNull CsvRecord csvRecord, int index, int noOfSiblings, boolean backward) {
+        int count = noOfSiblings;
+        for (PsiElement sibling = backward ? csvRecord.getPrevSibling() : csvRecord;
+             count != 0 && sibling != null;
+             sibling = backward ? sibling.getPrevSibling() : sibling.getNextSibling(), --count) {
+            PsiElement field = CsvHelper.getNthChild(sibling, index, CsvTypes.FIELD);
+            if (field != null) {
+                TextRange range = field.getTextRange();
+                if (range != null && range.getLength() > 0) {
+                    myReadUsages.add(range);
                 }
             }
-        });
+        }
+        return count;
     }
 }
