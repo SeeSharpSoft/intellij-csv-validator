@@ -130,18 +130,19 @@ public final class CsvHelper {
     @Nullable
     public static PsiElement getNthChild(@Nullable final PsiElement parent, int n, @Nullable IElementType countable) {
         if (parent != null) {
+            int count = 0;
             for (PsiElement child = parent.getFirstChild(); child != null; child = child.getNextSibling()) {
                 if (countable != null && getElementType(child) != countable) continue;
-                if (n == 0) return child;
-                --n;
+                if (count == n) return child;
+                ++count;
             }
         }
         return null;
     }
 
     public static int findIndex(@Nullable final PsiElement parent, @NotNull PsiElement needle, @Nullable IElementType countable) {
-        int index = 0;
         if (parent != null) {
+            int index = 0;
             for (PsiElement child = parent.getFirstChild(); child != null; child = child.getNextSibling()) {
                 if (countable != null && getElementType(child) != countable) continue;
                 if (needle == child) return index;

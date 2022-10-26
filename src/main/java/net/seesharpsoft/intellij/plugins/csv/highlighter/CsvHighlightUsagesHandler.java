@@ -15,7 +15,7 @@ import java.util.List;
 
 public class CsvHighlightUsagesHandler extends HighlightUsagesHandlerBase {
 
-    private static int MAX_HIGHLIGHTING_ROWS = 200;
+    private static int MAX_HIGHLIGHTING_ROWS = 1000;
 
     protected CsvHighlightUsagesHandler(@NotNull Editor editor, @NotNull CsvFile file) {
         super(editor, file);
@@ -51,8 +51,8 @@ public class CsvHighlightUsagesHandler extends HighlightUsagesHandlerBase {
             int index = CsvHelper.getFieldIndex(psiElement);
             if (index == -1) continue;
             CsvRecord csvRecord = (CsvRecord) psiElement.getParent();
-            int leftOverRows = addOccurrence(csvRecord, index, MAX_HIGHLIGHTING_ROWS / 2, true);
-            addOccurrence(csvRecord, index, MAX_HIGHLIGHTING_ROWS / 2 + leftOverRows, false);
+            int leftOverRows = addOccurrence(csvRecord, index, MAX_HIGHLIGHTING_ROWS / 2, false);
+            addOccurrence(csvRecord, index, MAX_HIGHLIGHTING_ROWS / 2 + leftOverRows, true);
         }
     }
 
@@ -63,7 +63,7 @@ public class CsvHighlightUsagesHandler extends HighlightUsagesHandlerBase {
 
     protected int addOccurrence(@NotNull CsvRecord csvRecord, int index, int noOfSiblings, boolean backward) {
         int count = noOfSiblings;
-        for (PsiElement sibling = backward ? csvRecord.getPrevSibling() : csvRecord.getNextSibling();
+        for (PsiElement sibling = backward ? csvRecord.getPrevSibling() : csvRecord;
              count != 0 && sibling != null;
              sibling = backward ? sibling.getPrevSibling() : sibling.getNextSibling(), --count) {
             PsiElement field = CsvHelper.getNthChild(sibling, index, CsvTypes.FIELD);
