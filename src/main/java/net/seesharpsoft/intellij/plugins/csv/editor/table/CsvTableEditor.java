@@ -3,6 +3,7 @@ package net.seesharpsoft.intellij.plugins.csv.editor.table;
 import com.google.common.primitives.Ints;
 import com.intellij.codeHighlighting.BackgroundEditorHighlighter;
 import com.intellij.ide.structureView.StructureViewBuilder;
+import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.command.CommandProcessor;
 import com.intellij.openapi.editor.Document;
@@ -35,9 +36,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
+public abstract class CsvTableEditor implements FileEditor, FileEditorLocation, Disposable {
 
     public static final String EDITOR_NAME = "Table Editor";
+
+    private boolean myDisposed = false;
 
     protected final Project project;
     protected final VirtualFile file;
@@ -222,7 +225,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
 
     @Override
     public boolean isValid() {
-        if (file == null || !file.isValid()) {
+        if (this.isDisposed() || file == null || !file.isValid()) {
             return false;
         }
         CsvFile csvFile = this.getCsvFile();
@@ -273,7 +276,14 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation {
 
     @Override
     public void dispose() {
+        if (this.isDisposed()) return;
+
         this.deselectNotify();
+        this.myDisposed = true;
+    }
+
+    public boolean isDisposed() {
+        return this.myDisposed;
     }
 
     @Nullable

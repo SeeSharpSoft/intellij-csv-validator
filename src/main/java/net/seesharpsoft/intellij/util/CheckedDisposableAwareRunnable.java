@@ -7,10 +7,10 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.ref.WeakReference;
 
-public class DisposerAwareRunnable<T extends Runnable> extends WeakReference<Disposable> implements Runnable {
+public class CheckedDisposableAwareRunnable<T extends Runnable> extends WeakReference<Disposable> implements Runnable {
     protected final T myDelegate;
 
-    private DisposerAwareRunnable(@NotNull T delegate, @NotNull Disposable disposable) {
+    private CheckedDisposableAwareRunnable(@NotNull T delegate, @NotNull Disposable disposable) {
         super(disposable);
         myDelegate = delegate;
     }
@@ -21,7 +21,7 @@ public class DisposerAwareRunnable<T extends Runnable> extends WeakReference<Dis
             return delegate;
         }
 
-        return new DisposerAwareRunnable<>(delegate, disposable);
+        return new CheckedDisposableAwareRunnable<>(delegate, disposable);
     }
 
     @Override

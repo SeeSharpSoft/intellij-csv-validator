@@ -18,7 +18,7 @@ import com.intellij.lexer.FlexLexer;
     private boolean mySupportComments;
 
     private boolean isActualValueSeparator() {
-        return myValueSeparator.isValueSeparator(yytext().toString());
+        return myValueSeparator.isValueSeparator(yycharat(0));
     }
 
     /**
@@ -39,8 +39,9 @@ VALUE_SEPARATOR=[,:;|\t]
 RECORD_SEPARATOR=\n
 ESCAPED_QUOTE=\"\"|\\\"
 QUOTE=\"
-TEXT=[^ ,:;|\t\r\n\"\\]+
+TEXT=[^ ,:;|\t\r\n\"\\#]+
 BACKSLASH=\\+
+HASHTAG=#
 COMMENT=\#[^\n]*
 
 %state UNQUOTED
@@ -88,6 +89,11 @@ COMMENT=\#[^\n]*
     }
     yypushback(yylength() - 1);
     yybegin(UNQUOTED);
+    return CsvTypes.TEXT;
+}
+
+<UNQUOTED, QUOTED> {HASHTAG}
+{
     return CsvTypes.TEXT;
 }
 
