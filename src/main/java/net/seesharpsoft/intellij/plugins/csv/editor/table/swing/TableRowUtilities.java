@@ -22,22 +22,17 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
 import com.intellij.ui.table.JBTable;
+import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditor;
 
 import javax.swing.*;
 import javax.swing.border.Border;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
+import javax.swing.event.*;
 import javax.swing.plaf.UIResource;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellRenderer;
 import java.awt.*;
-import java.awt.event.AdjustmentEvent;
-import java.awt.event.AdjustmentListener;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
+import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -85,7 +80,7 @@ public final class TableRowUtilities {
         return rowHeadersTable;
     }
 
-    private static void adjustComponents(final JScrollPane scrollPane, final JTable userTable, final JTable rowHeadersTable) {
+    private static void adjustComponents(final JScrollPane scrollPane, final CsvTableEditor tableEditor, final JTable rowHeadersTable, final JTable userTable) {
         scrollPane.setRowHeaderView(rowHeadersTable);
         // set the row header name into the top left corner
         scrollPane.setCorner(JScrollPane.UPPER_LEFT_CORNER, rowHeadersTable.getTableHeader());
@@ -133,6 +128,7 @@ public final class TableRowUtilities {
         });
 
         new TableSynchronizer(rowHeadersTable, userTable);
+        new TableRowResizer(rowHeadersTable, userTable, tableEditor);
     }
 
     /**
@@ -143,7 +139,7 @@ public final class TableRowUtilities {
      * @param userTable      - Table to have column added to (if it is in a scrollpane)
      * @param startingNumber - Number to start number column with, typically 0 or 1.
      */
-    public static JTable addNumberColumn(final JTable userTable, int startingNumber) {
+    public static JTable addNumberColumn(final CsvTableEditor tableEditor, final JTable userTable, int startingNumber) {
         Container parentContainer = userTable.getParent();
 
         if (parentContainer instanceof JViewport) {
@@ -163,7 +159,7 @@ public final class TableRowUtilities {
                 scrollPane.setColumnHeaderView(tableHeader);
 
                 final JTable rowHeadersTable = createRowHeadersTable(userTable, startingNumber);
-                adjustComponents(scrollPane, userTable, rowHeadersTable);
+                adjustComponents(scrollPane, tableEditor, rowHeadersTable, userTable);
                 return rowHeadersTable;
             }
         }
@@ -327,7 +323,6 @@ public final class TableRowUtilities {
 
                 for (int i = 0; i < rows.length; i++) {
                     rowHeadersTable.getSelectionModel().addSelectionInterval(rows[i], rows[i]);
-
                 }
 
                 rowHeadersTable.getSelectionModel().addListSelectionListener(this);
@@ -390,6 +385,94 @@ public final class TableRowUtilities {
                 }
                 m.fireTableDataChanged();
             }
+        }
+    }
+
+    public static class TableRowResizer extends MouseInputAdapter {
+        public static Cursor resizeCursor = Cursor.getPredefinedCursor(Cursor.N_RESIZE_CURSOR);
+
+        private int mouseYOffset, resizingRow = -1;
+        private Cursor otherCursor = resizeCursor;
+        private JTable rowHeadersTable;
+        private JTable userTable;
+        private CsvTableEditor myTableEditor;
+
+        public TableRowResizer(JTable rowHeadersTableArg, JTable userTableArg, CsvTableEditor tableEditor) {
+            this.userTable = userTableArg;
+            this.rowHeadersTable = rowHeadersTableArg;
+            this.myTableEditor = tableEditor;
+            rowHeadersTable.addMouseListener(this);
+            rowHeadersTable.addMouseMotionListener(this);
+        }
+
+        private int getResizingRow(Point p) {
+            return getResizingRow(p, rowHeadersTable.rowAtPoint(p));
+        }
+
+        private int getResizingRow(Point p, int row) {
+            if (row == -1) {
+                return -1;
+            }
+            int col = rowHeadersTable.columnAtPoint(p);
+            if (col == -1)
+                return -1;
+            Rectangle r = rowHeadersTable.getCellRect(row, col, true);
+            r.grow(0, -3);
+            if (r.contains(p))
+                return -1;
+
+            int midPoint = r.y + r.height / 2;
+            int rowIndex = (p.y < midPoint) ? row - 1 : row;
+
+            return rowIndex;
+        }
+
+        public void mousePressed(MouseEvent e) {
+            Point p = e.getPoint();
+
+            resizingRow = getResizingRow(p);
+            mouseYOffset = p.y - rowHeadersTable.getRowHeight(resizingRow);
+        }
+
+        private void swapCursor() {
+            Cursor tmp = rowHeadersTable.getCursor();
+            rowHeadersTable.setCursor(otherCursor);
+            otherCursor = tmp;
+        }
+
+        public void mouseMoved(MouseEvent e) {
+            if (resizingRow == -1 &&
+                    (getResizingRow(e.getPoint()) >= 0)
+                            != (rowHeadersTable.getCursor() == resizeCursor)) {
+                swapCursor();
+            }
+        }
+
+        public void mouseDragged(MouseEvent e) {
+            int mouseY = e.getY();
+
+            if (resizingRow >= 0) {
+                int newHeight = mouseY - mouseYOffset;
+                if (newHeight > 0) {
+                    userTable.setRowHeight(resizingRow, newHeight);
+                    rowHeadersTable.setRowHeight(resizingRow, newHeight);
+                }
+            }
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent e) {
+            int mouseY = e.getY();
+
+            if (resizingRow >= 0) {
+                int newHeight = mouseY - mouseYOffset;
+                if (newHeight > 0) {
+                    rowHeadersTable.setRowHeight(newHeight);
+                    userTable.setRowHeight(newHeight);
+                    myTableEditor.storeCurrentTableLayout();
+                }
+            }
+            resizingRow = -1;
         }
     }
 }

@@ -20,11 +20,14 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.text.BadLocationException;
 import java.awt.*;
 import java.awt.event.FocusEvent;
+import java.awt.event.KeyEvent;
 import java.awt.geom.Rectangle2D;
 import java.util.EventObject;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+
+import static java.awt.event.InputEvent.CTRL_DOWN_MASK;
 
 public class MultiLineCellRenderer extends JBScrollPane implements TableCellRenderer, TableCellEditor {
 
@@ -41,6 +44,8 @@ public class MultiLineCellRenderer extends JBScrollPane implements TableCellRend
         myTextArea.setOpaque(true);
         myTextArea.setRequestFocusEnabled(true);
         myTextArea.addKeyListener(keyListener);
+        myTextArea.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, CTRL_DOWN_MASK), myTextArea.getInputMap().get(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0)));
+        myTextArea.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "DO_NOTHING_AT_ALL");
         this.setOpaque(true);
         this.setBorder(null);
         this.setViewportView(myTextArea);
@@ -81,6 +86,7 @@ public class MultiLineCellRenderer extends JBScrollPane implements TableCellRend
             myTextArea.setBorder(new EmptyBorder(1, 2, 1, 2));
         }
 
+        this.setFont(table.getFont());
         this.setText(value == null ? "" : value.toString());
 
         final int columnWidth = table.getColumnModel().getColumn(column).getWidth();
@@ -120,28 +126,10 @@ public class MultiLineCellRenderer extends JBScrollPane implements TableCellRend
     }
 
     protected void setText(@NotNull String text) {
-        Font font = determineFont(text);
+        Font font = UIUtil.getFontWithFallbackIfNeeded(this.getFont(), text);
         this.setFont(font);
         myTextArea.setFont(font);
         myTextArea.setText(text);
-    }
-
-    protected Font determineFont(@NotNull String text) {
-        Font finalFont = UIUtil.getFontWithFallback(EditorColorsManager.getInstance().getGlobalScheme().getFont(EditorFontType.PLAIN));
-
-        FontFallbackIterator it = new FontFallbackIterator();
-        it.setPreferredFont(finalFont.getFamily(), finalFont.getSize());
-        it.setFontStyle(finalFont.getStyle());
-        it.start(text, 0, text.length());
-        for (; !it.atEnd(); it.advance()) {
-            Font font = it.getFont();
-            if (!font.getFamily().equals(finalFont.getFamily())) {
-                finalFont = font;
-                break;
-            }
-        }
-
-        return finalFont;
     }
 
     @Override

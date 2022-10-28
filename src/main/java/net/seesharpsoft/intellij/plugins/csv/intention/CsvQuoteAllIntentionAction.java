@@ -5,7 +5,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.TokenType;
 import com.intellij.util.IncorrectOperationException;
-import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
+import net.seesharpsoft.intellij.psi.PsiHelper;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -24,7 +24,7 @@ public class CsvQuoteAllIntentionAction extends CsvIntentionAction {
         }
 
         return !CsvIntentionHelper.getAllElements(element.getContainingFile()).stream()
-                .anyMatch(psiElement -> CsvHelper.getElementType(psiElement) == TokenType.ERROR_ELEMENT);
+                .anyMatch(psiElement -> PsiHelper.getElementType(psiElement) == TokenType.ERROR_ELEMENT);
     }
 
     @Override

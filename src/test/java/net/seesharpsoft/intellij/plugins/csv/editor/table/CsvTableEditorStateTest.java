@@ -23,7 +23,7 @@ public class CsvTableEditorStateTest extends BasePlatformTestCase {
         CsvTableEditorState originalTableEditorState = new CsvTableEditorState();
 
         originalTableEditorState.setColumnWidths(new int[] { 100, 50, 200, 42});
-        originalTableEditorState.setRowLines(42);
+        originalTableEditorState.setRowHeight(42);
         originalTableEditorState.setFixedHeaders(!originalTableEditorState.getFixedHeaders());
         originalTableEditorState.setShowInfoPanel(!originalTableEditorState.showInfoPanel());
 
@@ -32,7 +32,7 @@ public class CsvTableEditorStateTest extends BasePlatformTestCase {
         CsvTableEditorState deserializeEditorState = CsvTableEditorState.create(domElement, this.getProject(), myFixture.getFile().getVirtualFile());
 
         assertOrderedEquals(deserializeEditorState.getColumnWidths(), originalTableEditorState.getColumnWidths());
-        assertEquals(originalTableEditorState.getRowLines(), deserializeEditorState.getRowLines());
+        assertEquals(originalTableEditorState.getRowHeight(), deserializeEditorState.getRowHeight());
         assertEquals(originalTableEditorState.getFixedHeaders(), deserializeEditorState.getFixedHeaders());
         assertEquals(originalTableEditorState.showInfoPanel(), deserializeEditorState.showInfoPanel());
     }

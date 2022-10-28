@@ -93,6 +93,9 @@ test {
         exceptionFormat = 'full'
         showStandardStreams = true
     }
+    // see https://youtrack.jetbrains.com/issue/IDEA-278926
+    scanForTestClasses = false
+    include "**/*Test.class"
 }
 
 grammarKit {

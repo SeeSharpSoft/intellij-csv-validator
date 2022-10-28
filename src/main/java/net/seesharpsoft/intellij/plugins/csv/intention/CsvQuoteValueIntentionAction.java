@@ -7,6 +7,7 @@ import com.intellij.util.IncorrectOperationException;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvField;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
+import net.seesharpsoft.intellij.psi.PsiHelper;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -27,8 +28,8 @@ public class CsvQuoteValueIntentionAction extends CsvIntentionAction {
         PsiElement element = psiElement == null ? null : CsvHelper.getParentFieldElement(psiElement);
         return element instanceof CsvField &&
                 element.getFirstChild() != null &&
-                (CsvHelper.getElementType(element.getFirstChild()) != CsvTypes.QUOTE ||
-                        CsvHelper.getElementType(element.getLastChild()) != CsvTypes.QUOTE);
+                (PsiHelper.getElementType(element.getFirstChild()) != CsvTypes.QUOTE ||
+                        PsiHelper.getElementType(element.getLastChild()) != CsvTypes.QUOTE);
     }
 
     @Override

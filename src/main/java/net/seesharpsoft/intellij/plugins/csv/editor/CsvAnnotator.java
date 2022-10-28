@@ -11,6 +11,7 @@ import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.CsvValueSeparator;
 import net.seesharpsoft.intellij.plugins.csv.psi.*;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
+import net.seesharpsoft.intellij.psi.PsiHelper;
 import org.jetbrains.annotations.NotNull;
 
 import static com.intellij.lang.annotation.HighlightSeverity.INFORMATION;
@@ -27,7 +28,7 @@ public class CsvAnnotator implements Annotator {
 
     @Override
     public void annotate(@NotNull final PsiElement element, @NotNull final AnnotationHolder holder) {
-        IElementType elementType = CsvHelper.getElementType(element);
+        IElementType elementType = PsiHelper.getElementType(element);
         if ((elementType != CsvTypes.FIELD && elementType != CsvTypes.COMMA) || !(element.getContainingFile() instanceof CsvFile)) {
             return;
         }
@@ -65,7 +66,7 @@ public class CsvAnnotator implements Annotator {
     }
 
     protected String getHeaderText(@NotNull final CsvFile csvFile, int index) {
-        PsiElement nthChild = CsvHelper.getNthChild(csvFile.getFirstChild(), index, CsvTypes.FIELD);
+        PsiElement nthChild = PsiHelper.getNthChildOfType(csvFile.getFirstChild(), index, CsvField.class);
         return nthChild instanceof CsvField ? nthChild.getText() : "";
     }
 

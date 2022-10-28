@@ -5,9 +5,11 @@ import com.intellij.openapi.fileEditor.FileEditorStateLevel;
 import com.intellij.openapi.util.Key;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditor;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditorState;
+import net.seesharpsoft.intellij.plugins.csv.editor.table.api.CsvTableModel;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.BufferedReader;
@@ -74,22 +76,18 @@ public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
     }
 
     public void testTableContent() {
-        DefaultTableModel tableModel = fileEditor.getTableModel();
+        CsvTableModel tableModel = fileEditor.getTableModel();
         assertEquals(2, tableModel.getColumnCount());
         assertEquals(4, tableModel.getRowCount());
 
-        Vector columns = (Vector)tableModel.getDataVector().get(0);
-        assertEquals("Header1", columns.get(0));
-        assertEquals("header 2", columns.get(1));
-        columns = (Vector)tableModel.getDataVector().get(1);
-        assertEquals("this is column \"Header1\"", columns.get(0));
-        assertEquals("this is column header 2", columns.get(1));
-        columns = (Vector)tableModel.getDataVector().get(2);
-        assertEquals("just another line with leading and trailing whitespaces", columns.get(0));
-        assertEquals("  and one more value  ", columns.get(1));
-        columns = (Vector)tableModel.getDataVector().get(3);
-        assertEquals("", columns.get(0));
-        assertEquals("", columns.get(1));
+        assertEquals("Header1", tableModel.getValueAt(0, 0));
+        assertEquals("header 2", tableModel.getValueAt(0, 1));
+        assertEquals("this is column \"Header1\"", tableModel.getValueAt(1, 0));
+        assertEquals("this is column header 2", tableModel.getValueAt(1, 1));
+        assertEquals("just another line with leading and trailing whitespaces", tableModel.getValueAt(2, 0));
+        assertEquals("  and one more value  ", tableModel.getValueAt(2, 1));
+        assertEquals("", tableModel.getValueAt(3, 0));
+        assertEquals("", tableModel.getValueAt(3, 1));
     }
 
     public void testTableContentChanges() {

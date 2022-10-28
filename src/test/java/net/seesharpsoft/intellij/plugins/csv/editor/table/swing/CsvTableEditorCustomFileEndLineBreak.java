@@ -1,8 +1,10 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
+import net.seesharpsoft.intellij.plugins.csv.editor.table.api.CsvTableModel;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 import java.util.Vector;
 
 public class CsvTableEditorCustomFileEndLineBreak extends CsvTableEditorSwingTestBase {
@@ -23,24 +25,19 @@ public class CsvTableEditorCustomFileEndLineBreak extends CsvTableEditorSwingTes
     }
 
     public void testTableContent() {
-        DefaultTableModel tableModel = fileEditor.getTableModel();
+        CsvTableModel tableModel = fileEditor.getTableModel();
         assertEquals(2, tableModel.getColumnCount());
         assertEquals(5, tableModel.getRowCount());
 
-        Vector columns = (Vector)tableModel.getDataVector().get(0);
-        assertEquals("Header1", columns.get(0));
-        assertEquals("Header2", columns.get(1));
-        columns = (Vector)tableModel.getDataVector().get(1);
-        assertEquals("", columns.get(0));
-        assertEquals("", columns.get(1));
-        columns = (Vector)tableModel.getDataVector().get(2);
-        assertEquals("after the empty line", columns.get(0));
-        assertEquals("", columns.get(1));
-        columns = (Vector)tableModel.getDataVector().get(3);
-        assertEquals("before the previous last line", columns.get(0));
-        assertEquals("", columns.get(1));
-        columns = (Vector)tableModel.getDataVector().get(4);
-        assertEquals("", columns.get(0));
-        assertEquals("", columns.get(1));
+        assertEquals("Header1", tableModel.getValueAt(0, 0));
+        assertEquals("Header2", tableModel.getValueAt(0, 1));
+        assertEquals("", tableModel.getValueAt(1, 0));
+        assertEquals("", tableModel.getValueAt(1, 1));
+        assertEquals("after the empty line", tableModel.getValueAt(2, 0));
+        assertEquals("", tableModel.getValueAt(2, 1));
+        assertEquals("before the previous last line", tableModel.getValueAt(3, 0));
+        assertEquals("", tableModel.getValueAt(3, 1));
+        assertEquals("", tableModel.getValueAt(4, 0));
+        assertEquals("", tableModel.getValueAt(4, 1));
     }
 }

@@ -1,6 +1,9 @@
 package net.seesharpsoft.intellij.plugins.csv.editor;
 
+import com.intellij.codeInsight.CodeInsightSettings;
+import com.intellij.codeInsight.CodeInsightUtilBase;
 import com.intellij.diff.editor.DiffVirtualFile;
+import com.intellij.largeFilesEditor.editor.PropertiesGetter;
 import com.intellij.openapi.editor.EditorSettings;
 import com.intellij.openapi.fileEditor.*;
 import com.intellij.openapi.fileEditor.impl.text.TextEditorProvider;
@@ -18,7 +21,10 @@ public class CsvFileEditorProvider implements AsyncFileEditorProvider, DumbAware
     public static final String EDITOR_TYPE_ID = "csv-text-editor";
 
     public static boolean acceptCsvFile(@NotNull Project project, @NotNull VirtualFile file) {
-        return CsvHelper.isCsvFile(project, file) && !SingleRootFileViewProvider.isTooLargeForContentLoading(file) && !(file instanceof DiffVirtualFile);
+        return CsvHelper.isCsvFile(project, file)
+                && !SingleRootFileViewProvider.isTooLargeForContentLoading(file)
+                && !SingleRootFileViewProvider.isTooLargeForIntelligence(file)
+                && !(file instanceof DiffVirtualFile);
     }
 
     @Override

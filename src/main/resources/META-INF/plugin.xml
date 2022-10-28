@@ -172,21 +172,21 @@
         </group>
         <action class="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AddColumnBefore"
                 id="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AddColumnBefore"
-                text="New column before (Ctrl+Left)"
+                text="New column before (Ctrl+Shift+Left)"
                 icon="/media/icons/add-column-before.png"
         >
             <add-to-group group-id="CsvTableEditorColumnContextMenu" anchor="first" />
         </action>
         <action class="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AddColumnAfter"
                 id="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AddColumnAfter"
-                text="New column after (Ctrl+Right)"
+                text="New column after (Ctrl+Shift+Right)"
                 icon="/media/icons/add-column.png"
         >
             <add-to-group group-id="CsvTableEditorColumnContextMenu" relative-to-action="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AddColumnBefore" anchor="after" />
         </action>
         <action class="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$DeleteSelectedColumns"
                 id="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$DeleteSelectedColumns"
-                text="Delete selected column (Ctrl+Shift+Del)"
+                text="Delete selected columns (Ctrl+Shift+Del)"
                 icon="/media/icons/remove-column.png"
         >
             <add-to-group group-id="CsvTableEditorColumnContextMenu" relative-to-action="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AddColumnAfter" anchor="after" />
@@ -216,7 +216,7 @@
 
         <action class="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AdjustColumnWidths"
                 id="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AdjustColumnWidths"
-                text="Adjust column widths"
+                text="Auto fit columns width (Ctrl+Shift+Space)"
                 icon="/media/icons/adjust-column-width.png"
         >
             <add-to-group group-id="CsvTableEditorColumnContextMenu" />
@@ -224,7 +224,7 @@
         </action>
         <action class="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$ResetColumnWidths"
                 id="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$ResetColumnWidths"
-                text="Reset column widths to default"
+                text="Reset columns width to default"
                 icon="/media/icons/reset-column-width.png"
         >
             <add-to-group group-id="CsvTableEditorColumnContextMenu" relative-to-action="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AdjustColumnWidths" anchor="after" />

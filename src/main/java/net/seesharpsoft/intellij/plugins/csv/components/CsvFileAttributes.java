@@ -103,7 +103,8 @@ public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttrib
         return getFileAttribute(project, virtualFile, false);
     }
 
-    public boolean canChangeValueSeparator(@NotNull PsiFile psiFile) {
+    public static boolean canChangeAttributes(@Nullable PsiFile psiFile) {
+        if (psiFile == null) return false;
         Language language = psiFile.getLanguage();
         return language.isKindOf(CsvLanguage.INSTANCE) && !(language instanceof CsvSeparatorHolder);
     }
@@ -116,14 +117,14 @@ public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttrib
     }
 
     public void setFileSeparator(@NotNull PsiFile psiFile, @NotNull CsvValueSeparator separator) {
-        if (!canChangeValueSeparator(psiFile)) {
+        if (!canChangeAttributes(psiFile)) {
             return;
         }
         setFileSeparator(psiFile.getProject(), psiFile.getOriginalFile().getVirtualFile(), separator);
     }
 
     public void resetValueSeparator(@NotNull PsiFile psiFile) {
-        if (!canChangeValueSeparator(psiFile)) {
+        if (!canChangeAttributes(psiFile)) {
             return;
         }
         Attribute attribute = getFileAttribute(psiFile.getProject(), psiFile.getOriginalFile().getVirtualFile());
@@ -191,6 +192,9 @@ public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttrib
     }
 
     public void setEscapeCharacter(@NotNull PsiFile psiFile, @NotNull CsvEscapeCharacter escapeCharacter) {
+        if (!canChangeAttributes(psiFile)) {
+            return;
+        }
         Attribute attribute = getFileAttribute(psiFile.getProject(), psiFile.getOriginalFile().getVirtualFile(), true);
         if (attribute != null) {
             attribute.escapeCharacter = escapeCharacter;
@@ -198,6 +202,9 @@ public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttrib
     }
 
     public void resetEscapeSeparator(@NotNull PsiFile psiFile) {
+        if (!canChangeAttributes(psiFile)) {
+            return;
+        }
         Attribute attribute = getFileAttribute(psiFile.getProject(), psiFile.getOriginalFile().getVirtualFile());
         if (attribute != null) {
             attribute.escapeCharacter = null;

@@ -22,9 +22,9 @@ import java.util.Objects;
 @SuppressWarnings("all")
 public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSettings.OptionSet> {
 
-    public static final int TABLE_EDITOR_ROW_HEIGHT_MIN = 0;
-    public static final int TABLE_EDITOR_ROW_HEIGHT_MAX = 10;
-    public static final int TABLE_EDITOR_ROW_HEIGHT_DEFAULT = 3;
+    public static final int TABLE_EDITOR_ROW_HEIGHT_MIN = 10;
+    public static final int TABLE_EDITOR_ROW_HEIGHT_MAX = 100;
+    public static final int TABLE_EDITOR_ROW_HEIGHT_DEFAULT = 48;
     public static final int TABLE_AUTO_MAX_COLUMN_WIDTH_DEFAULT = 300;
     public static final int TABLE_DEFAULT_COLUMN_WIDTH_DEFAULT = 100;
 
@@ -71,7 +71,6 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
         public int TABLE_DEFAULT_COLUMN_WIDTH = TABLE_DEFAULT_COLUMN_WIDTH_DEFAULT;
         public boolean TABLE_AUTO_COLUMN_WIDTH_ON_OPEN = false;
         public boolean ZERO_BASED_COLUMN_NUMBERING = false;
-        public boolean TABLE_HEADER_ROW_FIXED = false;
 
         public boolean SHOW_TABLE_EDITOR_INFO_PANEL = true;
         public boolean QUOTING_ENFORCED = false;
@@ -302,14 +301,6 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
         if (valueColoring != oldValue) {
             myPropertyChangeSupport.firePropertyChange("valueColoring", oldValue, getValueColoring());
         }
-    }
-
-    public boolean isHeaderRowFixed() {
-        return getState().TABLE_HEADER_ROW_FIXED;
-    }
-
-    public void setHeaderRowFixed(boolean headerRowFixed) {
-        getState().TABLE_HEADER_ROW_FIXED = headerRowFixed;
     }
 
     public boolean isAutoDetectValueSeparator() {

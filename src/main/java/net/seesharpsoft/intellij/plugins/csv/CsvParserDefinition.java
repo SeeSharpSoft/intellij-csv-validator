@@ -20,8 +20,6 @@ import org.jetbrains.annotations.NotNull;
 public class CsvParserDefinition implements FileParserDefinition {
     public static final TokenSet WHITE_SPACES = TokenSet.create(TokenType.WHITE_SPACE);
 
-    public static final TokenSet COMMENTS = TokenSet.create(CsvTypes.COMMENT);
-
     public static final TokenSet STRING_LITERALS = TokenSet.create(CsvTypes.TEXT, CsvTypes.ESCAPED_TEXT);
 
     public static final IFileElementType FILE = new CsvFileElementType(CsvLanguage.INSTANCE);
@@ -41,7 +39,7 @@ public class CsvParserDefinition implements FileParserDefinition {
     @Override
     @NotNull
     public TokenSet getCommentTokens() {
-        return COMMENTS;
+        return TokenSet.EMPTY;
     }
 
     @Override
