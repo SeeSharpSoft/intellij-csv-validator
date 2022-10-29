@@ -34,12 +34,12 @@ import com.intellij.lexer.FlexLexer;
 %eof{  return;
 %eof}
 
-WHITE_SPACE=[ \f]+
+//WHITE_SPACE=[ \f]+
 VALUE_SEPARATOR=[,:;|\t]
 RECORD_SEPARATOR=\n
 ESCAPED_QUOTE=\"\"|\\\"
 QUOTE=\"
-TEXT=[^ ,:;|\t\r\n\"\\#]+
+TEXT=[^,:;|\t\r\n\"\\#]+
 BACKSLASH=\\+
 HASHTAG=#
 COMMENT=\#[^\n]*
@@ -142,10 +142,10 @@ COMMENT=\#[^\n]*
     return CsvTypes.QUOTE;
 }
 
-{WHITE_SPACE}
-{
-    return TokenType.WHITE_SPACE;
-}
+//{WHITE_SPACE}
+//{
+//    return TokenType.WHITE_SPACE;
+//}
 
 .
 {

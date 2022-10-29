@@ -270,22 +270,21 @@ public final class CsvHelper {
             return "";
         }
         String result = content;
-        String trimmedContent = content.trim();
-        if (trimmedContent.length() > 1 && trimmedContent.startsWith("\"") && trimmedContent.endsWith("\"")) {
-            result = trimmedContent.substring(1, trimmedContent.length() - 1);
-            if (escapeCharacter != CsvEscapeCharacter.QUOTE) {
-                result = result.replaceAll("(?:" + escapeCharacter.getRegexPattern() + ")" +
-                        escapeCharacter.getRegexPattern(), escapeCharacter.getRegexPattern());
-            }
+//        String trimmedContent = content.trim();
+        if (content.length() > 1 && content.startsWith("\"") && content.endsWith("\"")) {
+            result = content.substring(1, content.length() - 1);
+//            if (escapeCharacter != CsvEscapeCharacter.QUOTE) {
+//                result = result.replaceAll("(?:" + escapeCharacter.getRegexPattern() + ")" +
+//                        escapeCharacter.getRegexPattern(), escapeCharacter.getRegexPattern());
+//            }
             result = result.replaceAll("(?:" + escapeCharacter.getRegexPattern() + ")\"", "\"");
         }
         return result;
     }
 
-    private static boolean isQuotingRequired(String content, CsvEscapeCharacter escapeCharacter, CsvValueSeparator valueSeparator) {
+    private static boolean isQuotingRequired(String content, CsvValueSeparator valueSeparator) {
         return content != null &&
-                (content.contains(valueSeparator.getCharacter()) || content.contains("\"") || content.contains("\n") || content.contains(escapeCharacter.getCharacter()) ||
-                        content.startsWith(" ") || content.endsWith(" "));
+                (content.contains(valueSeparator.getCharacter()) || content.contains("\"") || content.contains("\n"));
     }
 
     public static String quoteCsvField(String content,
@@ -295,12 +294,12 @@ public final class CsvHelper {
         if (content == null) {
             return "";
         }
-        if (quotingEnforced || isQuotingRequired(content, escapeCharacter, valueSeparator)) {
+        if (quotingEnforced || isQuotingRequired(content, valueSeparator)) {
             String result = content;
-            if (escapeCharacter != CsvEscapeCharacter.QUOTE) {
-                result = result.replaceAll(escapeCharacter.getRegexPattern(),
-                        escapeCharacter.getRegexPattern() + escapeCharacter.getRegexPattern());
-            }
+//            if (escapeCharacter != CsvEscapeCharacter.QUOTE) {
+//                result = result.replaceAll(escapeCharacter.getRegexPattern(),
+//                        escapeCharacter.getRegexPattern() + escapeCharacter.getRegexPattern());
+//            }
             result = result.replaceAll("\"", escapeCharacter.getRegexPattern() + "\"");
             return "\"" + result + "\"";
         }

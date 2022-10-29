@@ -11,7 +11,6 @@ import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import net.seesharpsoft.intellij.psi.PsiFileHolder;
 import net.seesharpsoft.intellij.psi.PsiHelper;
-import net.seesharpsoft.intellij.util.Suspendable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -170,14 +169,14 @@ public abstract class CsvTableModelBase<T extends PsiFileHolder> implements CsvT
         if (field == null) {
             int currentColumnCount = getColumnCount(rowIndex);
             field = getFieldAt(rowIndex, currentColumnCount - 1);
-            updater.addColumn(field, sanitizeFieldValue(value), true);
+            updater.addColumn(field, value, true);
             updater.addEmptyColumns(field, columnIndex - currentColumnCount);
         } else {
-            String sanitizedValue = value;
-            if (!CsvHelper.isCommentElement(field)) {
-                sanitizedValue = sanitizeFieldValue(value);
+            if (CsvHelper.isCommentElement(field)) {
+                updater.replaceComment(field, value);
+            } else {
+                updater.replaceField(field, value, columnIndex == 0);
             }
-            updater.replaceField(field, sanitizedValue, true);
         }
         updater.commit();
     }

@@ -1,6 +1,6 @@
 <idea-plugin require-restart="false">
     <id>net.seesharpsoft.intellij.plugins.csv</id>
-    <name>CSV</name>
+    <name>CSV Rainbow Table</name>
     <vendor url="https://github.com/SeeSharpSoft/intellij-csv-validator">
         Martin Sommer
     </vendor>

@@ -116,6 +116,14 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
         doAddLineBreak(anchor, before);
     }
 
+    public void replaceComment(@NotNull PsiElement toReplace, @Nullable String text) {
+        assert PsiHelper.getElementType(toReplace) == CsvTypes.COMMENT;
+        // do not replace if not necessary
+        if (toReplace.getText().equals(text)) return;
+
+        doAction(new ReplacePsiAction(toReplace, createComment(text)));
+    }
+
     public void replaceField(@NotNull PsiElement toReplace, @Nullable String text, boolean enquoteCommentIndicator) {
         assert toReplace instanceof CsvField;
         // do not replace if not necessary
