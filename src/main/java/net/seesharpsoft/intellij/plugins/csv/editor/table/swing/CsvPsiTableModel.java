@@ -5,6 +5,7 @@ import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditor;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableModelBase;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
+import net.seesharpsoft.intellij.psi.PsiFileHolder;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.event.EventListenerList;
@@ -14,13 +15,13 @@ import javax.swing.table.TableModel;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CsvPsiTableModel extends CsvTableModelBase implements TableModel {
+public class CsvPsiTableModel extends CsvTableModelBase<CsvTableEditor> implements TableModel {
 
     /** List of listeners */
     protected EventListenerList listenerList = new EventListenerList();
 
-    public CsvPsiTableModel(@NotNull CsvTableEditor editor) {
-        super(editor);
+    public CsvPsiTableModel(@NotNull CsvTableEditor psiFileHolder) {
+        super(psiFileHolder);
     }
 
     @Override
@@ -80,6 +81,6 @@ public class CsvPsiTableModel extends CsvTableModelBase implements TableModel {
 
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
-        return getEditor().isEditable();
+        return getPsiFileHolder().isEditable();
     }
 }

@@ -197,6 +197,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation, 
 
         this.deselectNotify();
         this.myDisposed = true;
+        getTableModel().dispose();
     }
 
     @Override
@@ -340,64 +341,41 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation, 
         this.getTableModel().clearCells(rows, columns);
     }
 
-    protected boolean canUpdate() {
-        return !ApplicationManager.getApplication().isUnitTestMode() && this.isEditable() && this.getDocument().isWritable();
-    }
+//    protected boolean canUpdate() {
+//        return !ApplicationManager.getApplication().isUnitTestMode() && this.isEditable() && this.getDocument().isWritable();
+//    }
 
-    public final boolean doUpdateDocument(@NotNull Consumer<Document> ...updates) {
-        return doUpdateDocument(Arrays.asList(updates));
-    }
-
-    private int myDocumentTransactionCounter = 0;
-
-    public boolean isDocumentTransactionInProgress() {
-        return myDocumentTransactionCounter > 0;
-    }
-
-    public final boolean doUpdateDocument(@NotNull List<Consumer<Document>> updates) {
-        if (updates.size() == 0) return true;
-
-        return doUpdateDocument(() -> {
-            for (Consumer consumer : updates) {
-                consumer.accept(getDocument());
-            }
-        });
-    }
-
-    public final boolean doUpdateDocument(@NotNull Runnable runnable) {
-        if (!canUpdate()) return false;
-
-        DocumentRunnable documentRunnable = new DocumentRunnable(getDocument(), getProject()) {
-            @Override
-            public void run() {
-                CommandProcessor.getInstance().executeCommand(
-                        getProject(),
-                        () -> DocumentUtil.executeInBulk(getDocument(), runnable),
-                        "CSV Table Editor changes",
-                        null,
-                        getDocument());
-            }
-        };
-
-        ApplicationManager.getApplication().runWriteAction(documentRunnable);
-
-        return true;
-    }
-
-    private final class MyPsiDocumentTransactionListener implements PsiDocumentTransactionListener {
-        @Override
-        public void transactionStarted(@NotNull Document document, @NotNull PsiFile file) {
-            if (file == psiFile) {
-                ++myDocumentTransactionCounter;
-            }
-        }
-
-        @Override
-        public void transactionCompleted(@NotNull Document document, @NotNull PsiFile file) {
-            if (file == psiFile) {
-                --myDocumentTransactionCounter;
-//                if(!isDocumentTransactionInProgress() && isEditorSelected()) selectNotify();
-            }
-        }
-    }
+//    public final boolean doUpdateDocument(@NotNull Consumer<Document> ...updates) {
+//        return doUpdateDocument(Arrays.asList(updates));
+//    }
+//
+//    public final boolean doUpdateDocument(@NotNull List<Consumer<Document>> updates) {
+//        if (updates.size() == 0) return true;
+//
+//        return doUpdateDocument(() -> {
+//            for (Consumer consumer : updates) {
+//                consumer.accept(getDocument());
+//            }
+//        });
+//    }
+//
+//    public final boolean doUpdateDocument(@NotNull Runnable runnable) {
+//        if (!canUpdate()) return false;
+//
+//        DocumentRunnable documentRunnable = new DocumentRunnable(getDocument(), getProject()) {
+//            @Override
+//            public void run() {
+//                CommandProcessor.getInstance().executeCommand(
+//                        getProject(),
+//                        () -> DocumentUtil.executeInBulk(getDocument(), runnable),
+//                        "CSV Table Editor changes",
+//                        null,
+//                        getDocument());
+//            }
+//        };
+//
+//        ApplicationManager.getApplication().runWriteAction(documentRunnable);
+//
+//        return true;
+//    }
 }

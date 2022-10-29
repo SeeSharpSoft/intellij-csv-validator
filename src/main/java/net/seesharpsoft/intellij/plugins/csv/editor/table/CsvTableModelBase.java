@@ -9,12 +9,17 @@ import net.seesharpsoft.intellij.plugins.csv.psi.CsvPsiTreeUpdater;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvRecord;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
+import net.seesharpsoft.intellij.psi.PsiFileHolder;
 import net.seesharpsoft.intellij.psi.PsiHelper;
+import net.seesharpsoft.intellij.util.Suspendable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public abstract class CsvTableModelBase implements CsvTableModel {
-    private CsvTableEditor myEditor = null;
+import java.util.HashSet;
+import java.util.Set;
+
+public abstract class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel, Suspendable {
+    private final T myPsiFileHolder;
 
     private int myCachedRowCount = -1;
     private int myCachedColumnCount = -1;
@@ -25,19 +30,40 @@ public abstract class CsvTableModelBase implements CsvTableModel {
 
     private final CsvPsiTreeUpdater myPsiTreeUpdater;
 
-    public CsvTableModelBase(@NotNull CsvTableEditor editor) {
-        myEditor = editor;
-        myPsiTreeUpdater = new CsvPsiTreeUpdater(editor);
-        myPsiTreeUpdater.addCommitListener(() -> getEditor().updateUIComponents());
-        editor.getCsvFile().getManager().addPsiTreeChangeListener(new PsiTreeAnyChangeAbstractAdapter() {
-            @Override
-            protected void onChange(@Nullable PsiFile file) {
-                if (file == myPsiTreeUpdater.getPsiFile() && getEditor().isEditorSelected() && !myPsiTreeUpdater.isCommitting()) {
-                    getEditor().updateUIComponents();
-//                    notifyUpdate();
-                }
-            }
-        }, myEditor);
+    private final PsiTreeChangeListener myPsiTreeChangeListener = new PsiTreeAnyChangeAbstractAdapter() {
+        @Override
+        protected void onChange(@Nullable PsiFile file) {
+            onPsiTreeChanged(myPsiTreeUpdater.getPsiFile());
+        }
+    };
+
+    public CsvTableModelBase(@NotNull T psiFileHolder) {
+        myPsiFileHolder = psiFileHolder;
+        myPsiTreeUpdater = new CsvPsiTreeUpdater(psiFileHolder);
+        myPsiTreeUpdater.addCommitListener(() -> onPsiTreeChanged(getPsiFile()));
+        getPsiFile().getManager().addPsiTreeChangeListener(myPsiTreeChangeListener, myPsiFileHolder);
+    }
+
+    public T getPsiFileHolder() {
+        return myPsiFileHolder;
+    }
+
+    @Override
+    public void dispose() {
+        Suspendable.super.dispose();
+        getPsiFile().getManager().removePsiTreeChangeListener(myPsiTreeChangeListener);
+        myPsiTreeUpdater.dispose();
+    }
+
+    private void onPsiTreeChanged(@Nullable PsiFile file) {
+        if (file == getPsiFile() && !myPsiTreeUpdater.isSuspended() && !isSuspended()) {
+            notifyUpdate();
+        }
+    }
+
+    @Override
+    public PsiFile getPsiFile() {
+        return myPsiFileHolder.getPsiFile();
     }
 
     @Override
@@ -53,12 +79,14 @@ public abstract class CsvTableModelBase implements CsvTableModel {
     }
 
     private CsvField resetPointer() {
-        myPointerElement = PsiTreeUtil.findChildOfType(this.getEditor().getCsvFile(), CsvField.class);
+        myPointerElement = PsiTreeUtil.findChildOfType(getPsiFile(), CsvField.class);
         myPointerRow = 0;
         return myPointerElement;
     }
 
-    protected CsvPsiTreeUpdater getPsiTreeUpdater() { return myPsiTreeUpdater; }
+    protected CsvPsiTreeUpdater getPsiTreeUpdater() {
+        return myPsiTreeUpdater;
+    }
 
     @Override
     public PsiElement getFieldAt(int row, int column) {
@@ -79,11 +107,6 @@ public abstract class CsvTableModelBase implements CsvTableModel {
         myPointerElement = field;
         myPointerRow = row;
         return myPointerElement;
-    }
-
-    @Override
-    public CsvTableEditor getEditor() {
-        return myEditor;
     }
 
     @Override
@@ -154,7 +177,6 @@ public abstract class CsvTableModelBase implements CsvTableModel {
             if (!CsvHelper.isCommentElement(field)) {
                 sanitizedValue = sanitizeFieldValue(value);
             }
-
             updater.replaceField(field, sanitizedValue, true);
         }
         updater.commit();
@@ -169,24 +191,30 @@ public abstract class CsvTableModelBase implements CsvTableModel {
 
     @Override
     public void addRow(int focusedRowIndex, boolean before) {
-        CsvRecord row = PsiHelper.getNthChildOfType(getEditor().getCsvFile(), focusedRowIndex, CsvRecord.class);
+        CsvRecord row = PsiHelper.getNthChildOfType(getPsiFile(), focusedRowIndex, CsvRecord.class);
         getPsiTreeUpdater().addRow(row, before);
         getPsiTreeUpdater().commit();
     }
 
     @Override
     public void removeRows(int[] indices) {
-        CsvPsiTreeUpdater psiTreeUpdater = getPsiTreeUpdater();
+        CsvPsiTreeUpdater updater = getPsiTreeUpdater();
+        Set<PsiElement> toDelete = new HashSet<>();
+        PsiFile psiFile = getPsiFile();
         for (int rowIndex : indices) {
-            CsvRecord row = PsiHelper.getNthChildOfType(getEditor().getCsvFile(), rowIndex, CsvRecord.class);
+            CsvRecord row = PsiHelper.getNthChildOfType(psiFile, rowIndex, CsvRecord.class);
             boolean removePreviousLF = rowIndex > 0;
             PsiElement lfElement = PsiHelper.getSiblingOfType(row, CsvTypes.CRLF, removePreviousLF);
-            psiTreeUpdater.delete(row);
+            if (toDelete.contains(lfElement)) {
+                lfElement = PsiHelper.getSiblingOfType(row, CsvTypes.CRLF, !removePreviousLF);
+            }
             if (lfElement != null) {
-                psiTreeUpdater.delete(lfElement);
+                toDelete.add(row);
+                toDelete.add(lfElement);
             }
         }
-        psiTreeUpdater.commit();
+        updater.delete(toDelete.toArray(new PsiElement[toDelete.size()]));
+        updater.commit();
     }
 
     @Override
@@ -195,7 +223,7 @@ public abstract class CsvTableModelBase implements CsvTableModel {
         // +1 for the one to add
         int targetColumnCount = getColumnCount() + 1;
         int rowIndex = 0;
-        for (PsiElement record = getEditor().getCsvFile().getFirstChild(); record != null; record = record.getNextSibling()) {
+        for (PsiElement record = getPsiFile().getFirstChild(); record != null; record = record.getNextSibling()) {
             if (!CsvRecord.class.isInstance(record)) continue;
             if (CsvHelper.isCommentElement(record.getFirstChild())) continue;
             PsiElement focusedCol = PsiHelper.getNthChildOfType(record, focusedColumnIndex, CsvField.class);
@@ -211,32 +239,37 @@ public abstract class CsvTableModelBase implements CsvTableModel {
 
     @Override
     public void removeColumns(int[] indices) {
-        for (int columnIndex : indices) {
-            removeColumn(columnIndex);
-        }
-        getPsiTreeUpdater().commit();
-    }
+        if (indices.length == 0) return;
 
-    private void removeColumn(int columnIndex) {
         CsvPsiTreeUpdater updater = getPsiTreeUpdater();
         if (getColumnCount() == 1) {
             updater.deleteContent();
             return;
         }
-        for (PsiElement record = getEditor().getCsvFile().getFirstChild(); record != null; record = record.getNextSibling()) {
+
+        Set<PsiElement> toDelete = new HashSet<>();
+        for (PsiElement record = getPsiFile().getFirstChild(); record != null; record = record.getNextSibling()) {
             if (!CsvRecord.class.isInstance(record)) continue;
             if (CsvHelper.isCommentElement(record.getFirstChild())) continue;
-            PsiElement focusedCol = PsiHelper.getNthChildOfType(record, columnIndex, CsvField.class);
-            // if no field exists in row, we are done
-            if (focusedCol != null) {
-                boolean removePreviousSeparator = columnIndex > 0;
-                PsiElement valueSeparator = PsiHelper.getSiblingOfType(focusedCol,CsvTypes.COMMA, removePreviousSeparator);
-                updater.delete(focusedCol);
-                if (valueSeparator != null) {
-                    updater.delete(valueSeparator);
+            for (int columnIndex : indices) {
+                PsiElement focusedCol = PsiHelper.getNthChildOfType(record, columnIndex, CsvField.class);
+                // if no field exists in row, we are done
+                if (focusedCol != null) {
+                    boolean removePreviousSeparator = columnIndex > 0;
+                    PsiElement valueSeparator = PsiHelper.getSiblingOfType(focusedCol, CsvTypes.COMMA, removePreviousSeparator);
+                    if (toDelete.contains(valueSeparator)) {
+                        valueSeparator = PsiHelper.getSiblingOfType(focusedCol, CsvTypes.COMMA, !removePreviousSeparator);
+                    }
+                    if (valueSeparator != null) {
+                        toDelete.add(focusedCol);
+                        toDelete.add(valueSeparator);
+                    }
                 }
             }
         }
+
+        updater.delete(toDelete.toArray(new PsiElement[toDelete.size()]));
+        updater.commit();
     }
 
     @Override

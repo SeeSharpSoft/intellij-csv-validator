@@ -10,23 +10,22 @@ import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import net.seesharpsoft.intellij.psi.PsiFileHolder;
 import net.seesharpsoft.intellij.psi.PsiHelper;
+import net.seesharpsoft.intellij.util.Suspendable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.event.EventListenerList;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
 import java.util.ArrayList;
 import java.util.EventListener;
 import java.util.List;
 
-public class CsvPsiTreeUpdater implements PsiFileHolder {
+public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
 
     private final PsiFileHolder myPsiFileHolder;
 
     private final PsiFileFactory myFileFactory;
 
-    private final List<UpdateAction> myUncommittedActions = new ArrayList<>();
+    private List<PsiAction> myUncommittedActions = new ArrayList<>();
 
     public CsvPsiTreeUpdater(@NotNull PsiFileHolder psiFileHolder) {
         myPsiFileHolder = psiFileHolder;
@@ -62,6 +61,12 @@ public class CsvPsiTreeUpdater implements PsiFileHolder {
         return myPsiFileHolder.getPsiFile();
     }
 
+    @Override
+    public void dispose() {
+        Suspendable.super.dispose();
+        myUncommittedActions = null;
+    }
+
     public @Nullable PsiElement createValueSeparator() {
         return PsiHelper.findFirst(createFile(CsvHelper.getValueSeparator(getPsiFile()).getCharacter()), CsvTypes.COMMA);
     }
@@ -70,7 +75,7 @@ public class CsvPsiTreeUpdater implements PsiFileHolder {
         return PsiHelper.findFirst(createFile("\n"), CsvTypes.CRLF);
     }
 
-    public void doAction(UpdateAction action) {
+    public void doAction(PsiAction action) {
         myUncommittedActions.add(action);
     }
 
@@ -107,7 +112,7 @@ public class CsvPsiTreeUpdater implements PsiFileHolder {
             anchor = anchor.getParent();
         }
         assert anchor instanceof CsvRecord;
-        doAction(new AddUpdateAction(anchor, createRecord(), before));
+        doAction(new AddPsiAction(anchor, createRecord(), before));
         doAddLineBreak(anchor, before);
     }
 
@@ -116,15 +121,17 @@ public class CsvPsiTreeUpdater implements PsiFileHolder {
         // do not replace if not necessary
         if (toReplace.getText().equals(text)) return;
 
-        doAction(new ReplaceUpdateAction(toReplace, createField(text, enquoteCommentIndicator)));
+        doAction(new ReplacePsiAction(toReplace, createField(text, enquoteCommentIndicator)));
     }
 
-    public void delete(@NotNull PsiElement toRemove) {
-        doAction(new DeleteUpdateAction(toRemove));
+    public void delete(@NotNull PsiElement ...toRemove) {
+        for (PsiElement element : toRemove) {
+            doAction(new DeletePsiAction(element));
+        }
     }
 
     public void deleteAllChildren(@NotNull PsiElement anchor) {
-        doAction(new DeleteChildrenUpdateAction(anchor));
+        doAction(new DeleteChildrenPsiAction(anchor));
     }
 
     public void deleteContent() {
@@ -132,40 +139,35 @@ public class CsvPsiTreeUpdater implements PsiFileHolder {
     }
 
     private void doAddValueSeparator(@NotNull PsiElement anchor, boolean before) {
-        doAction(new AddUpdateAction(anchor, createValueSeparator(), before));
+        doAction(new AddPsiAction(anchor, createValueSeparator(), before));
     }
 
     private void doAddLineBreak(@NotNull PsiElement anchor, boolean before) {
-        doAction(new AddUpdateAction(anchor, createLineBreak(), before));
+        doAction(new AddPsiAction(anchor, createLineBreak(), before));
     }
 
     private void doAddField(@NotNull PsiElement anchor, @Nullable String text, boolean enquoteCommentIndicator, boolean before) {
-        doAction(new AddUpdateAction(anchor, createField(text, enquoteCommentIndicator), before));
-    }
-
-    private boolean committing = false;
-
-    public boolean isCommitting() {
-        return committing;
+        doAction(new AddPsiAction(anchor, createField(text, enquoteCommentIndicator), before));
     }
 
     public synchronized void commit() {
-        if (committing || myUncommittedActions.size() == 0) return;
-        committing = true;
+        if (isSuspended() || myUncommittedActions.size() == 0) return;
 
-        List<UpdateAction> actionsToCommit = new ArrayList<>(myUncommittedActions);
-        if (doCommit(() -> {
+        suspend();
+        List<PsiAction> actionsToCommit = new ArrayList<>(myUncommittedActions);
+        if (!doCommit(() -> {
             try {
-                actionsToCommit.forEach(UpdateAction::execute);
-                fireCommitted();
+                actionsToCommit.forEach(PsiAction::execute);
             } finally {
-                committing = false;
+                resume();
+                fireCommitted();
             }
         })) {
-            myUncommittedActions.clear();
-        } else {
-            committing = false;
+            resume();
         }
+
+        // TODO even when not committed, those are cleared -> OK?
+        myUncommittedActions.clear();
     }
 
     private boolean doCommit(@NotNull Runnable runnable) {
@@ -208,14 +210,14 @@ public class CsvPsiTreeUpdater implements PsiFileHolder {
         }
     }
 
-    public static interface CommitListener extends EventListener {
+    public interface CommitListener extends EventListener {
         void committed();
     }
 
-    private static abstract class UpdateAction {
+    private static abstract class PsiAction {
         private final PsiElement myAnchor;
 
-        UpdateAction(@NotNull PsiElement anchor) {
+        PsiAction(@NotNull PsiElement anchor) {
             myAnchor = anchor;
         }
 
@@ -226,16 +228,16 @@ public class CsvPsiTreeUpdater implements PsiFileHolder {
         abstract public void execute();
     }
 
-    private static class AddUpdateAction extends UpdateAction {
+    private static class AddPsiAction extends PsiAction {
 
         private final PsiElement myElementToAdd;
         private final boolean myBefore;
 
-        AddUpdateAction(@NotNull PsiElement anchor, @NotNull PsiElement elementToAdd) {
+        AddPsiAction(@NotNull PsiElement anchor, @NotNull PsiElement elementToAdd) {
             this(anchor, elementToAdd, false);
         }
 
-        AddUpdateAction(@NotNull PsiElement anchor, @NotNull PsiElement elementToAdd, boolean before) {
+        AddPsiAction(@NotNull PsiElement anchor, @NotNull PsiElement elementToAdd, boolean before) {
             super(anchor);
             myElementToAdd = elementToAdd;
             myBefore = before;
@@ -244,6 +246,7 @@ public class CsvPsiTreeUpdater implements PsiFileHolder {
         @Override
         public void execute() {
             PsiElement anchor = getAnchor();
+            if (anchor.getParent() == null) return;
             if (myBefore) {
                 anchor.getParent().addBefore(myElementToAdd, anchor);
             } else {
@@ -252,11 +255,11 @@ public class CsvPsiTreeUpdater implements PsiFileHolder {
         }
     }
 
-    private static class ReplaceUpdateAction extends UpdateAction {
+    private static class ReplacePsiAction extends PsiAction {
 
         private final PsiElement myReplacement;
 
-        ReplaceUpdateAction(@NotNull PsiElement anchor, @NotNull PsiElement replacement) {
+        ReplacePsiAction(@NotNull PsiElement anchor, @NotNull PsiElement replacement) {
             super(anchor);
             myReplacement = replacement;
         }
@@ -267,21 +270,23 @@ public class CsvPsiTreeUpdater implements PsiFileHolder {
         }
     }
 
-    private static class DeleteUpdateAction extends UpdateAction {
+    private static class DeletePsiAction extends PsiAction {
 
-        DeleteUpdateAction(@NotNull PsiElement anchor) {
+        DeletePsiAction(@NotNull PsiElement anchor) {
             super(anchor);
         }
 
         @Override
         public void execute() {
-            getAnchor().delete();
+            PsiElement anchor = getAnchor();
+            if (anchor.getParent() == null) return;
+            anchor.delete();
         }
     }
 
-    private static class DeleteChildrenUpdateAction extends UpdateAction {
+    private static class DeleteChildrenPsiAction extends PsiAction {
 
-        DeleteChildrenUpdateAction(@NotNull PsiElement anchor) {
+        DeleteChildrenPsiAction(@NotNull PsiElement anchor) {
             super(anchor);
         }
 
