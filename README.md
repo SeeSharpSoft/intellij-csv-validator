@@ -7,6 +7,14 @@
 - fix compatibility issues
 - localization? (maybe)
 
+TODOs
+
+- support comments in table editor
+- support column movement
+- make table default editor
+- refactor document updater
+- tests
+
 
 [![Plugin version](https://img.shields.io/jetbrains/plugin/d/10037-csv-plugin.svg)](https://plugins.jetbrains.com/plugin/10037-csv-plugin)
 [![Build Action Status](https://github.com/SeeSharpSoft/intellij-csv-validator/actions/workflows/CIBuild.yml/badge.svg)](https://github.com/SeeSharpSoft/intellij-csv-validator/actions)
