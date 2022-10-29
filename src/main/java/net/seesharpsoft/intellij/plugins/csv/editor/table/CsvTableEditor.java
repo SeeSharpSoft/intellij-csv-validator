@@ -23,9 +23,9 @@ import com.intellij.util.ui.UIUtil;
 import net.seesharpsoft.intellij.plugins.csv.*;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.api.CsvTableModel;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.api.TableActions;
-import net.seesharpsoft.intellij.plugins.csv.editor.table.swing.TableRowUtilities;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvFile;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
+import net.seesharpsoft.intellij.psi.PsiFileHolder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -35,10 +35,9 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
 
-public abstract class CsvTableEditor implements FileEditor, FileEditorLocation, CheckedDisposable {
+public abstract class CsvTableEditor implements FileEditor, FileEditorLocation, CheckedDisposable, PsiFileHolder {
 
     public static final String EDITOR_NAME = "Table Editor";
 
@@ -66,7 +65,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation, 
         this.changeSupport = new PropertyChangeSupport(this);
 //        this.psiTreeChangeListener = new MyPsiTreeChangeListener();
 
-        Topics.subscribe(PsiDocumentTransactionListener.TOPIC, this, new MyPsiDocumentTransactionListener());
+//        Topics.subscribe(PsiDocumentTransactionListener.TOPIC, this, new MyPsiDocumentTransactionListener());
     }
 
     @NotNull
@@ -248,6 +247,8 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation, 
         return this.document;
     }
 
+    public PsiFile getPsiFile() { return getCsvFile(); }
+
     @Nullable
     public final CsvFile getCsvFile() {
         if (project == null || project.isDisposed()) {
@@ -395,7 +396,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation, 
         public void transactionCompleted(@NotNull Document document, @NotNull PsiFile file) {
             if (file == psiFile) {
                 --myDocumentTransactionCounter;
-                if(!isDocumentTransactionInProgress() && isEditorSelected()) selectNotify();
+//                if(!isDocumentTransactionInProgress() && isEditorSelected()) selectNotify();
             }
         }
     }

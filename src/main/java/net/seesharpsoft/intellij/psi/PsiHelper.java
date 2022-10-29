@@ -5,6 +5,7 @@ import com.intellij.psi.PsiErrorElement;
 import com.intellij.psi.SyntaxTraverser;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
+import net.seesharpsoft.intellij.plugins.csv.psi.CsvField;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -75,5 +76,9 @@ public class PsiHelper {
             }
         }
         return null;
+    }
+
+    public static PsiElement findFirst(@NotNull final PsiElement root, @NotNull IElementType type) {
+        return SyntaxTraverser.psiTraverser(root).filterTypes(elementType -> elementType == type).filter(PsiElement.class).first();
     }
 }
