@@ -5,12 +5,12 @@ import javax.swing.event.CellEditorListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.table.TableCellRenderer;
 
-public class MultiLineCellRendererTest extends CsvTableEditorSwingTestBase {
+public class CsvMultiLineCellRendererTest extends CsvTableEditorSwingTestBase {
 
     public void testCellRendererUsage() {
         TableCellRenderer cellRenderer = fileEditor.getTable().getCellRenderer(0, 0);
 
-        assertInstanceOf(cellRenderer, MultiLineCellRenderer.class);
+        assertInstanceOf(cellRenderer, CsvMultiLineCellRenderer.class);
     }
 
     public void testPreferredSize() {
@@ -20,13 +20,13 @@ public class MultiLineCellRendererTest extends CsvTableEditorSwingTestBase {
     }
 
     public void testCellEditorComponent() {
-        MultiLineCellRenderer cellRenderer = (MultiLineCellRenderer)fileEditor.getTable().getCellRenderer(0, 0);
+        CsvMultiLineCellRenderer cellRenderer = (CsvMultiLineCellRenderer)fileEditor.getTable().getCellRenderer(0, 0);
 
         assertEquals(cellRenderer, cellRenderer.getTableCellEditorComponent(fileEditor.getTable(), "Test", true, 0, 0));
     }
 
     public void testCellEditing() {
-        MultiLineCellRenderer cellRenderer = (MultiLineCellRenderer)fileEditor.getTable().getCellRenderer(0, 0);
+        CsvMultiLineCellRenderer cellRenderer = (CsvMultiLineCellRenderer)fileEditor.getTable().getCellRenderer(0, 0);
 
         assertTrue(cellRenderer.isCellEditable(null));
         assertTrue(cellRenderer.shouldSelectCell(null));

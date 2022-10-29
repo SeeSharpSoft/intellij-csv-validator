@@ -132,19 +132,8 @@ public abstract class CsvTableModelBase<T extends PsiFileHolder> implements CsvT
         return myCachedColumnCount;
     }
 
-    private String sanitizeFieldValue(Object value) {
-        return sanitizeFieldValue(value, CsvEditorSettings.getInstance().isQuotingEnforced());
-    }
-
-    private String sanitizeFieldValue(Object value, boolean enforceQuoting) {
-        if (value == null) {
-            return "";
-        }
-        return CsvHelper.quoteCsvField(value.toString(), this.getEscapeCharacter(), this.getValueSeparator(), enforceQuoting);
-    }
-
     @Override
-    public void setValueAt(String value, int rowIndex, int columnIndex) {
+    public void setValue(String value, int rowIndex, int columnIndex) {
         setValueAt(value, rowIndex, columnIndex, true);
     }
 
@@ -182,10 +171,12 @@ public abstract class CsvTableModelBase<T extends PsiFileHolder> implements CsvT
     }
 
     @Override
-    public String getValueAt(int rowIndex, int columnIndex) {
+    public String getValue(int rowIndex, int columnIndex) {
         PsiElement field = getFieldAt(rowIndex, columnIndex);
         String value = field == null ? "" : field.getText();
-        return CsvHelper.unquoteCsvValue(value, getEscapeCharacter());
+        return CsvHelper.isCommentElement(field) ?
+                value.substring(CsvEditorSettings.getInstance().getCommentIndicator().length()) :
+                CsvHelper.unquoteCsvValue(value, getEscapeCharacter());
     }
 
     @Override

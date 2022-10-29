@@ -3,10 +3,6 @@ package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.api.CsvTableModel;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableModel;
-import java.util.Vector;
-
 public class CsvTableEditorCustomFileEndLineBreak extends CsvTableEditorSwingTestBase {
 
     @Override
@@ -29,15 +25,15 @@ public class CsvTableEditorCustomFileEndLineBreak extends CsvTableEditorSwingTes
         assertEquals(2, tableModel.getColumnCount());
         assertEquals(5, tableModel.getRowCount());
 
-        assertEquals("Header1", tableModel.getValueAt(0, 0));
-        assertEquals("Header2", tableModel.getValueAt(0, 1));
-        assertEquals("", tableModel.getValueAt(1, 0));
-        assertEquals("", tableModel.getValueAt(1, 1));
-        assertEquals("after the empty line", tableModel.getValueAt(2, 0));
-        assertEquals("", tableModel.getValueAt(2, 1));
-        assertEquals("before the previous last line", tableModel.getValueAt(3, 0));
-        assertEquals("", tableModel.getValueAt(3, 1));
-        assertEquals("", tableModel.getValueAt(4, 0));
-        assertEquals("", tableModel.getValueAt(4, 1));
+        assertEquals("Header1", tableModel.getValue(0, 0));
+        assertEquals("Header2", tableModel.getValue(0, 1));
+        assertEquals("", tableModel.getValue(1, 0));
+        assertEquals("", tableModel.getValue(1, 1));
+        assertEquals("after the empty line", tableModel.getValue(2, 0));
+        assertEquals("", tableModel.getValue(2, 1));
+        assertEquals("before the previous last line", tableModel.getValue(3, 0));
+        assertEquals("", tableModel.getValue(3, 1));
+        assertEquals("", tableModel.getValue(4, 0));
+        assertEquals("", tableModel.getValue(4, 1));
     }
 }

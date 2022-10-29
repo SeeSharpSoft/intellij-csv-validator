@@ -9,10 +9,11 @@
 
 TODOs
 
-- support comments in table editor
-- support column movement
-- make table default editor
-- refactor document updater
+- prevent horizontal scrolling on focus change!
+- support comments in table editor - DONE
+- support column movement - not planned
+- make table default editor - DONE
+- refactor document updater - DONE
 - tests
 
 

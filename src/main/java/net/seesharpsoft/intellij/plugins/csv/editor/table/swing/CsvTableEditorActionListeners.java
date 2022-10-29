@@ -50,7 +50,7 @@ public class CsvTableEditorActionListeners extends CsvTableEditorUtilBase implem
             int targetRow = before ? currentRow : currentRow + 1;
             int targetColumn = 0;
             selectCell(tableEditor.getTable(), targetRow, targetColumn);
-            tableEditor.getTable().editCellAt(targetRow, targetColumn);
+//            tableEditor.getTable().editCellAt(targetRow, targetColumn);
         } finally {
             tableEditor.applyTableChangeListener();
         }

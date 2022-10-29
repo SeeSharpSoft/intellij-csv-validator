@@ -14,12 +14,12 @@ import javax.swing.table.TableModel;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CsvPsiTableModel extends CsvTableModelBase<CsvTableEditor> implements TableModel {
+public class CsvTableModelSwing extends CsvTableModelBase<CsvTableEditor> implements TableModel {
 
     /** List of listeners */
     protected EventListenerList listenerList = new EventListenerList();
 
-    public CsvPsiTableModel(@NotNull CsvTableEditor psiFileHolder) {
+    public CsvTableModelSwing(@NotNull CsvTableEditor psiFileHolder) {
         super(psiFileHolder);
     }
 
@@ -44,13 +44,13 @@ public class CsvPsiTableModel extends CsvTableModelBase<CsvTableEditor> implemen
     }
 
     @Override
-    public String getValueAt(int rowIndex, int columnIndex) {
-        return super.getValueAt(rowIndex, columnIndex);
+    public Object getValueAt(int rowIndex, int columnIndex) {
+        return getValue(rowIndex, columnIndex);
     }
 
     @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-        setValueAt(aValue == null ? "" : aValue.toString(), rowIndex, columnIndex);
+        setValue(aValue == null ? "" : aValue.toString(), rowIndex, columnIndex);
     }
 
     @Override

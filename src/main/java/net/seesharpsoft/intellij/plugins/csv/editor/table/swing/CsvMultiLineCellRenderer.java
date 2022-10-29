@@ -2,8 +2,6 @@ package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
 import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.editor.colors.EditorColorsScheme;
-import com.intellij.openapi.editor.colors.EditorFontType;
-import com.intellij.openapi.editor.impl.FontFallbackIterator;
 import com.intellij.openapi.editor.markup.TextAttributes;
 import com.intellij.openapi.util.UserDataHolder;
 import com.intellij.ui.components.JBScrollPane;
@@ -29,14 +27,13 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 import static java.awt.event.InputEvent.CTRL_DOWN_MASK;
 
-public class MultiLineCellRenderer extends JBScrollPane implements TableCellRenderer, TableCellEditor {
-
+public class CsvMultiLineCellRenderer extends JBScrollPane implements TableCellRenderer, TableCellEditor {
     private Set<CellEditorListener> cellEditorListenerSet = new CopyOnWriteArraySet<>();
     private final UserDataHolder myUserDataHolder;
 
     private JTextArea myTextArea;
 
-    public MultiLineCellRenderer(CsvTableEditorKeyListener keyListener, UserDataHolder userDataHolderParam) {
+    public CsvMultiLineCellRenderer(CsvTableEditorKeyListener keyListener, UserDataHolder userDataHolderParam) {
         this.myUserDataHolder = userDataHolderParam;
         myTextArea = new JTextArea();
         myTextArea.setLineWrap(true);
@@ -51,7 +48,7 @@ public class MultiLineCellRenderer extends JBScrollPane implements TableCellRend
         this.setViewportView(myTextArea);
     }
 
-    private TextAttributes getColumnTextAttributes(int column) {
+    protected TextAttributes getColumnTextAttributes(int column) {
         return CsvColorSettings.getTextAttributesOfColumn(column, myUserDataHolder);
     }
 
@@ -191,5 +188,16 @@ public class MultiLineCellRenderer extends JBScrollPane implements TableCellRend
     protected void processFocusEvent(FocusEvent focusEvent) {
         super.processFocusEvent(focusEvent);
         myTextArea.grabFocus();
+    }
+
+    public static class Comment extends CsvMultiLineCellRenderer {
+        public Comment(CsvTableEditorKeyListener keyListener, UserDataHolder userDataHolderParam) {
+            super(keyListener, userDataHolderParam);
+        }
+
+        @Override
+        protected TextAttributes getColumnTextAttributes(int column) {
+            return CsvColorSettings.getCommentTextAttributes();
+        }
     }
 }

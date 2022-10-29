@@ -30,6 +30,11 @@ public interface CsvTableModel extends PsiFileHolder, Suspendable {
         return CsvHelper.getValueSeparator(getPsiFile());
     }
 
+    default boolean isCommentRow(int rowIndex) {
+        PsiElement field = getFieldAt(rowIndex, 0);
+        return CsvHelper.isCommentElement(field);
+    }
+
     default boolean hasErrors() {
         PsiFile psiFile = getPsiFile();
         return psiFile != null && PsiTreeUtil.hasErrorElements(psiFile);
@@ -65,9 +70,9 @@ public interface CsvTableModel extends PsiFileHolder, Suspendable {
     }
 
     @NotNull
-    String getValueAt(int rowIndex, int columnIndex);
+    String getValue(int rowIndex, int columnIndex);
 
-    void setValueAt(String value, int rowIndex, int columnIndex);
+    void setValue(String value, int rowIndex, int columnIndex);
 
     void addRow(int focusedRowIndex, boolean before);
 

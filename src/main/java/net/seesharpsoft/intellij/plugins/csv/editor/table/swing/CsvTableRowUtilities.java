@@ -50,11 +50,11 @@ import java.util.Objects;
  *
  * @author Oliver Watkins, Martin Sommer
  */
-public final class TableRowUtilities {
+public final class CsvTableRowUtilities {
 
     public static final int ROW_NUMBER_CELL_PADDING = 4;
 
-    private TableRowUtilities() {
+    private CsvTableRowUtilities() {
         // static helper
     }
 
@@ -127,8 +127,7 @@ public final class TableRowUtilities {
             }
         });
 
-        new TableSynchronizer(rowHeadersTable, userTable);
-        new TableRowResizer(rowHeadersTable, userTable, tableEditor);
+        new TableSynchronizer(rowHeadersTable, userTable, new TableRowResizer(rowHeadersTable, userTable, tableEditor));
     }
 
     /**
@@ -296,9 +295,12 @@ public final class TableRowUtilities {
         private JViewport userTableViewPort;
         private JViewport rowHeadersViewPort;
 
-        private TableSynchronizer(JTable rowHeadersTableArg, JTable userTableArg) {
+        private TableRowResizer tableRowResizer;
+
+        private TableSynchronizer(JTable rowHeadersTableArg, JTable userTableArg, TableRowResizer tableRowResizerArg) {
             this.userTable = userTableArg;
             this.rowHeadersTable = rowHeadersTableArg;
+            this.tableRowResizer = tableRowResizerArg;
 
             Container p = userTableArg.getParent();
             userTableViewPort = (JViewport) p;
@@ -315,6 +317,8 @@ public final class TableRowUtilities {
         }
 
         public void valueChanged(ListSelectionEvent e) {
+            if (tableRowResizer.isResizing()) return;
+
             if (Objects.equals(e.getSource(), userTable.getSelectionModel())) {
                 rowHeadersTable.getSelectionModel().removeListSelectionListener(this);
                 rowHeadersTable.getSelectionModel().clearSelection();
@@ -389,10 +393,10 @@ public final class TableRowUtilities {
     }
 
     public static class TableRowResizer extends MouseInputAdapter {
-        public static Cursor resizeCursor = Cursor.getPredefinedCursor(Cursor.N_RESIZE_CURSOR);
+        public static Cursor RESIZE_CURSOR = Cursor.getPredefinedCursor(Cursor.N_RESIZE_CURSOR);
 
         private int mouseYOffset, resizingRow = -1;
-        private Cursor otherCursor = resizeCursor;
+        private Cursor otherCursor = RESIZE_CURSOR;
         private JTable rowHeadersTable;
         private JTable userTable;
         private CsvTableEditor myTableEditor;
@@ -407,6 +411,10 @@ public final class TableRowUtilities {
 
         private int getResizingRow(Point p) {
             return getResizingRow(p, rowHeadersTable.rowAtPoint(p));
+        }
+
+        public boolean isResizing() {
+            return this.resizingRow != -1;
         }
 
         private int getResizingRow(Point p, int row) {
@@ -443,7 +451,7 @@ public final class TableRowUtilities {
         public void mouseMoved(MouseEvent e) {
             if (resizingRow == -1 &&
                     (getResizingRow(e.getPoint()) >= 0)
-                            != (rowHeadersTable.getCursor() == resizeCursor)) {
+                            != (rowHeadersTable.getCursor() == RESIZE_CURSOR)) {
                 swapCursor();
             }
         }
@@ -454,8 +462,10 @@ public final class TableRowUtilities {
             if (resizingRow >= 0) {
                 int newHeight = mouseY - mouseYOffset;
                 if (newHeight > 0) {
-                    userTable.setRowHeight(resizingRow, newHeight);
-                    rowHeadersTable.setRowHeight(resizingRow, newHeight);
+//                    userTable.setRowHeight(resizingRow, newHeight);
+//                    rowHeadersTable.setRowHeight(resizingRow, newHeight);
+                    rowHeadersTable.setRowHeight(newHeight);
+                    userTable.setRowHeight(newHeight);
                 }
             }
         }

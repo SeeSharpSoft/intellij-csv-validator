@@ -99,9 +99,11 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
     }
 
     public void addColumn(@NotNull PsiElement anchor, String text, boolean enquoteCommentIndicator, boolean before) {
-        while (anchor != null && !(anchor instanceof CsvField)) {
+        while (anchor != null && !(anchor instanceof CsvField || CsvHelper.isCommentElement(anchor))) {
             anchor = anchor.getParent();
         }
+        // no columns in comment row
+        if (CsvHelper.isCommentElement(anchor)) return;
         assert anchor instanceof CsvField;
         doAddField(anchor, text, enquoteCommentIndicator, before);
         doAddValueSeparator(anchor, before);

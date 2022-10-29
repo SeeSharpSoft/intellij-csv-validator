@@ -66,7 +66,7 @@ public class CsvTableEditorSwing extends CsvTableEditor {
     }
 
     protected void createUIComponents() {
-        tblEditor = new CsvTable(new CsvPsiTableModel(this));
+        tblEditor = new CsvTable(new CsvTableModelSwing(this));
         tblEditor.setRowSorter(null);
         lnkTextEditor = new LinkLabel("Open file in text editor", null);
     }
@@ -89,19 +89,21 @@ public class CsvTableEditorSwing extends CsvTableEditor {
         tblEditor.setForeground(editorColorsScheme.getDefaultForeground());
         tblEditor.getColumnModel().addColumnModelListener(tableEditorListener);
 
-        MultiLineCellRenderer cellRenderer = new MultiLineCellRenderer(this.tableEditorKeyListener, this);
-        MultiLineCellRenderer cellEditor = new MultiLineCellRenderer(this.tableEditorKeyListener, this);
+        CsvMultiLineCellRenderer cellRenderer = new CsvMultiLineCellRenderer(this.tableEditorKeyListener, this);
+        CsvMultiLineCellRenderer cellEditor = new CsvMultiLineCellRenderer(this.tableEditorKeyListener, this);
         tblEditor.setDefaultRenderer(String.class, cellRenderer);
         tblEditor.setDefaultRenderer(Object.class, cellRenderer);
+        tblEditor.setDefaultRenderer(CsvTable.CommentColumn.class, new CsvMultiLineCellRenderer.Comment(this.tableEditorKeyListener, this));
         tblEditor.setDefaultEditor(String.class, cellEditor);
         tblEditor.setDefaultEditor(Object.class, cellEditor);
+        tblEditor.setDefaultEditor(CsvTable.CommentColumn.class, new CsvMultiLineCellRenderer.Comment(this.tableEditorKeyListener, this));
         tblEditor.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         tblEditor.setRowHeight(1);
 
         setFontSize(getGlobalFontSize());
         baseFontHeight = getFontHeight();
 
-        rowHeadersTable = TableRowUtilities.addNumberColumn(this, tblEditor, 1);
+        rowHeadersTable = CsvTableRowUtilities.addNumberColumn(this, tblEditor, 1);
 
         applyEditorState(getTableEditorState());
     }
@@ -290,9 +292,11 @@ public class CsvTableEditorSwing extends CsvTableEditor {
         int[] textLengths = new int[tableModel.getColumnCount()];
 
         for (int row = 0; row < maxRow; ++row) {
-            for (int col = 0; col < textLengths.length; ++col) {
-                String currentText = tableModel.getValueAt(row, col);
-                textLengths[col] = Math.max(getStringWidth(currentText), textLengths[col]);
+            if (!tableModel.isCommentRow(row)) {
+                for (int col = 0; col < textLengths.length; ++col) {
+                    String currentText = tableModel.getValue(row, col);
+                    textLengths[col] = Math.max(getStringWidth(currentText), textLengths[col]);
+                }
             }
         }
 

@@ -8,15 +8,12 @@ import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditorState;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.api.CsvTableModel;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableModel;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.util.Vector;
 
 public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
 
@@ -80,14 +77,14 @@ public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
         assertEquals(2, tableModel.getColumnCount());
         assertEquals(4, tableModel.getRowCount());
 
-        assertEquals("Header1", tableModel.getValueAt(0, 0));
-        assertEquals("header 2", tableModel.getValueAt(0, 1));
-        assertEquals("this is column \"Header1\"", tableModel.getValueAt(1, 0));
-        assertEquals("this is column header 2", tableModel.getValueAt(1, 1));
-        assertEquals("just another line with leading and trailing whitespaces", tableModel.getValueAt(2, 0));
-        assertEquals("  and one more value  ", tableModel.getValueAt(2, 1));
-        assertEquals("", tableModel.getValueAt(3, 0));
-        assertEquals("", tableModel.getValueAt(3, 1));
+        assertEquals("Header1", tableModel.getValue(0, 0));
+        assertEquals("header 2", tableModel.getValue(0, 1));
+        assertEquals("this is column \"Header1\"", tableModel.getValue(1, 0));
+        assertEquals("this is column header 2", tableModel.getValue(1, 1));
+        assertEquals("just another line with leading and trailing whitespaces", tableModel.getValue(2, 0));
+        assertEquals("  and one more value  ", tableModel.getValue(2, 1));
+        assertEquals("", tableModel.getValue(3, 0));
+        assertEquals("", tableModel.getValue(3, 1));
     }
 
     public void testTableContentChanges() {
