@@ -18,7 +18,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.HashSet;
 import java.util.Set;
 
-public abstract class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel, Suspendable {
+public abstract class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel {
     private final T myPsiFileHolder;
 
     private int myCachedRowCount = -1;
@@ -50,7 +50,7 @@ public abstract class CsvTableModelBase<T extends PsiFileHolder> implements CsvT
 
     @Override
     public void dispose() {
-        Suspendable.super.dispose();
+        CsvTableModel.super.dispose();
         getPsiFile().getManager().removePsiTreeChangeListener(myPsiTreeChangeListener);
         myPsiTreeUpdater.dispose();
     }

@@ -28,7 +28,6 @@ public class CsvTableEditorActionListeners extends CsvTableEditorUtilBase implem
     protected ActionListener adjustColumnWidthAction = event -> adjustColumnWidths(csvTableEditor);
     protected ActionListener resetColumnWidthAction = event -> resetColumnWidths(csvTableEditor);
 
-    protected LinkListener adjustColumnWidthLink = ((linkLabel, o) -> adjustColumnWidths(csvTableEditor));
     protected LinkListener openTextEditor = new OpenTextEditor();
     protected LinkListener openCsvPluginLink = new OpenCsvPluginLink();
 
@@ -45,12 +44,15 @@ public class CsvTableEditorActionListeners extends CsvTableEditorUtilBase implem
         tableEditor.removeTableChangeListener();
         try {
             JTable table = tableEditor.getTable();
-            int currentColumn = table.getSelectedColumn();
+//            int currentColumn = table.getSelectedColumn();
             int currentRow = table.getSelectedRow();
 
             tableEditor.addRow(currentRow, before);
 
-            selectCell(tableEditor.getTable(), before ? currentRow + 1 : currentRow, currentColumn);
+            int targetRow = before ? currentRow : currentRow + 1;
+            int targetColumn = 0;
+            selectCell(tableEditor.getTable(), targetRow, targetColumn);
+            tableEditor.getTable().editCellAt(targetRow, targetColumn);
         } finally {
             tableEditor.applyTableChangeListener();
         }
@@ -163,8 +165,6 @@ public class CsvTableEditorActionListeners extends CsvTableEditorUtilBase implem
         @Override
         public void linkSelected(LinkLabel linkLabel, Object o) {
             FileEditorManager.getInstance(csvTableEditor.getProject()).openTextEditor(new OpenFileDescriptor(csvTableEditor.getProject(), csvTableEditor.getFile()), true);
-            // this line is for legacy reasons (https://youtrack.jetbrains.com/issue/IDEA-199790)
-            FileEditorManager.getInstance(csvTableEditor.getProject()).setSelectedEditor(csvTableEditor.getFile(), CsvFileEditorProvider.EDITOR_TYPE_ID);
         }
     }
 

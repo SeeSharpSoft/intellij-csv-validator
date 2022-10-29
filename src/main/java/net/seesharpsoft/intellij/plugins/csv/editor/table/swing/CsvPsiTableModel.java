@@ -26,8 +26,10 @@ public class CsvPsiTableModel extends CsvTableModelBase<CsvTableEditor> implemen
 
     @Override
     public void notifyUpdate() {
+        getPsiFileHolder().beforeTableModelUpdate();
         super.notifyUpdate();
         fireTableChanged(new TableModelEvent(this));
+        getPsiFileHolder().afterTableModelUpdate();
     }
 
     protected void fireTableChanged(TableModelEvent e) {

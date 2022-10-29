@@ -170,7 +170,7 @@ public class CsvTableEditorSwing extends CsvTableEditor {
     }
 
     @Override
-    protected void beforeTableComponentUpdate() {
+    public void beforeTableModelUpdate() {
         ((CsvTable)tblEditor).suspend();
         removeTableChangeListener();
         mySelectedColumn = tblEditor.getSelectedColumn();
@@ -179,7 +179,7 @@ public class CsvTableEditorSwing extends CsvTableEditor {
     }
 
     @Override
-    protected void afterTableComponentUpdate() {
+    public void afterTableModelUpdate() {
         try {
             this.tblEditor.tableChanged(new TableModelEvent(tblEditor.getModel(), TableModelEvent.ALL_COLUMNS));
             this.updateEditorLayout();
@@ -208,7 +208,9 @@ public class CsvTableEditorSwing extends CsvTableEditor {
     private void updateEditActionElements(boolean isEditable) {
         tblEditor.setEnabled(isEditable);
         tblEditor.setDragEnabled(isEditable);
-        tblEditor.getTableHeader().setReorderingAllowed(isEditable);
+        // TODO support later
+//        tblEditor.getTableHeader().setReorderingAllowed(isEditable);
+        tblEditor.getTableHeader().setReorderingAllowed(false);
     }
 
     protected JTable getTable() {
@@ -222,14 +224,6 @@ public class CsvTableEditorSwing extends CsvTableEditor {
     @Override
     public CsvTableModel getTableModel() {
         return (CsvTableModel) tblEditor.getModel();
-    }
-
-    @Override
-    protected void updateUIComponents() {
-        if (!isEditorSelected() || !isValid()) {
-            return;
-        }
-        updateTableComponentData();
     }
 
     public void selectColumn(int currentColumn, boolean append) {

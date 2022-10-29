@@ -13,7 +13,7 @@ public interface Suspendable extends Disposable {
     }
 
     default void resume() {
-        MONITOR.suspend(this);
+        MONITOR.resume(this);
     }
 
     default boolean isSuspended() {
@@ -35,14 +35,15 @@ public interface Suspendable extends Disposable {
         void suspend(Suspendable suspendable) {
             Integer suspendableCounter = getSuspendableCounter(suspendable);
             if (suspendableCounter == null) {
-                suspendableCounterMap.put(suspendable, 0);
+                suspendableCounterMap.put(suspendable, 1);
             } else {
                 suspendableCounterMap.put(suspendable, suspendableCounter + 1);
             }
         }
         void resume(Suspendable suspendable) {
             Integer suspendableCounter = getSuspendableCounter(suspendable);
-            assert suspendableCounter != null;
+            // this usually shouldn't happen but doesn't hurt, so fail gracefully
+            if (suspendableCounter == null) return;
 
             if (suspendableCounter == 1) suspendableCounterMap.remove(suspendable);
             else suspendableCounterMap.put(suspendable, suspendableCounter - 1);

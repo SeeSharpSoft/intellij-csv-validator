@@ -1,12 +1,9 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table;
 
-import com.intellij.application.Topics;
 import com.intellij.codeHighlighting.BackgroundEditorHighlighter;
 import com.intellij.ide.structureView.StructureViewBuilder;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.command.CommandProcessor;
 import com.intellij.openapi.editor.Document;
-import com.intellij.openapi.editor.DocumentRunnable;
 import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.editor.colors.EditorFontType;
 import com.intellij.openapi.fileEditor.*;
@@ -17,8 +14,6 @@ import com.intellij.openapi.util.UserDataHolder;
 import com.intellij.openapi.util.UserDataHolderBase;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
-import com.intellij.psi.impl.PsiDocumentTransactionListener;
-import com.intellij.util.DocumentUtil;
 import com.intellij.util.ui.UIUtil;
 import net.seesharpsoft.intellij.plugins.csv.*;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.api.CsvTableModel;
@@ -34,8 +29,6 @@ import java.awt.*;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.Arrays;
-import java.util.List;
-import java.util.function.Consumer;
 
 public abstract class CsvTableEditor implements FileEditor, FileEditorLocation, CheckedDisposable, PsiFileHolder {
 
@@ -49,7 +42,6 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation, 
     protected final PropertyChangeSupport changeSupport;
 
     protected Document document;
-//    protected PsiTreeChangeListener psiTreeChangeListener;
     protected PsiFile psiFile;
     protected CsvValueSeparator currentSeparator;
     protected CsvEscapeCharacter currentEscapeCharacter;
@@ -63,17 +55,12 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation, 
         this.file = fileArg;
         this.userDataHolder = new UserDataHolderBase();
         this.changeSupport = new PropertyChangeSupport(this);
-//        this.psiTreeChangeListener = new MyPsiTreeChangeListener();
-
-//        Topics.subscribe(PsiDocumentTransactionListener.TOPIC, this, new MyPsiDocumentTransactionListener());
     }
 
     @NotNull
     public abstract TableActions getActions();
 
     protected abstract boolean isInCellEditMode();
-
-    protected abstract void updateUIComponents();
 
     protected abstract void updateInteractionElements();
 
@@ -85,16 +72,16 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation, 
 
     public abstract CsvTableModel getTableModel();
 
-    protected abstract void beforeTableComponentUpdate();
+    public abstract void beforeTableModelUpdate();
 
-    protected abstract void afterTableComponentUpdate();
+    public abstract void afterTableModelUpdate();
 
     public final void updateTableComponentData() {
-        beforeTableComponentUpdate();
+        beforeTableModelUpdate();
         try {
-            getTableModel().notifyUpdate();
+//            getTableModel().notifyUpdate();
         } finally {
-            afterTableComponentUpdate();
+            afterTableModelUpdate();
         }
     }
 
@@ -157,12 +144,13 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation, 
 
     @Override
     public void selectNotify() {
-        updateUIComponents();
+        getTableModel().resume();
     }
 
     @Override
     public void deselectNotify() {
         // auto save on change - nothing to do here
+        getTableModel().suspend();
     }
 
     public boolean isEditorSelected() {

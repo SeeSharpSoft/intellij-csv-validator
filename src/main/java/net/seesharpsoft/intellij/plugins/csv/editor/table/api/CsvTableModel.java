@@ -12,12 +12,13 @@ import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvVisitor;
 import net.seesharpsoft.intellij.psi.PsiFileHolder;
 import net.seesharpsoft.intellij.psi.PsiHelper;
+import net.seesharpsoft.intellij.util.Suspendable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-public interface CsvTableModel extends PsiFileHolder {
+public interface CsvTableModel extends PsiFileHolder, Suspendable {
 
     void notifyUpdate();
 
@@ -77,4 +78,14 @@ public interface CsvTableModel extends PsiFileHolder {
     void removeColumns(int[] indices);
 
     void clearCells(int[] rows, int[] columns);
+
+    @Override
+    default void dispose() {
+        Suspendable.super.dispose();
+    }
+
+    default void resume() {
+        Suspendable.super.resume();
+        notifyUpdate();
+    }
 }
