@@ -6,6 +6,7 @@ import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.actionSystem.ToggleAction;
 import com.intellij.openapi.fileEditor.FileEditor;
+import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.psi.PsiFile;
 import com.intellij.util.FileContentUtilCore;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
@@ -37,13 +38,13 @@ public class CsvChangeSeparatorAction extends ToggleAction {
         if (!CsvHelper.isCsvFile(psiFile)) {
             return;
         }
-        Language language = psiFile.getLanguage();
-        if (language instanceof CsvSeparatorHolder) {
+        FileType fileType = psiFile.getFileType();
+        if (fileType instanceof CsvSeparatorHolder) {
             return;
         }
         CsvFileAttributes csvFileAttributes = psiFile.getProject().getService(CsvFileAttributes.class);
         csvFileAttributes.setFileSeparator(psiFile, this.mySeparator);
-        FileContentUtilCore.reparseFiles(psiFile.getVirtualFile());
+        FileContentUtilCore.reparseFiles(CsvHelper.getVirtualFile(psiFile));
 
         FileEditor fileEditor = anActionEvent.getData(PlatformDataKeys.FILE_EDITOR);
         if (fileEditor != null) {

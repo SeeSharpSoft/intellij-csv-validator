@@ -138,6 +138,9 @@ public class CsvTableEditorSwing extends CsvTableEditor {
 
     @Override
     public void updateEditorLayout() {
+        updateInteractionElements();
+        panelInfo.setVisible(getTableEditorState().showInfoPanel());
+
         int currentColumnCount = this.getTableModel().getColumnCount();
         int[] columnWidths = getTableEditorState().getColumnWidths();
         int prevColumnCount = columnWidths.length;
@@ -152,11 +155,6 @@ public class CsvTableEditorSwing extends CsvTableEditor {
             column.setPreferredWidth(Math.round(columnWidths[i] * zoomFactor));
             column.setWidth(Math.round(columnWidths[i] * zoomFactor));
         }
-//        tblEditor.setRowHeight(Math.round(zoomFactor * getTableEditorState().getRowHeight()));
-
-        panelInfo.setVisible(getTableEditorState().showInfoPanel());
-
-        updateInteractionElements();
 
         storeCurrentTableLayout();
     }
@@ -174,7 +172,6 @@ public class CsvTableEditorSwing extends CsvTableEditor {
     @Override
     public void beforeTableModelUpdate() {
         ((CsvTable)tblEditor).suspend();
-        removeTableChangeListener();
         mySelectedColumn = tblEditor.getSelectedColumn();
         mySelectedRow = tblEditor.getSelectedRow();
         myIsInCellEditMode = tblEditor.isEditing();
@@ -192,7 +189,6 @@ public class CsvTableEditorSwing extends CsvTableEditor {
                 tblEditor.editCellAt(selectedRow, selectedCol);
             }
         } finally {
-            this.applyTableChangeListener();
             ((CsvTable)tblEditor).resume();
         }
     }
@@ -209,7 +205,7 @@ public class CsvTableEditorSwing extends CsvTableEditor {
 
     private void updateEditActionElements(boolean isEditable) {
         tblEditor.setEnabled(isEditable);
-        tblEditor.setDragEnabled(isEditable);
+//        tblEditor.setDragEnabled(isEditable);
         // TODO support later
 //        tblEditor.getTableHeader().setReorderingAllowed(isEditable);
         tblEditor.getTableHeader().setReorderingAllowed(false);

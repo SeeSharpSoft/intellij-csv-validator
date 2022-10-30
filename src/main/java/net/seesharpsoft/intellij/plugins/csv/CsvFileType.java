@@ -31,6 +31,11 @@ public final class CsvFileType extends LanguageFileType {
         return "csv";
     }
 
+    @Override
+    public @NotNull String getDisplayName() {
+        return getName() + " (CSV Table Plugin)";
+    }
+
     @Nullable
     @Override
     public Icon getIcon() {

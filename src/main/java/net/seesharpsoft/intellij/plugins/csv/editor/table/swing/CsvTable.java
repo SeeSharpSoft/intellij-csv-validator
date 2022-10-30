@@ -61,8 +61,11 @@ public class CsvTable extends JBTable implements Suspendable {
     public Rectangle getCellRect(int row, int column, boolean includeSpacing) {
         Rectangle rect = super.getCellRect(row, column, includeSpacing);
         if (isCommentRow(row)) {
-            rect.width = convertColumnIndexToModel(column) == 0 ? this.getWidth() : 0;
-            rect.x = 0;
+            if (convertColumnIndexToModel(column) == 0) {
+                rect.width = this.getWidth();
+            } else {
+                return new Rectangle();
+            }
         }
         return rect;
     }
@@ -82,27 +85,11 @@ public class CsvTable extends JBTable implements Suspendable {
     }
 
     @Override
-    public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
-        if (isCommentRow(row) && convertColumnIndexToModel(column) != 0) {
-            return null;
-        }
-        return super.prepareRenderer(renderer, row, column);
-    }
-
-    @Override
     public TableCellEditor getCellEditor(int row, int column) {
         if (isCommentRow(row)) {
             return getDefaultEditor(CommentColumn.class);
         }
         return super.getCellEditor(row, column);
-    }
-
-    @Override
-    public Component prepareEditor(TableCellEditor editor, int row, int column) {
-        if (isCommentRow(row) && convertColumnIndexToModel(column) != 0) {
-            return null;
-        }
-        return super.prepareEditor(editor, row, column);
     }
 
     @Override

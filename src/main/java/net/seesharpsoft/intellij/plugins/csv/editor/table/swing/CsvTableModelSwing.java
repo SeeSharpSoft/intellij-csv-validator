@@ -1,5 +1,6 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.psi.PsiElement;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditor;
@@ -7,17 +8,24 @@ import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableModelBase;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import org.jetbrains.annotations.NotNull;
 
+import javax.swing.*;
 import javax.swing.event.EventListenerList;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class CsvTableModelSwing extends CsvTableModelBase<CsvTableEditor> implements TableModel {
 
     /** List of listeners */
     protected EventListenerList listenerList = new EventListenerList();
+
+    protected Future delayedUpdate;
 
     public CsvTableModelSwing(@NotNull CsvTableEditor psiFileHolder) {
         super(psiFileHolder);
@@ -25,10 +33,24 @@ public class CsvTableModelSwing extends CsvTableModelBase<CsvTableEditor> implem
 
     @Override
     public void notifyUpdate() {
+//        doNotifyUpdate();
+
+        if (delayedUpdate != null && !delayedUpdate.isDone()) {
+            delayedUpdate.cancel(false);
+        }
+
+        ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+        delayedUpdate = executorService.schedule(() -> SwingUtilities.invokeLater(this::doNotifyUpdate), 50, TimeUnit.MILLISECONDS);
+    }
+
+    private void doNotifyUpdate() {
         getPsiFileHolder().beforeTableModelUpdate();
-        super.notifyUpdate();
-        fireTableChanged(new TableModelEvent(this));
-        getPsiFileHolder().afterTableModelUpdate();
+        try {
+            super.notifyUpdate();
+            fireTableChanged(new TableModelEvent(this));
+        } finally {
+            getPsiFileHolder().afterTableModelUpdate();
+        }
     }
 
     protected void fireTableChanged(TableModelEvent e) {

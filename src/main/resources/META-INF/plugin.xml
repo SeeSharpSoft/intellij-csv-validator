@@ -1,6 +1,6 @@
 <idea-plugin require-restart="false">
     <id>net.seesharpsoft.intellij.plugins.csv</id>
-    <name>CSV Rainbow Table</name>
+    <name>CSV Table</name>
     <vendor url="https://github.com/SeeSharpSoft/intellij-csv-validator">
         Martin Sommer
     </vendor>
@@ -57,15 +57,11 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <fileType name="CSV" language="csv" implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvFileType" extensions="csv" fieldName="INSTANCE"/>
-        <fileType name="TSV" language="tsv" implementationClass="net.seesharpsoft.intellij.plugins.tsv.TsvFileType" extensions="tsv;tab" fieldName="INSTANCE"/>
-        <fileType name="PSV" language="psv" implementationClass="net.seesharpsoft.intellij.plugins.psv.PsvFileType" extensions="psv" fieldName="INSTANCE"/>
+        <fileType name="TSV" language="csv" implementationClass="net.seesharpsoft.intellij.plugins.tsv.TsvFileType" extensions="tsv;tab" fieldName="INSTANCE"/>
+        <fileType name="PSV" language="csv" implementationClass="net.seesharpsoft.intellij.plugins.psv.PsvFileType" extensions="psv" fieldName="INSTANCE"/>
 
         <lang.parserDefinition language="csv"
                                implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvParserDefinition"/>
-        <lang.parserDefinition language="tsv"
-                               implementationClass="net.seesharpsoft.intellij.plugins.tsv.TsvParserDefinition"/>
-        <lang.parserDefinition language="psv"
-                               implementationClass="net.seesharpsoft.intellij.plugins.psv.PsvParserDefinition"/>
 
         <lang.syntaxHighlighterFactory language="csv"
                                        implementationClass="net.seesharpsoft.intellij.plugins.csv.highlighter.CsvSyntaxHighlighterFactory"/>

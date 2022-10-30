@@ -51,7 +51,7 @@ public class CsvCustomSeparatorAction extends ToggleAction {
 
         CsvFileAttributes csvFileAttributes = psiFile.getProject().getService(CsvFileAttributes.class);
         csvFileAttributes.setFileSeparator(psiFile, new CsvValueSeparator(customValueSeparator));
-        FileContentUtilCore.reparseFiles(psiFile.getVirtualFile());
+        FileContentUtilCore.reparseFiles(CsvHelper.getVirtualFile(psiFile));
 
         if (fileEditor != null) {
             fileEditor.selectNotify();

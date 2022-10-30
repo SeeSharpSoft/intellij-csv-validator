@@ -65,7 +65,7 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
         public boolean HIGHTLIGHT_TAB_SEPARATOR = true;
         public boolean SHOW_INFO_BALLOON = true;
         public String TAB_HIGHLIGHT_COLOR = "-7984";
-        public EditorPrio EDITOR_PRIO = EditorPrio.TEXT_FIRST;
+        public EditorPrio EDITOR_PRIO = EditorPrio.TABLE_FIRST;
         public int TABLE_EDITOR_ROW_HEIGHT = TABLE_EDITOR_ROW_HEIGHT_DEFAULT;
         public int TABLE_AUTO_MAX_COLUMN_WIDTH = TABLE_AUTO_MAX_COLUMN_WIDTH_DEFAULT;
         public int TABLE_DEFAULT_COLUMN_WIDTH = TABLE_DEFAULT_COLUMN_WIDTH_DEFAULT;

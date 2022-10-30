@@ -24,15 +24,15 @@ public abstract class CsvTableModelBase<T extends PsiFileHolder> implements CsvT
     private int myCachedColumnCount = -1;
     private Boolean myCachedHasErrors = null;
 
-    private int myPointerRow = -1;
-    private CsvField myPointerElement = null;
+    private int myPointedRow = -1;
+    private PsiElement myPointedRecord = null;
 
     private final CsvPsiTreeUpdater myPsiTreeUpdater;
 
     private final PsiTreeChangeListener myPsiTreeChangeListener = new PsiTreeAnyChangeAbstractAdapter() {
         @Override
         protected void onChange(@Nullable PsiFile file) {
-            onPsiTreeChanged(myPsiTreeUpdater.getPsiFile());
+            onPsiTreeChanged(file);
         }
     };
 
@@ -77,10 +77,10 @@ public abstract class CsvTableModelBase<T extends PsiFileHolder> implements CsvT
         myCachedHasErrors = null;
     }
 
-    private CsvField resetPointer() {
-        myPointerElement = PsiTreeUtil.findChildOfType(getPsiFile(), CsvField.class);
-        myPointerRow = 0;
-        return myPointerElement;
+    private PsiElement resetPointer() {
+        myPointedRecord = PsiTreeUtil.findChildOfType(getPsiFile(), CsvRecord.class);
+        myPointedRow = 0;
+        return myPointedRecord;
     }
 
     protected CsvPsiTreeUpdater getPsiTreeUpdater() {
@@ -89,23 +89,22 @@ public abstract class CsvTableModelBase<T extends PsiFileHolder> implements CsvT
 
     @Override
     public PsiElement getFieldAt(int row, int column) {
-        int diffToCurrent = Math.abs(myPointerRow - row);
-        if (diffToCurrent > row) {
+        int diffToCurrent = Math.abs(myPointedRow - row);
+        if (diffToCurrent > row || myPointedRecord == null) {
             resetPointer();
             diffToCurrent = row;
         }
+        assert myPointedRecord != null;
 
-        CsvRecord record = PsiHelper.getNthSiblingOfType(myPointerElement.getParent(), diffToCurrent, CsvRecord.class, myPointerRow > row);
+        CsvRecord record = PsiHelper.getNthSiblingOfType(myPointedRecord, diffToCurrent, CsvRecord.class, myPointedRow > row);
         if (record == null) return null;
+
+        myPointedRecord = record;
+        myPointedRow = row;
 
         if (PsiHelper.getElementType(record.getFirstChild()) == CsvTypes.COMMENT) return record.getFirstChild();
 
-        CsvField field = PsiHelper.getNthChildOfType(record, column, CsvField.class);
-        if (field == null) return null;
-
-        myPointerElement = field;
-        myPointerRow = row;
-        return myPointerElement;
+        return PsiHelper.getNthChildOfType(record, column, CsvField.class);
     }
 
     @Override

@@ -2,18 +2,21 @@ package net.seesharpsoft.intellij.plugins.psv;
 
 import com.intellij.openapi.fileTypes.LanguageFileType;
 import com.intellij.openapi.util.IconLoader;
+import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
+import net.seesharpsoft.intellij.plugins.csv.CsvSeparatorHolder;
+import net.seesharpsoft.intellij.plugins.csv.CsvValueSeparator;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 
-public final class PsvFileType extends LanguageFileType {
+public final class PsvFileType extends LanguageFileType implements CsvSeparatorHolder {
     public static final PsvFileType INSTANCE = new PsvFileType();
 
     public static final Icon ICON = IconLoader.getIcon("/media/icons/psv-icon.png", PsvFileType.class);
 
     private PsvFileType() {
-        super(PsvLanguage.INSTANCE);
+        super(CsvLanguage.INSTANCE);
     }
 
     @NotNull
@@ -25,7 +28,7 @@ public final class PsvFileType extends LanguageFileType {
     @NotNull
     @Override
     public String getDescription() {
-        return "PSV file";
+        return "PSV (Pipe Separated Values)";
     }
 
     @NotNull
@@ -34,9 +37,19 @@ public final class PsvFileType extends LanguageFileType {
         return "psv";
     }
 
+    @Override
+    public @NotNull String getDisplayName() {
+        return getName() + " (CSV Table Plugin)";
+    }
+
     @Nullable
     @Override
     public Icon getIcon() {
         return ICON;
+    }
+
+    @Override
+    public CsvValueSeparator getSeparator() {
+        return CsvValueSeparator.PIPE;
     }
 }

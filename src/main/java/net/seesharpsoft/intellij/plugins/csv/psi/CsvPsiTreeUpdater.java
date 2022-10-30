@@ -3,10 +3,10 @@ package net.seesharpsoft.intellij.plugins.csv.psi;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.command.CommandProcessor;
 import com.intellij.openapi.editor.Document;
+import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.psi.*;
 import com.intellij.util.DocumentUtil;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
-import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import net.seesharpsoft.intellij.psi.PsiFileHolder;
 import net.seesharpsoft.intellij.psi.PsiHelper;
@@ -25,15 +25,24 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
 
     private final PsiFileFactory myFileFactory;
 
+    private final CsvPsiParserFileType myFileType;
+
     private List<PsiAction> myUncommittedActions = new ArrayList<>();
 
     public CsvPsiTreeUpdater(@NotNull PsiFileHolder psiFileHolder) {
         myPsiFileHolder = psiFileHolder;
         myFileFactory = PsiFileFactory.getInstance(getPsiFile().getProject());
+        myFileType = new CsvPsiParserFileType(CsvHelper.getValueSeparator(psiFileHolder.getPsiFile()), CsvHelper.getEscapeCharacter(psiFileHolder.getPsiFile()));
+    }
+
+    private FileType getFileType() {
+        myFileType.setSeparator(CsvHelper.getValueSeparator(getPsiFile()));
+        myFileType.setEscapeCharacter(CsvHelper.getEscapeCharacter(getPsiFile()));
+        return myFileType;
     }
 
     private PsiFile createFile(@NotNull String text) {
-        return myFileFactory.createFileFromText("a.csv", CsvLanguage.INSTANCE, text, false, false);
+        return myFileFactory.createFileFromText("a.csv", getFileType(), text);
     }
 
     private boolean isIndicatingComment(@NotNull String text) {

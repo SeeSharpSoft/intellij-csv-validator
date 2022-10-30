@@ -86,7 +86,7 @@ public final class CsvHelper {
         if (file == null) {
             return false;
         }
-        return isCsvFile(file.getProject(), file.getOriginalFile().getVirtualFile());
+        return isCsvFile(file.getProject(), getVirtualFile(file));
     }
 
     public static boolean isCommentElement(PsiElement element) {
@@ -192,7 +192,12 @@ public final class CsvHelper {
     }
 
     public static VirtualFile getVirtualFile(PsiFile psiFile) {
-        return psiFile == null ? null : psiFile.getOriginalFile().getVirtualFile();
+        if (psiFile == null) return null;
+        PsiFile original = psiFile.getOriginalFile();
+        if (original != null && original != psiFile) return getVirtualFile(psiFile.getOriginalFile());
+        if (psiFile.getVirtualFile() != null) return psiFile.getVirtualFile();
+        if (psiFile.getViewProvider() != null) return psiFile.getViewProvider().getVirtualFile();
+        return null;
     }
 
     public static Project getProject(PsiFile psiFile) {

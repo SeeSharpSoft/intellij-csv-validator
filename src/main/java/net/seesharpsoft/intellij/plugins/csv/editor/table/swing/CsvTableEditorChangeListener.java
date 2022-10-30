@@ -15,11 +15,13 @@ public class CsvTableEditorChangeListener extends CsvTableEditorUtilBase impleme
     @Override
     public void columnAdded(TableColumnModelEvent e) {
         // on column added
+//        csvTableEditor.updateEditorLayout();
     }
 
     @Override
     public void columnRemoved(TableColumnModelEvent e) {
         // on column removed
+//        csvTableEditor.updateEditorLayout();
     }
 
     @Override

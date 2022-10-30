@@ -462,10 +462,10 @@ public final class CsvTableRowUtilities {
             if (resizingRow >= 0) {
                 int newHeight = mouseY - mouseYOffset;
                 if (newHeight > 0) {
-//                    userTable.setRowHeight(resizingRow, newHeight);
-//                    rowHeadersTable.setRowHeight(resizingRow, newHeight);
-                    rowHeadersTable.setRowHeight(newHeight);
-                    userTable.setRowHeight(newHeight);
+                    userTable.setRowHeight(resizingRow, newHeight);
+                    rowHeadersTable.setRowHeight(resizingRow, newHeight);
+//                    rowHeadersTable.setRowHeight(newHeight);
+//                    userTable.setRowHeight(newHeight);
                 }
             }
         }
