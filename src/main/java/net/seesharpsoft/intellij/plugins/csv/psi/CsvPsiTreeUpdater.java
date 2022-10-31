@@ -4,9 +4,13 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.command.CommandProcessor;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.fileTypes.FileType;
+import com.intellij.openapi.util.Pair;
+import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.*;
+import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.DocumentUtil;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
+import net.seesharpsoft.intellij.plugins.csv.editor.table.api.CsvTableModel;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import net.seesharpsoft.intellij.psi.PsiFileHolder;
 import net.seesharpsoft.intellij.psi.PsiHelper;
@@ -15,9 +19,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.event.EventListenerList;
-import java.util.ArrayList;
-import java.util.EventListener;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
 
@@ -88,26 +91,26 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
         myUncommittedActions.add(action);
     }
 
-    public void addEmptyColumns(@NotNull PsiElement anchor, int no) {
+    public void appendEmptyFields(@NotNull PsiElement anchor, int no) {
         if (no < 1) return;
         for (int i = 0; i < no; ++i) {
-            addColumn(anchor);
+            appendField(anchor);
         }
     }
 
-    public void addColumn(@NotNull PsiElement anchor) {
-        addColumn(anchor, false);
+    public void appendField(@NotNull PsiElement anchor) {
+        appendField(anchor, false);
     }
 
-    public void addColumn(@NotNull PsiElement anchor, boolean before) {
-        addColumn(anchor, "", false, before);
+    public void appendField(@NotNull PsiElement anchor, boolean before) {
+        appendField(anchor, "", false, before);
     }
 
-    public void addColumn(@NotNull PsiElement anchor, String text, boolean enquoteCommentIndicator) {
-        addColumn(anchor, text, enquoteCommentIndicator, false);
+    public void appendField(@NotNull PsiElement anchor, String text, boolean enquoteCommentIndicator) {
+        appendField(anchor, text, enquoteCommentIndicator, false);
     }
 
-    public void addColumn(@NotNull PsiElement anchor, String text, boolean enquoteCommentIndicator, boolean before) {
+    public void appendField(@NotNull PsiElement anchor, String text, boolean enquoteCommentIndicator, boolean before) {
         while (anchor != null && !(anchor instanceof CsvField || CsvHelper.isCommentElement(anchor))) {
             anchor = anchor.getParent();
         }
@@ -118,13 +121,136 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
         doAddValueSeparator(anchor, before);
     }
 
+    public void removeField(@NotNull PsiElement field) {
+        removeField(field, false);
+    }
+
+    public void removeField(@NotNull PsiElement field, boolean removeRowIfOnlyField) {
+        assert field instanceof CsvField;
+        PsiElement separator = PsiTreeUtil.findSiblingBackward(field, CsvTypes.COMMA, null);
+        if (separator == null) separator = PsiTreeUtil.findSiblingForward(field, CsvTypes.COMMA, null);
+        // no separator means it is the only field in the row
+        if (separator == null) {
+            if (removeRowIfOnlyField) {
+                deleteRow(field.getParent());
+            }
+            return;
+        }
+        delete(field, separator);
+    }
+
+    /**
+     * This can be a heavy operation on PsiFile, so it will be executed on the document itself.
+     */
+    public void addColumn(int columnIndex, boolean before) {
+        List<Pair<TextRange, String>> replacements = new ArrayList<>();
+        PsiFile psiFile = getPsiFile();
+        String valueSeparator = CsvHelper.getValueSeparator(psiFile).getCharacter();
+        for (PsiElement record = psiFile.getFirstChild(); record != null; record = record.getNextSibling()) {
+            if (!CsvRecord.class.isInstance(record)) continue;
+            PsiElement field = record.getFirstChild();
+            if (CsvHelper.isCommentElement(field)) continue;
+
+            int startOffset = 0;
+            String value = valueSeparator;
+            field = PsiHelper.getNextNthSiblingOfType(field, columnIndex, CsvField.class);
+            if (field == null) {
+                int currentNoOfColumn = PsiTreeUtil.countChildrenOfType(record, CsvField.class);
+                field = PsiHelper.getNthChildOfType(record, currentNoOfColumn - 1, CsvField.class);
+
+                startOffset = field.getTextRange().getEndOffset();
+                value = valueSeparator.repeat(columnIndex - currentNoOfColumn + 1);
+            } else {
+                startOffset = (before ? field.getTextRange().getStartOffset() : field.getTextRange().getEndOffset());
+            }
+            replacements.add(Pair.create(TextRange.create(startOffset, startOffset), value));
+        }
+
+        if (replacements.size() > 0) {
+            doAction(new DocumentPsiAction(psiFile, replacements));
+        }
+    }
+
+    /**
+     * This can be a heavy operation on PsiFile, so it will be executed on the document itself.
+     */
+    public void deleteColumns(Collection<Integer> indices) {
+        if (indices.size() == 0) return;
+
+        PsiFile psiFile = getPsiFile();
+        int columnCount = CsvTableModel.getColumnCount(psiFile);
+        // filter double indices
+        List<Integer> distinctIndices = indices.stream().distinct().collect(Collectors.toList());
+        if (distinctIndices.size() == columnCount) {
+            deleteContent();
+            return;
+        }
+
+        List<Pair<TextRange, String>> replacements = collectRangesToDelete(distinctIndices);
+        if (replacements.size() > 0) {
+            doAction(new DocumentPsiAction(psiFile, replacements));
+        }
+    }
+
+    private List<Pair<TextRange, String>> collectRangesToDelete(List<Integer> indices) {
+        Set<PsiElement> toDelete = new LinkedHashSet();
+        Collections.sort(indices);
+        for (PsiElement record = getPsiFile().getFirstChild(); record != null; record = record.getNextSibling()) {
+            if (!CsvRecord.class.isInstance(record)) continue;
+            if (CsvHelper.isCommentElement(record.getFirstChild())) continue;
+            for (int columnIndex : indices) {
+                PsiElement focusedCol = PsiHelper.getNthChildOfType(record, columnIndex, CsvField.class);
+                // if no field exists in row, we are done
+                if (focusedCol != null) {
+                    boolean removePreviousSeparator = columnIndex > 0;
+                    PsiElement valueSeparator = PsiHelper.getSiblingOfType(focusedCol, CsvTypes.COMMA, removePreviousSeparator);
+                    if (toDelete.contains(valueSeparator)) {
+                        valueSeparator = PsiHelper.getSiblingOfType(focusedCol, CsvTypes.COMMA, !removePreviousSeparator);
+                    }
+                    if (valueSeparator != null) {
+                        toDelete.add(focusedCol);
+                        toDelete.add(valueSeparator);
+                    }
+                }
+            }
+        }
+        return toDelete.stream().map(element -> Pair.create(element.getTextRange(), "")).collect(Collectors.toList());
+    }
+
     public void addRow(@NotNull PsiElement anchor, boolean before) {
         while (anchor != null && !(anchor instanceof CsvRecord)) {
             anchor = anchor.getParent();
         }
         assert anchor instanceof CsvRecord;
-        doAction(new AddPsiAction(anchor, createRecord(), before));
+        doAction(new AddSiblingPsiAction(anchor, createRecord(), before));
         doAddLineBreak(anchor, before);
+    }
+
+    public void deleteRow(@NotNull PsiElement record) {
+        assert record instanceof CsvRecord;
+        PsiElement lf = PsiTreeUtil.findSiblingBackward(record, CsvTypes.CRLF, null);
+        if (lf == null) lf = PsiTreeUtil.findSiblingForward(record, CsvTypes.CRLF, null);
+        // no lf means only one record exists - this is a must, so don't delete it
+        if (lf == null) return;
+        delete(record, lf);
+    }
+
+    public void deleteRows(Collection<Integer> indices) {
+        Set<PsiElement> toDelete = new HashSet<>();
+        PsiFile psiFile = getPsiFile();
+        for (int rowIndex : indices) {
+            CsvRecord row = PsiHelper.getNthChildOfType(psiFile, rowIndex, CsvRecord.class);
+            boolean removePreviousLF = rowIndex > 0;
+            PsiElement lfElement = PsiHelper.getSiblingOfType(row, CsvTypes.CRLF, removePreviousLF);
+            if (toDelete.contains(lfElement)) {
+                lfElement = PsiHelper.getSiblingOfType(row, CsvTypes.CRLF, !removePreviousLF);
+            }
+            if (lfElement != null) {
+                toDelete.add(row);
+                toDelete.add(lfElement);
+            }
+        }
+        delete(toDelete.toArray(new PsiElement[toDelete.size()]));
     }
 
     public void replaceComment(@NotNull PsiElement toReplace, @Nullable String text) {
@@ -154,23 +280,26 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
     }
 
     public void deleteContent() {
-        deleteAllChildren(getPsiFile());
+        PsiFile psiFile = getPsiFile();
+        deleteAllChildren(psiFile);
+        // even an empty file has a row with a field
+        doAction(new AddChildPsiAction(psiFile, createRecord()));
     }
 
     private void doAddValueSeparator(@NotNull PsiElement anchor, boolean before) {
-        doAction(new AddPsiAction(anchor, createValueSeparator(), before));
+        doAction(new AddSiblingPsiAction(anchor, createValueSeparator(), before));
     }
 
     private void doAddLineBreak(@NotNull PsiElement anchor, boolean before) {
-        doAction(new AddPsiAction(anchor, createLineBreak(), before));
+        doAction(new AddSiblingPsiAction(anchor, createLineBreak(), before));
     }
 
     private void doAddField(@NotNull PsiElement anchor, @Nullable String text, boolean enquoteCommentIndicator, boolean before) {
-        doAction(new AddPsiAction(anchor, createField(text, enquoteCommentIndicator), before));
+        doAction(new AddSiblingPsiAction(anchor, createField(text, enquoteCommentIndicator), before));
     }
 
     public synchronized void commit() {
-        if (isSuspended() || myUncommittedActions.size() == 0) return;
+        if (isSuspended() || myUncommittedActions == null || myUncommittedActions.size() == 0) return;
 
         suspend();
         List<PsiAction> actionsToCommit = new ArrayList<>(myUncommittedActions);
@@ -247,16 +376,16 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
         abstract public void execute();
     }
 
-    private static class AddPsiAction extends PsiAction {
+    private static class AddSiblingPsiAction extends PsiAction {
 
         private final PsiElement myElementToAdd;
         private final boolean myBefore;
 
-        AddPsiAction(@NotNull PsiElement anchor, @NotNull PsiElement elementToAdd) {
+        AddSiblingPsiAction(@NotNull PsiElement anchor, @NotNull PsiElement elementToAdd) {
             this(anchor, elementToAdd, false);
         }
 
-        AddPsiAction(@NotNull PsiElement anchor, @NotNull PsiElement elementToAdd, boolean before) {
+        AddSiblingPsiAction(@NotNull PsiElement anchor, @NotNull PsiElement elementToAdd, boolean before) {
             super(anchor);
             myElementToAdd = elementToAdd;
             myBefore = before;
@@ -271,6 +400,22 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
             } else {
                 anchor.getParent().addAfter(myElementToAdd, anchor);
             }
+        }
+    }
+
+    private static class AddChildPsiAction extends PsiAction {
+
+        private final PsiElement myElementToAdd;
+
+        AddChildPsiAction(@NotNull PsiElement parent, @NotNull PsiElement elementToAdd) {
+            super(parent);
+            myElementToAdd = elementToAdd;
+        }
+
+        @Override
+        public void execute() {
+            PsiElement anchor = getAnchor();
+            anchor.add(myElementToAdd);
         }
     }
 
@@ -313,6 +458,34 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
         public void execute() {
             PsiElement anchor = getAnchor();
             anchor.deleteChildRange(anchor.getFirstChild(), anchor.getLastChild());
+        }
+    }
+
+    private static class DocumentPsiAction extends PsiAction {
+
+        private final List<Pair<TextRange, String>> myReplacements;
+
+        DocumentPsiAction(@NotNull PsiElement psiFile, List<Pair<TextRange, String>> replacements) {
+            super(psiFile);
+            assert psiFile instanceof PsiFile;
+            myReplacements = replacements;
+        }
+
+        @Override
+        public void execute() {
+            PsiFile psiFile = (PsiFile) getAnchor();
+
+            PsiDocumentManager manager = PsiDocumentManager.getInstance(psiFile.getProject());
+            Document document = manager.getDocument(psiFile);
+            manager.doPostponedOperationsAndUnblockDocument(document);
+
+            int offset = 0;
+            for (Pair<TextRange, String> replacement : myReplacements) {
+                TextRange textRange = replacement.getFirst().shiftRight(offset);
+                String text = replacement.getSecond();
+                document.replaceString(textRange.getStartOffset(), textRange.getEndOffset(), text);
+                offset += text.length() - textRange.getLength();
+            }
         }
     }
 }

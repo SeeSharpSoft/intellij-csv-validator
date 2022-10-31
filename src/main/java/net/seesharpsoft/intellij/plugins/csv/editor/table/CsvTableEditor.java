@@ -29,6 +29,7 @@ import java.awt.*;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.Arrays;
+import java.util.Collection;
 
 public abstract class CsvTableEditor implements FileEditor, FileEditorLocation, CheckedDisposable, PsiFileHolder {
 
@@ -91,7 +92,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation, 
     }
 
     public boolean isEditable() {
-        return this.tableIsEditable && !getTableModel().hasErrors() && file.isWritable();
+        return this.tableIsEditable && file.isWritable();
     }
 
     @NotNull
@@ -313,7 +314,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation, 
         this.getTableModel().addRow(focusedRowIndex, before);
     }
 
-    public final void removeRows(int[] indices) {
+    public final void removeRows(Collection<Integer> indices) {
         this.getTableModel().removeRows(indices);
     }
 
@@ -321,11 +322,11 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation, 
         this.getTableModel().addColumn(focusedColumnIndex, before);
     }
 
-    public final void removeColumns(int[] indices) {
+    public final void removeColumns(Collection<Integer> indices) {
         this.getTableModel().removeColumns(indices);
     }
 
-    public final void clearCells(int[] columns, int[] rows) {
+    public final void clearCells(Collection<Integer> rows, Collection<Integer> columns) {
         this.getTableModel().clearCells(rows, columns);
     }
 

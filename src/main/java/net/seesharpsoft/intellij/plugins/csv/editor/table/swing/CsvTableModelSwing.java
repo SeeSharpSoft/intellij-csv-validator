@@ -1,6 +1,5 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.psi.PsiElement;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditor;
@@ -15,31 +14,28 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 public class CsvTableModelSwing extends CsvTableModelBase<CsvTableEditor> implements TableModel {
 
     /** List of listeners */
     protected EventListenerList listenerList = new EventListenerList();
 
-    protected Future delayedUpdate;
+    protected ScheduledFuture delayedUpdate;
+
+    protected ScheduledExecutorService executorService;
 
     public CsvTableModelSwing(@NotNull CsvTableEditor psiFileHolder) {
         super(psiFileHolder);
+        executorService = Executors.newSingleThreadScheduledExecutor();
     }
 
     @Override
     public void notifyUpdate() {
-//        doNotifyUpdate();
-
         if (delayedUpdate != null && !delayedUpdate.isDone()) {
-            delayedUpdate.cancel(false);
+            delayedUpdate.cancel(true);
         }
 
-        ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
         delayedUpdate = executorService.schedule(() -> SwingUtilities.invokeLater(this::doNotifyUpdate), 50, TimeUnit.MILLISECONDS);
     }
 

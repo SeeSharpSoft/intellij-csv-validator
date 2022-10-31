@@ -1,6 +1,7 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.api;
 
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiErrorElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.util.PsiTreeUtil;
 import net.seesharpsoft.intellij.plugins.csv.CsvEscapeCharacter;
@@ -16,9 +17,41 @@ import net.seesharpsoft.intellij.util.Suspendable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public interface CsvTableModel extends PsiFileHolder, Suspendable {
+
+    static int getColumnCount(PsiFile psiFile) {
+        final AtomicInteger maxColumnCount = new AtomicInteger(0);
+        if (psiFile != null) {
+            psiFile.acceptChildren(new CsvVisitor() {
+                @Override
+                public void visitRecord(@NotNull CsvRecord csvRecord) {
+                    maxColumnCount.set(Math.max(maxColumnCount.get(), PsiTreeUtil.countChildrenOfType(csvRecord, CsvField.class)));
+                }
+            });
+        }
+        return maxColumnCount.get();
+    }
+
+    static int getRowCount(PsiFile psiFile) {
+        if (psiFile == null) return 0;
+
+        int counter = 0;
+        PsiElement rowElement;
+        for (rowElement = psiFile.getFirstChild();
+             rowElement != null && !(rowElement instanceof PsiErrorElement);
+             rowElement = rowElement.getNextSibling())
+        {
+            if (rowElement instanceof CsvRecord) counter++;
+        }
+
+        // TODO support for showing the error in table editor?!
+//        if (rowElement instanceof PsiErrorElement) counter++;
+
+        return counter;
+    }
 
     void notifyUpdate();
 
@@ -41,22 +74,11 @@ public interface CsvTableModel extends PsiFileHolder, Suspendable {
     }
 
     default int getRowCount() {
-        PsiFile psiFile = getPsiFile();
-        return psiFile != null ? PsiTreeUtil.countChildrenOfType(getPsiFile(), CsvRecord.class) : 0;
+        return getRowCount(getPsiFile());
     }
 
     default int getColumnCount() {
-        final AtomicInteger maxColumnCount = new AtomicInteger(0);
-        PsiFile psiFile = getPsiFile();
-        if (psiFile != null) {
-            psiFile.acceptChildren(new CsvVisitor() {
-                @Override
-                public void visitRecord(@NotNull CsvRecord csvRecord) {
-                    maxColumnCount.set(Math.max(maxColumnCount.get(), PsiTreeUtil.countChildrenOfType(csvRecord, CsvField.class)));
-                }
-            });
-        }
-        return maxColumnCount.get();
+        return getColumnCount(getPsiFile());
     }
 
     @Nullable
@@ -76,13 +98,13 @@ public interface CsvTableModel extends PsiFileHolder, Suspendable {
 
     void addRow(int focusedRowIndex, boolean before);
 
-    void removeRows(int[] indices);
+    void removeRows(Collection<Integer> indices);
 
     void addColumn(int focusedColumnIndex, boolean before);
 
-    void removeColumns(int[] indices);
+    void removeColumns(Collection<Integer> indices);
 
-    void clearCells(int[] rows, int[] columns);
+    void clearCells(Collection<Integer> rows, Collection<Integer> columns);
 
     @Override
     default void dispose() {

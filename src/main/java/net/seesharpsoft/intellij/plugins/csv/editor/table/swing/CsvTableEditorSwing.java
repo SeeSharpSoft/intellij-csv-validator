@@ -198,15 +198,13 @@ public class CsvTableEditorSwing extends CsvTableEditor {
         updateEditActionElements(isEditable());
 
         panelTop.setVisible(getTableModel().hasErrors());
-
-        this.removeTableChangeListener();
-        this.applyTableChangeListener();
     }
 
     private void updateEditActionElements(boolean isEditable) {
         tblEditor.setEnabled(isEditable);
-//        tblEditor.setDragEnabled(isEditable);
         // TODO support later
+//        tblEditor.setDragEnabled(isEditable);
+        tblEditor.setDragEnabled(false);
 //        tblEditor.getTableHeader().setReorderingAllowed(isEditable);
         tblEditor.getTableHeader().setReorderingAllowed(false);
     }

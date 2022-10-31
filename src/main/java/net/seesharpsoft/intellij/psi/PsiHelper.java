@@ -39,6 +39,7 @@ public class PsiHelper {
         if (n < 0) return null;
         int count = 0;
         for (PsiElement sibling = element; sibling != null; sibling = backwards ? sibling.getPrevSibling() : sibling.getNextSibling()) {
+            if (sibling instanceof PsiErrorElement) return null;
             if (aClass.isInstance(sibling)) {
                 if (count == n) return aClass.cast(sibling);
                 ++count;
@@ -71,11 +72,35 @@ public class PsiHelper {
              sibling != null;
              sibling = backwards ? sibling.getPrevSibling() : sibling.getNextSibling())
         {
+            if (sibling instanceof PsiErrorElement) return null;
             if (getElementType(sibling) == type) {
                 return sibling;
             }
         }
         return null;
+    }
+
+    public static PsiElement getLastChildOfType(@NotNull final PsiElement parent, @NotNull IElementType type) {
+        if (parent.getFirstChild() == null) return null;
+        return getLastSiblingOfType(parent.getFirstChild(), type, false);
+    }
+
+    public static PsiElement getFirstSiblingOfType(@NotNull final PsiElement element, @NotNull IElementType type) {
+        return getLastSiblingOfType(element, type, true);
+    }
+
+    public static PsiElement getLastSiblingOfType(@NotNull final PsiElement element, @NotNull IElementType type) {
+        return getLastSiblingOfType(element, type, false);
+    }
+
+    public static PsiElement getLastSiblingOfType(@NotNull final PsiElement element, @NotNull IElementType type, boolean backwards) {
+        PsiElement nextSibling = element;
+        PsiElement prevSibling;
+        do {
+            prevSibling = nextSibling;
+            nextSibling = getSiblingOfType(prevSibling, type, backwards);
+        } while (nextSibling != null);
+        return prevSibling == element ? null : prevSibling;
     }
 
     public static PsiElement findFirst(@NotNull final PsiElement root, @NotNull IElementType type) {

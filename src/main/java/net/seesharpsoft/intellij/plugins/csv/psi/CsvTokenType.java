@@ -12,6 +12,20 @@ public class CsvTokenType extends IElementType {
 
     @Override
     public String toString() {
-        return "CsvTokenType." + super.toString();
+        switch(super.toString()) {
+            case "COMMA":
+                return "Value Separator";
+            case "QUOTE":
+                return "Quote";
+            case "TEXT":
+            case "ESCAPED_TEXT":
+                return "Text";
+            case "COMMENT":
+                return "Comment";
+            case "CRLF":
+                return "<Enter>";
+            default:
+                return super.toString();
+        }
     }
 }

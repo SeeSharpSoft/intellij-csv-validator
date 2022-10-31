@@ -11,6 +11,8 @@ import java.awt.*;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.net.URI;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 public class CsvTableEditorActionListeners extends CsvTableEditorUtilBase implements TableActions<CsvTableEditorSwing> {
 
@@ -45,7 +47,7 @@ public class CsvTableEditorActionListeners extends CsvTableEditorUtilBase implem
 //            int currentColumn = table.getSelectedColumn();
             int currentRow = table.getSelectedRow();
 
-            tableEditor.addRow(currentRow, before);
+            tableEditor.addRow(table.convertRowIndexToModel(currentRow), before);
 
             int targetRow = before ? currentRow : currentRow + 1;
             int targetColumn = 0;
@@ -68,7 +70,7 @@ public class CsvTableEditorActionListeners extends CsvTableEditorUtilBase implem
             int currentColumn = table.getSelectedColumn();
             int currentRow = table.getSelectedRow();
 
-            tableEditor.addColumn(currentColumn, before);
+            tableEditor.addColumn(table.convertColumnIndexToModel(currentColumn), before);
 
             selectCell(table, currentRow, before ? currentColumn + 1 : currentColumn);
         } finally {
@@ -91,7 +93,7 @@ public class CsvTableEditorActionListeners extends CsvTableEditorUtilBase implem
             }
             int currentColumn = table.getSelectedColumn();
 
-            tableEditor.removeRows(currentRows);
+            tableEditor.removeRows(Arrays.stream(currentRows).map(row -> table.convertRowIndexToModel(row)).boxed().collect(Collectors.toList()));
 
             selectCell(table, currentRows[0], currentColumn);
         } finally {
@@ -114,7 +116,7 @@ public class CsvTableEditorActionListeners extends CsvTableEditorUtilBase implem
             }
             int focusedRow = table.getSelectedRow();
 
-            tableEditor.removeColumns(selectedColumns);
+            tableEditor.removeColumns(Arrays.stream(selectedColumns).map(col -> table.convertColumnIndexToModel(col)).boxed().collect(Collectors.toList()));
 
             selectCell(table, focusedRow, selectedColumns[0]);
         } finally {
@@ -142,7 +144,10 @@ public class CsvTableEditorActionListeners extends CsvTableEditorUtilBase implem
             int focusedRow = table.getSelectedRow();
             int focusedColumn = table.getSelectedColumn();
 
-            tableEditor.clearCells(selectedColumns, selectedRows);
+            tableEditor.clearCells(
+                    Arrays.stream(selectedRows).map(row -> table.convertRowIndexToModel(row)).boxed().collect(Collectors.toList()),
+                    Arrays.stream(selectedColumns).map(col -> table.convertColumnIndexToModel(col)).boxed().collect(Collectors.toList())
+            );
 
             selectCell(table, focusedRow, focusedColumn);
         } finally {

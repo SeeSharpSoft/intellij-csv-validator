@@ -14,8 +14,7 @@ import net.seesharpsoft.intellij.psi.PsiHelper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public abstract class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel {
     private final T myPsiFileHolder;
@@ -139,7 +138,7 @@ public abstract class CsvTableModelBase<T extends PsiFileHolder> implements CsvT
     private void createMissingColumns(int rowIndex, int columnIndex) {
         int currentColumnCount = getColumnCount(rowIndex);
         PsiElement field = getFieldAt(rowIndex, currentColumnCount - 1);
-        getPsiTreeUpdater().addEmptyColumns(field, columnIndex - currentColumnCount + 1);
+        getPsiTreeUpdater().appendEmptyFields(field, columnIndex - currentColumnCount + 1);
     }
 
     private int getColumnCount(int rowIndex) {
@@ -157,8 +156,8 @@ public abstract class CsvTableModelBase<T extends PsiFileHolder> implements CsvT
         if (field == null) {
             int currentColumnCount = getColumnCount(rowIndex);
             field = getFieldAt(rowIndex, currentColumnCount - 1);
-            updater.addColumn(field, value, true);
-            updater.addEmptyColumns(field, columnIndex - currentColumnCount);
+            updater.appendField(field, value, true);
+            updater.appendEmptyFields(field, columnIndex - currentColumnCount);
         } else {
             if (CsvHelper.isCommentElement(field)) {
                 updater.replaceComment(field, value);
@@ -186,83 +185,28 @@ public abstract class CsvTableModelBase<T extends PsiFileHolder> implements CsvT
     }
 
     @Override
-    public void removeRows(int[] indices) {
+    public void removeRows(Collection<Integer> indices) {
         CsvPsiTreeUpdater updater = getPsiTreeUpdater();
-        Set<PsiElement> toDelete = new HashSet<>();
-        PsiFile psiFile = getPsiFile();
-        for (int rowIndex : indices) {
-            CsvRecord row = PsiHelper.getNthChildOfType(psiFile, rowIndex, CsvRecord.class);
-            boolean removePreviousLF = rowIndex > 0;
-            PsiElement lfElement = PsiHelper.getSiblingOfType(row, CsvTypes.CRLF, removePreviousLF);
-            if (toDelete.contains(lfElement)) {
-                lfElement = PsiHelper.getSiblingOfType(row, CsvTypes.CRLF, !removePreviousLF);
-            }
-            if (lfElement != null) {
-                toDelete.add(row);
-                toDelete.add(lfElement);
-            }
-        }
-        updater.delete(toDelete.toArray(new PsiElement[toDelete.size()]));
+        updater.deleteRows(indices);
         updater.commit();
     }
 
     @Override
     public void addColumn(int focusedColumnIndex, boolean before) {
         CsvPsiTreeUpdater updater = getPsiTreeUpdater();
-        // +1 for the one to add
-        int targetColumnCount = getColumnCount() + 1;
-        int rowIndex = 0;
-        for (PsiElement record = getPsiFile().getFirstChild(); record != null; record = record.getNextSibling()) {
-            if (!CsvRecord.class.isInstance(record)) continue;
-            if (CsvHelper.isCommentElement(record.getFirstChild())) continue;
-            PsiElement focusedCol = PsiHelper.getNthChildOfType(record, focusedColumnIndex, CsvField.class);
-            if (focusedCol == null) {
-                createMissingColumns(rowIndex, targetColumnCount);
-            } else {
-                updater.addColumn(focusedCol, before);
-            }
-            ++rowIndex;
-        }
+        getPsiTreeUpdater().addColumn(focusedColumnIndex, before);
         updater.commit();
     }
 
     @Override
-    public void removeColumns(int[] indices) {
-        if (indices.length == 0) return;
-
+    public void removeColumns(Collection<Integer> indices) {
         CsvPsiTreeUpdater updater = getPsiTreeUpdater();
-        if (getColumnCount() == 1) {
-            updater.deleteContent();
-            return;
-        }
-
-        Set<PsiElement> toDelete = new HashSet<>();
-        for (PsiElement record = getPsiFile().getFirstChild(); record != null; record = record.getNextSibling()) {
-            if (!CsvRecord.class.isInstance(record)) continue;
-            if (CsvHelper.isCommentElement(record.getFirstChild())) continue;
-            for (int columnIndex : indices) {
-                PsiElement focusedCol = PsiHelper.getNthChildOfType(record, columnIndex, CsvField.class);
-                // if no field exists in row, we are done
-                if (focusedCol != null) {
-                    boolean removePreviousSeparator = columnIndex > 0;
-                    PsiElement valueSeparator = PsiHelper.getSiblingOfType(focusedCol, CsvTypes.COMMA, removePreviousSeparator);
-                    if (toDelete.contains(valueSeparator)) {
-                        valueSeparator = PsiHelper.getSiblingOfType(focusedCol, CsvTypes.COMMA, !removePreviousSeparator);
-                    }
-                    if (valueSeparator != null) {
-                        toDelete.add(focusedCol);
-                        toDelete.add(valueSeparator);
-                    }
-                }
-            }
-        }
-
-        updater.delete(toDelete.toArray(new PsiElement[toDelete.size()]));
+        updater.deleteColumns(indices);
         updater.commit();
     }
 
     @Override
-    public void clearCells(int[] rows, int[] columns) {
+    public void clearCells(Collection<Integer> rows, Collection<Integer> columns) {
         for (int currentColumn : columns) {
             for (int currentRow : rows) {
                 setValueAt("", currentRow, currentColumn, false);
