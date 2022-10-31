@@ -42,7 +42,7 @@ public class CsvFile extends PsiFileBase {
 
     @Override
     public String toString() {
-        return String.format("%s File", myFileType.getName());
+        return String.format("%s File", myFileType.getName().toUpperCase());
     }
 
     @Override

@@ -34,11 +34,11 @@ import com.intellij.lexer.FlexLexer;
 %eof{  return;
 %eof}
 
-//WHITE_SPACE=[ \f]+
 VALUE_SEPARATOR=[,:;|\t]
 RECORD_SEPARATOR=\n
 ESCAPED_QUOTE=\"\"|\\\"
-QUOTE=\"
+OPENING_QUOTE=[ \f]*\"
+CLOSING_QUOTE=\"[ \f]*
 TEXT=[^,:;|\t\r\n\"\\#]+
 BACKSLASH=\\+
 HASHTAG=#
@@ -70,7 +70,7 @@ COMMENT=\#[^\n]*
     return CsvTypes.TEXT;
 }
 
-<YYINITIAL, UNQUOTED> {QUOTE}
+<YYINITIAL, UNQUOTED> {OPENING_QUOTE}
 {
     yybegin(QUOTED);
     return CsvTypes.QUOTE;
@@ -136,16 +136,11 @@ COMMENT=\#[^\n]*
     return CsvTypes.ESCAPED_TEXT;
 }
 
-<QUOTED> {QUOTE}
+<QUOTED> {CLOSING_QUOTE}
 {
     yybegin(UNQUOTED);
     return CsvTypes.QUOTE;
 }
-
-//{WHITE_SPACE}
-//{
-//    return TokenType.WHITE_SPACE;
-//}
 
 .
 {

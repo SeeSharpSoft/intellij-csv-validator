@@ -34,32 +34,10 @@ public class CsvLanguageCodeStyleSettingsProvider extends LanguageCodeStyleSetti
                     "TRIM_TRAILING_WHITE_SPACES",
                     "Trim trailing whitespaces",
                     "Trimming");
-
-            consumer.showCustomOption(CsvCodeStyleSettings.class,
-                    "TABULARIZE",
-                    "Enabled",
-                    "Tabularize (ignores Trimming settings)");
-            consumer.showCustomOption(CsvCodeStyleSettings.class,
-                    "WHITE_SPACES_OUTSIDE_QUOTES",
-                    "Trimming/spacing outside quotes",
-                    "Tabularize (ignores Trimming settings)");
-            consumer.showCustomOption(CsvCodeStyleSettings.class,
-                    "LEADING_WHITE_SPACES",
-                    "Leading whitespaces",
-                    "Tabularize (ignores Trimming settings)");
-            consumer.showCustomOption(CsvCodeStyleSettings.class,
-                    "ENABLE_WIDE_CHARACTER_DETECTION",
-                    "East Asian charset support (slower!)",
-                    "Tabularize (ignores Trimming settings)");
-            consumer.showCustomOption(CsvCodeStyleSettings.class,
-                    "TREAT_AMBIGUOUS_CHARACTERS_AS_WIDE",
-                    "Double wide EA ambiguous characters",
-                    "Tabularize (ignores Trimming settings)");
         }
 
         if (settingsType == SettingsType.WRAPPING_AND_BRACES_SETTINGS) {
             consumer.showStandardOptions(
-                    CodeStyleSettingsCustomizable.WrappingOrBraceOption.RIGHT_MARGIN.toString(),
                     CodeStyleSettingsCustomizable.WrappingOrBraceOption.WRAP_LONG_LINES.toString(),
                     CodeStyleSettingsCustomizable.WrappingOrBraceOption.WRAP_ON_TYPING.toString()
             );
@@ -79,13 +57,10 @@ public class CsvLanguageCodeStyleSettingsProvider extends LanguageCodeStyleSetti
 
     protected void customizeDefaults(@NotNull CommonCodeStyleSettings commonSettings, @NotNull CommonCodeStyleSettings.IndentOptions indentOptions) {
         super.customizeDefaults(commonSettings, indentOptions);
-        indentOptions.TAB_SIZE = 1;
-        indentOptions.INDENT_SIZE = 1;
         indentOptions.USE_TAB_CHARACTER = true;
         indentOptions.SMART_TABS = false;
         indentOptions.KEEP_INDENTS_ON_EMPTY_LINES = true;
         commonSettings.WRAP_ON_TYPING = CommonCodeStyleSettings.WrapOnTyping.NO_WRAP.intValue;
         commonSettings.WRAP_LONG_LINES = false;
-        commonSettings.RIGHT_MARGIN = Integer.MAX_VALUE;
     }
 }

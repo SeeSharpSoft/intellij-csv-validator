@@ -30,7 +30,7 @@ public class CsvStructureViewTest extends BasePlatformTestCase {
         myFixture.testStructureView(structureViewComponent -> {
             StructureViewTreeElement root = structureViewComponent.getTreeModel().getRoot();
             doCheckTreeElement(root, CsvStructureViewElement.File.class, "FirstName, LastName\n" +
-                    "Peter,Lustig,42\n" +
+                    "Peter,Lustig ,42\n" +
                     "Martin\n" +
                     ",Fuchs\n", null);
             assertEquals(3, root.getChildren().length);
@@ -79,7 +79,7 @@ public class CsvStructureViewTest extends BasePlatformTestCase {
             doCheckTreeElement(
                     header,
                     CsvStructureViewElement.Header.class,
-                    "LastName",
+                    " LastName",
                     "Header (3 entries)"
             );
 
@@ -87,7 +87,7 @@ public class CsvStructureViewTest extends BasePlatformTestCase {
             doCheckTreeElement(
                     field,
                     CsvStructureViewElement.Field.class,
-                    "Lustig",
+                    "Lustig ",
                     "(1)"
             );
             field = header.getChildren()[1];
@@ -132,7 +132,7 @@ public class CsvStructureViewTest extends BasePlatformTestCase {
         myFixture.testStructureView(structureViewComponent -> {
             StructureViewTreeElement root = structureViewComponent.getTreeModel().getRoot();
             doCheckTreeElement(root, CsvStructureViewElement.File.class, "FirstName, LastName\n" +
-                    "Peter,Lustig,42\n" +
+                    "Peter,Lustig ,42\n" +
                     "Martin\n" +
                     ",Fuchs\n", null);
             assertEquals(3, root.getChildren().length);
@@ -174,7 +174,7 @@ public class CsvStructureViewTest extends BasePlatformTestCase {
             doCheckTreeElement(
                     header,
                     CsvStructureViewElement.Header.class,
-                    "LastName",
+                    " LastName",
                     "Header (3 entries)"
             );
 
@@ -182,7 +182,7 @@ public class CsvStructureViewTest extends BasePlatformTestCase {
             doCheckTreeElement(
                     field,
                     CsvStructureViewElement.Field.class,
-                    "Lustig",
+                    "Lustig ",
                     "(1)"
             );
             field = header.getChildren()[1];

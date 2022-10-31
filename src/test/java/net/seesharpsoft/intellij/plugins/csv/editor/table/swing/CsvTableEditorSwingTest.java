@@ -37,7 +37,6 @@ public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
 
         assertEquals(myFixture.getFile().getVirtualFile(), fileEditor.getFile());
         assertEquals(this.getProject(), fileEditor.getProject());
-        assertNotNull(fileEditor.getDataHandler());
         assertNotNull(fileEditor.getComponent());
         assertEquals(fileEditor.getTable(), fileEditor.getPreferredFocusedComponent());
     }
@@ -90,29 +89,5 @@ public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
     public void testTableContentChanges() {
         Object[][] newState = changeValue("new value", 2, 1);
         assertTrue(fileEditor.isModified());
-        assertFalse(fileEditor.getDataHandler().equalsCurrentState(initialState));
-        assertTrue(fileEditor.getDataHandler().equalsCurrentState(newState));
     }
-
-    public void testTableCsvGeneration() throws FileNotFoundException {
-        changeValue("new value", 2, 1);
-        String generatedCsv = fileEditor.generateCsv(fileEditor.getDataHandler().getCurrentState());
-
-        File resultFile = new File(this.getTestDataPath(), "TableEditorFileChanged.csv");
-        String expectedContent = new BufferedReader(new FileReader(resultFile)).lines().reduce(null, (prev, line) -> prev == null ? line : prev + "\n" + line);
-
-        assertEquals(expectedContent, generatedCsv);
-    }
-
-    public void testTableCsvGenerationEnforceQuoting() throws FileNotFoundException {
-        changeValue("new value", 2, 1);
-        CsvEditorSettings.getInstance().setQuotingEnforced(true);
-        String generatedCsv = fileEditor.generateCsv(fileEditor.getDataHandler().getCurrentState());
-
-        File resultFile = new File(this.getTestDataPath(), "TableEditorFileChangedQuoted.csv");
-        String expectedContent = new BufferedReader(new FileReader(resultFile)).lines().reduce(null, (prev, line) -> prev == null ? line : prev + "\n" + line);
-
-        assertEquals(expectedContent, generatedCsv);
-    }
-
 }

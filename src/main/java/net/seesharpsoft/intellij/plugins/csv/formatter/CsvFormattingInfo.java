@@ -9,7 +9,7 @@ import net.seesharpsoft.intellij.plugins.csv.settings.CsvCodeStyleSettings;
 
 import java.util.Map;
 
-public class CsvFormattingInfo extends CsvColumnInfoMap<ASTNode> {
+public class CsvFormattingInfo {
 
     private SpacingBuilder mySpacingBuilder;
     private CodeStyleSettings myCodeStyleSettings;
@@ -26,8 +26,7 @@ public class CsvFormattingInfo extends CsvColumnInfoMap<ASTNode> {
         return myCodeStyleSettings;
     }
 
-    public CsvFormattingInfo(CodeStyleSettings codeStyleSettings, SpacingBuilder spacingBuilder, Map<Integer, CsvColumnInfo<ASTNode>> infoColumnMap) {
-        super(infoColumnMap);
+    public CsvFormattingInfo(CodeStyleSettings codeStyleSettings, SpacingBuilder spacingBuilder) {
         this.mySpacingBuilder = spacingBuilder;
         this.myCodeStyleSettings = codeStyleSettings;
     }

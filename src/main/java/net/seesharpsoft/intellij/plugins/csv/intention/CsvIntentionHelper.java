@@ -3,19 +3,19 @@ package net.seesharpsoft.intellij.plugins.csv.intention;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.Pair;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
+import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.IncorrectOperationException;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
+import net.seesharpsoft.intellij.plugins.csv.psi.CsvField;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
 import net.seesharpsoft.intellij.psi.PsiHelper;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public final class CsvIntentionHelper {
@@ -56,121 +56,95 @@ public final class CsvIntentionHelper {
     }
 
     public static void quoteAll(@NotNull Project project, @NotNull PsiFile psiFile) {
-        try {
-            Document document = PsiDocumentManager.getInstance(project).getDocument(psiFile);
-            List<Integer> quotePositions = new ArrayList<>();
-            Collection<PsiElement> fields = getAllFields(psiFile);
-            PsiElement separator;
-            for (PsiElement field : fields) {
-                if (field.getFirstChild() == null || PsiHelper.getElementType(field.getFirstChild()) != CsvTypes.QUOTE) {
-                    separator = CsvHelper.getPreviousSeparator(field);
-                    if (separator == null) {
-                        quotePositions.add(field.getParent().getTextOffset());
-                    } else {
-                        quotePositions.add(separator.getTextOffset() + separator.getTextLength());
-                    }
-                }
-                if (field.getLastChild() == null || PsiHelper.getElementType(field.getLastChild()) != CsvTypes.QUOTE) {
-                    separator = CsvHelper.getNextSeparator(field);
-                    if (separator == null) {
-                        quotePositions.add(field.getParent().getTextOffset() + field.getParent().getTextLength());
-                    } else {
-                        quotePositions.add(separator.getTextOffset());
-                    }
-                }
+        Document document = PsiDocumentManager.getInstance(project).getDocument(psiFile);
+        List<Integer> quotePositions = new ArrayList<>();
+
+        PsiTreeUtil.processElements(psiFile, CsvField.class, field -> {
+            if (PsiHelper.getElementType(field.getFirstChild()) != CsvTypes.QUOTE) {
+                quotePositions.add(field.getTextRange().getStartOffset());
             }
-            String text = addQuotes(document.getText(), quotePositions);
-            document.setText(text);
-        } catch (IncorrectOperationException e) {
-            LOG.error(e);
+            if (PsiHelper.getElementType(field.getLastChild()) != CsvTypes.QUOTE) {
+                quotePositions.add(field.getTextRange().getEndOffset());
+            }
+            return true;
+        });
+        addQuotes(document, quotePositions);
+    }
+
+    public static void quoteValue(@NotNull Project project, @NotNull final PsiElement field) {
+        Document document = PsiDocumentManager.getInstance(project).getDocument(field.getContainingFile());
+        List<Integer> quotePositions = new ArrayList<>();
+        if (PsiHelper.getElementType(field.getFirstChild()) != CsvTypes.QUOTE) {
+            quotePositions.add(field.getTextRange().getStartOffset());
         }
+        if (PsiHelper.getElementType(field.getLastChild()) != CsvTypes.QUOTE) {
+            quotePositions.add(field.getTextRange().getEndOffset());
+        }
+        addQuotes(document, quotePositions);
     }
 
     public static void unquoteAll(@NotNull Project project, @NotNull PsiFile psiFile) {
-        try {
-            Document document = PsiDocumentManager.getInstance(project).getDocument(psiFile);
-            List<Integer> quotePositions = new ArrayList<>();
-            Collection<PsiElement> fields = getAllFields(psiFile);
-            for (PsiElement field : fields) {
-                if (getChildren(field).stream().anyMatch(element -> PsiHelper.getElementType(element) == CsvTypes.ESCAPED_TEXT)) {
-                    continue;
-                }
-                if (PsiHelper.getElementType(field.getFirstChild()) == CsvTypes.QUOTE) {
-                    quotePositions.add(field.getFirstChild().getTextOffset());
-                }
-                if (PsiHelper.getElementType(field.getLastChild()) == CsvTypes.QUOTE) {
-                    quotePositions.add(field.getLastChild().getTextOffset());
+        Document document = PsiDocumentManager.getInstance(project).getDocument(psiFile);
+
+        final List<PsiElement> quotePositions = new ArrayList<>();
+
+        PsiTreeUtil.processElements(psiFile, CsvField.class, field -> {
+            if (!getChildren(field).stream().anyMatch(element -> PsiHelper.getElementType(element) == CsvTypes.ESCAPED_TEXT)) {
+                Pair<PsiElement, PsiElement> positions = getQuotePositions(field);
+                if (positions != null) {
+                    quotePositions.add(positions.getFirst());
+                    quotePositions.add(positions.getSecond());
                 }
             }
-            String text = removeQuotes(document.getText(), quotePositions);
-            document.setText(text);
-        } catch (IncorrectOperationException e) {
-            LOG.error(e);
+            return true;
+        });
+
+        removeQuotes(document, quotePositions);
+    }
+
+    public static void unquoteValue(@NotNull Project project, @NotNull final PsiElement field) {
+        unquoteValue(PsiDocumentManager.getInstance(project).getDocument(field.getContainingFile()), field);
+    }
+
+    public static void unquoteValue(@NotNull Document document, @NotNull final PsiElement field) {
+        if (getChildren(field).stream().anyMatch(element -> PsiHelper.getElementType(element) == CsvTypes.ESCAPED_TEXT)) {
+            return;
+        }
+        Pair<PsiElement, PsiElement> positions = getQuotePositions(field);
+        if (positions != null) {
+            removeQuotes(document, Arrays.asList(positions.getFirst(), positions.getSecond()));
         }
     }
 
-    public static void quoteValue(@NotNull Project project, @NotNull final PsiElement element) {
-        try {
-            Document document = PsiDocumentManager.getInstance(project).getDocument(element.getContainingFile());
-            List<Integer> quotePositions = new ArrayList<>();
-
-            int quotePosition = getOpeningQuotePosition(element.getFirstChild(), element.getLastChild());
-            if (quotePosition != -1) {
-                quotePositions.add(quotePosition);
-            }
-            PsiElement endSeparatorElement = findQuotePositionsUntilSeparator(element, quotePositions);
-            if (endSeparatorElement == null) {
-                quotePositions.add(document.getTextLength());
-            } else {
-                quotePositions.add(endSeparatorElement.getTextOffset());
-            }
-            String text = addQuotes(document.getText(), quotePositions);
-            document.setText(text);
-        } catch (IncorrectOperationException e) {
-            LOG.error(e);
+    private static Pair<PsiElement, PsiElement> getQuotePositions(PsiElement element) {
+        PsiElement firstChild = element.getFirstChild();
+        PsiElement lastChild = element.getLastChild();
+        if (PsiHelper.getElementType(firstChild) == CsvTypes.QUOTE && PsiHelper.getElementType(lastChild) == CsvTypes.QUOTE) {
+            return Pair.create(firstChild, lastChild);
         }
+        return null;
     }
 
-    public static void unquoteValue(@NotNull Project project, @NotNull final PsiElement element) {
-        try {
-            Document document = PsiDocumentManager.getInstance(project).getDocument(element.getContainingFile());
-            List<Integer> quotePositions = new ArrayList<>();
-
-            if (PsiHelper.getElementType(element.getFirstChild()) == CsvTypes.QUOTE) {
-                quotePositions.add(element.getFirstChild().getTextOffset());
-            }
-            if (PsiHelper.getElementType(element.getLastChild()) == CsvTypes.QUOTE) {
-                quotePositions.add(element.getLastChild().getTextOffset());
-            }
-            String text = removeQuotes(document.getText(), quotePositions);
-            document.setText(text);
-        } catch (IncorrectOperationException e) {
-            LOG.error(e);
-        }
-    }
-
-    public static String addQuotes(final String original, List<Integer> quotePositions) {
-        String text = original;
+    public static void addQuotes(final Document document, List<Integer> quotePositions) {
         int offset = 0;
+        String quote = "\"";
         quotePositions.sort(Integer::compareTo);
         for (int position : quotePositions) {
             int offsetPosition = position + offset;
-            text = text.substring(0, offsetPosition) + "\"" + text.substring(offsetPosition);
+            document.insertString(offsetPosition, quote);
             ++offset;
         }
-        return text;
     }
 
-    public static String removeQuotes(final String original, List<Integer> quotePositions) {
-        String text = original;
+    public static void removeQuotes(final Document document, List<PsiElement> quoteElements) {
         int offset = 0;
-        quotePositions.sort(Integer::compareTo);
-        for (int position : quotePositions) {
-            int offsetPosition = position + offset;
-            text = text.substring(0, offsetPosition) + text.substring(offsetPosition + 1);
-            --offset;
+        quoteElements.sort(Comparator.comparingInt(PsiElement::getTextOffset));
+        for (PsiElement element : quoteElements) {
+            int startOffset = element.getTextRange().getStartOffset() + offset;
+            int endOffset = startOffset + element.getTextLength();
+            document.replaceString(startOffset, endOffset, "");
+            offset -= (endOffset - startOffset);
         }
-        return text;
     }
 
     public static int getOpeningQuotePosition(PsiElement firstFieldElement, PsiElement lastFieldElement) {

@@ -1,18 +1,11 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
-import com.intellij.testFramework.exceptionCases.AbstractExceptionCase;
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
-import com.intellij.util.ThrowableRunnable;
-import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public abstract class CsvTableEditorSwingTestBase extends BasePlatformTestCase {
 
     protected CsvTableEditorSwing fileEditor;
-
-    protected Object[][] initialState;
 
     @Override
     protected String getTestDataPath() {
@@ -29,7 +22,6 @@ public abstract class CsvTableEditorSwingTestBase extends BasePlatformTestCase {
 
         fileEditor = new CsvTableEditorSwing(this.getProject(), myFixture.getFile().getVirtualFile());
         fileEditor.selectNotify();
-        initialState = fileEditor.getDataHandler().getCurrentState();
     }
 
     @Override
@@ -45,10 +37,11 @@ public abstract class CsvTableEditorSwingTestBase extends BasePlatformTestCase {
         instance.setTableAutoColumnWidthOnOpen(false);
     }
 
+    @Deprecated
     protected Object[][] changeValue(String newValue, int row, int column) {
         fileEditor.getTable().setValueAt(newValue, row, column);
-        Object[][] copy = CsvHelper.deepCopy(initialState);
-        copy[row][column] = newValue;
-        return copy;
+//        Object[][] copy = CsvHelper.deepCopy(initialState);
+//        copy[row][column] = newValue;
+        return new Object[0][0];
     }
 }

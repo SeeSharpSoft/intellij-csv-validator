@@ -1,5 +1,6 @@
 package net.seesharpsoft.intellij.plugins.csv.psi;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.psi.tree.IElementType;
 import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
 import org.jetbrains.annotations.NonNls;
@@ -12,6 +13,10 @@ public class CsvTokenType extends IElementType {
 
     @Override
     public String toString() {
+        if (ApplicationManager.getApplication().isUnitTestMode()) {
+            return "CsvTokenType." + super.toString();
+        }
+
         switch(super.toString()) {
             case "COMMA":
                 return "Value Separator";

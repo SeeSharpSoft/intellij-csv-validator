@@ -27,7 +27,7 @@ public class CsvChangeSeparatorActionGroup extends ActionGroup {
     @Override
     public void update(AnActionEvent anActionEvent) {
         PsiFile psiFile = anActionEvent.getData(CommonDataKeys.PSI_FILE);
-        boolean canChangeAttributes = CsvFileAttributes.canChangeAttributes(psiFile);
+        boolean canChangeAttributes = CsvFileAttributes.canChangeValueSeparator(psiFile);
 
         anActionEvent.getPresentation().setEnabledAndVisible(canChangeAttributes);
         if (canChangeAttributes) {

@@ -7,10 +7,37 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.codeStyle.CodeStyleSettings;
 import net.seesharpsoft.UnhandledSwitchCaseException;
+import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
+import net.seesharpsoft.intellij.plugins.csv.psi.CsvElementType;
+import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
+import net.seesharpsoft.intellij.plugins.csv.settings.CsvCodeStyleSettings;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class CsvFormattingModelBuilder implements FormattingModelBuilder {
+
+    private static SpacingBuilder createSpaceBuilder(CodeStyleSettings settings) {
+        CsvCodeStyleSettings csvCodeStyleSettings = settings.getCustomSettings(CsvCodeStyleSettings.class);
+        SpacingBuilder builder = new SpacingBuilder(settings, CsvLanguage.INSTANCE);
+        if (csvCodeStyleSettings.TRIM_LEADING_WHITE_SPACES) {
+            builder
+                    .after(CsvTypes.COMMA).spaceIf(csvCodeStyleSettings.SPACE_AFTER_SEPARATOR)
+                    .after(CsvTypes.CRLF).spaces(0)
+                    .after(CsvElementType.DOCUMENT_START).spaces(0);
+        } else if (csvCodeStyleSettings.SPACE_AFTER_SEPARATOR) {
+            builder.after(CsvTypes.COMMA).spaces(1);
+        }
+
+        if (csvCodeStyleSettings.TRIM_TRAILING_WHITE_SPACES) {
+            builder
+                    .before(CsvTypes.COMMA).spaceIf(csvCodeStyleSettings.SPACE_BEFORE_SEPARATOR)
+                    .before(CsvTypes.CRLF).spaces(0);
+        } else if (csvCodeStyleSettings.SPACE_BEFORE_SEPARATOR) {
+            builder.before(CsvTypes.COMMA).spaces(1);
+        }
+
+        return builder;
+    }
 
     @Override
     @NotNull
@@ -23,16 +50,15 @@ public class CsvFormattingModelBuilder implements FormattingModelBuilder {
             case REFORMAT:
                 PsiElement element = formattingContext.getPsiElement();
                 CodeStyleSettings settings = formattingContext.getCodeStyleSettings();
-                ASTNode root = CsvFormatHelper.getRoot(element.getNode());
+                ASTNode root = element.getNode(); //CsvFormatHelper.getRoot(element.getNode());
                 CsvFormattingInfo formattingInfo = new CsvFormattingInfo(
                         settings,
-                        CsvFormatHelper.createSpaceBuilder(settings),
-                        CsvFormatHelper.createColumnInfoMap(root, settings)
+                        createSpaceBuilder(settings)
                 );
 
                 return FormattingModelProvider.createFormattingModelForPsiFile(
                         element.getContainingFile(),
-                        new CsvBlock(root, formattingInfo),
+                        new SimpleCsvBlock(root, formattingInfo),
                         settings
                 );
             default:

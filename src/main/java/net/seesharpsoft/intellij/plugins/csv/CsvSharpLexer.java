@@ -32,26 +32,23 @@ public class CsvSharpLexer extends LexerBase {
     private static final Map<TokenType, LexerState> QUOTED_NEXT_STATES = new LinkedHashMap<>();
 
     static {
-        INITIAL_NEXT_STATES.put(TokenType.WHITESPACE, LexerState.Initial);
         INITIAL_NEXT_STATES.put(TokenType.COMMENT, LexerState.Initial);
         INITIAL_NEXT_STATES.put(TokenType.VALUE_SEPARATOR, LexerState.Unquoted);
         INITIAL_NEXT_STATES.put(TokenType.RECORD_SEPARATOR, LexerState.Initial);
-        INITIAL_NEXT_STATES.put(TokenType.QUOTE, LexerState.Quoted);
+        INITIAL_NEXT_STATES.put(TokenType.OPENING_QUOTE, LexerState.Quoted);
         INITIAL_NEXT_STATES.put(TokenType.TEXT, LexerState.Unquoted);
         INITIAL_NEXT_STATES.put(TokenType.BACKSLASH, LexerState.Unquoted);
 
-        UNQUOTED_NEXT_STATES.put(TokenType.WHITESPACE, LexerState.Unquoted);
         UNQUOTED_NEXT_STATES.put(TokenType.VALUE_SEPARATOR, LexerState.Unquoted);
         UNQUOTED_NEXT_STATES.put(TokenType.RECORD_SEPARATOR, LexerState.Initial);
-        UNQUOTED_NEXT_STATES.put(TokenType.QUOTE, LexerState.Quoted);
+        UNQUOTED_NEXT_STATES.put(TokenType.OPENING_QUOTE, LexerState.Quoted);
         UNQUOTED_NEXT_STATES.put(TokenType.TEXT, LexerState.Unquoted);
         UNQUOTED_NEXT_STATES.put(TokenType.BACKSLASH, LexerState.Unquoted);
 
-        QUOTED_NEXT_STATES.put(TokenType.WHITESPACE, LexerState.Quoted);
         QUOTED_NEXT_STATES.put(TokenType.RECORD_SEPARATOR, LexerState.Quoted);
         QUOTED_NEXT_STATES.put(TokenType.VALUE_SEPARATOR, LexerState.Quoted);
         QUOTED_NEXT_STATES.put(TokenType.ESCAPED_QUOTE, LexerState.Quoted);
-        QUOTED_NEXT_STATES.put(TokenType.QUOTE, LexerState.Unquoted);
+        QUOTED_NEXT_STATES.put(TokenType.CLOSING_QUOTE, LexerState.Unquoted);
         QUOTED_NEXT_STATES.put(TokenType.TEXT, LexerState.Quoted);
         QUOTED_NEXT_STATES.put(TokenType.BACKSLASH, LexerState.Quoted);
     }
@@ -78,12 +75,12 @@ public class CsvSharpLexer extends LexerBase {
 
     enum TokenType {
         BACKSLASH,
-        QUOTE,
+        OPENING_QUOTE,
+        CLOSING_QUOTE,
         TEXT,
         ESCAPED_QUOTE,
         VALUE_SEPARATOR,
         RECORD_SEPARATOR,
-        WHITESPACE,
         COMMENT
     }
 
@@ -113,16 +110,16 @@ public class CsvSharpLexer extends LexerBase {
         super();
 
         tokenizer = new Tokenizer<>();
-        tokenizer.add(TokenType.WHITESPACE, "[ \f]+");
         tokenizer.add(TokenType.VALUE_SEPARATOR, configuration.valueSeparator);
         tokenizer.add(TokenType.RECORD_SEPARATOR, configuration.recordSeparator);
         tokenizer.add(TokenType.ESCAPED_QUOTE, String.format("%s%s", configuration.escapeCharacter, configuration.quoteCharacter));
-        tokenizer.add(TokenType.QUOTE, String.format("%s", configuration.quoteCharacter));
+        tokenizer.add(TokenType.OPENING_QUOTE, String.format("[ \f]*%s", configuration.quoteCharacter));
+        tokenizer.add(TokenType.CLOSING_QUOTE, String.format("%s[ \f]*", configuration.quoteCharacter));
         if (configuration.escapeCharacter.equals(configuration.quoteCharacter)) {
-            tokenizer.add(TokenType.TEXT, String.format("((?!%s)[^ %s%s])+", configuration.valueSeparator, configuration.quoteCharacter, configuration.recordSeparator));
+            tokenizer.add(TokenType.TEXT, String.format("((?!%s)[^%s%s])+", configuration.valueSeparator, configuration.quoteCharacter, configuration.recordSeparator));
         } else {
             tokenizer.add(TokenType.TEXT,
-                    String.format("((?!%s)[^ %s%s%s])+|%s%s",
+                    String.format("((?!%s)[^%s%s%s])+|%s%s",
                     configuration.valueSeparator,
                     configuration.escapeCharacter,
                     configuration.quoteCharacter,
@@ -249,7 +246,8 @@ public class CsvSharpLexer extends LexerBase {
             this.tokenEnd = tokenInfo.textRange().end();
 
             switch(tokenInfo.token()) {
-                case QUOTE:
+                case OPENING_QUOTE:
+                case CLOSING_QUOTE:_QUOTE:
                     currentTokenType = CsvTypes.QUOTE;
                     break;
                 case ESCAPED_QUOTE:
@@ -267,9 +265,6 @@ public class CsvSharpLexer extends LexerBase {
                     break;
                 case COMMENT:
                     currentTokenType = CsvTypes.COMMENT;
-                    break;
-                case WHITESPACE:
-                    currentTokenType = com.intellij.psi.TokenType.WHITE_SPACE;
                     break;
                 default:
                     throw new UnhandledSwitchCaseException(tokenInfo.token());

@@ -137,6 +137,17 @@ public class CsvParsingTest extends ParsingTestCase {
         doTest(true);
     }
 
+    public void testWhitespaces() {
+        doTest(true);
+    }
+
+    public void testWhitespacesCustom() {
+        setName("Whitespaces");
+        // with custom comment characters like //, custom lexer is used
+        CsvEditorSettings.getInstance().setCommentIndicator("//");
+        doTest(true);
+    }
+
     @Override
     protected String getTestDataPath() {
         return "./src/test/resources/parser";

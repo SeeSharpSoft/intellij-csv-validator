@@ -119,26 +119,21 @@ public class CsvValidationInspection extends LocalInspectionTool {
 
         @Override
         public void applyFix(@NotNull Project project, @NotNull ProblemDescriptor descriptor) {
-            try {
-                PsiElement element = descriptor.getPsiElement();
-                Document document = PsiDocumentManager.getInstance(project).getDocument(element.getContainingFile());
-                List<Integer> quotePositions = new ArrayList<>();
+            PsiElement element = descriptor.getPsiElement();
+            Document document = PsiDocumentManager.getInstance(project).getDocument(element.getContainingFile());
+            List<Integer> quotePositions = new ArrayList<>();
 
-                int quotePosition = CsvIntentionHelper.getOpeningQuotePosition(element);
-                if (quotePosition != -1) {
-                    quotePositions.add(quotePosition);
-                }
-                PsiElement endSeparatorElement = CsvIntentionHelper.findQuotePositionsUntilSeparator(element, quotePositions, true);
-                if (endSeparatorElement == null) {
-                    quotePositions.add(document.getTextLength());
-                } else {
-                    quotePositions.add(endSeparatorElement.getTextOffset());
-                }
-                String text = CsvIntentionHelper.addQuotes(document.getText(), quotePositions);
-                document.setText(text);
-            } catch (IncorrectOperationException e) {
-                LOG.error(e);
+            int quotePosition = CsvIntentionHelper.getOpeningQuotePosition(element);
+            if (quotePosition != -1) {
+                quotePositions.add(quotePosition);
             }
+            PsiElement endSeparatorElement = CsvIntentionHelper.findQuotePositionsUntilSeparator(element, quotePositions, true);
+            if (endSeparatorElement == null) {
+                quotePositions.add(document.getTextLength());
+            } else {
+                quotePositions.add(endSeparatorElement.getTextOffset());
+            }
+            CsvIntentionHelper.addQuotes(document, quotePositions);
         }
     }
 
