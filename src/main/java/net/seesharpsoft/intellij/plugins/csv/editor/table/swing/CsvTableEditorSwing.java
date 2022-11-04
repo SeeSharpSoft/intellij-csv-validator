@@ -6,11 +6,11 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.components.labels.LinkLabel;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
-import net.seesharpsoft.intellij.plugins.csv.editor.table.api.CsvTableModel;
+import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableModel;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditor;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditorState;
-import net.seesharpsoft.intellij.plugins.csv.editor.table.api.TableActions;
+import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableActions;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -133,12 +133,14 @@ public class CsvTableEditorSwing extends CsvTableEditor {
     @Override
     protected void applyEditorState(CsvTableEditorState editorState) {
         tblEditor.setRowHeight(editorState.getRowHeight());
-        rowHeadersTable.setRowHeight(tblEditor.getRowHeight());
+        if (rowHeadersTable != null) {
+            rowHeadersTable.setRowHeight(tblEditor.getRowHeight());
+        }
     }
 
     @Override
     public void updateEditorLayout() {
-        updateInteractionElements();
+        setEditable(!getTableModel().hasErrors());
         panelInfo.setVisible(getTableEditorState().showInfoPanel());
 
         int currentColumnCount = this.getTableModel().getColumnCount();
@@ -171,7 +173,6 @@ public class CsvTableEditorSwing extends CsvTableEditor {
 
     @Override
     public void beforeTableModelUpdate() {
-        ((CsvTable)tblEditor).suspend();
         mySelectedColumn = tblEditor.getSelectedColumn();
         mySelectedRow = tblEditor.getSelectedRow();
         myIsInCellEditMode = tblEditor.isEditing();
@@ -179,6 +180,7 @@ public class CsvTableEditorSwing extends CsvTableEditor {
 
     @Override
     public void afterTableModelUpdate() {
+        removeTableChangeListener();
         try {
             this.tblEditor.tableChanged(new TableModelEvent(tblEditor.getModel(), TableModelEvent.ALL_COLUMNS));
             this.updateEditorLayout();
@@ -189,15 +191,14 @@ public class CsvTableEditorSwing extends CsvTableEditor {
                 tblEditor.editCellAt(selectedRow, selectedCol);
             }
         } finally {
-            ((CsvTable)tblEditor).resume();
+            applyTableChangeListener();
         }
     }
 
     @Override
     protected void updateInteractionElements() {
-        updateEditActionElements(isEditable());
-
         panelTop.setVisible(getTableModel().hasErrors());
+        updateEditActionElements(isEditable());
     }
 
     private void updateEditActionElements(boolean isEditable) {
@@ -235,7 +236,7 @@ public class CsvTableEditorSwing extends CsvTableEditor {
 
     @NotNull
     @Override
-    public TableActions getActions() {
+    public CsvTableActions getActions() {
         return this.tableEditorActions;
     }
 

@@ -9,6 +9,9 @@ import net.seesharpsoft.intellij.plugins.csv.psi.CsvField;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.*;
+import java.util.function.Consumer;
+
 public class PsiHelper {
     private PsiHelper() {
         // static helper
@@ -105,5 +108,18 @@ public class PsiHelper {
 
     public static PsiElement findFirst(@NotNull final PsiElement root, @NotNull IElementType type) {
         return SyntaxTraverser.psiTraverser(root).filterTypes(elementType -> elementType == type).filter(PsiElement.class).first();
+    }
+
+    public static void traverseChildrenOfAnyType(@NotNull final PsiElement parent, Consumer<PsiElement> consume, IElementType ...types) {
+        Set<IElementType> allTypes = new HashSet<>(Arrays.asList(types));
+        for (PsiElement child = parent.getFirstChild(); child != null; child = child.getNextSibling()) {
+            if (allTypes.contains(getElementType(child))) consume.accept(child);
+        }
+    }
+
+    public static Collection<PsiElement> findChildrenOfAnyElement(@NotNull final PsiElement parent, IElementType ...types) {
+        List<PsiElement> foundElements = new ArrayList<>();
+        traverseChildrenOfAnyType(parent, element -> foundElements.add(element), types);
+        return foundElements;
     }
 }

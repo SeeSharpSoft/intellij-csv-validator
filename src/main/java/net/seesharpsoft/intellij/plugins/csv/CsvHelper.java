@@ -6,10 +6,7 @@ import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.fileTypes.FileTypeRegistry;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiManager;
-import com.intellij.psi.TokenType;
+import com.intellij.psi.*;
 import com.intellij.psi.impl.source.DummyHolder;
 import com.intellij.psi.impl.source.DummyHolderFactory;
 import com.intellij.psi.impl.source.tree.FileElement;
@@ -17,20 +14,14 @@ import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
 import net.seesharpsoft.intellij.lang.FileParserDefinition;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvFileAttributes;
-import net.seesharpsoft.intellij.plugins.csv.psi.CsvField;
-import net.seesharpsoft.intellij.plugins.csv.psi.CsvFile;
-import net.seesharpsoft.intellij.plugins.csv.psi.CsvRecord;
-import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
+import net.seesharpsoft.intellij.plugins.csv.psi.*;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import net.seesharpsoft.intellij.plugins.psv.PsvFileType;
 import net.seesharpsoft.intellij.plugins.tsv.TsvFileType;
 import net.seesharpsoft.intellij.psi.PsiHelper;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -268,6 +259,18 @@ public final class CsvHelper {
             ++row;
         }
         return new CsvColumnInfoMap(columnInfoMap, PsiTreeUtil.hasErrorElements(csvFile), hasComments);
+    }
+
+    public static String getFieldValue(PsiElement field) {
+        if (field == null) return "";
+        if (isCommentElement(field)) {
+            return field.getText().substring(CsvEditorSettings.getInstance().getCommentIndicator().length());
+        }
+        return PsiHelper.findChildrenOfAnyElement(field, CsvTypes.TEXT, CsvTypes.ESCAPED_TEXT)
+                .stream()
+                .map(element -> element.getText())
+                .reduce(String::concat)
+                .orElse("");
     }
 
     public static String unquoteCsvValue(String content, CsvEscapeCharacter escapeCharacter) {

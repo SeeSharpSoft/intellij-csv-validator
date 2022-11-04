@@ -1,6 +1,6 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
-import net.seesharpsoft.intellij.plugins.csv.editor.table.api.CsvTableModel;
+import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableModel;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 
 public class CsvTableEditorCustomFileEndLineBreak extends CsvTableEditorSwingTestBase {

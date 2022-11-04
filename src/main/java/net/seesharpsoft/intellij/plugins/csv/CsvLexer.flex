@@ -4,11 +4,13 @@ import com.intellij.psi.tree.IElementType;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
 import com.intellij.psi.TokenType;
 import com.intellij.lexer.FlexLexer;
+import net.seesharpsoft.intellij.plugins.csv.CsvSeparatorHolder;
 
 %%
 
 %class CsvLexer
 %implements FlexLexer
+%implements CsvSeparatorHolder
 %unicode
 %function advance
 %type IElementType
@@ -19,6 +21,11 @@ import com.intellij.lexer.FlexLexer;
 
     private boolean isActualValueSeparator() {
         return myValueSeparator.isValueSeparator(yycharat(0));
+    }
+
+    @Override
+    public CsvValueSeparator getSeparator() {
+        return myValueSeparator;
     }
 
     /**

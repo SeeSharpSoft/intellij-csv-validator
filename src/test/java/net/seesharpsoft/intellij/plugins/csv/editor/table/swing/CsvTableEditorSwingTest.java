@@ -5,15 +5,10 @@ import com.intellij.openapi.fileEditor.FileEditorStateLevel;
 import com.intellij.openapi.util.Key;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditor;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditorState;
-import net.seesharpsoft.intellij.plugins.csv.editor.table.api.CsvTableModel;
-import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
+import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableModel;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 
 public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
 
@@ -84,10 +79,5 @@ public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
         assertEquals("  and one more value  ", tableModel.getValue(2, 1));
         assertEquals("", tableModel.getValue(3, 0));
         assertEquals("", tableModel.getValue(3, 1));
-    }
-
-    public void testTableContentChanges() {
-        Object[][] newState = changeValue("new value", 2, 1);
-        assertTrue(fileEditor.isModified());
     }
 }

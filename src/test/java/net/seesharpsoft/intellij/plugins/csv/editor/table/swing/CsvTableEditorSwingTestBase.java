@@ -1,6 +1,7 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
+import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableModel;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 
 public abstract class CsvTableEditorSwingTestBase extends BasePlatformTestCase {
@@ -14,6 +15,9 @@ public abstract class CsvTableEditorSwingTestBase extends BasePlatformTestCase {
 
     protected String getTestFile() { return "TableEditorFile.csv"; }
 
+    protected int myInitialRowCount;
+    protected int myInitialColumnCount;
+
     @Override
     protected void setUp() throws Exception {
         super.setUp();
@@ -22,6 +26,9 @@ public abstract class CsvTableEditorSwingTestBase extends BasePlatformTestCase {
 
         fileEditor = new CsvTableEditorSwing(this.getProject(), myFixture.getFile().getVirtualFile());
         fileEditor.selectNotify();
+
+        myInitialRowCount = getTableModel().getRowCount();
+        myInitialColumnCount = getTableModel().getColumnCount();
     }
 
     @Override
@@ -31,17 +38,13 @@ public abstract class CsvTableEditorSwingTestBase extends BasePlatformTestCase {
         super.tearDown();
     }
 
+    protected CsvTableModel getTableModel() {
+        return fileEditor.getTableModel();
+    }
+
     protected void initializeEditorSettings(CsvEditorSettings instance) {
         instance.loadState(new CsvEditorSettings.OptionSet());
         instance.setFileEndLineBreak(false);
         instance.setTableAutoColumnWidthOnOpen(false);
-    }
-
-    @Deprecated
-    protected Object[][] changeValue(String newValue, int row, int column) {
-        fileEditor.getTable().setValueAt(newValue, row, column);
-//        Object[][] copy = CsvHelper.deepCopy(initialState);
-//        copy[row][column] = newValue;
-        return new Object[0][0];
     }
 }

@@ -4,7 +4,7 @@ import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.ui.components.labels.LinkLabel;
 import com.intellij.ui.components.labels.LinkListener;
-import net.seesharpsoft.intellij.plugins.csv.editor.table.api.TableActions;
+import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableActions;
 
 import javax.swing.*;
 import java.awt.*;
@@ -14,12 +14,11 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-public class CsvTableEditorActionListeners extends CsvTableEditorUtilBase implements TableActions<CsvTableEditorSwing> {
+public class CsvTableEditorActionListeners extends CsvTableEditorUtilBase implements CsvTableActions<CsvTableEditorSwing> {
 
     protected ActionListener addRow = event -> addRow(csvTableEditor, false);
     protected ActionListener addRowBefore = event -> addRow(csvTableEditor, true);
     protected ActionListener addRowAfter = event -> addRow(csvTableEditor, false);
-    protected ActionListener addColumn = event -> addColumn(csvTableEditor, false);
     protected ActionListener addColumnBefore = event -> addColumn(csvTableEditor, true);
     protected ActionListener addColumnAfter = event -> addColumn(csvTableEditor, false);
     protected ActionListener deleteRow = event -> deleteSelectedRows(csvTableEditor);
@@ -44,15 +43,14 @@ public class CsvTableEditorActionListeners extends CsvTableEditorUtilBase implem
         tableEditor.removeTableChangeListener();
         try {
             JTable table = tableEditor.getTable();
-//            int currentColumn = table.getSelectedColumn();
             int currentRow = table.getSelectedRow();
+            if (currentRow == -1) return;
 
             tableEditor.addRow(table.convertRowIndexToModel(currentRow), before);
 
             int targetRow = before ? currentRow : currentRow + 1;
             int targetColumn = 0;
             selectCell(tableEditor.getTable(), targetRow, targetColumn);
-//            tableEditor.getTable().editCellAt(targetRow, targetColumn);
         } finally {
             tableEditor.applyTableChangeListener();
         }
@@ -69,6 +67,7 @@ public class CsvTableEditorActionListeners extends CsvTableEditorUtilBase implem
             JTable table = tableEditor.getTable();
             int currentColumn = table.getSelectedColumn();
             int currentRow = table.getSelectedRow();
+            if (currentColumn == -1 || currentRow == -1) return;
 
             tableEditor.addColumn(table.convertColumnIndexToModel(currentColumn), before);
 

@@ -22,10 +22,6 @@ public class CsvFormattingInfo {
         return myCodeStyleSettings.getCustomSettings(CsvCodeStyleSettings.class);
     }
 
-    public CodeStyleSettings getCodeStyleSettings() {
-        return myCodeStyleSettings;
-    }
-
     public CsvFormattingInfo(CodeStyleSettings codeStyleSettings, SpacingBuilder spacingBuilder) {
         this.mySpacingBuilder = spacingBuilder;
         this.myCodeStyleSettings = codeStyleSettings;

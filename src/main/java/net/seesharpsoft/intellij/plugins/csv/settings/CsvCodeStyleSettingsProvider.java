@@ -2,8 +2,8 @@ package net.seesharpsoft.intellij.plugins.csv.settings;
 
 import com.intellij.application.options.CodeStyleAbstractConfigurable;
 import com.intellij.application.options.CodeStyleAbstractPanel;
+import com.intellij.application.options.IndentOptionsEditor;
 import com.intellij.application.options.TabbedLanguageCodeStylePanel;
-import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.codeStyle.*;
@@ -47,8 +47,15 @@ public class CsvCodeStyleSettingsProvider extends CodeStyleSettingsProvider {
 
         @Override
         protected void initTabs(CodeStyleSettings settings) {
-            addTab(new CsvCodeStyleOptionTreeWithPreviewPanel(settings));
+            addTab(new CsvIntendPanel(settings));
+            addTab(new CsvSpacesPanel(settings));
             addTab(new CsvWrappingPanel(settings));
+        }
+
+        protected class CsvIntendPanel extends MyIndentOptionsWrapper {
+            protected CsvIntendPanel(CodeStyleSettings settings) {
+                super(settings, new IndentOptionsEditor(LanguageCodeStyleSettingsProvider.forLanguage(CsvLanguage.INSTANCE)));
+            }
         }
 
         protected class CsvWrappingPanel extends MyWrappingAndBracesPanel {
@@ -62,14 +69,14 @@ public class CsvCodeStyleSettingsProvider extends CodeStyleSettingsProvider {
             }
         }
 
-        protected class CsvCodeStyleOptionTreeWithPreviewPanel extends MyWrappingAndBracesPanel {
-            public CsvCodeStyleOptionTreeWithPreviewPanel(CodeStyleSettings settings) {
+        protected class CsvSpacesPanel extends MyWrappingAndBracesPanel {
+            public CsvSpacesPanel(CodeStyleSettings settings) {
                 super(settings);
             }
 
             @Override
             protected String getTabTitle() {
-                return "Settings";
+                return "Spaces";
             }
 
             @Override

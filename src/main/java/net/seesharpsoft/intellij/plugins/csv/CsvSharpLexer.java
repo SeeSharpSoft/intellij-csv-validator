@@ -12,7 +12,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public class CsvSharpLexer extends LexerBase {
+public class CsvSharpLexer extends LexerBase implements CsvSeparatorHolder {
 
     private final Tokenizer<TokenType> tokenizer;
     private final List<Tokenizer.Token<TokenType>> initialNextStateTokens;
@@ -102,12 +102,16 @@ public class CsvSharpLexer extends LexerBase {
         }
     }
 
+    private final CsvValueSeparator myValueSeparator;
+
     public CsvSharpLexer() {
         this(Configuration.DEFAULT);
     }
 
     public CsvSharpLexer(Configuration configuration) {
         super();
+
+        myValueSeparator = CsvValueSeparator.create(configuration.valueSeparator);
 
         tokenizer = new Tokenizer<>();
         tokenizer.add(TokenType.VALUE_SEPARATOR, configuration.valueSeparator);
@@ -144,6 +148,11 @@ public class CsvSharpLexer extends LexerBase {
                 .map(tokenizer::getToken)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public CsvValueSeparator getSeparator() {
+        return myValueSeparator;
     }
 
     @Override

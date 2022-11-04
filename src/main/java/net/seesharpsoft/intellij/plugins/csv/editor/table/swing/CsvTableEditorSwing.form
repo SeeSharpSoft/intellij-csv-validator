@@ -15,7 +15,7 @@
           </grid>
         </constraints>
         <properties>
-          <visible value="true"/>
+          <visible value="false"/>
         </properties>
         <border type="none"/>
         <children>
@@ -37,7 +37,7 @@
             <properties>
               <font size="12" style="1"/>
               <foreground color="-65536"/>
-              <text value="  ATTENTION: Error while parsing content - please fix issues in text editor!"/>
+              <text value="  Error while parsing content - please fix issues in text editor!"/>
             </properties>
           </component>
           <component id="d8426" class="javax.swing.JToolBar$Separator">

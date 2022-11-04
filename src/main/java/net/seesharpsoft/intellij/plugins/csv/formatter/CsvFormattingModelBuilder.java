@@ -50,7 +50,7 @@ public class CsvFormattingModelBuilder implements FormattingModelBuilder {
             case REFORMAT:
                 PsiElement element = formattingContext.getPsiElement();
                 CodeStyleSettings settings = formattingContext.getCodeStyleSettings();
-                ASTNode root = element.getNode(); //CsvFormatHelper.getRoot(element.getNode());
+                ASTNode root = element.getNode();
                 CsvFormattingInfo formattingInfo = new CsvFormattingInfo(
                         settings,
                         createSpaceBuilder(settings)

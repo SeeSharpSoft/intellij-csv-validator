@@ -31,7 +31,7 @@ public class SimpleCsvBlock extends AbstractBlock {
     @Override
     protected List<Block> buildChildren() {
         List<Block> blocks = new ArrayList<>();
-        if (myNode.getElementType() == CsvTypes.FIELD) return blocks;
+        if (isFieldBlock()) return blocks;
 
         ASTNode child = myNode.getFirstChildNode();
         while (child != null) {
@@ -42,6 +42,10 @@ public class SimpleCsvBlock extends AbstractBlock {
             child = child.getTreeNext();
         }
         return blocks;
+    }
+
+    private boolean isFieldBlock() {
+        return myNode.getElementType() == CsvTypes.FIELD;
     }
 
     private boolean stripLeading() {
@@ -59,6 +63,8 @@ public class SimpleCsvBlock extends AbstractBlock {
     @Override
     public TextRange getTextRange() {
         TextRange textRange = super.getTextRange();
+        if (!isFieldBlock()) return textRange;
+
         String originalText = myNode.getText();
         String trimmedText = stripLeading() ? originalText.stripLeading() : originalText;
         trimmedText = stripTrailing() ? trimmedText.stripTrailing() : trimmedText;

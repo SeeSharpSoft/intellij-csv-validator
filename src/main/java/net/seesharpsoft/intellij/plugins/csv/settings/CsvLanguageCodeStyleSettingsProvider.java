@@ -34,12 +34,17 @@ public class CsvLanguageCodeStyleSettingsProvider extends LanguageCodeStyleSetti
                     "TRIM_TRAILING_WHITE_SPACES",
                     "Trim trailing whitespaces",
                     "Trimming");
-        }
-
-        if (settingsType == SettingsType.WRAPPING_AND_BRACES_SETTINGS) {
+        } else if (settingsType == SettingsType.WRAPPING_AND_BRACES_SETTINGS) {
             consumer.showStandardOptions(
-                    CodeStyleSettingsCustomizable.WrappingOrBraceOption.WRAP_LONG_LINES.toString(),
-                    CodeStyleSettingsCustomizable.WrappingOrBraceOption.WRAP_ON_TYPING.toString()
+                    CodeStyleSettingsCustomizable.WrappingOrBraceOption.WRAP_LONG_LINES.name(),
+                    CodeStyleSettingsCustomizable.WrappingOrBraceOption.WRAP_ON_TYPING.name()
+            );
+        } else if (settingsType == SettingsType.INDENT_SETTINGS) {
+            consumer.showStandardOptions(
+                    CodeStyleSettingsCustomizable.IndentOption.SMART_TABS.name(),
+                    CodeStyleSettingsCustomizable.IndentOption.USE_TAB_CHARACTER.name(),
+                    CodeStyleSettingsCustomizable.IndentOption.TAB_SIZE.name(),
+                    CodeStyleSettingsCustomizable.IndentOption.KEEP_INDENTS_ON_EMPTY_LINES.name()
             );
         }
     }

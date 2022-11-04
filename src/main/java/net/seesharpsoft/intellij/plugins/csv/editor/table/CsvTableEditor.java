@@ -16,8 +16,6 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
 import com.intellij.util.ui.UIUtil;
 import net.seesharpsoft.intellij.plugins.csv.*;
-import net.seesharpsoft.intellij.plugins.csv.editor.table.api.CsvTableModel;
-import net.seesharpsoft.intellij.plugins.csv.editor.table.api.TableActions;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvFile;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import net.seesharpsoft.intellij.psi.PsiFileHolder;
@@ -59,7 +57,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation, 
     }
 
     @NotNull
-    public abstract TableActions getActions();
+    public abstract CsvTableActions getActions();
 
     protected abstract boolean isInCellEditMode();
 

@@ -1,8 +1,6 @@
-package net.seesharpsoft.intellij.plugins.csv.editor.table.api;
+package net.seesharpsoft.intellij.plugins.csv.editor.table;
 
-import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditor;
-
-public interface TableActions<T extends CsvTableEditor> {
+public interface CsvTableActions<T extends CsvTableEditor> {
 
     void addRow(T tableEditor, boolean before);
 

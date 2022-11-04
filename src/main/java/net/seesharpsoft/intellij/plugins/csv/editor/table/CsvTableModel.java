@@ -1,4 +1,4 @@
-package net.seesharpsoft.intellij.plugins.csv.editor.table.api;
+package net.seesharpsoft.intellij.plugins.csv.editor.table;
 
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiErrorElement;
@@ -18,6 +18,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public interface CsvTableModel extends PsiFileHolder, Suspendable {
@@ -96,11 +97,19 @@ public interface CsvTableModel extends PsiFileHolder, Suspendable {
 
     void setValue(String value, int rowIndex, int columnIndex);
 
-    void addRow(int focusedRowIndex, boolean before);
+    void addRow(int anchorRowIndex, boolean before);
+
+    default void removeRow(int rowIndex) {
+        removeRows(Collections.singletonList(rowIndex));
+    }
 
     void removeRows(Collection<Integer> indices);
 
-    void addColumn(int focusedColumnIndex, boolean before);
+    void addColumn(int anchorColumnIndex, boolean before);
+
+    default void removeColumn(int columnIndex) {
+        removeColumns(Collections.singletonList(columnIndex));
+    }
 
     void removeColumns(Collection<Integer> indices);
 

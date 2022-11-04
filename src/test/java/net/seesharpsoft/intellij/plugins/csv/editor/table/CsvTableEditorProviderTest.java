@@ -28,11 +28,11 @@ public class CsvTableEditorProviderTest extends BasePlatformTestCase {
     public void testCsvTableEditorProviderIsAvailableAndHasCorrectNameAndPolicy() {
         FileEditorProvider[] fileEditorProviders = FileEditorProviderManager.getInstance().getProviders(getProject(), myFixture.getFile().getVirtualFile());
         assertEquals(2, fileEditorProviders.length);
-        assertInstanceOf(fileEditorProviders[1], CsvTableEditorProvider.class);
+        assertInstanceOf(fileEditorProviders[0], CsvTableEditorProvider.class);
 
-        FileEditorProvider fileEditorProvider = fileEditorProviders[1];
+        FileEditorProvider fileEditorProvider = fileEditorProviders[0];
         assertEquals(CsvTableEditorProvider.EDITOR_TYPE_ID, fileEditorProvider.getEditorTypeId());
-        assertEquals(FileEditorPolicy.PLACE_AFTER_DEFAULT_EDITOR, fileEditorProvider.getPolicy());
+        assertEquals(FileEditorPolicy.HIDE_DEFAULT_EDITOR, fileEditorProvider.getPolicy());
         assertEquals(true, fileEditorProvider.accept(getProject(), myFixture.getFile().getVirtualFile()));
 
         CsvEditorSettings csvEditorSettings = CsvEditorSettings.getInstance();
@@ -40,14 +40,14 @@ public class CsvTableEditorProviderTest extends BasePlatformTestCase {
         assertEquals(FileEditorPolicy.PLACE_AFTER_DEFAULT_EDITOR, fileEditorProvider.getPolicy());
         assertEquals(false, fileEditorProvider.accept(getProject(), myFixture.getFile().getVirtualFile()));
 
-        csvEditorSettings.setEditorPrio(CsvEditorSettings.EditorPrio.TABLE_FIRST);
-        assertEquals(FileEditorPolicy.HIDE_DEFAULT_EDITOR, fileEditorProvider.getPolicy());
+        csvEditorSettings.setEditorPrio(CsvEditorSettings.EditorPrio.TEXT_FIRST);
+        assertEquals(FileEditorPolicy.PLACE_AFTER_DEFAULT_EDITOR, fileEditorProvider.getPolicy());
         assertEquals(true, fileEditorProvider.accept(getProject(), myFixture.getFile().getVirtualFile()));
     }
 
     public void testCsvTableEditorCreatesInstanceOfCsvTableEditor() {
         FileEditorProvider[] fileEditorProviders = FileEditorProviderManager.getInstance().getProviders(getProject(), myFixture.getFile().getVirtualFile());
-        FileEditorProvider fileEditorProvider = fileEditorProviders[1];
+        FileEditorProvider fileEditorProvider = fileEditorProviders[0];
 
         FileEditor fileEditor = fileEditorProvider.createEditor(getProject(), myFixture.getFile().getVirtualFile());
         assertInstanceOf(fileEditor, CsvTableEditor.class);
@@ -57,11 +57,11 @@ public class CsvTableEditorProviderTest extends BasePlatformTestCase {
 
     public void testWriteAndReadTableEditorState() {
         FileEditorProvider[] fileEditorProviders = FileEditorProviderManager.getInstance().getProviders(getProject(), myFixture.getFile().getVirtualFile());
-        FileEditorProvider fileEditorProvider = fileEditorProviders[1];
+        FileEditorProvider fileEditorProvider = fileEditorProviders[0];
 
         CsvTableEditorState editorState = new CsvTableEditorState();
         editorState.setColumnWidths(new int[]{ 120, 32, 9});
-        editorState.setRowHeight(5);
+        editorState.setRowHeight(142);
         editorState.setShowInfoPanel(false);
 
         Element element = new Element("state");

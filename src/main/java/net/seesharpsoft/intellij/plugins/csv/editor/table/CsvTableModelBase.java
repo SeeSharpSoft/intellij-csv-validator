@@ -3,12 +3,10 @@ package net.seesharpsoft.intellij.plugins.csv.editor.table;
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
-import net.seesharpsoft.intellij.plugins.csv.editor.table.api.CsvTableModel;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvField;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvPsiTreeUpdater;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvRecord;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
-import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import net.seesharpsoft.intellij.psi.PsiFileHolder;
 import net.seesharpsoft.intellij.psi.PsiHelper;
 import org.jetbrains.annotations.NotNull;
@@ -16,7 +14,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public abstract class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel {
+public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel {
     private final T myPsiFileHolder;
 
     private int myCachedRowCount = -1;
@@ -93,6 +91,8 @@ public abstract class CsvTableModelBase<T extends PsiFileHolder> implements CsvT
             resetPointer();
             diffToCurrent = row;
         }
+        // fail gracefully or not?!
+        if (myPointedRecord == null) return null;
         assert myPointedRecord != null;
 
         CsvRecord record = PsiHelper.getNthSiblingOfType(myPointedRecord, diffToCurrent, CsvRecord.class, myPointedRow > row);
@@ -135,12 +135,6 @@ public abstract class CsvTableModelBase<T extends PsiFileHolder> implements CsvT
         setValueAt(value, rowIndex, columnIndex, true);
     }
 
-    private void createMissingColumns(int rowIndex, int columnIndex) {
-        int currentColumnCount = getColumnCount(rowIndex);
-        PsiElement field = getFieldAt(rowIndex, currentColumnCount - 1);
-        getPsiTreeUpdater().appendEmptyFields(field, columnIndex - currentColumnCount + 1);
-    }
-
     private int getColumnCount(int rowIndex) {
         return getColumnCount(PsiHelper.getNthChildOfType(getPsiTreeUpdater().getPsiFile(), rowIndex, CsvRecord.class));
     }
@@ -165,21 +159,18 @@ public abstract class CsvTableModelBase<T extends PsiFileHolder> implements CsvT
                 updater.replaceField(field, value, columnIndex == 0);
             }
         }
-        updater.commit();
+        if (commitImmediately) updater.commit();
     }
 
     @Override
     public String getValue(int rowIndex, int columnIndex) {
         PsiElement field = getFieldAt(rowIndex, columnIndex);
-        String value = field == null ? "" : field.getText();
-        return CsvHelper.isCommentElement(field) ?
-                value.substring(CsvEditorSettings.getInstance().getCommentIndicator().length()) :
-                CsvHelper.unquoteCsvValue(value, getEscapeCharacter());
+        return CsvHelper.getFieldValue(field);
     }
 
     @Override
-    public void addRow(int focusedRowIndex, boolean before) {
-        CsvRecord row = PsiHelper.getNthChildOfType(getPsiFile(), focusedRowIndex, CsvRecord.class);
+    public void addRow(int anchorRowIndex, boolean before) {
+        CsvRecord row = PsiHelper.getNthChildOfType(getPsiFile(), anchorRowIndex, CsvRecord.class);
         getPsiTreeUpdater().addRow(row, before);
         getPsiTreeUpdater().commit();
     }
@@ -192,9 +183,9 @@ public abstract class CsvTableModelBase<T extends PsiFileHolder> implements CsvT
     }
 
     @Override
-    public void addColumn(int focusedColumnIndex, boolean before) {
+    public void addColumn(int anchorColumnIndex, boolean before) {
         CsvPsiTreeUpdater updater = getPsiTreeUpdater();
-        getPsiTreeUpdater().addColumn(focusedColumnIndex, before);
+        getPsiTreeUpdater().addColumn(anchorColumnIndex, before);
         updater.commit();
     }
 

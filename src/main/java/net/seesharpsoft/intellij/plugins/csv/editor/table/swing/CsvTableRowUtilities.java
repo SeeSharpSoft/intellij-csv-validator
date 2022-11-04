@@ -331,36 +331,11 @@ public final class CsvTableRowUtilities {
 
                 rowHeadersTable.getSelectionModel().addListSelectionListener(this);
             } else if (Objects.equals(e.getSource(), rowHeadersTable.getSelectionModel())) {
-                boolean isColumnSelectionAllowed = userTable.getColumnSelectionAllowed();
-                boolean isRowSelectionAllowed = userTable.getRowSelectionAllowed();
-                boolean isCellSelectionAllowed = userTable.getCellSelectionEnabled();
-
                 userTable.getSelectionModel().removeListSelectionListener(this);
-                userTable.getSelectionModel().clearSelection();
 
                 int[] rows = rowHeadersTable.getSelectedRows();
+                userTable.setRowSelectionInterval(rows[0], rows[rows.length - 1]);
 
-                if (isRowSelectionAllowed && !isCellSelectionAllowed && !isColumnSelectionAllowed) {
-                    for (int i = 0; i < rows.length; i++) {
-                        userTable.addRowSelectionInterval(rows[i], rows[i]);
-                        userTableViewPort.setViewPosition(rowHeadersViewPort.getViewPosition());
-
-                    }
-                } else {
-                    // looks cleaner
-                    userTableViewPort.setScrollMode(JViewport.BACKINGSTORE_SCROLL_MODE);
-
-                    for (int i = 0; i < rows.length; i++) {
-                        if (i == 0) {
-                            // need to create row first with change selection
-                            userTable.changeSelection(rows[i], 0, false, false);
-                            userTable.changeSelection(rows[i], userTable.getColumnCount(), false, true);
-
-                        } else {
-                            userTable.addRowSelectionInterval(rows[i], rows[i]);
-                        }
-                    }
-                }
                 // re-adding the listener to the user table
                 userTable.getSelectionModel().addListSelectionListener(this);
             }

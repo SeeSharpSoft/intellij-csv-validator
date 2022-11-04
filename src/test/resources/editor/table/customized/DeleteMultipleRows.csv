@@ -1,0 +1,6 @@
+Value 1$~ "Value 2"  $~  Value 3 $~ " Value 4"$~"Value$~ \"5\""$~
+$~
+""
+
+/// I am a comment $~;|" nothing happens $~$~$~$~$~$~$~$~$~$~$~
+42$~$~"  "$~all good$~#not a comment$~ me neither
