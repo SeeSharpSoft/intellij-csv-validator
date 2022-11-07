@@ -73,7 +73,6 @@ public class CsvEditorSettingsProviderTest extends BasePlatformTestCase {
         csvEditorSettings.setFileEndLineBreak(false);
         csvEditorSettings.setTableDefaultColumnWidth(500);
         csvEditorSettings.setTableAutoMaxColumnWidth(1000);
-        csvEditorSettings.setTableAutoColumnWidthOnOpen(false);
         csvEditorSettings.setDefaultEscapeCharacter(CsvEscapeCharacter.BACKSLASH);
         csvEditorSettings.setDefaultValueSeparator(CsvValueSeparator.PIPE);
         csvEditorSettings.setKeepTrailingSpaces(true);
@@ -96,7 +95,6 @@ public class CsvEditorSettingsProviderTest extends BasePlatformTestCase {
         assertEquals(false, csvEditorSettings.isFileEndLineBreak());
         assertEquals(500, csvEditorSettings.getTableDefaultColumnWidth());
         assertEquals(1000, csvEditorSettings.getTableAutoMaxColumnWidth());
-        assertEquals(false, csvEditorSettings.isTableAutoColumnWidthOnOpen());
         assertEquals(CsvEscapeCharacter.BACKSLASH, csvEditorSettings.getDefaultEscapeCharacter());
         assertEquals(CsvValueSeparator.PIPE, csvEditorSettings.getDefaultValueSeparator());
         assertEquals(true, csvEditorSettings.getKeepTrailingSpaces());
@@ -123,7 +121,6 @@ public class CsvEditorSettingsProviderTest extends BasePlatformTestCase {
         csvEditorSettings.setFileEndLineBreak(false);
         csvEditorSettings.setTableDefaultColumnWidth(500);
         csvEditorSettings.setTableAutoMaxColumnWidth(1000);
-        csvEditorSettings.setTableAutoColumnWidthOnOpen(false);
         csvEditorSettings.setDefaultEscapeCharacter(CsvEscapeCharacter.BACKSLASH);
         csvEditorSettings.setDefaultValueSeparator(CsvValueSeparator.PIPE);
         csvEditorSettings.setKeepTrailingSpaces(true);
@@ -145,7 +142,6 @@ public class CsvEditorSettingsProviderTest extends BasePlatformTestCase {
         assertEquals(freshOptionSet.FILE_END_LINE_BREAK, csvEditorSettings.isFileEndLineBreak());
         assertEquals(freshOptionSet.TABLE_DEFAULT_COLUMN_WIDTH, csvEditorSettings.getTableDefaultColumnWidth());
         assertEquals(freshOptionSet.TABLE_AUTO_MAX_COLUMN_WIDTH, csvEditorSettings.getTableAutoMaxColumnWidth());
-        assertEquals(freshOptionSet.TABLE_AUTO_COLUMN_WIDTH_ON_OPEN, csvEditorSettings.isTableAutoColumnWidthOnOpen());
         assertEquals(freshOptionSet.DEFAULT_ESCAPE_CHARACTER, csvEditorSettings.getDefaultEscapeCharacter());
         assertEquals(freshOptionSet.DEFAULT_VALUE_SEPARATOR, csvEditorSettings.getDefaultValueSeparator());
         assertEquals(freshOptionSet.KEEP_TRAILING_SPACES, csvEditorSettings.getKeepTrailingSpaces());

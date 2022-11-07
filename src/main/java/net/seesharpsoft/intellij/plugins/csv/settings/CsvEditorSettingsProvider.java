@@ -40,13 +40,11 @@ public class CsvEditorSettingsProvider implements EditorOptionsProvider {
     private JCheckBox cbFileEndLineBreak;
     private JFormattedTextField tfMaxColumnWidth;
     private JFormattedTextField tfDefaultColumnWidth;
-    private JCheckBox cbAdjustColumnWidthOnOpen;
     private JComboBox comboEscapeCharacter;
     private JComboBox comboValueSeparator;
     private JCheckBox cbKeepTrailingWhitespaces;
     private JTextField tfCommentIndicator;
     private JComboBox comboValueColoring;
-    private JCheckBox cbHeaderRowFixed;
     private JCheckBox cbAutoDetectSeparator;
     private JFormattedTextField tfDefaultRowHeight;
 
@@ -94,7 +92,6 @@ public class CsvEditorSettingsProvider implements EditorOptionsProvider {
                 isModified(cbFileEndLineBreak, csvEditorSettings.isFileEndLineBreak()) ||
                 !tfMaxColumnWidth.getValue().equals(csvEditorSettings.getTableAutoMaxColumnWidth()) ||
                 !tfDefaultColumnWidth.getValue().equals(csvEditorSettings.getTableDefaultColumnWidth()) ||
-                isModified(cbAdjustColumnWidthOnOpen, csvEditorSettings.isTableAutoColumnWidthOnOpen()) ||
                 !Objects.equals(comboEscapeCharacter.getSelectedItem(), csvEditorSettings.getDefaultEscapeCharacter()) ||
                 !Objects.equals(comboValueSeparator.getSelectedItem(), csvEditorSettings.getDefaultValueSeparator()) ||
                 isModified(cbKeepTrailingWhitespaces, csvEditorSettings.getKeepTrailingSpaces()) ||
@@ -119,7 +116,6 @@ public class CsvEditorSettingsProvider implements EditorOptionsProvider {
         cbFileEndLineBreak.setSelected(csvEditorSettings.isFileEndLineBreak());
         tfMaxColumnWidth.setValue(csvEditorSettings.getTableAutoMaxColumnWidth());
         tfDefaultColumnWidth.setValue(csvEditorSettings.getTableDefaultColumnWidth());
-        cbAdjustColumnWidthOnOpen.setSelected(csvEditorSettings.isTableAutoColumnWidthOnOpen());
         comboEscapeCharacter.setSelectedItem(csvEditorSettings.getDefaultEscapeCharacter());
         comboValueSeparator.setSelectedItem(csvEditorSettings.getDefaultValueSeparator());
         cbKeepTrailingWhitespaces.setSelected(csvEditorSettings.getKeepTrailingSpaces());
@@ -144,7 +140,6 @@ public class CsvEditorSettingsProvider implements EditorOptionsProvider {
         csvEditorSettings.setFileEndLineBreak(cbFileEndLineBreak.isSelected());
         csvEditorSettings.setTableAutoMaxColumnWidth((int) tfMaxColumnWidth.getValue());
         csvEditorSettings.setTableDefaultColumnWidth((int) tfDefaultColumnWidth.getValue());
-        csvEditorSettings.setTableAutoColumnWidthOnOpen(cbAdjustColumnWidthOnOpen.isSelected());
         csvEditorSettings.setDefaultEscapeCharacter((CsvEscapeCharacter) comboEscapeCharacter.getSelectedItem());
         csvEditorSettings.setDefaultValueSeparator(
                 comboValueSeparator.getSelectedItem() instanceof CsvValueSeparator ?

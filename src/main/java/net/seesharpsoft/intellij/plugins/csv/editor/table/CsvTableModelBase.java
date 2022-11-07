@@ -2,6 +2,7 @@ package net.seesharpsoft.intellij.plugins.csv.editor.table;
 
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
+import net.seesharpsoft.intellij.plugins.csv.CsvEscapeCharacter;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvField;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvPsiTreeUpdater;
@@ -19,6 +20,7 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
 
     private int myCachedRowCount = -1;
     private int myCachedColumnCount = -1;
+    private CsvEscapeCharacter myCachedEscapeCharacter;
     private Boolean myCachedHasErrors = null;
 
     private int myPointedRow = -1;
@@ -72,6 +74,7 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
         myCachedRowCount = -1;
         myCachedColumnCount = -1;
         myCachedHasErrors = null;
+        myCachedEscapeCharacter = null;
     }
 
     private PsiElement resetPointer() {
@@ -82,6 +85,13 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
 
     protected CsvPsiTreeUpdater getPsiTreeUpdater() {
         return myPsiTreeUpdater;
+    }
+
+    protected CsvEscapeCharacter getEscapeCharacter() {
+        if (myCachedEscapeCharacter == null) {
+            myCachedEscapeCharacter = CsvHelper.getEscapeCharacter(getPsiFile());
+        }
+        return myCachedEscapeCharacter;
     }
 
     @Override
@@ -165,7 +175,7 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
     @Override
     public String getValue(int rowIndex, int columnIndex) {
         PsiElement field = getFieldAt(rowIndex, columnIndex);
-        return CsvHelper.getFieldValue(field);
+        return CsvHelper.getFieldValue(field, getEscapeCharacter());
     }
 
     @Override

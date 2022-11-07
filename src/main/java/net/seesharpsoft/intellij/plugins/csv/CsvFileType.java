@@ -22,7 +22,7 @@ public final class CsvFileType extends LanguageFileType {
     @NotNull
     @Override
     public String getDescription() {
-        return "CSV file";
+        return "CSV (Comma Separated Values)";
     }
 
     @NotNull
@@ -33,7 +33,7 @@ public final class CsvFileType extends LanguageFileType {
 
     @Override
     public @NotNull String getDisplayName() {
-        return getName() + " (CSV Table Plugin)";
+        return getName() + " (CSV Table Editor)";
     }
 
     @Nullable

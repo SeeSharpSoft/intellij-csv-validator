@@ -28,7 +28,7 @@ public final class TsvFileType extends LanguageFileType implements CsvSeparatorH
     @NotNull
     @Override
     public String getDescription() {
-        return "TSV/TAB (tab separated values)";
+        return "TSV/TAB (Tab separated Values)";
     }
 
     @NotNull
@@ -39,7 +39,7 @@ public final class TsvFileType extends LanguageFileType implements CsvSeparatorH
 
     @Override
     public @NotNull String getDisplayName() {
-        return getName() + " (CSV Table Plugin)";
+        return getName() + " (CSV Table Editor)";
     }
 
     @Nullable

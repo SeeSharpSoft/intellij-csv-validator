@@ -27,9 +27,6 @@ public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
         assertEquals(true, fileEditor.isValid());
         assertEquals(null, fileEditor.getBackgroundHighlighter());
 
-        StructureViewBuilder structureViewBuilder = StructureViewBuilder.PROVIDER.getStructureViewBuilder(myFixture.getFile().getFileType(), myFixture.getFile().getVirtualFile(), this.getProject());
-        assertInstanceOf(fileEditor.getStructureViewBuilder(), structureViewBuilder.getClass());
-
         assertEquals(myFixture.getFile().getVirtualFile(), fileEditor.getFile());
         assertEquals(this.getProject(), fileEditor.getProject());
         assertNotNull(fileEditor.getComponent());
@@ -72,10 +69,10 @@ public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
         assertEquals(4, tableModel.getRowCount());
 
         assertEquals("Header1", tableModel.getValue(0, 0));
-        assertEquals("header 2", tableModel.getValue(0, 1));
+        assertEquals(" header 2", tableModel.getValue(0, 1));
         assertEquals("this is column \"Header1\"", tableModel.getValue(1, 0));
         assertEquals("this is column header 2", tableModel.getValue(1, 1));
-        assertEquals("just another line with leading and trailing whitespaces", tableModel.getValue(2, 0));
+        assertEquals(" just another line with leading and trailing whitespaces  ", tableModel.getValue(2, 0));
         assertEquals("  and one more value  ", tableModel.getValue(2, 1));
         assertEquals("", tableModel.getValue(3, 0));
         assertEquals("", tableModel.getValue(3, 1));

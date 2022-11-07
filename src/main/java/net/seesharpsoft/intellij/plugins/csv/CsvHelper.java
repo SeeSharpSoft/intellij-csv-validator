@@ -261,14 +261,17 @@ public final class CsvHelper {
         return new CsvColumnInfoMap(columnInfoMap, PsiTreeUtil.hasErrorElements(csvFile), hasComments);
     }
 
-    public static String getFieldValue(PsiElement field) {
+    public static String getFieldValue(PsiElement field, CsvEscapeCharacter escapeCharacter) {
         if (field == null) return "";
         if (isCommentElement(field)) {
             return field.getText().substring(CsvEditorSettings.getInstance().getCommentIndicator().length());
         }
         return PsiHelper.findChildrenOfAnyElement(field, CsvTypes.TEXT, CsvTypes.ESCAPED_TEXT)
                 .stream()
-                .map(element -> element.getText())
+                .map(element -> {
+                    String text = element.getText();
+                    return PsiHelper.getElementType(element) == CsvTypes.ESCAPED_TEXT && escapeCharacter.isEscapedQuote(text) ? "\"" : text;
+                })
                 .reduce(String::concat)
                 .orElse("");
     }
@@ -278,13 +281,9 @@ public final class CsvHelper {
             return "";
         }
         String result = content;
-//        String trimmedContent = content.trim();
-        if (content.length() > 1 && content.startsWith("\"") && content.endsWith("\"")) {
-            result = content.substring(1, content.length() - 1);
-//            if (escapeCharacter != CsvEscapeCharacter.QUOTE) {
-//                result = result.replaceAll("(?:" + escapeCharacter.getRegexPattern() + ")" +
-//                        escapeCharacter.getRegexPattern(), escapeCharacter.getRegexPattern());
-//            }
+        String trimmedContent = content.trim();
+        if (trimmedContent.length() > 1 && trimmedContent.startsWith("\"") && trimmedContent.endsWith("\"")) {
+            result = trimmedContent.substring(1, trimmedContent.length() - 1);
             result = result.replaceAll("(?:" + escapeCharacter.getRegexPattern() + ")\"", "\"");
         }
         return result;

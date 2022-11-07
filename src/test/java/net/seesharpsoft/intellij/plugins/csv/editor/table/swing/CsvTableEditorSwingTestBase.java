@@ -1,8 +1,12 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
+import com.intellij.util.WaitFor;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableModel;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
+
+import java.util.function.Supplier;
+
 
 public abstract class CsvTableEditorSwingTestBase extends BasePlatformTestCase {
 
@@ -45,6 +49,5 @@ public abstract class CsvTableEditorSwingTestBase extends BasePlatformTestCase {
     protected void initializeEditorSettings(CsvEditorSettings instance) {
         instance.loadState(new CsvEditorSettings.OptionSet());
         instance.setFileEndLineBreak(false);
-        instance.setTableAutoColumnWidthOnOpen(false);
     }
 }

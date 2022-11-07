@@ -39,7 +39,7 @@ public final class PsvFileType extends LanguageFileType implements CsvSeparatorH
 
     @Override
     public @NotNull String getDisplayName() {
-        return getName() + " (CSV Table Plugin)";
+        return getName() + " (CSV Table Editor)";
     }
 
     @Nullable

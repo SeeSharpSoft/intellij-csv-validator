@@ -121,6 +121,7 @@ public class CsvTableModelBaseTest extends BasePlatformTestCase implements PsiFi
             assertEquals("Header 1", csvTableModel.getValue(0, 0));
             assertEquals("", csvTableModel.getValue(100, 100));
             assertEquals("Header 2", csvTableModel.getValue(0, 1));
+            assertEquals("Header, \"5\"", csvTableModel.getValue(0, 4));
             assertEquals("  Value 3 ", csvTableModel.getValue(1, 2));
             assertEquals(" Value 4", csvTableModel.getValue(1, 3));
             assertEquals("", csvTableModel.getValue(2, 1));
@@ -142,6 +143,16 @@ public class CsvTableModelBaseTest extends BasePlatformTestCase implements PsiFi
             csvTableModel.setValue(null, 7, 4);
             csvTableModel.setValue("", 8, 3);
             csvTableModel.setValue(";:|\\\tvalue 2", 8, 5);
+
+            assertEquals("New Header", csvTableModel.getValue(0, 0));
+            assertEquals("Other value with comma, and \"quotes\"", csvTableModel.getValue(0, 1));
+            assertEquals("  Value 3 ", csvTableModel.getValue(1, 2));
+            assertEquals(" Value 4 ", csvTableModel.getValue(1, 3));
+            assertEquals("BO\nOM", csvTableModel.getValue(2, 1));
+            assertEquals("Just another comment,,", csvTableModel.getValue(5, 3));
+            assertEquals("", csvTableModel.getValue(7, 4));
+            assertEquals("", csvTableModel.getValue(8, 3));
+            assertEquals(";:|\\\tvalue 2", csvTableModel.getValue(8, 5));
         });
     }
 

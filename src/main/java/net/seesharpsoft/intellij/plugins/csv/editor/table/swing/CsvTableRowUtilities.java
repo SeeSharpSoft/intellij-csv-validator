@@ -36,7 +36,6 @@ import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.Objects;
 
-
 /**
  * TableRowUtilities. Utility for adding a row column to a JTable.
  * <p>
@@ -324,7 +323,6 @@ public final class CsvTableRowUtilities {
                 rowHeadersTable.getSelectionModel().clearSelection();
 
                 int[] rows = userTable.getSelectedRows();
-
                 for (int i = 0; i < rows.length; i++) {
                     rowHeadersTable.getSelectionModel().addSelectionInterval(rows[i], rows[i]);
                 }
@@ -334,7 +332,9 @@ public final class CsvTableRowUtilities {
                 userTable.getSelectionModel().removeListSelectionListener(this);
 
                 int[] rows = rowHeadersTable.getSelectedRows();
-                userTable.setRowSelectionInterval(rows[0], rows[rows.length - 1]);
+                for (int i = 0; i < rows.length; i++) {
+                    userTable.getSelectionModel().addSelectionInterval(rows[i], rows[i]);
+                }
 
                 // re-adding the listener to the user table
                 userTable.getSelectionModel().addListSelectionListener(this);

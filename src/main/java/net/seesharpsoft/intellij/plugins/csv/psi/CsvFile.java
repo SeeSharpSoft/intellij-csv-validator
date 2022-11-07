@@ -18,20 +18,10 @@ import javax.swing.*;
 public class CsvFile extends PsiFileBase {
 
     private final FileType myFileType;
-    private CsvColumnInfoMap<PsiElement> myColumnInfoMap;
-    private long myColumnInfoMapModifiedStamp;
 
     public CsvFile(@NotNull FileViewProvider viewProvider, FileType fileType) {
         super(viewProvider, CsvLanguage.INSTANCE);
         myFileType = fileType;
-    }
-
-    public CsvColumnInfoMap<PsiElement> getColumnInfoMap() {
-        if (myColumnInfoMap == null || this.getModificationStamp() != myColumnInfoMapModifiedStamp) {
-            myColumnInfoMapModifiedStamp = getModificationStamp();
-            myColumnInfoMap = CsvHelper.createColumnInfoMap(this);
-        }
-        return myColumnInfoMap;
     }
 
     @NotNull

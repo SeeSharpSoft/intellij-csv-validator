@@ -95,8 +95,6 @@
         <langCodeStyleSettingsProvider
                 implementation="net.seesharpsoft.intellij.plugins.csv.settings.CsvLanguageCodeStyleSettingsProvider"/>
 
-        <lang.psiStructureViewFactory language="csv"
-                                      implementationClass="net.seesharpsoft.intellij.plugins.csv.structureview.CsvStructureViewFactory"/>
         <iconProvider implementation="net.seesharpsoft.intellij.plugins.csv.CsvIconProvider"/>
 
         <localInspection
@@ -212,7 +210,7 @@
 
         <action class="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AdjustColumnWidths"
                 id="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AdjustColumnWidths"
-                text="Auto fit columns width (Ctrl+Shift+Space)"
+                text="Auto-fit columns width (Ctrl+Shift+Space)"
                 icon="/media/icons/adjust-column-width.png"
         >
             <add-to-group group-id="CsvTableEditorColumnContextMenu" />

@@ -56,14 +56,6 @@ public interface CsvTableModel extends PsiFileHolder, Suspendable {
 
     void notifyUpdate();
 
-    default CsvEscapeCharacter getEscapeCharacter() {
-        return CsvHelper.getEscapeCharacter(getPsiFile());
-    }
-
-    default CsvValueSeparator getValueSeparator() {
-        return CsvHelper.getValueSeparator(getPsiFile());
-    }
-
     default boolean isCommentRow(int rowIndex) {
         PsiElement field = getFieldAt(rowIndex, 0);
         return CsvHelper.isCommentElement(field);

@@ -2,7 +2,6 @@ package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.TextEditor;
-import com.intellij.psi.PsiDocumentManager;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableModel;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 
@@ -23,9 +22,6 @@ public class CsvTableEditorActionsTest extends CsvTableEditorSwingTestBase {
         fileEditor.getTable().setRowSelectionInterval(1, 1);
         fileEditor.getTable().setColumnSelectionInterval(1, 1);
         fileEditor.tableEditorActions.addRowBefore.actionPerformed(null);
-
-        PsiDocumentManager.getInstance(fileEditor.getProject()).doPostponedOperationsAndUnblockDocument(fileEditor.getDocument());
-
         CsvTableModel tableModel = getTableModel();
         assertEquals(myInitialRowCount + 1, tableModel.getRowCount());
         assertEquals("", tableModel.getValue(1, 0));
@@ -76,7 +72,7 @@ public class CsvTableEditorActionsTest extends CsvTableEditorSwingTestBase {
         fileEditor.tableEditorActions.deleteRow.actionPerformed(null);
         CsvTableModel tableModel = getTableModel();
         assertEquals(myInitialRowCount - 1, tableModel.getRowCount());
-        assertEquals("just another line with leading and trailing whitespaces", tableModel.getValue(1, 0));
+        assertEquals(" just another line with leading and trailing whitespaces  ", tableModel.getValue(1, 0));
         assertEquals("  and one more value  ", tableModel.getValue(1, 1));
         assertEquals(1, fileEditor.getTable().getSelectedRow());
         assertEquals(1, fileEditor.getTable().getSelectedColumn());

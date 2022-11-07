@@ -1,5 +1,6 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.psi.PsiElement;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditor;
@@ -32,6 +33,11 @@ public class CsvTableModelSwing extends CsvTableModelBase<CsvTableEditor> implem
 
     @Override
     public void notifyUpdate() {
+        if (ApplicationManager.getApplication().isUnitTestMode()) {
+            doNotifyUpdate();
+            return;
+        }
+
         if (delayedUpdate != null && !delayedUpdate.isDone()) {
             delayedUpdate.cancel(true);
         }
