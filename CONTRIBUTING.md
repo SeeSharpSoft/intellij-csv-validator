@@ -6,7 +6,7 @@ After that, create a pull request (PR).
 
 ### Some guidance for a successful pull request
 
-- Open PR for master branch only
+- Open PR for main branch only
 - Reference an issue in your PR, hence do not open a PR without a corresponding issue
 - Follow the single-purpose principle: Only one fix or feature in one PR
 - Write tests for newly introduced features or fixes
