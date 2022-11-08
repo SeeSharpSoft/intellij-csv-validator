@@ -15,13 +15,11 @@ public class CsvTableEditorChangeListener extends CsvTableEditorUtilBase impleme
     @Override
     public void columnAdded(TableColumnModelEvent e) {
         // on column added
-//        csvTableEditor.updateEditorLayout();
     }
 
     @Override
     public void columnRemoved(TableColumnModelEvent e) {
         // on column removed
-//        csvTableEditor.updateEditorLayout();
     }
 
     @Override
@@ -35,7 +33,6 @@ public class CsvTableEditorChangeListener extends CsvTableEditorUtilBase impleme
                     if (table.getTableHeader().getDraggedColumn() != null) {
                         SwingUtilities.invokeLater(this);
                     } else {
-//                        csvTableEditor.syncTableModelWithUI();
                         columnPositionWillBeCalculated = false;
                     }
                 }
@@ -55,5 +52,6 @@ public class CsvTableEditorChangeListener extends CsvTableEditorUtilBase impleme
 
     @Override
     public void tableChanged(TableModelEvent e) {
+        // on table data changed
     }
 }

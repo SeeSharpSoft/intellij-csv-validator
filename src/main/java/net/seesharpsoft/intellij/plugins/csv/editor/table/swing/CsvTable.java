@@ -12,7 +12,8 @@ import java.awt.*;
 
 public class CsvTable extends JBTable {
 
-    public static class CommentColumn {}
+    public static class CommentColumn {
+    }
 
     public CsvTable(TableModel model) {
         super(model);
@@ -24,8 +25,6 @@ public class CsvTable extends JBTable {
         new EditableCellFocusAction(this, KeyStroke.getKeyStroke("LEFT"));
         new EditableCellFocusAction(this, KeyStroke.getKeyStroke("UP"));
         new EditableCellFocusAction(this, KeyStroke.getKeyStroke("DOWN"));
-//        new EditableCellFocusAction(this, KeyStroke.getKeyStroke("ctrl shift ENTER"));
-//        new EditableCellFocusAction(this, KeyStroke.getKeyStroke("shift ENTER"));
     }
 
     @Override
@@ -84,7 +83,7 @@ public class CsvTable extends JBTable {
 
     @Override
     public boolean isCellEditable(int row, int column) {
-        return isCommentRow(row) && convertColumnIndexToModel(column) != 0 ? false : super.isCellEditable(row, column);
+        return (!isCommentRow(row) || convertColumnIndexToModel(column) == 0) && super.isCellEditable(row, column);
     }
 
     @Override
@@ -120,11 +119,10 @@ public class CsvTable extends JBTable {
                     return;
                 }
 
-                Point upperLeft, lowerRight;
                 // compute the visible part of table which needs to be painted
                 Rectangle visibleBounds = clip.intersection(bounds);
-                upperLeft = visibleBounds.getLocation();
-                lowerRight = new Point(visibleBounds.x + visibleBounds.width - 1,
+                Point upperLeft = visibleBounds.getLocation();
+                Point lowerRight = new Point(visibleBounds.x + visibleBounds.width - 1,
                         visibleBounds.y + visibleBounds.height - 1);
 
                 int rMin = table.rowAtPoint(upperLeft);
@@ -153,21 +151,21 @@ public class CsvTable extends JBTable {
         }
 
         private void paintCommentRow(Graphics g, int row) {
-            Rectangle cellRect = table.getCellRect(row, 0,true);
+            Rectangle cellRect = table.getCellRect(row, 0, true);
             cellRect.width = table.getWidth();
             paintCell(g, cellRect, row, 0);
         }
 
         private void paintCell(Graphics g, Rectangle cellRect, int row, int column) {
             int spacingHeight = table.getRowMargin();
-            int spacingWidth  = table.getColumnModel().getColumnMargin();
+            int spacingWidth = table.getColumnModel().getColumnMargin();
 
             Color c = g.getColor();
             g.setColor(table.getGridColor());
-            g.drawRect(cellRect.x,cellRect.y,cellRect.width-1,cellRect.height-1);
+            g.drawRect(cellRect.x, cellRect.y, cellRect.width - 1, cellRect.height - 1);
             g.setColor(c);
 
-            cellRect.setBounds(cellRect.x + spacingWidth/2, cellRect.y + spacingHeight/2,
+            cellRect.setBounds(cellRect.x + spacingWidth / 2, cellRect.y + spacingHeight / 2,
                     cellRect.width - spacingWidth, cellRect.height - spacingHeight);
 
             if (table.isEditing() && table.getEditingRow() == row &&
@@ -175,8 +173,7 @@ public class CsvTable extends JBTable {
                 Component component = table.getEditorComponent();
                 component.setBounds(cellRect);
                 component.validate();
-            }
-            else {
+            } else {
                 TableCellRenderer renderer = table.getCellRenderer(row, column);
                 Component component = table.prepareRenderer(renderer, row, column);
                 if (component.getParent() == null) {

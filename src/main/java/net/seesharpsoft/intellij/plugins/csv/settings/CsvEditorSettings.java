@@ -7,7 +7,9 @@ import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.openapi.editor.ex.EditorSettingsExternalizable;
 import com.intellij.util.xmlb.annotations.OptionTag;
-import net.seesharpsoft.intellij.plugins.csv.*;
+import net.seesharpsoft.intellij.plugins.csv.CsvEscapeCharacter;
+import net.seesharpsoft.intellij.plugins.csv.CsvStorageHelper;
+import net.seesharpsoft.intellij.plugins.csv.CsvValueSeparator;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;

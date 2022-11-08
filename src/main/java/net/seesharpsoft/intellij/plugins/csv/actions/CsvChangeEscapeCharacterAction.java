@@ -13,7 +13,7 @@ import net.seesharpsoft.intellij.plugins.csv.components.CsvFileAttributes;
 import org.jetbrains.annotations.NotNull;
 
 public class CsvChangeEscapeCharacterAction extends ToggleAction {
-    private CsvEscapeCharacter myEscapeCharacter;
+    private final CsvEscapeCharacter myEscapeCharacter;
 
     CsvChangeEscapeCharacterAction(CsvEscapeCharacter escapeCharacter) {
         super(escapeCharacter.getDisplay());

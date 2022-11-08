@@ -1,8 +1,6 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
@@ -30,10 +28,6 @@ public class CsvTableEditorKeyListener extends CsvTableEditorUtilBase implements
         selectOffsetColumn(1, startEdit);
     }
 
-    private void selectPrevColumn(boolean startEdit) {
-        selectOffsetColumn(-1, startEdit);
-    }
-
     private void selectOffsetColumn(int offset, boolean startEdit) {
         JTable tblEditor = csvTableEditor.getTable();
         int row = tblEditor.getSelectedRow();
@@ -53,10 +47,6 @@ public class CsvTableEditorKeyListener extends CsvTableEditorUtilBase implements
         selectOffsetRow(1, startEdit);
     }
 
-    private void selectPrevRow(boolean startEdit) {
-        selectOffsetRow(-1, startEdit);
-    }
-
     private void selectOffsetRow(int offset, boolean startEdit) {
         JTable tblEditor = csvTableEditor.getTable();
         int row = tblEditor.getSelectedRow() + offset;
@@ -68,10 +58,12 @@ public class CsvTableEditorKeyListener extends CsvTableEditorUtilBase implements
 
     @Override
     public void keyTyped(KeyEvent e) {
+        // on typing
     }
 
     @Override
     public void keyPressed(KeyEvent e) {
+        // on key pressing
     }
 
     @Override

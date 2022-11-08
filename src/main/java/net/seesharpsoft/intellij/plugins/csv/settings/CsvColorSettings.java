@@ -77,7 +77,7 @@ public class CsvColorSettings implements ColorSettingsPage {
             EditorColorsScheme editorColorsScheme = EditorColorsManager.getInstance().getGlobalScheme();
             textAttributeList = new ArrayList<>();
             int maxIndex = 0;
-            switch(CsvEditorSettings.getInstance().getValueColoring()) {
+            switch (CsvEditorSettings.getInstance().getValueColoring()) {
                 case RAINBOW:
                     maxIndex = applyColumnTextAttributes(editorColorsScheme, textAttributeList);
                     break;

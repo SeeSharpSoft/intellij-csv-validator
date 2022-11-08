@@ -1,6 +1,5 @@
 package net.seesharpsoft.intellij.plugins.csv.actions;
 
-import com.intellij.lang.Language;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
@@ -16,7 +15,7 @@ import net.seesharpsoft.intellij.plugins.csv.components.CsvFileAttributes;
 import org.jetbrains.annotations.NotNull;
 
 public class CsvChangeSeparatorAction extends ToggleAction {
-    private CsvValueSeparator mySeparator;
+    private final CsvValueSeparator mySeparator;
 
     CsvChangeSeparatorAction(CsvValueSeparator separator) {
         super(separator.getDisplay());

@@ -1,9 +1,6 @@
 package net.seesharpsoft.intellij.plugins.csv.editor;
 
-import com.intellij.codeInsight.CodeInsightSettings;
-import com.intellij.codeInsight.CodeInsightUtilBase;
 import com.intellij.diff.editor.DiffVirtualFile;
-import com.intellij.largeFilesEditor.editor.PropertiesGetter;
 import com.intellij.openapi.editor.EditorSettings;
 import com.intellij.openapi.fileEditor.*;
 import com.intellij.openapi.fileEditor.impl.text.TextEditorProvider;

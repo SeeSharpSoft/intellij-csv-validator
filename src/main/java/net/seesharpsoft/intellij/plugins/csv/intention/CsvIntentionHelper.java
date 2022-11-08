@@ -8,8 +8,6 @@ import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.util.PsiTreeUtil;
-import com.intellij.util.IncorrectOperationException;
-import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvField;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
 import net.seesharpsoft.intellij.psi.PsiHelper;
@@ -20,7 +18,7 @@ import java.util.stream.Collectors;
 
 public final class CsvIntentionHelper {
 
-    private static final Logger LOG = Logger.getInstance("#net.seesharpsoft.intellij.plugins.csv.inspection.CsvIntentionHelper");
+//    private static final Logger LOG = Logger.getInstance("#net.seesharpsoft.intellij.plugins.csv.inspection.CsvIntentionHelper");
 
     public static List<PsiElement> getChildren(final PsiElement element) {
         PsiElement currentElement = element;
@@ -37,7 +35,7 @@ public final class CsvIntentionHelper {
 
     public static Collection<PsiElement> getAllElements(PsiFile file) {
         List<PsiElement> todo = getChildren(file);
-        Collection<PsiElement> elements = new HashSet();
+        Collection<PsiElement> elements = new HashSet<>();
         while (todo.size() > 0) {
             PsiElement current = todo.get(todo.size() - 1);
             todo.remove(todo.size() - 1);
@@ -45,14 +43,6 @@ public final class CsvIntentionHelper {
             todo.addAll(getChildren(current));
         }
         return elements;
-    }
-
-    private static Collection<PsiElement> getAllFields(PsiFile file) {
-        return getChildren(file).parallelStream()
-                .filter(element -> PsiHelper.getElementType(element) == CsvTypes.RECORD)
-                .flatMap(record -> getChildren(record).stream())
-                .filter(element -> PsiHelper.getElementType(element) == CsvTypes.FIELD)
-                .collect(Collectors.toList());
     }
 
     public static void quoteAll(@NotNull Project project, @NotNull PsiFile psiFile) {
@@ -89,7 +79,7 @@ public final class CsvIntentionHelper {
         final List<PsiElement> quotePositions = new ArrayList<>();
 
         PsiTreeUtil.processElements(psiFile, CsvField.class, field -> {
-            if (!getChildren(field).stream().anyMatch(element -> PsiHelper.getElementType(element) == CsvTypes.ESCAPED_TEXT)) {
+            if (getChildren(field).stream().noneMatch(element -> PsiHelper.getElementType(element) == CsvTypes.ESCAPED_TEXT)) {
                 Pair<PsiElement, PsiElement> positions = getQuotePositions(field);
                 if (positions != null) {
                     quotePositions.add(positions.getFirst());
@@ -103,7 +93,7 @@ public final class CsvIntentionHelper {
     }
 
     public static void unquoteValue(@NotNull Project project, @NotNull final PsiElement field) {
-        unquoteValue(PsiDocumentManager.getInstance(project).getDocument(field.getContainingFile()), field);
+        unquoteValue(Objects.requireNonNull(PsiDocumentManager.getInstance(project).getDocument(field.getContainingFile())), field);
     }
 
     public static void unquoteValue(@NotNull Document document, @NotNull final PsiElement field) {
@@ -167,10 +157,6 @@ public final class CsvIntentionHelper {
             throw new IllegalArgumentException("Field element expected");
         }
         return getOpeningQuotePosition(lastFieldElement.getFirstChild(), lastFieldElement.getLastChild());
-    }
-
-    public static PsiElement findQuotePositionsUntilSeparator(final PsiElement element, List<Integer> quotePositions) {
-        return findQuotePositionsUntilSeparator(element, quotePositions, false);
     }
 
     public static PsiElement findQuotePositionsUntilSeparator(final PsiElement element, List<Integer> quotePositions, boolean stopAtEscapedTexts) {

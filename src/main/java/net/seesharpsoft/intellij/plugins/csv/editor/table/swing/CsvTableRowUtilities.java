@@ -168,8 +168,8 @@ public final class CsvTableRowUtilities {
      * Table Model for the row number column. It just has one column (the numbers)
      */
     private static final class RowHeadersTableModel extends AbstractTableModel {
-        private ArrayList<Integer> numbersList = new ArrayList<Integer>();
-        private int startNumber;
+        private final ArrayList<Integer> numbersList = new ArrayList<Integer>();
+        private final int startNumber;
 
         /**
          * Initialize model
@@ -188,13 +188,12 @@ public final class CsvTableRowUtilities {
         }
 
         public int getRowCount() {
-            return numbersList != null ? numbersList.size() : 0;
+            return numbersList.size();
         }
 
         public int getMaxIntValue() {
-            if (numbersList != null && numbersList.size() != 0) {
-                Integer integer = (Integer) getValueAt(numbersList.size() - 1, 0);
-                return integer.intValue();
+            if (numbersList.size() != 0) {
+                return (Integer) getValueAt(numbersList.size() - 1, 0);
             }
             return 0;
         }
@@ -207,7 +206,7 @@ public final class CsvTableRowUtilities {
             return "";
         }
 
-        public Class getColumnClass(int columnIndex) {
+        public Class<Integer> getColumnClass(int columnIndex) {
             return Integer.class;
         }
 
@@ -224,7 +223,7 @@ public final class CsvTableRowUtilities {
                 numbersList.add(0, startNumber);
             } else {
                 Integer maxNum = numbersList.get(numbersList.size() - 1);
-                numbersList.add(numbersList.size(), maxNum.intValue() + 1);
+                numbersList.add(numbersList.size(), maxNum + 1);
             }
             this.fireTableDataChanged();
         }
@@ -289,12 +288,9 @@ public final class CsvTableRowUtilities {
      */
     private static final class TableSynchronizer implements ListSelectionListener, TableModelListener {
 
-        private JTable rowHeadersTable;
-        private JTable userTable;
-        private JViewport userTableViewPort;
-        private JViewport rowHeadersViewPort;
-
-        private TableRowResizer tableRowResizer;
+        private final JTable rowHeadersTable;
+        private final JTable userTable;
+        private final TableRowResizer tableRowResizer;
 
         private TableSynchronizer(JTable rowHeadersTableArg, JTable userTableArg, TableRowResizer tableRowResizerArg) {
             this.userTable = userTableArg;
@@ -302,10 +298,10 @@ public final class CsvTableRowUtilities {
             this.tableRowResizer = tableRowResizerArg;
 
             Container p = userTableArg.getParent();
-            userTableViewPort = (JViewport) p;
+            JViewport userTableViewPort = (JViewport) p;
 
             Container p2 = rowHeadersTableArg.getParent();
-            rowHeadersViewPort = (JViewport) p2;
+            JViewport rowHeadersViewPort = (JViewport) p2;
 
             Point newPosition = userTableViewPort.getViewPosition();
             rowHeadersViewPort.setViewPosition(newPosition);
@@ -323,8 +319,8 @@ public final class CsvTableRowUtilities {
                 rowHeadersTable.getSelectionModel().clearSelection();
 
                 int[] rows = userTable.getSelectedRows();
-                for (int i = 0; i < rows.length; i++) {
-                    rowHeadersTable.getSelectionModel().addSelectionInterval(rows[i], rows[i]);
+                for (int row : rows) {
+                    rowHeadersTable.getSelectionModel().addSelectionInterval(row, row);
                 }
 
                 rowHeadersTable.getSelectionModel().addListSelectionListener(this);
@@ -332,8 +328,8 @@ public final class CsvTableRowUtilities {
                 userTable.getSelectionModel().removeListSelectionListener(this);
 
                 int[] rows = rowHeadersTable.getSelectedRows();
-                for (int i = 0; i < rows.length; i++) {
-                    userTable.getSelectionModel().addSelectionInterval(rows[i], rows[i]);
+                for (int row : rows) {
+                    userTable.getSelectionModel().addSelectionInterval(row, row);
                 }
 
                 // re-adding the listener to the user table
@@ -370,11 +366,12 @@ public final class CsvTableRowUtilities {
     public static class TableRowResizer extends MouseInputAdapter {
         public static Cursor RESIZE_CURSOR = Cursor.getPredefinedCursor(Cursor.N_RESIZE_CURSOR);
 
-        private int mouseYOffset, resizingRow = -1;
+        private int mouseYOffset;
+        private int resizingRow = -1;
         private Cursor otherCursor = RESIZE_CURSOR;
-        private JTable rowHeadersTable;
-        private JTable userTable;
-        private CsvTableEditor myTableEditor;
+        private final JTable rowHeadersTable;
+        private final JTable userTable;
+        private final CsvTableEditor myTableEditor;
 
         public TableRowResizer(JTable rowHeadersTableArg, JTable userTableArg, CsvTableEditor tableEditor) {
             this.userTable = userTableArg;
@@ -405,9 +402,8 @@ public final class CsvTableRowUtilities {
                 return -1;
 
             int midPoint = r.y + r.height / 2;
-            int rowIndex = (p.y < midPoint) ? row - 1 : row;
 
-            return rowIndex;
+            return (p.y < midPoint) ? row - 1 : row;
         }
 
         public void mousePressed(MouseEvent e) {
@@ -439,8 +435,6 @@ public final class CsvTableRowUtilities {
                 if (newHeight > 0) {
                     userTable.setRowHeight(resizingRow, newHeight);
                     rowHeadersTable.setRowHeight(resizingRow, newHeight);
-//                    rowHeadersTable.setRowHeight(newHeight);
-//                    userTable.setRowHeight(newHeight);
                 }
             }
         }

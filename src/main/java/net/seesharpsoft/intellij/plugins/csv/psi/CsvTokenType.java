@@ -17,7 +17,7 @@ public class CsvTokenType extends IElementType {
             return "CsvTokenType." + super.toString();
         }
 
-        switch(super.toString()) {
+        switch (super.toString()) {
             case "COMMA":
                 return "Value Separator";
             case "QUOTE":

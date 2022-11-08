@@ -178,7 +178,7 @@ public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttrib
         }
         FileType fileType = virtualFile.getFileType();
         if (fileType instanceof CsvSeparatorHolder) {
-            return ((CsvSeparatorHolder)fileType).getSeparator();
+            return ((CsvSeparatorHolder) fileType).getSeparator();
         }
         Attribute attribute = getFileAttribute(project, virtualFile);
         return attribute == null || attribute.separator == null || attribute.separator.getCharacter().isEmpty() ?
@@ -218,7 +218,7 @@ public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttrib
         }
         FileType fileType = virtualFile.getFileType();
         if (fileType instanceof CsvEscapeCharacterHolder) {
-            return ((CsvEscapeCharacterHolder)fileType).getEscapeCharacter();
+            return ((CsvEscapeCharacterHolder) fileType).getEscapeCharacter();
         }
         Attribute attribute = getFileAttribute(project, virtualFile);
         return attribute == null || attribute.escapeCharacter == null ?

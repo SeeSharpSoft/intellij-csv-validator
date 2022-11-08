@@ -28,10 +28,10 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import static java.awt.event.InputEvent.CTRL_DOWN_MASK;
 
 public class CsvMultiLineCellRenderer extends JBScrollPane implements TableCellRenderer, TableCellEditor {
-    private Set<CellEditorListener> cellEditorListenerSet = new CopyOnWriteArraySet<>();
+    private final Set<CellEditorListener> cellEditorListenerSet = new CopyOnWriteArraySet<>();
     private final UserDataHolder myUserDataHolder;
 
-    private JTextArea myTextArea;
+    private final JTextArea myTextArea;
 
     public CsvMultiLineCellRenderer(CsvTableEditorKeyListener keyListener, UserDataHolder userDataHolderParam) {
         this.myUserDataHolder = userDataHolderParam;
@@ -103,7 +103,7 @@ public class CsvMultiLineCellRenderer extends JBScrollPane implements TableCellR
             final Rectangle2D rectangle = myTextArea.modelToView2D(myTextArea.getDocument().getLength());
             if (rectangle != null) {
                 return new Dimension(this.getWidth(),
-                        (int)(this.getInsets().top + rectangle.getY() + rectangle.getHeight() + this.getInsets().bottom));
+                        (int) (this.getInsets().top + rectangle.getY() + rectangle.getHeight() + this.getInsets().bottom));
             }
         } catch (BadLocationException e) {
             e.printStackTrace();

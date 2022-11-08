@@ -4,9 +4,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiErrorElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.util.PsiTreeUtil;
-import net.seesharpsoft.intellij.plugins.csv.CsvEscapeCharacter;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
-import net.seesharpsoft.intellij.plugins.csv.CsvValueSeparator;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvField;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvRecord;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
@@ -43,8 +41,7 @@ public interface CsvTableModel extends PsiFileHolder, Suspendable {
         PsiElement rowElement;
         for (rowElement = psiFile.getFirstChild();
              rowElement != null && !(rowElement instanceof PsiErrorElement);
-             rowElement = rowElement.getNextSibling())
-        {
+             rowElement = rowElement.getNextSibling()) {
             if (rowElement instanceof CsvRecord) counter++;
         }
 

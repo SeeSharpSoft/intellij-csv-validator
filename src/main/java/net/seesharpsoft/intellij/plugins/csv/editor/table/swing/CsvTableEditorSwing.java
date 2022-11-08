@@ -6,11 +6,11 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.components.labels.LinkLabel;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
-import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableModel;
-import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
+import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableActions;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditor;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditorState;
-import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableActions;
+import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableModel;
+import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,8 +28,8 @@ public class CsvTableEditorSwing extends CsvTableEditor {
     private JTable tblEditor;
     private JPanel panelMain;
     private LinkLabel lnkTextEditor;
-    private JLabel lblErrorText;
     private LinkLabel lnkPlugin;
+    private JLabel lblErrorText;
     private JButton btnCloseInfoPanel;
     private JComponent panelInfo;
     private JScrollPane tableScrollPane;

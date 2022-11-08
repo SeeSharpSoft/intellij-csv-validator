@@ -26,7 +26,7 @@ public class CsvHighlightingLexer extends DelegateLexer {
 
     @Override
     public void restore(@NotNull LexerPosition position) {
-        myCurrentColumnIndex = ((LexerPositionWithColumnIndex)position).getColumnIndex();
+        myCurrentColumnIndex = ((LexerPositionWithColumnIndex) position).getColumnIndex();
         super.start(getBufferSequence(), position.getOffset(), getBufferEnd(), position.getState());
     }
 

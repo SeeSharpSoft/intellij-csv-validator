@@ -15,11 +15,16 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 public class CsvTableModelSwing extends CsvTableModelBase<CsvTableEditor> implements TableModel {
 
-    /** List of listeners */
+    /**
+     * List of listeners
+     */
     protected EventListenerList listenerList = new EventListenerList();
 
     protected ScheduledFuture delayedUpdate;
@@ -62,7 +67,7 @@ public class CsvTableModelSwing extends CsvTableModelBase<CsvTableEditor> implem
         // those that are interested in this event
         for (int i = listeners.length - 2; i >= 0; i -= 2) {
             if (listeners[i] == TableModelListener.class) {
-                ((TableModelListener)listeners[i+1]).tableChanged(e);
+                ((TableModelListener) listeners[i + 1]).tableChanged(e);
             }
         }
     }

@@ -18,6 +18,7 @@ public class CsvSharpLexer extends LexerBase implements CsvSeparatorHolder {
     private final List<Tokenizer.Token<TokenType>> initialNextStateTokens;
     private final List<Tokenizer.Token<TokenType>> unquotedNextStateTokens;
     private final List<Tokenizer.Token<TokenType>> quotedNextStateTokens;
+    private final CsvValueSeparator myValueSeparator;
 
     private CharSequence buffer;
     private int bufferEnd;
@@ -102,8 +103,6 @@ public class CsvSharpLexer extends LexerBase implements CsvSeparatorHolder {
         }
     }
 
-    private final CsvValueSeparator myValueSeparator;
-
     public CsvSharpLexer() {
         this(Configuration.DEFAULT);
     }
@@ -124,12 +123,12 @@ public class CsvSharpLexer extends LexerBase implements CsvSeparatorHolder {
         } else {
             tokenizer.add(TokenType.TEXT,
                     String.format("((?!%s)[^%s%s%s])+|%s%s",
-                    configuration.valueSeparator,
-                    configuration.escapeCharacter,
-                    configuration.quoteCharacter,
-                    configuration.recordSeparator,
-                    configuration.escapeCharacter,
-                    configuration.escapeCharacter));
+                            configuration.valueSeparator,
+                            configuration.escapeCharacter,
+                            configuration.quoteCharacter,
+                            configuration.recordSeparator,
+                            configuration.escapeCharacter,
+                            configuration.escapeCharacter));
             tokenizer.add(TokenType.BACKSLASH, String.format("%s", configuration.escapeCharacter));
         }
         if (!configuration.commentCharacter.isEmpty()) {
@@ -213,7 +212,7 @@ public class CsvSharpLexer extends LexerBase implements CsvSeparatorHolder {
     }
 
     protected Collection<Tokenizer.Token<TokenType>> getCurrentTokenCollection() {
-        switch(this.currentState) {
+        switch (this.currentState) {
             case Initial:
                 return initialNextStateTokens;
             case Unquoted:
@@ -254,9 +253,9 @@ public class CsvSharpLexer extends LexerBase implements CsvSeparatorHolder {
             this.currentState = currentState.getNextState(tokenInfo.token());
             this.tokenEnd = tokenInfo.textRange().end();
 
-            switch(tokenInfo.token()) {
+            switch (tokenInfo.token()) {
                 case OPENING_QUOTE:
-                case CLOSING_QUOTE:_QUOTE:
+                case CLOSING_QUOTE:
                     currentTokenType = CsvTypes.QUOTE;
                     break;
                 case ESCAPED_QUOTE:

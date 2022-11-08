@@ -1,7 +1,6 @@
 package net.seesharpsoft.intellij.plugins.csv.formatter;
 
 import com.intellij.formatting.*;
-import com.intellij.lang.ASTFactory;
 import com.intellij.lang.ASTNode;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.TokenType;
@@ -18,7 +17,7 @@ public class SimpleCsvBlock extends AbstractBlock {
 
     protected CsvFormattingInfo myFormattingInfo;
 
-    protected SimpleCsvBlock(@NotNull ASTNode node,  CsvFormattingInfo formattingInfo) {
+    protected SimpleCsvBlock(@NotNull ASTNode node, CsvFormattingInfo formattingInfo) {
         this(node, Wrap.createWrap(WrapType.NONE, false), Alignment.createAlignment(), formattingInfo);
     }
 

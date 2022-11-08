@@ -6,7 +6,7 @@ import com.intellij.openapi.fileTypes.SyntaxHighlighterBase;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.tree.IElementType;
-import net.seesharpsoft.intellij.plugins.csv.*;
+import net.seesharpsoft.intellij.plugins.csv.CsvLexerFactory;
 import org.jetbrains.annotations.NotNull;
 
 public class CsvSyntaxHighlighter extends SyntaxHighlighterBase {

@@ -25,7 +25,7 @@ public interface Suspendable extends Disposable {
     }
 
     class SuspensionMonitor {
-        private Map<Suspendable, Integer> suspendableCounterMap = new HashMap<>();
+        private final Map<Suspendable, Integer> suspendableCounterMap = new HashMap<>();
 
         private Integer getSuspendableCounter(Suspendable suspendable) {
             if (suspendableCounterMap.containsKey(suspendable)) return suspendableCounterMap.get(suspendable);
@@ -40,6 +40,7 @@ public interface Suspendable extends Disposable {
                 suspendableCounterMap.put(suspendable, suspendableCounter + 1);
             }
         }
+
         void resume(Suspendable suspendable) {
             Integer suspendableCounter = getSuspendableCounter(suspendable);
             // this usually shouldn't happen but doesn't hurt, so fail gracefully

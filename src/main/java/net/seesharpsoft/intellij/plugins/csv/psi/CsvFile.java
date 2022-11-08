@@ -1,15 +1,10 @@
 package net.seesharpsoft.intellij.plugins.csv.psi;
 
 import com.intellij.extapi.psi.PsiFileBase;
-import com.intellij.lang.Language;
 import com.intellij.openapi.fileTypes.FileType;
-import com.intellij.openapi.fileTypes.LanguageFileType;
 import com.intellij.psi.FileViewProvider;
-import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
 import com.intellij.psi.impl.source.resolve.reference.ReferenceProvidersRegistry;
-import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfoMap;
-import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
 import org.jetbrains.annotations.NotNull;
 

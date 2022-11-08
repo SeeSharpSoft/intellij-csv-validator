@@ -26,11 +26,11 @@ public class CsvTableEditorMouseWheelListener extends CsvTableEditorUtilBase imp
         } else if (mouseWheelEvent.isShiftDown()) {
             JScrollPane scrollPane = csvTableEditor.getTableScrollPane();
             JScrollBar hScrollbar = scrollPane.getHorizontalScrollBar();
-            hScrollbar.setValue(hScrollbar.getValue() + (int)(SCROLL_FACTOR * mouseWheelEvent.getPreciseWheelRotation()));
+            hScrollbar.setValue(hScrollbar.getValue() + (int) (SCROLL_FACTOR * mouseWheelEvent.getPreciseWheelRotation()));
         } else {
             JScrollPane scrollPane = csvTableEditor.getTableScrollPane();
             JScrollBar vScrollbar = scrollPane.getVerticalScrollBar();
-            vScrollbar.setValue(vScrollbar.getValue() + (int)(SCROLL_FACTOR * mouseWheelEvent.getPreciseWheelRotation()));
+            vScrollbar.setValue(vScrollbar.getValue() + (int) (SCROLL_FACTOR * mouseWheelEvent.getPreciseWheelRotation()));
         }
     }
 }

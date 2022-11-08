@@ -7,7 +7,9 @@ import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
 import com.intellij.util.Consumer;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
-import net.seesharpsoft.intellij.plugins.csv.psi.*;
+import net.seesharpsoft.intellij.plugins.csv.psi.CsvField;
+import net.seesharpsoft.intellij.plugins.csv.psi.CsvFile;
+import net.seesharpsoft.intellij.plugins.csv.psi.CsvRecord;
 import net.seesharpsoft.intellij.psi.PsiHelper;
 import org.jetbrains.annotations.NotNull;
 
@@ -16,7 +18,7 @@ import java.util.List;
 
 public class CsvHighlightUsagesHandler extends HighlightUsagesHandlerBase {
 
-    private static int MAX_HIGHLIGHTING_ROWS = 1000;
+    private static final int MAX_HIGHLIGHTING_ROWS = 1000;
 
     protected CsvHighlightUsagesHandler(@NotNull Editor editor, @NotNull CsvFile file) {
         super(editor, file);

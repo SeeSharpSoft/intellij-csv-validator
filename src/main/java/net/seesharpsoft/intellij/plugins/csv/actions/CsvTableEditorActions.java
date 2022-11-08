@@ -4,8 +4,8 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.fileEditor.FileEditor;
-import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditor;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableActions;
+import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditor;
 import org.jetbrains.annotations.NotNull;
 
 public abstract class CsvTableEditorActions extends AnAction {

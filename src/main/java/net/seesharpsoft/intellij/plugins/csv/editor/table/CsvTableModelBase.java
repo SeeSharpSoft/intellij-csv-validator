@@ -1,6 +1,9 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table;
 
-import com.intellij.psi.*;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiTreeAnyChangeAbstractAdapter;
+import com.intellij.psi.PsiTreeChangeListener;
 import com.intellij.psi.util.PsiTreeUtil;
 import net.seesharpsoft.intellij.plugins.csv.CsvEscapeCharacter;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
@@ -13,7 +16,7 @@ import net.seesharpsoft.intellij.psi.PsiHelper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.Collection;
 
 public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel {
     private final T myPsiFileHolder;

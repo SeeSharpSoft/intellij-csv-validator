@@ -9,7 +9,9 @@ import com.intellij.psi.tree.IElementType;
 import com.intellij.xml.util.XmlStringUtil;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.CsvValueSeparator;
-import net.seesharpsoft.intellij.plugins.csv.psi.*;
+import net.seesharpsoft.intellij.plugins.csv.psi.CsvField;
+import net.seesharpsoft.intellij.plugins.csv.psi.CsvFile;
+import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import net.seesharpsoft.intellij.psi.PsiHelper;
 import org.jetbrains.annotations.NotNull;
@@ -45,13 +47,13 @@ public class CsvAnnotator implements Annotator {
                     XmlStringUtil.escapeString(header, true)
             );
             String tooltip = XmlStringUtil.wrapInHtml(
-                String.format("%s<br /><br />Header: %s<br />Index: %d",
-                    FontUtil.getHtmlWithFonts(
-                            XmlStringUtil.escapeString(element.getText(), true)
-                    ),
-                    message,
-                    fieldIndex + (CsvEditorSettings.getInstance().isZeroBasedColumnNumbering() ? 0 : 1)
-                )
+                    String.format("%s<br /><br />Header: %s<br />Index: %d",
+                            FontUtil.getHtmlWithFonts(
+                                    XmlStringUtil.escapeString(element.getText(), true)
+                            ),
+                            message,
+                            fieldIndex + (CsvEditorSettings.getInstance().isZeroBasedColumnNumbering() ? 0 : 1)
+                    )
             );
 
             AnnotationBuilder annotationBuilder = holder.newAnnotation(CSV_COLUMN_INFO_SEVERITY, message)

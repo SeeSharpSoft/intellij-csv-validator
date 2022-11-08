@@ -5,7 +5,6 @@ import com.intellij.ide.plugins.IdeaPluginDescriptor;
 import com.intellij.ide.plugins.PluginManagerCore;
 import com.intellij.ide.ui.IdeUiService;
 import com.intellij.notification.*;
-import com.intellij.notification.impl.NotificationGroupManagerImpl;
 import com.intellij.openapi.extensions.PluginId;
 import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.openapi.progress.ProgressIndicator;
@@ -17,11 +16,6 @@ import net.seesharpsoft.intellij.plugins.csv.components.CsvFileAttributes;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettingsProvider;
 import org.jetbrains.annotations.NotNull;
-
-import javax.swing.event.HyperlinkEvent;
-import java.awt.*;
-import java.io.IOException;
-import java.net.URI;
 
 public class CsvPlugin implements StartupActivity, StartupActivity.DumbAware, StartupActivity.Background {
 

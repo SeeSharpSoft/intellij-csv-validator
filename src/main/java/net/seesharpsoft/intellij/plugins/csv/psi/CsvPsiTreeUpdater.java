@@ -30,6 +30,8 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
 
     private final CsvPsiParserFileType myFileType;
 
+    protected final EventListenerList listenerList = new EventListenerList();
+
     private List<PsiAction> myUncommittedActions = new ArrayList<>();
 
     public CsvPsiTreeUpdater(@NotNull PsiFileHolder psiFileHolder) {
@@ -116,14 +118,15 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
     }
 
     public void appendField(@NotNull PsiElement anchor, String text, boolean enquoteCommentIndicator, boolean before) {
-        while (anchor != null && !(anchor instanceof CsvField || CsvHelper.isCommentElement(anchor))) {
-            anchor = anchor.getParent();
+        PsiElement commentOrField = anchor;
+        while (commentOrField != null && !(commentOrField instanceof CsvField || CsvHelper.isCommentElement(commentOrField))) {
+            commentOrField = commentOrField.getParent();
         }
         // no columns in comment row
-        if (CsvHelper.isCommentElement(anchor)) return;
-        assert anchor instanceof CsvField;
-        doAddField(anchor, text, enquoteCommentIndicator, before);
-        doAddValueSeparator(anchor, before);
+        if (CsvHelper.isCommentElement(commentOrField)) return;
+        assert commentOrField instanceof CsvField;
+        doAddField(commentOrField, text, enquoteCommentIndicator, before);
+        doAddValueSeparator(commentOrField, before);
     }
 
     public void removeField(@NotNull PsiElement field) {
@@ -146,7 +149,7 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
         PsiFile psiFile = getPsiFile();
         String valueSeparator = CsvHelper.getValueSeparator(psiFile).getCharacter();
         for (PsiElement record = psiFile.getFirstChild(); record != null; record = record.getNextSibling()) {
-            if (!CsvRecord.class.isInstance(record)) continue;
+            if (!(record instanceof CsvRecord)) continue;
             PsiElement field = record.getFirstChild();
             if (CsvHelper.isCommentElement(field)) continue;
 
@@ -192,10 +195,10 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
     }
 
     private List<Pair<TextRange, String>> collectRangesToDelete(List<Integer> indices) {
-        Set<PsiElement> toDelete = new LinkedHashSet();
+        Set<PsiElement> toDelete = new LinkedHashSet<>();
         Collections.sort(indices);
         for (PsiElement record = getPsiFile().getFirstChild(); record != null; record = record.getNextSibling()) {
-            if (!CsvRecord.class.isInstance(record)) continue;
+            if (!(record instanceof CsvRecord)) continue;
             if (CsvHelper.isCommentElement(record.getFirstChild())) continue;
             for (int columnIndex : indices) {
                 PsiElement focusedCol = PsiHelper.getNthChildOfType(record, columnIndex, CsvField.class);
@@ -265,9 +268,9 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
         delete(toDelete.toArray(new PsiElement[toDelete.size()]));
     }
 
-    public void replaceComment(@NotNull PsiElement toReplace, @Nullable String text) {
+    public void replaceComment(@NotNull PsiElement toReplace, @Nullable String textArg) {
         assert PsiHelper.getElementType(toReplace) == CsvTypes.COMMENT;
-        if (text == null) text = "";
+        String text = textArg == null ? "" : textArg;
         // do not replace if not necessary
         if (toReplace.getText().equals(text)) return;
 
@@ -283,7 +286,7 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
         doAction(new ReplacePsiAction(toReplace, createField(text, enquoteCommentIndicator)));
     }
 
-    public void delete(@NotNull PsiElement ...toRemove) {
+    public void delete(@NotNull PsiElement... toRemove) {
         for (PsiElement element : toRemove) {
             doAction(new DeletePsiAction(element));
         }
@@ -349,9 +352,6 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
         return true;
     }
 
-    /** List of listeners */
-    protected EventListenerList listenerList = new EventListenerList();
-
     public void addCommitListener(CommitListener l) {
         listenerList.add(CommitListener.class, l);
     }
@@ -367,7 +367,7 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
         // those that are interested in this event
         for (int i = listeners.length - 2; i >= 0; i -= 2) {
             if (listeners[i] == CommitListener.class) {
-                ((CommitListener)listeners[i+1]).committed();
+                ((CommitListener) listeners[i + 1]).committed();
             }
         }
     }

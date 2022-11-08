@@ -13,9 +13,12 @@ import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.UserDataHolder;
 import com.intellij.openapi.util.UserDataHolderBase;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.psi.*;
+import com.intellij.psi.PsiDocumentManager;
+import com.intellij.psi.PsiFile;
 import com.intellij.util.ui.UIUtil;
-import net.seesharpsoft.intellij.plugins.csv.*;
+import net.seesharpsoft.intellij.plugins.csv.CsvEscapeCharacter;
+import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
+import net.seesharpsoft.intellij.plugins.csv.CsvValueSeparator;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvFile;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import net.seesharpsoft.intellij.psi.PsiFileHolder;
@@ -235,7 +238,9 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation, 
         return this.document;
     }
 
-    public PsiFile getPsiFile() { return getCsvFile(); }
+    public PsiFile getPsiFile() {
+        return getCsvFile();
+    }
 
     @Nullable
     public final CsvFile getCsvFile() {

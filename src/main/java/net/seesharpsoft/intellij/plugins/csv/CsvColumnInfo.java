@@ -7,10 +7,10 @@ import java.util.*;
 
 public class CsvColumnInfo<T> {
 
-    private int myColumnIndex;
+    private final int myColumnIndex;
     private int myMaxLength;
     private int myMaxLengthRowIndex;
-    private Map<T, RowInfo> myElementInfos;
+    private final Map<T, RowInfo> myElementInfos;
     private T myHeaderElement;
     private int mySize;
 
