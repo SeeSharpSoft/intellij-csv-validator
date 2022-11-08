@@ -129,7 +129,11 @@ public class CsvGithubIssueSubmitter extends ErrorReportSubmitter {
                 Collections.emptyList());
     }
 
-    protected String searchExistingIssues(GithubApiRequestExecutor githubExecutor, String needle, ProgressIndicator progressIndicator) throws IOException {
+    protected String searchExistingIssues(GithubApiRequestExecutor githubExecutor, String needleArg, ProgressIndicator progressIndicator) throws IOException {
+        String needle = needleArg;
+        if (needle.length() > 255) {
+            needle = needle.substring(0, needle.substring(0, 255).lastIndexOf(" "));
+        }
         GithubApiRequest<GithubResponsePage<GithubSearchedIssue>> existingIssueRequest =
                 GithubApiRequests.Search.Issues.get(
                         GithubServerPath.DEFAULT_SERVER,
@@ -137,19 +141,19 @@ public class CsvGithubIssueSubmitter extends ErrorReportSubmitter {
                         GithubIssueState.open.name(),
                         null,
                         needle,
-                        new GithubRequestPagination(1, 1)
+                        new GithubRequestPagination(1, 5)
                 );
 
-        String issueId = null;
         GithubResponsePage<GithubSearchedIssue> foundIssuesPage = githubExecutor.execute(progressIndicator, existingIssueRequest);
         if (foundIssuesPage != null && !foundIssuesPage.getItems().isEmpty()) {
-            GithubSearchedIssue foundIssue = foundIssuesPage.getItems().get(0);
-            if (foundIssue.getTitle().equals(needle)) {
-                issueId = Long.toString(foundIssue.getNumber());
+            for (GithubSearchedIssue foundIssue : foundIssuesPage.getItems()) {
+                if (foundIssue.getTitle().equals(needleArg)) {
+                    return Long.toString(foundIssue.getNumber());
+                }
             }
         }
 
-        return issueId;
+        return null;
     }
 
     protected String getIssueTitle(IdeaLoggingEvent event) {

@@ -82,8 +82,16 @@ intellij {
 }
 patchPluginXml {
     changeNotes = """<pre style="font-family: sans-serif">
-NEW: major update release!
-      </pre>"""
+Major update release 3.*!
+
+For this realase, the plugin was reworked quite a bit, focusing on performance and table editor usage. The table editor is now the default editor!
+
+Some options were removed for simplification and consistency (e.g. 'Tabularize' formatting), while new features were added (e.g. comment support in table editor).   
+
+Feedback is welcome!
+
+PS: The previous versions are still available on the project page.
+</pre>"""
 }
 publishPlugin {
     token = System.getenv().getOrDefault('JI_TOKEN', '')
