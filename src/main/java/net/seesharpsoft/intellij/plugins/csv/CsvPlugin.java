@@ -42,7 +42,7 @@ public class CsvPlugin implements StartupActivity, StartupActivity.DumbAware, St
     }
 
     public static void doAsyncProjectMaintenance(@NotNull Project project) {
-        ProgressManager.getInstance().run(new Task.Backgroundable(project, "CSV plugin validation") {
+        ProgressManager.getInstance().run(new Task.Backgroundable(project, "CSV Table Editor validation") {
             public void run(@NotNull ProgressIndicator progressIndicator) {
                 // initialize progress indication
                 progressIndicator.setIndeterminate(false);
@@ -72,11 +72,11 @@ public class CsvPlugin implements StartupActivity, StartupActivity.DumbAware, St
 
         NotificationGroup notificationGroup = NotificationGroupManager.getInstance().getNotificationGroup("net.seesharpsoft.intellij.plugins.csv");
         Notification notification = notificationGroup.createNotification(
-                "CSV Plugin " + getVersion() + " - Change Notes",
+                "CSV Table Editor " + getVersion() + " - Change Notes",
                 getChangeNotes() +
                         "<p>You can always <b>customize plugin settings</b> to your likings (shortcuts below)!</p>" +
                         "<br>" +
-                        "<p>Visit the <b>CSV Plugin homepage</b> to read more about the available features & settings, " +
+                        "<p>Visit the <b>CSV Table Editor homepage</b> to read more about the available features & settings, " +
                         "submit issues & feature request, " +
                         "or show your support by rating this plugin. <b>Thanks!</b></p>"
                 ,
@@ -92,7 +92,7 @@ public class CsvPlugin implements StartupActivity, StartupActivity.DumbAware, St
         notification.addAction(NotificationAction.create("Formatting", (anActionEvent, notification1) -> {
             openLink(project, "#preferences.sourceCode.CSV/TSV/PSV");
         }));
-        notification.addAction(NotificationAction.create("Open CSV Plugin homepage", (anActionEvent, notification1) -> {
+        notification.addAction(NotificationAction.create("Open CSV Table Editor homepage", (anActionEvent, notification1) -> {
             openLink(project, "https://github.com/SeeSharpSoft/intellij-csv-validator");
         }));
 

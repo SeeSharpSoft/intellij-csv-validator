@@ -63,7 +63,8 @@ public class CsvGithubIssueSubmitter extends ErrorReportSubmitter {
         }
         GithubAccount githubAccount = githubAuthManager.getSingleOrDefaultAccount(project);
         assert githubAccount != null;
-        GithubApiRequestExecutor.WithTokenAuth githubExecutor = GithubApiRequestExecutorManager.getInstance().getExecutor(githubAccount, project);
+        // the cast shouldn't be needed due to inheritance, but Java complains for some reason in 2022.1
+        GithubApiRequestExecutor githubExecutor = GithubApiRequestExecutor.class.cast(GithubApiRequestExecutorManager.getInstance().getExecutor(githubAccount, project));
 
         Task submitTask = new Task.Backgroundable(project, getReportActionText()) {
             @Override
@@ -83,7 +84,7 @@ public class CsvGithubIssueSubmitter extends ErrorReportSubmitter {
 
     private void submitToGithub(IdeaLoggingEvent event,
                                 String additionalInfo,
-                                GithubApiRequestExecutor.WithTokenAuth githubExecutor,
+                                GithubApiRequestExecutor githubExecutor,
                                 Consumer<? super SubmittedReportInfo> consumer,
                                 ProgressIndicator progressIndicator) {
         try {
@@ -128,7 +129,7 @@ public class CsvGithubIssueSubmitter extends ErrorReportSubmitter {
                 Collections.emptyList());
     }
 
-    protected String searchExistingIssues(GithubApiRequestExecutor.WithTokenAuth githubExecutor, String needle, ProgressIndicator progressIndicator) throws IOException {
+    protected String searchExistingIssues(GithubApiRequestExecutor githubExecutor, String needle, ProgressIndicator progressIndicator) throws IOException {
         GithubApiRequest<GithubResponsePage<GithubSearchedIssue>> existingIssueRequest =
                 GithubApiRequests.Search.Issues.get(
                         GithubServerPath.DEFAULT_SERVER,
