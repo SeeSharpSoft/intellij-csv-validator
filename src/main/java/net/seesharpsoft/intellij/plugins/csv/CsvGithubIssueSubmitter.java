@@ -8,14 +8,15 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.ErrorReportSubmitter;
 import com.intellij.openapi.diagnostic.IdeaLoggingEvent;
 import com.intellij.openapi.diagnostic.SubmittedReportInfo;
-import com.intellij.openapi.progress.ProgressIndicator;
-import com.intellij.openapi.progress.ProgressManager;
+import com.intellij.openapi.progress.*;
 import com.intellij.openapi.project.Project;
 import com.intellij.util.Consumer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.plugins.github.api.*;
-import org.jetbrains.plugins.github.api.data.*;
+import org.jetbrains.plugins.github.api.data.GithubIssueState;
+import org.jetbrains.plugins.github.api.data.GithubResponsePage;
+import org.jetbrains.plugins.github.api.data.GithubSearchedIssue;
 import org.jetbrains.plugins.github.api.data.request.GithubRequestPagination;
 import org.jetbrains.plugins.github.authentication.GithubAuthenticationManager;
 import org.jetbrains.plugins.github.authentication.accounts.GithubAccount;
@@ -39,11 +40,11 @@ public class CsvGithubIssueSubmitter extends ErrorReportSubmitter {
     @NotNull
     @Override
     public String getReportActionText() {
-        return "Report to 'CSV Plugin' (Github)";
+        return "Report to 'CSV Table Editor' (Github)";
     }
 
     @Override
-    public boolean submit(@NotNull IdeaLoggingEvent[] events, @Nullable String additionalInfo, @NotNull Component parentComponent, @NotNull Consumer<SubmittedReportInfo> consumer) {
+    public boolean submit(IdeaLoggingEvent @NotNull [] events, @Nullable String additionalInfo, @NotNull Component parentComponent, @NotNull Consumer<? super SubmittedReportInfo> consumer) {
         final DataContext dataContext = DataManager.getInstance().getDataContext(parentComponent);
         final Project project = CommonDataKeys.PROJECT.getData(dataContext);
 
@@ -55,37 +56,48 @@ public class CsvGithubIssueSubmitter extends ErrorReportSubmitter {
         return true;
     }
 
-    protected boolean submit(IdeaLoggingEvent event, String additionalInfo, Project project, Consumer<SubmittedReportInfo> consumer) {
+    protected boolean submit(IdeaLoggingEvent event, String additionalInfo, Project project, Consumer<? super SubmittedReportInfo> consumer) {
         GithubAuthenticationManager githubAuthManager = GithubAuthenticationManager.getInstance();
         if (!githubAuthManager.ensureHasAccounts(project)) {
             return false;
         }
         GithubAccount githubAccount = githubAuthManager.getSingleOrDefaultAccount(project);
-        GithubApiRequestExecutor githubExecutor = GithubApiRequestExecutorManager.getInstance().getExecutor(githubAccount, project);
+        assert githubAccount != null;
+        GithubApiRequestExecutor.WithTokenAuth githubExecutor = GithubApiRequestExecutorManager.getInstance().getExecutor(githubAccount, project);
 
-        ApplicationManager.getApplication().executeOnPooledThread(() -> {
-            ProgressIndicator progressIndicator = ProgressManager.getInstance().getProgressIndicator();
-            ProgressManager.getInstance().runProcess(() -> {
-                submitToGithub(event, additionalInfo, githubExecutor, consumer);
-            }, progressIndicator);
-        });
+        Task submitTask = new Task.Backgroundable(project, getReportActionText()) {
+            @Override
+            public void run(@NotNull ProgressIndicator indicator) {
+                submitToGithub(event, additionalInfo, githubExecutor, consumer, indicator);
+            }
+        };
+
+        if (ApplicationManager.getApplication().isUnitTestMode()) {
+            submitTask.run(new EmptyProgressIndicator());
+        } else {
+            ProgressManager.getInstance().run(submitTask);
+        }
 
         return true;
     }
 
-    private void submitToGithub(IdeaLoggingEvent event, String additionalInfo, GithubApiRequestExecutor githubExecutor, Consumer<SubmittedReportInfo> consumer) {
+    private void submitToGithub(IdeaLoggingEvent event,
+                                String additionalInfo,
+                                GithubApiRequestExecutor.WithTokenAuth githubExecutor,
+                                Consumer<? super SubmittedReportInfo> consumer,
+                                ProgressIndicator progressIndicator) {
         try {
             SubmittedReportInfo.SubmissionStatus status;
 
             String issueTitle = getIssueTitle(event);
             String issueDetails = getIssueDetails(event, additionalInfo);
-            String foundIssueId = searchExistingIssues(githubExecutor, issueTitle);
+            String foundIssueId = searchExistingIssues(githubExecutor, issueTitle, progressIndicator);
 
             if (foundIssueId == null) {
-                createNewIssue(githubExecutor, issueTitle, issueDetails);
+                githubExecutor.execute(progressIndicator, createNewIssue(issueTitle, issueDetails));
                 status = SubmittedReportInfo.SubmissionStatus.NEW_ISSUE;
             } else {
-                updateExistingIssue(githubExecutor, foundIssueId, issueDetails);
+                githubExecutor.execute(progressIndicator, updateExistingIssue(foundIssueId, issueDetails));
                 status = SubmittedReportInfo.SubmissionStatus.DUPLICATE;
             }
             consumer.consume(new SubmittedReportInfo(status));
@@ -94,35 +106,29 @@ public class CsvGithubIssueSubmitter extends ErrorReportSubmitter {
         }
     }
 
-    protected void updateExistingIssue(GithubApiRequestExecutor githubExecutor, String issueId, String content) throws IOException {
-        GithubApiRequest.Post createIssueCommentRequest =
-                GithubApiRequests.Repos.Issues.Comments.create(
-                        GithubServerPath.DEFAULT_SERVER,
-                        GIT_USER,
-                        GIT_REPO,
-                        issueId,
-                        content
-                );
-
-        githubExecutor.execute(createIssueCommentRequest);
+    protected GithubApiRequest updateExistingIssue(String issueId, String content) throws IOException {
+        return GithubApiRequests.Repos.Issues.Comments.create(
+                GithubServerPath.DEFAULT_SERVER,
+                GIT_USER,
+                GIT_REPO,
+                issueId,
+                content
+        );
     }
 
-    protected void createNewIssue(GithubApiRequestExecutor githubExecutor, String title, String content) throws IOException {
-        GithubApiRequest.Post<GithubIssue> createIssueRequest =
-                GithubApiRequests.Repos.Issues.create(
-                        GithubServerPath.DEFAULT_SERVER,
-                        GIT_USER,
-                        GIT_REPO,
-                        title,
-                        content,
-                        null,
-                        Collections.emptyList(),
-                        Collections.emptyList());
-
-        githubExecutor.execute(createIssueRequest);
+    protected GithubApiRequest createNewIssue(String title, String content) throws IOException {
+        return GithubApiRequests.Repos.Issues.create(
+                GithubServerPath.DEFAULT_SERVER,
+                GIT_USER,
+                GIT_REPO,
+                title,
+                content,
+                null,
+                Collections.emptyList(),
+                Collections.emptyList());
     }
 
-    protected String searchExistingIssues(GithubApiRequestExecutor githubExecutor, String needle) throws IOException {
+    protected String searchExistingIssues(GithubApiRequestExecutor.WithTokenAuth githubExecutor, String needle, ProgressIndicator progressIndicator) throws IOException {
         GithubApiRequest<GithubResponsePage<GithubSearchedIssue>> existingIssueRequest =
                 GithubApiRequests.Search.Issues.get(
                         GithubServerPath.DEFAULT_SERVER,
@@ -134,7 +140,7 @@ public class CsvGithubIssueSubmitter extends ErrorReportSubmitter {
                 );
 
         String issueId = null;
-        GithubResponsePage<GithubSearchedIssue> foundIssuesPage = githubExecutor.execute(existingIssueRequest);
+        GithubResponsePage<GithubSearchedIssue> foundIssuesPage = githubExecutor.execute(progressIndicator, existingIssueRequest);
         if (foundIssuesPage != null && !foundIssuesPage.getItems().isEmpty()) {
             GithubSearchedIssue foundIssue = foundIssuesPage.getItems().get(0);
             if (foundIssue.getTitle().equals(needle)) {
@@ -152,40 +158,35 @@ public class CsvGithubIssueSubmitter extends ErrorReportSubmitter {
     }
 
     protected String getIssueDetails(IdeaLoggingEvent event, String additionalInfo) {
-        StringBuilder builder = new StringBuilder()
-                .append("Message\n---\n")
-                .append(additionalInfo != null && !additionalInfo.isEmpty() ? additionalInfo : "<no message>")
-                .append("\n\n")
-                .append("Stacktrace\n---\n")
-                .append(event.getThrowableText())
-                .append("\n\n")
-                .append("Plugin\n---\n")
-                .append(getPluginDescriptor().getPluginClassLoader().toString())
-                .append("\n\n")
-                .append("IDE\n---\n")
-                .append(ApplicationInfo.getInstance().getVersionName())
-                .append(" (")
-                .append(ApplicationInfo.getInstance().getBuild().toString())
-                .append(")");
-
-        return builder.toString();
+        return "Message\n---\n" +
+                (additionalInfo != null && !additionalInfo.isEmpty() ? additionalInfo : "<no message>") +
+                "\n\n" +
+                "Stacktrace\n---\n" +
+                event.getThrowableText() +
+                "\n\n" +
+                "Plugin\n---\n" +
+                getPluginDescriptor().getPluginClassLoader() +
+                "\n\n" +
+                "IDE\n---\n" +
+                ApplicationInfo.getInstance().getVersionName() +
+                " (" +
+                ApplicationInfo.getInstance().getBuild() +
+                ")";
     }
 
     @Override
     public String getPrivacyNoticeText() {
-        StringBuilder builder = new StringBuilder()
-                .append("An automated issue report contains the provided message, ")
-                .append("the stacktrace, ")
-                .append("the plugin class loader info (")
-                .append(getPluginDescriptor().getPluginClassLoader().toString())
-                .append("), the used IDE version name (")
-                .append(ApplicationInfo.getInstance().getVersionName())
-                .append(") and build number (")
-                .append(ApplicationInfo.getInstance().getBuild().toString())
-                .append("). ")
-                .append("By sending the report I agree to the information be used for resolving this and further related issues. ")
-                .append("Github Issue Link: ")
-                .append(String.format("https://%s/%s/%s/issues", GithubServerPath.DEFAULT_SERVER, GIT_USER, GIT_REPO));
-        return builder.toString();
+        return "An automated issue report contains the provided message, " +
+                "the stacktrace, " +
+                "the plugin class loader info (" +
+                getPluginDescriptor().getPluginClassLoader() +
+                "), the used IDE version name (" +
+                ApplicationInfo.getInstance().getVersionName() +
+                ") and build number (" +
+                ApplicationInfo.getInstance().getBuild() +
+                "). " +
+                "By sending the report I agree to the information be used for resolving this and further related issues. " +
+                "All provided information will be publicly available at " +
+                String.format("https://%s/%s/%s/issues", GithubServerPath.DEFAULT_SERVER, GIT_USER, GIT_REPO);
     }
 }
