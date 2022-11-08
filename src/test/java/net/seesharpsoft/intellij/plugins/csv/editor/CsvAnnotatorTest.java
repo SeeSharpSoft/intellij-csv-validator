@@ -3,7 +3,6 @@ package net.seesharpsoft.intellij.plugins.csv.editor;
 import com.intellij.codeInsight.daemon.impl.HighlightInfo;
 import com.intellij.codeInsight.daemon.impl.HighlightInfoType;
 import com.intellij.openapi.Disposable;
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Disposer;
@@ -56,7 +55,7 @@ public class CsvAnnotatorTest extends BasePlatformTestCase {
         PsiFileImpl file = (PsiFileImpl)this.getHostFile();
         FileElement hardRefToFileElement = file.calcTreeElement();
         if (!DumbService.isDumb(project)) {
-            ServiceManager.getService(project, CacheManager.class).getFilesWithWord("XXX", (short)2, GlobalSearchScope.allScope(project), true);
+            project.getService(CacheManager.class).getFilesWithWord("XXX", (short)2, GlobalSearchScope.allScope(project), true);
         }
 
         long start = System.currentTimeMillis();

@@ -1,6 +1,7 @@
 package net.seesharpsoft.intellij.plugins.csv.parser;
 
 import com.intellij.testFramework.ParsingTestCase;
+import net.seesharpsoft.intellij.plugins.csv.CsvEscapeCharacter;
 import net.seesharpsoft.intellij.plugins.csv.CsvParserDefinition;
 import net.seesharpsoft.intellij.plugins.csv.CsvValueSeparator;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
@@ -24,7 +25,19 @@ public class CsvParsingTest extends ParsingTestCase {
         CsvEditorSettings.getInstance().setAutoDetectValueSeparator(true);
         CsvEditorSettings.getInstance().setDefaultValueSeparator(CsvEditorSettings.VALUE_SEPARATOR_DEFAULT);
         CsvEditorSettings.getInstance().setCommentIndicator(COMMENT_INDICATOR_DEFAULT);
+        CsvEditorSettings.getInstance().setDefaultEscapeCharacter(CsvEscapeCharacter.QUOTE);
         super.tearDown();
+    }
+
+    public void testEmptyCsv() {
+        doTest(true);
+    }
+
+    public void testEmptyCsvCustom() {
+        setName("EmptyCsv");
+        // enforce custom lexer
+        CsvEditorSettings.getInstance().setDefaultValueSeparator(new CsvValueSeparator(","));
+        doTest(true);
     }
 
     public void testParsingTestData() {
@@ -35,7 +48,8 @@ public class CsvParsingTest extends ParsingTestCase {
 
     public void testParsingTestDataWithCustomParser() {
         setName("ParsingTestData");
-        CsvEditorSettings.getInstance().setDefaultValueSeparator(CsvValueSeparator.create(","));
+        // enforce custom lexer
+        CsvEditorSettings.getInstance().setDefaultValueSeparator(new CsvValueSeparator(","));
         doTest(true);
     }
 
@@ -58,13 +72,39 @@ public class CsvParsingTest extends ParsingTestCase {
 
     public void testAllSeparators() {
         // without comment support, default lexer is used
-        CsvEditorSettings.getInstance().setCommentIndicator("");
         CsvEditorSettings.getInstance().setDefaultValueSeparator(CsvValueSeparator.COMMA);
         doTest(true);
     }
 
+    public void testAllSeparatorsCustom() {
+        // enforce custom lexer
+        CsvEditorSettings.getInstance().setDefaultValueSeparator(new CsvValueSeparator(","));
+        doTest(true);
+    }
+
     public void testCsvWithComments() {
-        // comment support by default (custom lexer is used)
+        // with default comment character #, default lexer is used
+        CsvEditorSettings.getInstance().setDefaultValueSeparator(CsvValueSeparator.COMMA);
+        doTest(true);
+    }
+
+    public void testCsvWithCommentsWithoutCommentSupport() {
+        // with no comment character, default lexer is used
+        CsvEditorSettings.getInstance().setDefaultValueSeparator(CsvValueSeparator.COMMA);
+        CsvEditorSettings.getInstance().setCommentIndicator("");
+        doTest(true);
+    }
+
+    public void testCsvWithCommentsWithoutCommentSupportCustom() {
+        // enforce custom lexer
+        CsvEditorSettings.getInstance().setDefaultValueSeparator(new CsvValueSeparator(","));
+        CsvEditorSettings.getInstance().setCommentIndicator("");
+        doTest(true);
+    }
+
+    public void testCsvWithCommentsCustom() {
+        // with custom comment characters like //, custom lexer is used
+        CsvEditorSettings.getInstance().setCommentIndicator("//");
         CsvEditorSettings.getInstance().setDefaultValueSeparator(CsvValueSeparator.COMMA);
         doTest(true);
     }
@@ -81,6 +121,30 @@ public class CsvParsingTest extends ParsingTestCase {
         CsvEditorSettings.getInstance().setCommentIndicator("");
         CsvEditorSettings.getInstance().setDefaultValueSeparator(CsvValueSeparator.PIPE);
         CsvEditorSettings.getInstance().setAutoDetectValueSeparator(true);
+        doTest(true);
+    }
+
+    public void testBackslashEscape() {
+        CsvEditorSettings.getInstance().setDefaultEscapeCharacter(CsvEscapeCharacter.BACKSLASH);
+        doTest(true);
+    }
+
+    public void testBackslashEscapeCustom() {
+        setName("BackslashEscape");
+        // with custom comment characters like //, custom lexer is used
+        CsvEditorSettings.getInstance().setCommentIndicator("//");
+        CsvEditorSettings.getInstance().setDefaultEscapeCharacter(CsvEscapeCharacter.BACKSLASH);
+        doTest(true);
+    }
+
+    public void testWhitespaces() {
+        doTest(true);
+    }
+
+    public void testWhitespacesCustom() {
+        setName("Whitespaces");
+        // with custom comment characters like //, custom lexer is used
+        CsvEditorSettings.getInstance().setCommentIndicator("//");
         doTest(true);
     }
 

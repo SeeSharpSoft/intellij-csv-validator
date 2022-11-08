@@ -1,5 +1,54 @@
+2.21.0
+Oct 26, 2022
+
+PERF: support comments in fast lexer
+PERF: reworked (rainbow) coloring
+PERF: avoid formatting while typing
+PERF: limit column highlighting to 1000 entries around caret
+PERF: limit calculation and buffering of CSV column info data
+FIX: short comments
+
+2.20.0
+Oct 24, 2022
+
+FIX: Cannot load from object array because "data" is null #335 #337
+NEW: Support fast lexing for default comments
+NEW: Simplify & unify both lexers
+FIX: Empty comment indicator
+
+2.19.0
+Jul 24, 2022
+
+NEW: Ability to auto-reload changed files #316
+FIX: NullPointerException when applying editor state #327
+FIX: additional disposed checks
+
+2.18.2
+Dec 14, 2021
+
+FIX: java.lang.NullPointerException #320
+FIX: Exception when Show info balloon is not selected #318
+
+2.18.1
+Nov 04, 2021
+
+FIX: set require-restart attribute
+NEW: Ability to open urls from IntelliJ CSV view #312
+
+2.18.0
+Oct 21, 2021
+
+NOTE: Minimum version requirement changed to v2020.1 and newer
+FIX: Show diff opens an empty window #306
+
+2.17.1
+Jun 30, 2021
+
+FIX: Plugin not showing column at caret Ctr+F1 #300
+FIX: Past few versions of this plugin don't show colors #298
+
 2.17.0
-Jun 20, 2021
+Jun 21, 2021
 
 NEW: Plugin name change: CSV
 FIX: Null pointer when using csv rendering in Markdown documentation #292

@@ -1,24 +1,15 @@
-buildscript {
-    repositories {
-        mavenCentral()
-        maven { url 'http://dl.bintray.com/jetbrains/intellij-plugin-service' }
-        maven { url 'https://jitpack.io' }
-    }
-    dependencies {
-        classpath 'com.github.hurricup:gradle-grammar-kit-plugin:2018.1.1'
-    }
-}
-
 plugins {
     // https://github.com/JetBrains/gradle-intellij-plugin
-    id 'org.jetbrains.intellij' version '0.7.2'
+    id 'org.jetbrains.intellij' version '1.9.0'
     id 'jacoco'
     id 'com.github.kt3k.coveralls' version '2.8.4'
     id 'com.github.ManifestClasspath' version '0.1.0-RELEASE'
+    // https://github.com/JetBrains/gradle-grammar-kit-plugin
+    id 'org.jetbrains.grammarkit' version '2021.2.2'
 }
 
 jacoco {
-    toolVersion = "0.8.6"
+    toolVersion = "0.8.8"
 }
 
 jacocoTestReport {
@@ -28,7 +19,7 @@ jacocoTestReport {
 }
 
 group 'net.seesharpsoft.intellij.plugins'
-version '2.17.0'
+version '3.0.0'
 
 apply plugin: 'java'
 project.sourceCompatibility = JavaVersion.VERSION_11
@@ -42,8 +33,8 @@ repositories {
 }
 dependencies {
     implementation 'net.seesharpsoft.sharping:sharping-commons:0.21.0'
-    compileOnly 'org.apache.ant:ant:1.10.9'
-    testCompile 'org.mockito:mockito-core:3.8.0'
+    compileOnly 'org.apache.ant:ant:1.10.12'
+    testImplementation 'org.mockito:mockito-core:4.8.1'
 }
 sourceSets {
     main {
@@ -79,16 +70,20 @@ idea {
 apply plugin: 'org.jetbrains.intellij'
 intellij {
     // IDE version - https://www.jetbrains.com/intellij-repository/releases
-    version = System.getenv().getOrDefault('IDEA_VERSION', 'IU-201.6668.121')
-    pluginName = 'CSV Plugin'
-    instrumentCode = true
+    version = System.getenv().getOrDefault('IDEA_VERSION', 'IC-2022.1.1')
+    pluginName = 'CSV'
     updateSinceUntilBuild = false
-    downloadSources = System.getenv().getOrDefault('IDEA_SOURCES', 'true')
+    downloadSources = Boolean.parseBoolean(System.getenv().getOrDefault('IDEA_SOURCES', "true"))
 
     plugins = [
             System.getenv().getOrDefault('GIT_PLUGIN_VERSION', 'Git4Idea:201.6668.74'),
             System.getenv().getOrDefault('GITHUB_PLUGIN_VERSION', 'org.jetbrains.plugins.github:201.6668.74')
     ]
+}
+patchPluginXml {
+    changeNotes = """<pre style="font-family: sans-serif">
+NEW: major update release!
+      </pre>"""
 }
 publishPlugin {
     token = System.getenv().getOrDefault('JI_TOKEN', '')
@@ -103,21 +98,19 @@ test {
         exceptionFormat = 'full'
         showStandardStreams = true
     }
+    // see https://youtrack.jetbrains.com/issue/IDEA-278926
+    scanForTestClasses = false
+    include "**/*Test.class"
 }
 
-apply plugin: 'org.jetbrains.grammarkit'
 grammarKit {
     // version of IntelliJ patched JFlex - https://bintray.com/jetbrains/intellij-third-party-dependencies/jflex
     jflexRelease = '1.7.0-1'
-
     // tag or short commit hash of Grammar-Kit to use - https://github.com/JetBrains/Grammar-Kit
-    grammarKitRelease = System.getenv().getOrDefault('GRAMMAR_KIT_VERSION', '2019.3')
+    grammarKitRelease = System.getenv().getOrDefault('GRAMMAR_KIT_VERSION', '2021.1.2')
 }
 
-import org.jetbrains.grammarkit.tasks.GenerateLexer
-import org.jetbrains.grammarkit.tasks.GenerateParser
-
-task generateCsvParser(type: GenerateParser) {
+tasks.named("generateParser").configure {
     source = 'src/main/java/net/seesharpsoft/intellij/plugins/csv/Csv.bnf'
     targetRoot = 'gen'
     pathToParser = '/net/seesharpsoft/intellij/plugins/csv/parser/CsvParser.java'
@@ -125,7 +118,9 @@ task generateCsvParser(type: GenerateParser) {
     purgeOldFiles = true
 }
 
-task generateCsvLexer(dependsOn: generateCsvParser, type: GenerateLexer) {
+tasks.named("generateLexer").configure {
+    dependsOn generateParser
+
     source = 'src/main/java/net/seesharpsoft/intellij/plugins/csv/CsvLexer.flex'
     targetDir = './gen/net/seesharpsoft/intellij/plugins/csv/'
     targetClass = 'CsvLexer'
@@ -133,5 +128,12 @@ task generateCsvLexer(dependsOn: generateCsvParser, type: GenerateLexer) {
 }
 
 compileJava {
-    dependsOn generateCsvLexer
+    dependsOn generateLexer
+}
+
+// TODO https://youtrack.jetbrains.com/issue/IDEA-298989 - remove after gradle plugin v1.9.1 or v1.10.0 released
+setupDependencies {
+    doLast {
+        fileTree("$buildDir/instrumented/instrumentCode") { include("**/*TableEditorSwing.class") }.files.forEach { delete(it) }
+    }
 }

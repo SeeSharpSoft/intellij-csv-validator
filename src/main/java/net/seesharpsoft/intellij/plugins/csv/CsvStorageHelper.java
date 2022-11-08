@@ -18,18 +18,18 @@ public final class CsvStorageHelper {
         if (project == null || virtualFile == null) {
             return null;
         }
-        if (virtualFile instanceof VirtualFileWindow) {
-            virtualFile = ((VirtualFileWindow) virtualFile).getDelegate();
-        }
-        String filePath = virtualFile.getUserData(RELATIVE_FILE_URL);
+        VirtualFile targetFile = virtualFile instanceof VirtualFileWindow ?
+                ((VirtualFileWindow) virtualFile).getDelegate() :
+                virtualFile;
+        String filePath = targetFile.getUserData(RELATIVE_FILE_URL);
         if (filePath == null && project.getBasePath() != null) {
-            String localFilePath = PathUtil.getLocalPath(virtualFile);
+            String localFilePath = PathUtil.getLocalPath(targetFile);
             if (localFilePath == null) {
                 return null;
             }
             String projectDir = PathUtil.getLocalPath(project.getBasePath());
             filePath = localFilePath.replaceFirst("^" + Pattern.quote(projectDir), "");
-            virtualFile.putUserData(RELATIVE_FILE_URL, filePath);
+            targetFile.putUserData(RELATIVE_FILE_URL, filePath);
         }
         return filePath;
     }

@@ -23,7 +23,7 @@ public class CsvShiftColumnRightIntentionAction extends CsvShiftColumnIntentionA
 
         PsiElement element = CsvHelper.getParentFieldElement(psiElement);
 
-        CsvColumnInfoMap<PsiElement> columnInfoMap = csvFile.getColumnInfoMap();
+        CsvColumnInfoMap<PsiElement> columnInfoMap = CsvHelper.createColumnInfoMap(csvFile);
         CsvColumnInfo<PsiElement> leftColumnInfo = columnInfoMap.getColumnInfo(element);
 
         // column must be at least index 1 to be shifted left

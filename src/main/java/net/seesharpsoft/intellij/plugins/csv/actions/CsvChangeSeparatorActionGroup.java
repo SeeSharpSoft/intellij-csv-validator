@@ -1,14 +1,13 @@
 package net.seesharpsoft.intellij.plugins.csv.actions;
 
-import com.intellij.lang.Language;
 import com.intellij.openapi.actionSystem.ActionGroup;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.psi.PsiFile;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
-import net.seesharpsoft.intellij.plugins.csv.CsvSeparatorHolder;
 import net.seesharpsoft.intellij.plugins.csv.CsvValueSeparator;
+import net.seesharpsoft.intellij.plugins.csv.components.CsvFileAttributes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,11 +27,10 @@ public class CsvChangeSeparatorActionGroup extends ActionGroup {
     @Override
     public void update(AnActionEvent anActionEvent) {
         PsiFile psiFile = anActionEvent.getData(CommonDataKeys.PSI_FILE);
-        boolean isCsvFile = CsvHelper.isCsvFile(psiFile);
-        Language language = psiFile == null ? null : psiFile.getLanguage();
-        anActionEvent.getPresentation().setEnabledAndVisible(isCsvFile && !(language instanceof CsvSeparatorHolder));
+        boolean canChangeAttributes = CsvFileAttributes.canChangeValueSeparator(psiFile);
 
-        if (isCsvFile) {
+        anActionEvent.getPresentation().setEnabledAndVisible(canChangeAttributes);
+        if (canChangeAttributes) {
             anActionEvent.getPresentation()
                     .setText(String.format("CSV Value Separator: %s",
                             CsvHelper.getValueSeparator(psiFile).getDisplay())

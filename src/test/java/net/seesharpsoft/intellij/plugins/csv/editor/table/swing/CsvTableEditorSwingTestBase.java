@@ -1,18 +1,16 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
-import com.intellij.testFramework.exceptionCases.AbstractExceptionCase;
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
-import com.intellij.util.ThrowableRunnable;
-import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
+import com.intellij.util.WaitFor;
+import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableModel;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+
+import java.util.function.Supplier;
+
 
 public abstract class CsvTableEditorSwingTestBase extends BasePlatformTestCase {
 
     protected CsvTableEditorSwing fileEditor;
-
-    protected Object[][] initialState;
 
     @Override
     protected String getTestDataPath() {
@@ -20,6 +18,9 @@ public abstract class CsvTableEditorSwingTestBase extends BasePlatformTestCase {
     }
 
     protected String getTestFile() { return "TableEditorFile.csv"; }
+
+    protected int myInitialRowCount;
+    protected int myInitialColumnCount;
 
     @Override
     protected void setUp() throws Exception {
@@ -29,7 +30,9 @@ public abstract class CsvTableEditorSwingTestBase extends BasePlatformTestCase {
 
         fileEditor = new CsvTableEditorSwing(this.getProject(), myFixture.getFile().getVirtualFile());
         fileEditor.selectNotify();
-        initialState = fileEditor.getDataHandler().getCurrentState();
+
+        myInitialRowCount = getTableModel().getRowCount();
+        myInitialColumnCount = getTableModel().getColumnCount();
     }
 
     @Override
@@ -39,29 +42,12 @@ public abstract class CsvTableEditorSwingTestBase extends BasePlatformTestCase {
         super.tearDown();
     }
 
+    protected CsvTableModel getTableModel() {
+        return fileEditor.getTableModel();
+    }
+
     protected void initializeEditorSettings(CsvEditorSettings instance) {
         instance.loadState(new CsvEditorSettings.OptionSet());
         instance.setFileEndLineBreak(false);
-        instance.setTableAutoColumnWidthOnOpen(false);
-    }
-
-    protected Object[][] changeValue(String newValue, int row, int column) {
-        fileEditor.getTable().setValueAt(newValue, row, column);
-        Object[][] copy = CsvHelper.deepCopy(initialState);
-        copy[row][column] = newValue;
-        return copy;
-    }
-
-
-    public <T extends Throwable> void assertException(@NotNull final Class<? extends Throwable> exceptionClass, @Nullable String expectedErrorMsg, @NotNull final ThrowableRunnable<T> runnable) throws Throwable {
-        assertException(new AbstractExceptionCase() {
-            public Class<? extends Throwable> getExpectedExceptionClass() {
-                return exceptionClass;
-            }
-
-            public void tryClosure() throws Throwable {
-                runnable.run();
-            }
-        }, expectedErrorMsg);
     }
 }

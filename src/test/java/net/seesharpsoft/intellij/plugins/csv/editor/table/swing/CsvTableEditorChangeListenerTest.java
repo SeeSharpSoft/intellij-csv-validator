@@ -16,7 +16,6 @@ public class CsvTableEditorChangeListenerTest extends CsvTableEditorSwingTestBas
 
         fileEditor.tableEditorListener.columnMarginChanged(new ChangeEvent(fileEditor.getTable().getColumnModel()));
         fileEditor.tableEditorListener.columnSelectionChanged(new ListSelectionEvent(fileEditor.getTable().getColumnModel(), 0, 1, true));
-        fileEditor.tableEditorListener.tableChanged(new TableModelEvent(fileEditor.getTableModel()));
         assertTrue(true);
     }
 

@@ -20,6 +20,8 @@ import org.jetbrains.annotations.NotNull;
 public class CsvParserDefinition implements FileParserDefinition {
     public static final TokenSet WHITE_SPACES = TokenSet.create(TokenType.WHITE_SPACE);
 
+    public static final TokenSet STRING_LITERALS = TokenSet.create(CsvTypes.TEXT, CsvTypes.ESCAPED_TEXT);
+
     public static final IFileElementType FILE = new CsvFileElementType(CsvLanguage.INSTANCE);
 
     @NotNull
@@ -43,7 +45,7 @@ public class CsvParserDefinition implements FileParserDefinition {
     @Override
     @NotNull
     public TokenSet getStringLiteralElements() {
-        return TokenSet.EMPTY;
+        return STRING_LITERALS;
     }
 
     @Override
@@ -59,7 +61,8 @@ public class CsvParserDefinition implements FileParserDefinition {
 
     @Override
     public PsiFile createFile(FileViewProvider viewProvider) {
-        return new CsvFile(viewProvider, CsvFileType.INSTANCE);
+        return new CsvFile(viewProvider, viewProvider.getFileType());
+//        return new CsvFile(viewProvider, CsvFileType.INSTANCE);
     }
 
     @Override

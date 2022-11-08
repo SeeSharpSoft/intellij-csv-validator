@@ -4,24 +4,21 @@ import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.ui.components.labels.LinkLabel;
 import com.intellij.ui.components.labels.LinkListener;
-import com.intellij.ui.table.JBTable;
-import net.seesharpsoft.intellij.plugins.csv.editor.CsvFileEditorProvider;
-import net.seesharpsoft.intellij.plugins.csv.editor.table.api.TableActions;
+import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableActions;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.net.URI;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
-public class CsvTableEditorActionListeners extends CsvTableEditorUtilBase implements TableActions<CsvTableEditorSwing> {
+public class CsvTableEditorActionListeners extends CsvTableEditorUtilBase implements CsvTableActions<CsvTableEditorSwing> {
 
-    protected ActionListener undo = event -> undoLastAction(csvTableEditor);
-    protected ActionListener redo = event -> redoLastAction(csvTableEditor);
     protected ActionListener addRow = event -> addRow(csvTableEditor, false);
     protected ActionListener addRowBefore = event -> addRow(csvTableEditor, true);
     protected ActionListener addRowAfter = event -> addRow(csvTableEditor, false);
-    protected ActionListener addColumn = event -> addColumn(csvTableEditor, false);
     protected ActionListener addColumnBefore = event -> addColumn(csvTableEditor, true);
     protected ActionListener addColumnAfter = event -> addColumn(csvTableEditor, false);
     protected ActionListener deleteRow = event -> deleteSelectedRows(csvTableEditor);
@@ -30,7 +27,6 @@ public class CsvTableEditorActionListeners extends CsvTableEditorUtilBase implem
     protected ActionListener adjustColumnWidthAction = event -> adjustColumnWidths(csvTableEditor);
     protected ActionListener resetColumnWidthAction = event -> resetColumnWidths(csvTableEditor);
 
-    protected LinkListener adjustColumnWidthLink = ((linkLabel, o) -> adjustColumnWidths(csvTableEditor));
     protected LinkListener openTextEditor = new OpenTextEditor();
     protected LinkListener openCsvPluginLink = new OpenCsvPluginLink();
 
@@ -40,7 +36,29 @@ public class CsvTableEditorActionListeners extends CsvTableEditorUtilBase implem
 
     @Override
     public void addRow(CsvTableEditorSwing tableEditor, boolean before) {
-        if (tableEditor.hasErrors()) {
+        if (tableEditor.getTableModel().hasErrors()) {
+            return;
+        }
+
+        tableEditor.removeTableChangeListener();
+        try {
+            JTable table = tableEditor.getTable();
+            int currentRow = table.getSelectedRow();
+            if (currentRow == -1) return;
+
+            tableEditor.addRow(table.convertRowIndexToModel(currentRow), before);
+
+            int targetRow = before ? currentRow : currentRow + 1;
+            int targetColumn = 0;
+            selectCell(tableEditor.getTable(), targetRow, targetColumn);
+        } finally {
+            tableEditor.applyTableChangeListener();
+        }
+    }
+
+    @Override
+    public void addColumn(CsvTableEditorSwing tableEditor, boolean before) {
+        if (tableEditor.getTableModel().hasErrors()) {
             return;
         }
 
@@ -49,28 +67,9 @@ public class CsvTableEditorActionListeners extends CsvTableEditorUtilBase implem
             JTable table = tableEditor.getTable();
             int currentColumn = table.getSelectedColumn();
             int currentRow = table.getSelectedRow();
+            if (currentColumn == -1 || currentRow == -1) return;
 
-            tableEditor.addRow(currentRow, before);
-
-            selectCell(tableEditor.getTable(), before ? currentRow + 1 : currentRow, currentColumn);
-        } finally {
-            tableEditor.applyTableChangeListener();
-        }
-    }
-
-    @Override
-    public void addColumn(CsvTableEditorSwing tableEditor, boolean before) {
-        if (tableEditor.hasErrors()) {
-            return;
-        }
-
-        tableEditor.removeTableChangeListener();
-        try {
-            JBTable table = tableEditor.getTable();
-            int currentColumn = table.getSelectedColumn();
-            int currentRow = table.getSelectedRow();
-
-            tableEditor.addColumn(currentColumn, before);
+            tableEditor.addColumn(table.convertColumnIndexToModel(currentColumn), before);
 
             selectCell(table, currentRow, before ? currentColumn + 1 : currentColumn);
         } finally {
@@ -80,7 +79,7 @@ public class CsvTableEditorActionListeners extends CsvTableEditorUtilBase implem
 
     @Override
     public void deleteSelectedRows(CsvTableEditorSwing tableEditor) {
-        if (tableEditor.hasErrors()) {
+        if (tableEditor.getTableModel().hasErrors()) {
             return;
         }
 
@@ -93,7 +92,7 @@ public class CsvTableEditorActionListeners extends CsvTableEditorUtilBase implem
             }
             int currentColumn = table.getSelectedColumn();
 
-            tableEditor.removeRows(currentRows);
+            tableEditor.removeRows(Arrays.stream(currentRows).map(row -> table.convertRowIndexToModel(row)).boxed().collect(Collectors.toList()));
 
             selectCell(table, currentRows[0], currentColumn);
         } finally {
@@ -103,20 +102,20 @@ public class CsvTableEditorActionListeners extends CsvTableEditorUtilBase implem
 
     @Override
     public void deleteSelectedColumns(CsvTableEditorSwing tableEditor) {
-        if (tableEditor.hasErrors()) {
+        if (tableEditor.getTableModel().hasErrors()) {
             return;
         }
 
         tableEditor.removeTableChangeListener();
         try {
-            JBTable table = tableEditor.getTable();
+            JTable table = tableEditor.getTable();
             int[] selectedColumns = table.getSelectedColumns();
             if (selectedColumns == null || selectedColumns.length == 0) {
                 return;
             }
             int focusedRow = table.getSelectedRow();
 
-            tableEditor.removeColumns(selectedColumns);
+            tableEditor.removeColumns(Arrays.stream(selectedColumns).map(col -> table.convertColumnIndexToModel(col)).boxed().collect(Collectors.toList()));
 
             selectCell(table, focusedRow, selectedColumns[0]);
         } finally {
@@ -126,13 +125,13 @@ public class CsvTableEditorActionListeners extends CsvTableEditorUtilBase implem
 
     @Override
     public void clearSelectedCells(CsvTableEditorSwing tableEditor) {
-        if (tableEditor.hasErrors()) {
+        if (tableEditor.getTableModel().hasErrors()) {
             return;
         }
 
         tableEditor.removeTableChangeListener();
         try {
-            JBTable table = tableEditor.getTable();
+            JTable table = tableEditor.getTable();
             int[] selectedRows = table.getSelectedRows();
             int[] selectedColumns = table.getSelectedColumns();
 
@@ -144,7 +143,10 @@ public class CsvTableEditorActionListeners extends CsvTableEditorUtilBase implem
             int focusedRow = table.getSelectedRow();
             int focusedColumn = table.getSelectedColumn();
 
-            tableEditor.clearCells(selectedColumns, selectedRows);
+            tableEditor.clearCells(
+                    Arrays.stream(selectedRows).map(row -> table.convertRowIndexToModel(row)).boxed().collect(Collectors.toList()),
+                    Arrays.stream(selectedColumns).map(col -> table.convertColumnIndexToModel(col)).boxed().collect(Collectors.toList())
+            );
 
             selectCell(table, focusedRow, focusedColumn);
         } finally {
@@ -158,16 +160,13 @@ public class CsvTableEditorActionListeners extends CsvTableEditorUtilBase implem
         if (actualRow < 0 || actualColumn < 0) {
             return;
         }
-        table.setRowSelectionInterval(actualRow, actualRow);
-        table.setColumnSelectionInterval(actualColumn, actualColumn);
+        table.changeSelection(actualRow, actualColumn, false, false);
     }
 
     private final class OpenTextEditor implements LinkListener {
         @Override
         public void linkSelected(LinkLabel linkLabel, Object o) {
             FileEditorManager.getInstance(csvTableEditor.getProject()).openTextEditor(new OpenFileDescriptor(csvTableEditor.getProject(), csvTableEditor.getFile()), true);
-            // this line is for legacy reasons (https://youtrack.jetbrains.com/issue/IDEA-199790)
-            FileEditorManager.getInstance(csvTableEditor.getProject()).setSelectedEditor(csvTableEditor.getFile(), CsvFileEditorProvider.EDITOR_TYPE_ID);
         }
     }
 

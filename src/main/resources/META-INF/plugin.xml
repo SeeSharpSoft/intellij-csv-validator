@@ -1,6 +1,6 @@
-<idea-plugin>
+<idea-plugin require-restart="false">
     <id>net.seesharpsoft.intellij.plugins.csv</id>
-    <name>CSV</name>
+    <name>CSV Table Editor</name>
     <vendor url="https://github.com/SeeSharpSoft/intellij-csv-validator">
         Martin Sommer
     </vendor>
@@ -36,9 +36,9 @@
         <br><br>
         <b>Code formatting:</b> <em>Default code formatting is 'Tabularize'. Can be changed in Settings -> Editor -> Code Style -> CSV/TSV/PSV</em>
         <br><br>
-        For more detailed information please have a look at the <a href="https://github.com/SeeSharpSoft/intellij-csv-validator/blob/master/README.md">README</a>.
+        For more detailed information please have a look at the <a href="https://github.com/SeeSharpSoft/intellij-csv-validator/blob/main/README.md">README</a>.
         <br><br><br>
-        <em>Thanks to @royqh1979, @egoisticalgoat, @sabi0, @ptahchiev, @ghost, @MarkJeronimus, <a href="http://finevisuals.de" target="_blank">FineVisuals</a> and others for supporting me and the project!</em>
+        <em>Thanks to @royqh1979, @egoisticalgoat, @sabi0, @ptahchiev, @ghost, @MarkJeronimus, <a href="https://finevisuals.de" target="_blank">FineVisuals</a> and others for supporting me and the project!</em>
         <br><br><br>
         </p>
         <p>
@@ -48,17 +48,8 @@
         </p>
     ]]></description>
 
-    <change-notes><![CDATA[
-        <pre style="font-family: sans-serif">
-NEW: Plugin name change: CSV
-FIX: Null pointer when using csv rendering in Markdown documentation #292
-FIX: NullPointerException on startup #295
-      </pre>
-    ]]>
-    </change-notes>
-
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
-    <idea-version since-build="201" />
+    <idea-version since-build="221" />
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
          on how to target different products -->
@@ -67,16 +58,11 @@ FIX: NullPointerException on startup #295
 
     <extensions defaultExtensionNs="com.intellij">
         <fileType name="CSV" language="csv" implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvFileType" extensions="csv" fieldName="INSTANCE"/>
-        <fileType name="TSV" language="tsv" implementationClass="net.seesharpsoft.intellij.plugins.tsv.TsvFileType" extensions="tsv;tab" fieldName="INSTANCE"/>
-        <fileType name="PSV" language="psv" implementationClass="net.seesharpsoft.intellij.plugins.psv.PsvFileType" extensions="psv" fieldName="INSTANCE"/>
-        <fileTypeOverrider implementation="net.seesharpsoft.intellij.plugins.csv.CsvFileTypeOverrider" />
+        <fileType name="TSV" language="csv" implementationClass="net.seesharpsoft.intellij.plugins.tsv.TsvFileType" extensions="tsv;tab" fieldName="INSTANCE"/>
+        <fileType name="PSV" language="csv" implementationClass="net.seesharpsoft.intellij.plugins.psv.PsvFileType" extensions="psv" fieldName="INSTANCE"/>
 
         <lang.parserDefinition language="csv"
                                implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvParserDefinition"/>
-        <lang.parserDefinition language="tsv"
-                               implementationClass="net.seesharpsoft.intellij.plugins.tsv.TsvParserDefinition"/>
-        <lang.parserDefinition language="psv"
-                               implementationClass="net.seesharpsoft.intellij.plugins.psv.PsvParserDefinition"/>
 
         <lang.syntaxHighlighterFactory language="csv"
                                        implementationClass="net.seesharpsoft.intellij.plugins.csv.highlighter.CsvSyntaxHighlighterFactory"/>
@@ -110,8 +96,6 @@ FIX: NullPointerException on startup #295
         <langCodeStyleSettingsProvider
                 implementation="net.seesharpsoft.intellij.plugins.csv.settings.CsvLanguageCodeStyleSettingsProvider"/>
 
-        <lang.psiStructureViewFactory language="csv"
-                                      implementationClass="net.seesharpsoft.intellij.plugins.csv.structureview.CsvStructureViewFactory"/>
         <iconProvider implementation="net.seesharpsoft.intellij.plugins.csv.CsvIconProvider"/>
 
         <localInspection
@@ -163,6 +147,11 @@ FIX: NullPointerException on startup #295
         <postStartupActivity implementation="net.seesharpsoft.intellij.plugins.csv.CsvPlugin" />
 
         <lang.commenter implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvCommenter" language="csv" />
+
+        <!-- support for URL referencing -->
+        <psi.referenceContributor language="csv" implementation="net.seesharpsoft.intellij.plugins.csv.psi.CsvPsiReferenceContributor" />
+
+        <notificationGroup displayType="STICKY_BALLOON" id="net.seesharpsoft.intellij.plugins.csv" isLogByDefault="true" hideFromSettings="true" />
     </extensions>
 
     <actions>
@@ -178,21 +167,21 @@ FIX: NullPointerException on startup #295
         </group>
         <action class="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AddColumnBefore"
                 id="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AddColumnBefore"
-                text="New column before (Ctrl+Left)"
+                text="New column before (Ctrl+Shift+Left)"
                 icon="/media/icons/add-column-before.png"
         >
             <add-to-group group-id="CsvTableEditorColumnContextMenu" anchor="first" />
         </action>
         <action class="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AddColumnAfter"
                 id="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AddColumnAfter"
-                text="New column after (Ctrl+Right)"
+                text="New column after (Ctrl+Shift+Right)"
                 icon="/media/icons/add-column.png"
         >
             <add-to-group group-id="CsvTableEditorColumnContextMenu" relative-to-action="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AddColumnBefore" anchor="after" />
         </action>
         <action class="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$DeleteSelectedColumns"
                 id="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$DeleteSelectedColumns"
-                text="Delete selected column (Ctrl+Shift+Del)"
+                text="Delete selected columns (Ctrl+Shift+Del)"
                 icon="/media/icons/remove-column.png"
         >
             <add-to-group group-id="CsvTableEditorColumnContextMenu" relative-to-action="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AddColumnAfter" anchor="after" />
@@ -222,7 +211,7 @@ FIX: NullPointerException on startup #295
 
         <action class="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AdjustColumnWidths"
                 id="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AdjustColumnWidths"
-                text="Adjust column widths"
+                text="Auto-fit columns width (Ctrl+Shift+Space)"
                 icon="/media/icons/adjust-column-width.png"
         >
             <add-to-group group-id="CsvTableEditorColumnContextMenu" />
@@ -230,7 +219,7 @@ FIX: NullPointerException on startup #295
         </action>
         <action class="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$ResetColumnWidths"
                 id="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$ResetColumnWidths"
-                text="Reset column widths to default"
+                text="Reset columns width to default"
                 icon="/media/icons/reset-column-width.png"
         >
             <add-to-group group-id="CsvTableEditorColumnContextMenu" relative-to-action="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AdjustColumnWidths" anchor="after" />

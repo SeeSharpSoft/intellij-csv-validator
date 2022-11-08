@@ -8,6 +8,10 @@ import com.intellij.openapi.editor.markup.RangeHighlighter;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public class CsvHighlightUsagesHandlerTest extends BasePlatformTestCase {
 
     @Override
@@ -15,8 +19,13 @@ public class CsvHighlightUsagesHandlerTest extends BasePlatformTestCase {
         return "./src/test/resources/highlighter";
     }
 
-    private void assertHighlightedText(RangeHighlighter rangeHighlighter, String text) {
-        assertEquals(text, rangeHighlighter.getDocument().getText(TextRange.create(rangeHighlighter.getStartOffset(), rangeHighlighter.getEndOffset())));
+    private void assertHighlightedTexts(RangeHighlighter[] rangeHighlighters, String... texts) {
+        assertSize(texts.length, rangeHighlighters);
+        List<String> needles =  new ArrayList(Arrays.asList(texts));
+        for (RangeHighlighter rangeHighlighter : rangeHighlighters) {
+            needles.removeIf(text -> text.equals(rangeHighlighter.getDocument().getText(TextRange.create(rangeHighlighter.getStartOffset(), rangeHighlighter.getEndOffset()))));
+        }
+        assertSize(0, needles);
     }
 
     private RangeHighlighter[] testHighlightUsages(String... fileNames) {
@@ -38,47 +47,37 @@ public class CsvHighlightUsagesHandlerTest extends BasePlatformTestCase {
     public void testHighlightUsages01() {
         RangeHighlighter[] rangeHighlighters = testHighlightUsages("HighlightUsagesTestData01.csv");
 
-        assertSize(2, rangeHighlighters);
-        assertHighlightedText(rangeHighlighters[0], " Header 2");
-        assertHighlightedText(rangeHighlighters[1], " Value 2");
+        assertHighlightedTexts(rangeHighlighters, " Header 2", " Value 2");
     }
 
     public void testHighlightUsages02() {
         RangeHighlighter[] rangeHighlighters = testHighlightUsages("HighlightUsagesTestData02.csv");
 
-        assertSize(2, rangeHighlighters);
-        assertHighlightedText(rangeHighlighters[0], " Header 2");
-        assertHighlightedText(rangeHighlighters[1], " Value 2");
+        assertHighlightedTexts(rangeHighlighters, " Header 2", " Value 2");
     }
 
     public void testHighlightUsages03() {
         RangeHighlighter[] rangeHighlighters = testHighlightUsages("HighlightUsagesTestData03.csv");
 
-        assertSize(2, rangeHighlighters);
-        assertHighlightedText(rangeHighlighters[0], "Header 1");
-        assertHighlightedText(rangeHighlighters[1], "Value 1");
+        assertHighlightedTexts(rangeHighlighters, "Header 1", "Value 1");
     }
 
     public void testHighlightUsages04() {
         RangeHighlighter[] rangeHighlighters = testHighlightUsages("HighlightUsagesTestData04.csv");
 
-        assertSize(1, rangeHighlighters);
-        assertHighlightedText(rangeHighlighters[0], " Value 3");
+        assertHighlightedTexts(rangeHighlighters, " Value 3");
     }
 
     public void testHighlightUsages05() {
         RangeHighlighter[] rangeHighlighters = testHighlightUsages("HighlightUsagesTestData05.csv");
 
-        assertSize(2, rangeHighlighters);
-        assertHighlightedText(rangeHighlighters[0], " Header 2");
-        assertHighlightedText(rangeHighlighters[1], " Value 2");
+        assertHighlightedTexts(rangeHighlighters, " Header 2", " Value 2");
     }
 
     public void testHighlightUsages06() {
         RangeHighlighter[] rangeHighlighters = testHighlightUsages("HighlightUsagesTestData06.csv");
 
-        assertSize(1, rangeHighlighters);
-        assertHighlightedText(rangeHighlighters[0], " Value 3");
+        assertHighlightedTexts(rangeHighlighters, " Value 3");
     }
 
     public void testHighlightUsages07() {

@@ -1,5 +1,6 @@
 package net.seesharpsoft.intellij.plugins.csv.psi;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.psi.tree.IElementType;
 import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
 import org.jetbrains.annotations.NonNls;
@@ -12,6 +13,24 @@ public class CsvTokenType extends IElementType {
 
     @Override
     public String toString() {
-        return "CsvTokenType." + super.toString();
+        if (ApplicationManager.getApplication().isUnitTestMode()) {
+            return "CsvTokenType." + super.toString();
+        }
+
+        switch (super.toString()) {
+            case "COMMA":
+                return "Value Separator";
+            case "QUOTE":
+                return "Quote";
+            case "TEXT":
+            case "ESCAPED_TEXT":
+                return "Text";
+            case "COMMENT":
+                return "Comment";
+            case "CRLF":
+                return "<Enter>";
+            default:
+                return super.toString();
+        }
     }
 }

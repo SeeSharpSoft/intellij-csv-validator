@@ -1,32 +1,69 @@
 package net.seesharpsoft.intellij.plugins.csv.formatter;
 
-import com.intellij.formatting.FormattingModel;
-import com.intellij.formatting.FormattingModelBuilder;
-import com.intellij.formatting.FormattingModelProvider;
+import com.intellij.formatting.*;
 import com.intellij.lang.ASTNode;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.codeStyle.CodeStyleSettings;
+import net.seesharpsoft.UnhandledSwitchCaseException;
+import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
+import net.seesharpsoft.intellij.plugins.csv.psi.CsvElementType;
+import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
+import net.seesharpsoft.intellij.plugins.csv.settings.CsvCodeStyleSettings;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class CsvFormattingModelBuilder implements FormattingModelBuilder {
-    @NotNull
-    @Override
-    public FormattingModel createModel(PsiElement element, CodeStyleSettings settings) {
-        ASTNode root = CsvFormatHelper.getRoot(element.getNode());
-        CsvFormattingInfo formattingInfo = new CsvFormattingInfo(
-                settings,
-                CsvFormatHelper.createSpaceBuilder(settings),
-                CsvFormatHelper.createColumnInfoMap(root, settings)
-        );
 
-        return FormattingModelProvider.createFormattingModelForPsiFile(
-                element.getContainingFile(),
-                new CsvBlock(root, formattingInfo),
-                settings
-        );
+    private static SpacingBuilder createSpaceBuilder(CodeStyleSettings settings) {
+        CsvCodeStyleSettings csvCodeStyleSettings = settings.getCustomSettings(CsvCodeStyleSettings.class);
+        SpacingBuilder builder = new SpacingBuilder(settings, CsvLanguage.INSTANCE);
+        if (csvCodeStyleSettings.TRIM_LEADING_WHITE_SPACES) {
+            builder
+                    .after(CsvTypes.COMMA).spaceIf(csvCodeStyleSettings.SPACE_AFTER_SEPARATOR)
+                    .after(CsvTypes.CRLF).spaces(0)
+                    .after(CsvElementType.DOCUMENT_START).spaces(0);
+        } else if (csvCodeStyleSettings.SPACE_AFTER_SEPARATOR) {
+            builder.after(CsvTypes.COMMA).spaces(1);
+        }
+
+        if (csvCodeStyleSettings.TRIM_TRAILING_WHITE_SPACES) {
+            builder
+                    .before(CsvTypes.COMMA).spaceIf(csvCodeStyleSettings.SPACE_BEFORE_SEPARATOR)
+                    .before(CsvTypes.CRLF).spaces(0);
+        } else if (csvCodeStyleSettings.SPACE_BEFORE_SEPARATOR) {
+            builder.before(CsvTypes.COMMA).spaces(1);
+        }
+
+        return builder;
+    }
+
+    @Override
+    @NotNull
+    public FormattingModel createModel(FormattingContext formattingContext) {
+        switch (formattingContext.getFormattingMode()) {
+            case ADJUST_INDENT:
+            case ADJUST_INDENT_ON_ENTER:
+                // do not care about indent during editing (baaad performance)
+                return FormatterImpl.getInstance().createDummyFormattingModel(formattingContext.getPsiElement());
+            case REFORMAT:
+                PsiElement element = formattingContext.getPsiElement();
+                CodeStyleSettings settings = formattingContext.getCodeStyleSettings();
+                ASTNode root = element.getNode();
+                CsvFormattingInfo formattingInfo = new CsvFormattingInfo(
+                        settings,
+                        createSpaceBuilder(settings)
+                );
+
+                return FormattingModelProvider.createFormattingModelForPsiFile(
+                        element.getContainingFile(),
+                        new SimpleCsvBlock(root, formattingInfo),
+                        settings
+                );
+            default:
+                throw new UnhandledSwitchCaseException(formattingContext.getFormattingMode());
+        }
     }
 
     @Nullable

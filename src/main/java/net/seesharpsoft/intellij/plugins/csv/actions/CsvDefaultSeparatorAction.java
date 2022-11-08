@@ -32,7 +32,7 @@ public class CsvDefaultSeparatorAction extends ToggleAction {
             return;
         }
         CsvFileAttributes.getInstance(psiFile.getProject()).resetValueSeparator(psiFile);
-        FileContentUtilCore.reparseFiles(psiFile.getVirtualFile());
+        FileContentUtilCore.reparseFiles(CsvHelper.getVirtualFile(psiFile));
 
         FileEditor fileEditor = anActionEvent.getData(PlatformDataKeys.FILE_EDITOR);
         if (fileEditor != null) {

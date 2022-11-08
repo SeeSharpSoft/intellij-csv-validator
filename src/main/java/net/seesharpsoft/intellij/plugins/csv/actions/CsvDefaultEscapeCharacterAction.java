@@ -32,7 +32,7 @@ public class CsvDefaultEscapeCharacterAction extends ToggleAction {
             return;
         }
         CsvFileAttributes.getInstance(psiFile.getProject()).resetEscapeSeparator(psiFile);
-        FileContentUtilCore.reparseFiles(psiFile.getVirtualFile());
+        FileContentUtilCore.reparseFiles(CsvHelper.getVirtualFile(psiFile));
 
         FileEditor fileEditor = anActionEvent.getData(PlatformDataKeys.FILE_EDITOR);
         if (fileEditor != null) {

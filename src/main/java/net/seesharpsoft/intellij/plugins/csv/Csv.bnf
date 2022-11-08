@@ -13,22 +13,23 @@
   tokenTypeClass="net.seesharpsoft.intellij.plugins.csv.psi.CsvTokenType"
 
   tokens=[
-    TEXT='regexp:[^ ,:;|\t\r\n"\\]+'
-    ESCAPED_TEXT='regexp:[,:;|\t\r\n]|""|\\"'
-    ESCAPE_CHARACTER='regexp:\\'
-    COMMA='regexp:[,:;|\t]'
-    QUOTE='regexp:"'
-    CRLF='regexp:\n'
-    COMMENT='regexp:#.*(\n|$)'
+    TEXT
+    ESCAPED_TEXT
+    COMMA
+    QUOTE
+    CRLF
+    COMMENT
    ]
 }
 
 csvFile ::= record (CRLF record)* [CRLF]
 
-record ::= (COMMENT | (field (COMMA field)*))
+record ::= COMMENT | (field (COMMA field)*)
 
-field ::= (escaped | nonEscaped)
+field ::= escaped | nonEscaped
 
-private escaped ::= QUOTE (TEXT | ESCAPE_CHARACTER | ESCAPED_TEXT)* QUOTE
+private escaped ::= QUOTE quotedText QUOTE
 
-private nonEscaped ::= (TEXT | ESCAPE_CHARACTER)*
+private quotedText ::= (TEXT | ESCAPED_TEXT)*
+
+private nonEscaped ::= TEXT*

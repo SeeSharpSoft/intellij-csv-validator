@@ -101,6 +101,10 @@ public class CsvValueSeparator {
         return myPattern.matcher(text).matches();
     }
 
+    public boolean isValueSeparator(char c) {
+        return myCharacter.charAt(0) == c;
+    }
+
     public String getName() {
         return myName;
     }
@@ -123,7 +127,7 @@ public class CsvValueSeparator {
         if (obj == null || !(obj instanceof CsvValueSeparator)) {
             return false;
         }
-        CsvValueSeparator otherObj = (CsvValueSeparator)obj;
+        CsvValueSeparator otherObj = (CsvValueSeparator) obj;
         return Objects.equals(otherObj.getCharacter(), this.getCharacter()) && Objects.equals(otherObj.isCustom(), this.isCustom());
     }
 

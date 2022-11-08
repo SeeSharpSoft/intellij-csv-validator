@@ -13,7 +13,7 @@ import net.seesharpsoft.intellij.plugins.csv.components.CsvFileAttributes;
 import org.jetbrains.annotations.NotNull;
 
 public class CsvChangeEscapeCharacterAction extends ToggleAction {
-    private CsvEscapeCharacter myEscapeCharacter;
+    private final CsvEscapeCharacter myEscapeCharacter;
 
     CsvChangeEscapeCharacterAction(CsvEscapeCharacter escapeCharacter) {
         super(escapeCharacter.getDisplay());
@@ -36,7 +36,7 @@ public class CsvChangeEscapeCharacterAction extends ToggleAction {
             return;
         }
         CsvFileAttributes.getInstance(psiFile.getProject()).setEscapeCharacter(psiFile, this.myEscapeCharacter);
-        FileContentUtilCore.reparseFiles(psiFile.getVirtualFile());
+        FileContentUtilCore.reparseFiles(CsvHelper.getVirtualFile(psiFile));
 
         FileEditor fileEditor = anActionEvent.getData(PlatformDataKeys.FILE_EDITOR);
         if (fileEditor != null) {

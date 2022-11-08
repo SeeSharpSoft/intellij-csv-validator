@@ -18,6 +18,7 @@ import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
 import net.seesharpsoft.intellij.plugins.csv.CsvValueSeparator;
 import net.seesharpsoft.intellij.plugins.csv.intention.CsvIntentionHelper;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
+import net.seesharpsoft.intellij.psi.PsiHelper;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -77,7 +78,7 @@ public class CsvValidationInspection extends LocalInspectionTool {
                     return;
                 }
 
-                IElementType elementType = CsvHelper.getElementType(element);
+                IElementType elementType = PsiHelper.getElementType(element);
                 PsiElement firstChild = element.getFirstChild();
                 PsiElement nextSibling = element.getNextSibling();
                 if (elementType == TokenType.ERROR_ELEMENT && firstChild != null && element.getText().equals(firstChild.getText())) {
@@ -86,7 +87,7 @@ public class CsvValidationInspection extends LocalInspectionTool {
                         CsvValidationInspection.this.registerError(holder, element, SEPARATOR_MISSING, fixSeparatorMissing);
                     }
                 } else if ((elementType == CsvTypes.TEXT || elementType == CsvTypes.ESCAPED_TEXT) &&
-                        CsvHelper.getElementType(nextSibling) == TokenType.ERROR_ELEMENT &&
+                        PsiHelper.getElementType(nextSibling) == TokenType.ERROR_ELEMENT &&
                         nextSibling.getFirstChild() == null) {
                     CsvValidationInspection.this.registerError(holder, element, CLOSING_QUOTE_MISSING, fixClosingQuoteMissing);
                 }
@@ -118,26 +119,21 @@ public class CsvValidationInspection extends LocalInspectionTool {
 
         @Override
         public void applyFix(@NotNull Project project, @NotNull ProblemDescriptor descriptor) {
-            try {
-                PsiElement element = descriptor.getPsiElement();
-                Document document = PsiDocumentManager.getInstance(project).getDocument(element.getContainingFile());
-                List<Integer> quotePositions = new ArrayList<>();
+            PsiElement element = descriptor.getPsiElement();
+            Document document = PsiDocumentManager.getInstance(project).getDocument(element.getContainingFile());
+            List<Integer> quotePositions = new ArrayList<>();
 
-                int quotePosition = CsvIntentionHelper.getOpeningQuotePosition(element);
-                if (quotePosition != -1) {
-                    quotePositions.add(quotePosition);
-                }
-                PsiElement endSeparatorElement = CsvIntentionHelper.findQuotePositionsUntilSeparator(element, quotePositions, true);
-                if (endSeparatorElement == null) {
-                    quotePositions.add(document.getTextLength());
-                } else {
-                    quotePositions.add(endSeparatorElement.getTextOffset());
-                }
-                String text = CsvIntentionHelper.addQuotes(document.getText(), quotePositions);
-                document.setText(text);
-            } catch (IncorrectOperationException e) {
-                LOG.error(e);
+            int quotePosition = CsvIntentionHelper.getOpeningQuotePosition(element);
+            if (quotePosition != -1) {
+                quotePositions.add(quotePosition);
             }
+            PsiElement endSeparatorElement = CsvIntentionHelper.findQuotePositionsUntilSeparator(element, quotePositions, true);
+            if (endSeparatorElement == null) {
+                quotePositions.add(document.getTextLength());
+            } else {
+                quotePositions.add(endSeparatorElement.getTextOffset());
+            }
+            CsvIntentionHelper.addQuotes(document, quotePositions);
         }
     }
 

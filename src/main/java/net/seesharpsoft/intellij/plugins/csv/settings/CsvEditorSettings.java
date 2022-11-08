@@ -3,12 +3,13 @@ package net.seesharpsoft.intellij.plugins.csv.settings;
 import com.intellij.openapi.application.Application;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.openapi.editor.ex.EditorSettingsExternalizable;
 import com.intellij.util.xmlb.annotations.OptionTag;
-import net.seesharpsoft.intellij.plugins.csv.*;
+import net.seesharpsoft.intellij.plugins.csv.CsvEscapeCharacter;
+import net.seesharpsoft.intellij.plugins.csv.CsvStorageHelper;
+import net.seesharpsoft.intellij.plugins.csv.CsvValueSeparator;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
@@ -23,9 +24,9 @@ import java.util.Objects;
 @SuppressWarnings("all")
 public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSettings.OptionSet> {
 
-    public static final int TABLE_EDITOR_ROW_HEIGHT_MIN = 0;
-    public static final int TABLE_EDITOR_ROW_HEIGHT_MAX = 10;
-    public static final int TABLE_EDITOR_ROW_HEIGHT_DEFAULT = 3;
+    public static final int TABLE_EDITOR_ROW_HEIGHT_MIN = 10;
+    public static final int TABLE_EDITOR_ROW_HEIGHT_MAX = 100;
+    public static final int TABLE_EDITOR_ROW_HEIGHT_DEFAULT = 48;
     public static final int TABLE_AUTO_MAX_COLUMN_WIDTH_DEFAULT = 300;
     public static final int TABLE_DEFAULT_COLUMN_WIDTH_DEFAULT = 100;
 
@@ -66,13 +67,11 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
         public boolean HIGHTLIGHT_TAB_SEPARATOR = true;
         public boolean SHOW_INFO_BALLOON = true;
         public String TAB_HIGHLIGHT_COLOR = "-7984";
-        public EditorPrio EDITOR_PRIO = EditorPrio.TEXT_FIRST;
+        public EditorPrio EDITOR_PRIO = EditorPrio.TABLE_FIRST;
         public int TABLE_EDITOR_ROW_HEIGHT = TABLE_EDITOR_ROW_HEIGHT_DEFAULT;
         public int TABLE_AUTO_MAX_COLUMN_WIDTH = TABLE_AUTO_MAX_COLUMN_WIDTH_DEFAULT;
         public int TABLE_DEFAULT_COLUMN_WIDTH = TABLE_DEFAULT_COLUMN_WIDTH_DEFAULT;
-        public boolean TABLE_AUTO_COLUMN_WIDTH_ON_OPEN = false;
         public boolean ZERO_BASED_COLUMN_NUMBERING = false;
-        public boolean TABLE_HEADER_ROW_FIXED = false;
 
         public boolean SHOW_TABLE_EDITOR_INFO_PANEL = true;
         public boolean QUOTING_ENFORCED = false;
@@ -104,7 +103,7 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
         if (application.isUnitTestMode()) {
             return CsvEditorSettings.STATIC_TEST_INSTANCE;
         }
-        return application.isDisposed() ? new CsvEditorSettings() :  ServiceManager.getService(CsvEditorSettings.class);
+        return application.isDisposed() ? new CsvEditorSettings() : application.getService(CsvEditorSettings.class);
     }
 
     public void addPropertyChangeListener(PropertyChangeListener listener) {
@@ -239,14 +238,6 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
         getState().TABLE_DEFAULT_COLUMN_WIDTH = tableDefaultColumnWidth;
     }
 
-    public boolean isTableAutoColumnWidthOnOpen() {
-        return getState().TABLE_AUTO_COLUMN_WIDTH_ON_OPEN;
-    }
-
-    public void setTableAutoColumnWidthOnOpen(boolean tableAutoColumnWidthOnOpen) {
-        getState().TABLE_AUTO_COLUMN_WIDTH_ON_OPEN = tableAutoColumnWidthOnOpen;
-    }
-
     public void setDefaultEscapeCharacter(CsvEscapeCharacter defaultEscapeCharacter) {
         CsvEscapeCharacter oldValue = getDefaultEscapeCharacter();
         getState().DEFAULT_ESCAPE_CHARACTER = defaultEscapeCharacter;
@@ -303,14 +294,6 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
         if (valueColoring != oldValue) {
             myPropertyChangeSupport.firePropertyChange("valueColoring", oldValue, getValueColoring());
         }
-    }
-
-    public boolean isHeaderRowFixed() {
-        return getState().TABLE_HEADER_ROW_FIXED;
-    }
-
-    public void setHeaderRowFixed(boolean headerRowFixed) {
-        getState().TABLE_HEADER_ROW_FIXED = headerRowFixed;
     }
 
     public boolean isAutoDetectValueSeparator() {
