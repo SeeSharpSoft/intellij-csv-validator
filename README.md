@@ -12,7 +12,7 @@ Compatible with _IntelliJ IDEA  PhpStorm  WebStorm  PyCharm  RubyMine  AppCode  
 This plugin introduces CSV (_Comma-Separated Values_) as a language to Jetbrains IDE with a syntax definition, structured language elements and associated file types (.csv/.tsv/.psv).
 This enables default editor features like syntax validation, highlighting and inspections for CSV-alike files.
 
-![CSV Plugin Example](./docs/example.png)
+![CSV Table Editor Example](./docs/example.png)
 
 ## Features
 
@@ -346,7 +346,7 @@ The plugin provides six types of intentions:
 
 Install it from the Jetbrains plugin repository within your IDE (**recommended**):
 
-- _File > Settings > Plugins > Browse repositories... > Search 'CSV Plugin' > Category 'Editor'_
+- _File > Settings > Plugins > Browse repositories... > Search 'CSV' > Category 'Editor'_
 
 You can also download the JAR package from the [Jetbrains plugin repository](https://plugins.jetbrains.com/plugin/10037-csv-plugin) or from [GitHub Releases](https://github.com/SeeSharpSoft/intellij-csv-validator/releases) and add it manually to your plugins:
 
@@ -356,7 +356,7 @@ You can also download the JAR package from the [Jetbrains plugin repository](htt
 
 #### CSV Table Editor doesn't seem to work
 
-Please ensure in the Settings that the corresponding files types (csv, tab/tsv, psv) are properly mapped (_File > Settings > Editor > File Types_). 
+Please ensure in the settings that the corresponding files types (csv, tab/tsv, psv) are properly mapped (_File > Settings > Editor > File Types_). 
 
 #### CSV Table Editor causes the IDE to stop working properly
 
@@ -368,9 +368,11 @@ In some cases the error log doesn't seem to point this out in a noticeable manne
 
 Please read the [official instructions](https://intellij-support.jetbrains.com/hc/en-us/articles/206544879-Selecting-the-JDK-version-the-IDE-will-run-under) on how to switch to a newer JRE, or [manually install](https://github.com/SeeSharpSoft/intellij-csv-validator#installation) a [prior CSV plugin version](https://github.com/SeeSharpSoft/intellij-csv-validator/releases/tag/2.10.0).
 
-#### Features of the CSV Plugin are not available
+#### Features of the CSV Table Editor are not available
 
-If another plugin for CSV files like [Rainbow CSV](https://plugins.jetbrains.com/plugin/12896-rainbow-csv) is enabled, this plugin might not be taken into account for parsing and presenting CSV file content. 
+If another plugin for CSV files like [Rainbow CSV](https://plugins.jetbrains.com/plugin/12896-rainbow-csv) is enabled, this plugin might not be taken into account for parsing and presenting CSV file content.
+
+Therefore, please ensure in the settings the proper mapping of corresponding files types (_File > Settings > Editor > File Types_).
 
 ## Contribution
 

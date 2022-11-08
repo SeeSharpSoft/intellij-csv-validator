@@ -223,12 +223,13 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
     }
 
     public void addRow(@NotNull PsiElement anchor, boolean before) {
-        while (anchor != null && !(anchor instanceof CsvRecord)) {
-            anchor = anchor.getParent();
+        PsiElement record = anchor;
+        while (record != null && !(record instanceof CsvRecord)) {
+            record = record.getParent();
         }
-        assert anchor instanceof CsvRecord;
-        doAction(new AddSiblingPsiAction(anchor, createRecord(), before));
-        doAddLineBreak(anchor, before);
+        assert record instanceof CsvRecord;
+        doAction(new AddSiblingPsiAction(record, createRecord(), before));
+        doAddLineBreak(record, before);
     }
 
     public void deleteRow(@NotNull PsiElement row) {
@@ -277,9 +278,9 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
         doAction(new ReplacePsiAction(toReplace, createComment(text)));
     }
 
-    public void replaceField(@NotNull PsiElement toReplace, @Nullable String text, boolean enquoteCommentIndicator) {
+    public void replaceField(@NotNull PsiElement toReplace, @Nullable String textArg, boolean enquoteCommentIndicator) {
         assert toReplace instanceof CsvField;
-        if (text == null) text = "";
+        String text = textArg == null ? "" : textArg;
         // do not replace if not necessary
         if (toReplace.getText().equals(text)) return;
 

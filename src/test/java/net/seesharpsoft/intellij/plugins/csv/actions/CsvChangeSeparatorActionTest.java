@@ -1,28 +1,15 @@
 package net.seesharpsoft.intellij.plugins.csv.actions;
 
 import com.intellij.openapi.actionSystem.Presentation;
-import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.CsvValueSeparator;
-import net.seesharpsoft.intellij.plugins.csv.components.CsvFileAttributes;
 
-public class CsvChangeSeparatorActionTest extends BasePlatformTestCase {
-
-    @Override
-    protected String getTestDataPath() {
-        return "./src/test/resources/actions";
-    }
-
-    @Override
-    protected void tearDown() throws Exception {
-        CsvFileAttributes.getInstance(this.getProject()).reset();
-        super.tearDown();
-    }
+public class CsvChangeSeparatorActionTest extends CsvActionTestBase {
 
     public void testActionGroupVisibilityForCsv() {
         myFixture.configureByFiles("CommaSeparated.csv");
 
-        Presentation presentation = myFixture.testAction(new CsvChangeSeparatorActionGroup());
+        Presentation presentation = testActionGroup(new CsvChangeSeparatorActionGroup(), myFixture);
         assertTrue(presentation.isVisible());
         assertTrue(presentation.isEnabled());
     }
@@ -30,7 +17,7 @@ public class CsvChangeSeparatorActionTest extends BasePlatformTestCase {
     public void testActionGroupVisibilityForTsv() {
         myFixture.configureByFiles("TabSeparated.tsv");
 
-        Presentation presentation = myFixture.testAction(new CsvChangeSeparatorActionGroup());
+        Presentation presentation = testActionGroup(new CsvChangeSeparatorActionGroup(), myFixture);
         assertFalse(presentation.isVisible());
         assertFalse(presentation.isEnabled());
     }

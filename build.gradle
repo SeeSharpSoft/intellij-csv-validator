@@ -74,6 +74,11 @@ intellij {
     pluginName = 'CSV'
     updateSinceUntilBuild = false
     downloadSources = Boolean.parseBoolean(System.getenv().getOrDefault('IDEA_SOURCES', "true"))
+
+    plugins = [
+            System.getenv().getOrDefault('GIT_PLUGIN_VERSION', 'Git4Idea'),
+            System.getenv().getOrDefault('GITHUB_PLUGIN_VERSION', 'org.jetbrains.plugins.github')
+    ]
 }
 patchPluginXml {
     changeNotes = """<pre style="font-family: sans-serif">
