@@ -29,6 +29,17 @@ public class CsvParsingTest extends ParsingTestCase {
         super.tearDown();
     }
 
+    public void testEmptyCsv() {
+        doTest(true);
+    }
+
+    public void testEmptyCsvCustom() {
+        setName("EmptyCsv");
+        // enforce custom lexer
+        CsvEditorSettings.getInstance().setDefaultValueSeparator(new CsvValueSeparator(","));
+        doTest(true);
+    }
+
     public void testParsingTestData() {
         // without comment support, default lexer is used
         CsvEditorSettings.getInstance().setCommentIndicator("");
@@ -123,6 +134,17 @@ public class CsvParsingTest extends ParsingTestCase {
         // with custom comment characters like //, custom lexer is used
         CsvEditorSettings.getInstance().setCommentIndicator("//");
         CsvEditorSettings.getInstance().setDefaultEscapeCharacter(CsvEscapeCharacter.BACKSLASH);
+        doTest(true);
+    }
+
+    public void testWhitespaces() {
+        doTest(true);
+    }
+
+    public void testWhitespacesCustom() {
+        setName("Whitespaces");
+        // with custom comment characters like //, custom lexer is used
+        CsvEditorSettings.getInstance().setCommentIndicator("//");
         doTest(true);
     }
 

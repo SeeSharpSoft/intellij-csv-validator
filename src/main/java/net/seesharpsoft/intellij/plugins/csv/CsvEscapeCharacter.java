@@ -102,7 +102,7 @@ public class CsvEscapeCharacter {
         if (obj == null || !(obj instanceof CsvEscapeCharacter)) {
             return false;
         }
-        CsvEscapeCharacter otherObj = (CsvEscapeCharacter)obj;
+        CsvEscapeCharacter otherObj = (CsvEscapeCharacter) obj;
         return Objects.equals(otherObj.getCharacter(), this.getCharacter()) && Objects.equals(otherObj.isCustom(), this.isCustom());
     }
 

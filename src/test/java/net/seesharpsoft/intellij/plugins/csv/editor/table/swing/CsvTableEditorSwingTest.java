@@ -5,16 +5,10 @@ import com.intellij.openapi.fileEditor.FileEditorStateLevel;
 import com.intellij.openapi.util.Key;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditor;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditorState;
-import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
+import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableModel;
 
-import javax.swing.table.DefaultTableModel;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.util.Vector;
 
 public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
 
@@ -33,12 +27,8 @@ public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
         assertEquals(true, fileEditor.isValid());
         assertEquals(null, fileEditor.getBackgroundHighlighter());
 
-        StructureViewBuilder structureViewBuilder = StructureViewBuilder.PROVIDER.getStructureViewBuilder(myFixture.getFile().getFileType(), myFixture.getFile().getVirtualFile(), this.getProject());
-        assertInstanceOf(fileEditor.getStructureViewBuilder(), structureViewBuilder.getClass());
-
         assertEquals(myFixture.getFile().getVirtualFile(), fileEditor.getFile());
         assertEquals(this.getProject(), fileEditor.getProject());
-        assertNotNull(fileEditor.getDataHandler());
         assertNotNull(fileEditor.getComponent());
         assertEquals(fileEditor.getTable(), fileEditor.getPreferredFocusedComponent());
     }
@@ -74,50 +64,17 @@ public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
     }
 
     public void testTableContent() {
-        DefaultTableModel tableModel = fileEditor.getTableModel();
+        CsvTableModel tableModel = fileEditor.getTableModel();
         assertEquals(2, tableModel.getColumnCount());
         assertEquals(4, tableModel.getRowCount());
 
-        Vector columns = (Vector)tableModel.getDataVector().get(0);
-        assertEquals("Header1", columns.get(0));
-        assertEquals("header 2", columns.get(1));
-        columns = (Vector)tableModel.getDataVector().get(1);
-        assertEquals("this is column \"Header1\"", columns.get(0));
-        assertEquals("this is column header 2", columns.get(1));
-        columns = (Vector)tableModel.getDataVector().get(2);
-        assertEquals("just another line with leading and trailing whitespaces", columns.get(0));
-        assertEquals("  and one more value  ", columns.get(1));
-        columns = (Vector)tableModel.getDataVector().get(3);
-        assertEquals("", columns.get(0));
-        assertEquals("", columns.get(1));
+        assertEquals("Header1", tableModel.getValue(0, 0));
+        assertEquals(" header 2", tableModel.getValue(0, 1));
+        assertEquals("this is column \"Header1\"", tableModel.getValue(1, 0));
+        assertEquals("this is column header 2", tableModel.getValue(1, 1));
+        assertEquals(" just another line with leading and trailing whitespaces  ", tableModel.getValue(2, 0));
+        assertEquals("  and one more value  ", tableModel.getValue(2, 1));
+        assertEquals("", tableModel.getValue(3, 0));
+        assertEquals("", tableModel.getValue(3, 1));
     }
-
-    public void testTableContentChanges() {
-        Object[][] newState = changeValue("new value", 2, 1);
-        assertTrue(fileEditor.isModified());
-        assertFalse(fileEditor.getDataHandler().equalsCurrentState(initialState));
-        assertTrue(fileEditor.getDataHandler().equalsCurrentState(newState));
-    }
-
-    public void testTableCsvGeneration() throws FileNotFoundException {
-        changeValue("new value", 2, 1);
-        String generatedCsv = fileEditor.generateCsv(fileEditor.getDataHandler().getCurrentState());
-
-        File resultFile = new File(this.getTestDataPath(), "TableEditorFileChanged.csv");
-        String expectedContent = new BufferedReader(new FileReader(resultFile)).lines().reduce(null, (prev, line) -> prev == null ? line : prev + "\n" + line);
-
-        assertEquals(expectedContent, generatedCsv);
-    }
-
-    public void testTableCsvGenerationEnforceQuoting() throws FileNotFoundException {
-        changeValue("new value", 2, 1);
-        CsvEditorSettings.getInstance().setQuotingEnforced(true);
-        String generatedCsv = fileEditor.generateCsv(fileEditor.getDataHandler().getCurrentState());
-
-        File resultFile = new File(this.getTestDataPath(), "TableEditorFileChangedQuoted.csv");
-        String expectedContent = new BufferedReader(new FileReader(resultFile)).lines().reduce(null, (prev, line) -> prev == null ? line : prev + "\n" + line);
-
-        assertEquals(expectedContent, generatedCsv);
-    }
-
 }

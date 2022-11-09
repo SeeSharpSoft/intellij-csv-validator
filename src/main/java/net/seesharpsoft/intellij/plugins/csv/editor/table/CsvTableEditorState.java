@@ -15,10 +15,8 @@ import java.util.List;
 public class CsvTableEditorState implements FileEditorState {
 
     private int[] columnWidths;
-    private Boolean autoColumnWidthOnOpen;
     private Boolean showInfoPanel;
-    private Boolean fixedHeaders;
-    private Integer rowLines;
+    private Integer rowHeight;
 
     public CsvTableEditorState() {
         columnWidths = new int[0];
@@ -40,31 +38,15 @@ public class CsvTableEditorState implements FileEditorState {
         showInfoPanel = showInfoPanelArg;
     }
 
-    public boolean getFixedHeaders() {
-        return fixedHeaders == null ? CsvEditorSettings.getInstance().isHeaderRowFixed() : fixedHeaders;
-    }
-
-    public void setFixedHeaders(boolean fixedHeadersArg) {
-        fixedHeaders = fixedHeadersArg;
-    }
-
-    public boolean getAutoColumnWidthOnOpen() {
-        return autoColumnWidthOnOpen == null ? CsvEditorSettings.getInstance().isTableAutoColumnWidthOnOpen() : autoColumnWidthOnOpen;
-    }
-
-    public void setAutoColumnWidthOnOpen(Boolean autoColumnWidthOnOpenArg) {
-        autoColumnWidthOnOpen = autoColumnWidthOnOpenArg;
-    }
-
-    public int getRowLines() {
-        if (rowLines == null) {
-            rowLines = CsvEditorSettings.getInstance().getTableEditorRowHeight();
+    public int getRowHeight() {
+        if (rowHeight == null) {
+            rowHeight = CsvEditorSettings.getInstance().getTableEditorRowHeight();
         }
-        return rowLines;
+        return rowHeight;
     }
 
-    public void setRowLines(int rowLinesArg) {
-        rowLines = rowLinesArg;
+    public void setRowHeight(int rowHeightArg) {
+        rowHeight = rowHeightArg;
     }
 
     @Override
@@ -74,11 +56,7 @@ public class CsvTableEditorState implements FileEditorState {
 
     public void write(@NotNull Project project, @NotNull Element element) {
         element.setAttribute("showInfoPanel", "" + showInfoPanel());
-        element.setAttribute("fixedHeaders", "" + getFixedHeaders());
-        if (autoColumnWidthOnOpen != null) {
-            element.setAttribute("autoColumnWidthOnOpen", "" + autoColumnWidthOnOpen);
-        }
-        element.setAttribute("rowLines", "" + getRowLines());
+        element.setAttribute("rowHeight", "" + getRowHeight());
         for (int i = 0; i < columnWidths.length; ++i) {
             Element cwElement = new Element("column");
 
@@ -87,7 +65,6 @@ public class CsvTableEditorState implements FileEditorState {
 
             element.addContent(cwElement);
         }
-
     }
 
     public static CsvTableEditorState create(@NotNull Element element, @NotNull Project project, @NotNull VirtualFile file) {
@@ -98,18 +75,8 @@ public class CsvTableEditorState implements FileEditorState {
                 attribute == null ? CsvEditorSettings.getInstance().showTableEditorInfoPanel() : Boolean.parseBoolean(attribute.getValue())
         );
 
-        attribute = element.getAttribute("fixedHeaders");
-        state.setFixedHeaders(
-                attribute == null ? false : Boolean.parseBoolean(attribute.getValue())
-        );
-
-        attribute = element.getAttribute("autoColumnWidthOnOpen");
-        if (attribute != null) {
-            state.setAutoColumnWidthOnOpen(Boolean.parseBoolean(attribute.getValue()));
-        }
-
-        state.setRowLines(
-                StringUtilRt.parseInt(element.getAttributeValue("rowLines"), CsvEditorSettings.getInstance().getTableEditorRowHeight())
+        state.setRowHeight(
+                StringUtilRt.parseInt(element.getAttributeValue("rowHeight"), CsvEditorSettings.getInstance().getTableEditorRowHeight())
         );
 
         List<Element> columnWidthElements = element.getChildren("column");

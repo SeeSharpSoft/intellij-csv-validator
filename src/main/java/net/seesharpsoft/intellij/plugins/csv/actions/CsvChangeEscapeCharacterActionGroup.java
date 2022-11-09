@@ -1,5 +1,6 @@
 package net.seesharpsoft.intellij.plugins.csv.actions;
 
+import com.intellij.lang.Language;
 import com.intellij.openapi.actionSystem.ActionGroup;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
@@ -7,6 +8,7 @@ import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.psi.PsiFile;
 import net.seesharpsoft.intellij.plugins.csv.CsvEscapeCharacter;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
+import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -25,9 +27,10 @@ public class CsvChangeEscapeCharacterActionGroup extends ActionGroup {
     @Override
     public void update(AnActionEvent anActionEvent) {
         PsiFile psiFile = anActionEvent.getData(CommonDataKeys.PSI_FILE);
-        boolean isCsvFile = CsvHelper.isCsvFile(psiFile);
-        anActionEvent.getPresentation().setEnabledAndVisible(isCsvFile);
-        if (isCsvFile) {
+        boolean canChangeEscapeCharacter = CsvHelper.isCsvFile(psiFile) && psiFile.getLanguage().isKindOf(CsvLanguage.INSTANCE);
+
+        anActionEvent.getPresentation().setEnabledAndVisible(canChangeEscapeCharacter);
+        if (canChangeEscapeCharacter) {
             CsvEscapeCharacter escapeCharacter = CsvHelper.getEscapeCharacter(psiFile);
             anActionEvent.getPresentation().setText(String.format("CSV Escape Character: %s", escapeCharacter.getDisplay()));
         }

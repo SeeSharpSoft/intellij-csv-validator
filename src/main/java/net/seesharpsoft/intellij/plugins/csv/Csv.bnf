@@ -24,9 +24,9 @@
 
 csvFile ::= record (CRLF record)* [CRLF]
 
-record ::= (COMMENT | (field (COMMA field)*))
+record ::= COMMENT | (field (COMMA field)*)
 
-field ::= (escaped | nonEscaped)
+field ::= escaped | nonEscaped
 
 private escaped ::= QUOTE quotedText QUOTE
 

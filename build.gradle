@@ -19,7 +19,7 @@ jacocoTestReport {
 }
 
 group 'net.seesharpsoft.intellij.plugins'
-version '2.21.0'
+version '3.0.0'
 
 apply plugin: 'java'
 project.sourceCompatibility = JavaVersion.VERSION_11
@@ -70,20 +70,28 @@ idea {
 apply plugin: 'org.jetbrains.intellij'
 intellij {
     // IDE version - https://www.jetbrains.com/intellij-repository/releases
-    version = System.getenv().getOrDefault('IDEA_VERSION', 'IC-2020.1.1')
+    version = System.getenv().getOrDefault('IDEA_VERSION', 'IC-2022.1.1')
     pluginName = 'CSV'
     updateSinceUntilBuild = false
     downloadSources = Boolean.parseBoolean(System.getenv().getOrDefault('IDEA_SOURCES', "true"))
+
+    plugins = [
+            System.getenv().getOrDefault('GIT_PLUGIN_VERSION', 'Git4Idea'),
+            System.getenv().getOrDefault('GITHUB_PLUGIN_VERSION', 'org.jetbrains.plugins.github')
+    ]
 }
 patchPluginXml {
     changeNotes = """<pre style="font-family: sans-serif">
-PERF: support comments in fast lexer
-PERF: reworked (rainbow) coloring
-PERF: avoid formatting while typing
-PERF: limit column highlighting to 1000 entries around caret
-PERF: limit calculation and buffering of CSV column info data
-FIX: short comments
-      </pre>"""
+Major update release 3.*!
+
+For this release, the plugin was reworked quite a bit, focusing on performance and table editor usage. The table editor is now the default editor!
+
+Some options were removed for simplification and consistency (e.g. 'Tabularize' formatting), while new features were added (e.g. comment support in table editor).
+
+Feedback is welcome!
+
+PS: The previous versions are still available on the project page.
+</pre>"""
 }
 publishPlugin {
     token = System.getenv().getOrDefault('JI_TOKEN', '')
@@ -98,6 +106,9 @@ test {
         exceptionFormat = 'full'
         showStandardStreams = true
     }
+    // see https://youtrack.jetbrains.com/issue/IDEA-278926
+    scanForTestClasses = false
+    include "**/*Test.class"
 }
 
 grammarKit {

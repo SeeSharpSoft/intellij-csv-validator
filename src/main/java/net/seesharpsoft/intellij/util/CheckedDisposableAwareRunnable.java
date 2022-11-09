@@ -1,22 +1,21 @@
 package net.seesharpsoft.intellij.util;
 
-import com.intellij.openapi.Disposable;
-import com.intellij.openapi.util.Disposer;
+import com.intellij.openapi.util.CheckedDisposable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.ref.WeakReference;
 
-public class CheckedDisposableAwareRunnable<T extends Runnable> extends WeakReference<Disposable> implements Runnable {
+public class CheckedDisposableAwareRunnable<T extends Runnable> extends WeakReference<CheckedDisposable> implements Runnable {
     protected final T myDelegate;
 
-    private CheckedDisposableAwareRunnable(@NotNull T delegate, @NotNull Disposable disposable) {
+    private CheckedDisposableAwareRunnable(@NotNull T delegate, @NotNull CheckedDisposable disposable) {
         super(disposable);
         myDelegate = delegate;
     }
 
     @NotNull
-    public static Runnable create(@NotNull Runnable delegate, @Nullable Disposable disposable) {
+    public static Runnable create(@NotNull Runnable delegate, @Nullable CheckedDisposable disposable) {
         if (disposable == null) {
             return delegate;
         }
@@ -26,8 +25,8 @@ public class CheckedDisposableAwareRunnable<T extends Runnable> extends WeakRefe
 
     @Override
     public void run() {
-        Disposable res = get();
-        if (res == null || Disposer.isDisposed(res)) return;
+        CheckedDisposable res = get();
+        if (res == null || res.isDisposed()) return;
 
         myDelegate.run();
     }

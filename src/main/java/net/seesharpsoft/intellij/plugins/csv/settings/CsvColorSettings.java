@@ -66,13 +66,18 @@ public class CsvColorSettings implements ColorSettingsPage {
         return COLUMN_COLORING_ATTRIBUTES.get(columnIndex % 10);
     }
 
+    public static TextAttributes getCommentTextAttributes() {
+        EditorColorsScheme editorColorsScheme = EditorColorsManager.getInstance().getGlobalScheme();
+        return editorColorsScheme.getAttributes(COMMENT);
+    }
+
     public static TextAttributes getTextAttributesOfColumn(int columnIndex, UserDataHolder userDataHolder) {
         List<TextAttributes> textAttributeList = userDataHolder.getUserData(COLUMN_COLORING_TEXT_ATTRIBUTES);
         if (textAttributeList == null) {
             EditorColorsScheme editorColorsScheme = EditorColorsManager.getInstance().getGlobalScheme();
             textAttributeList = new ArrayList<>();
             int maxIndex = 0;
-            switch(CsvEditorSettings.getInstance().getValueColoring()) {
+            switch (CsvEditorSettings.getInstance().getValueColoring()) {
                 case RAINBOW:
                     maxIndex = applyColumnTextAttributes(editorColorsScheme, textAttributeList);
                     break;

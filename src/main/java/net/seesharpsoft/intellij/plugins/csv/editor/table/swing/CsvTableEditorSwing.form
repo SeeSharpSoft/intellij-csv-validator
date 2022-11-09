@@ -8,216 +8,47 @@
     <properties/>
     <border type="none"/>
     <children>
-      <scrollpane id="67e39">
+      <grid id="911ca" binding="panelTop" layout-manager="GridBagLayout">
         <constraints>
-          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="true">
+            <minimum-size width="-1" height="30"/>
+          </grid>
         </constraints>
-        <properties/>
+        <properties>
+          <visible value="false"/>
+        </properties>
         <border type="none"/>
         <children>
-          <grid id="911ca" layout-manager="GridBagLayout">
-            <constraints/>
+          <component id="8e338" class="com.intellij.ui.components.labels.LinkLabel" binding="lnkTextEditor" custom-create="true">
+            <constraints>
+              <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+              <gridbag weightx="0.0" weighty="0.0"/>
+            </constraints>
+            <properties>
+              <horizontalTextPosition value="10"/>
+              <text value="Open file in text editor"/>
+            </properties>
+          </component>
+          <component id="157b0" class="javax.swing.JLabel" binding="lblErrorText">
+            <constraints>
+              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+              <gridbag weightx="0.0" weighty="0.0"/>
+            </constraints>
+            <properties>
+              <font size="12" style="1"/>
+              <foreground color="-65536"/>
+              <text value="  Error while parsing content - please fix issues in text editor!"/>
+            </properties>
+          </component>
+          <component id="d8426" class="javax.swing.JToolBar$Separator">
+            <constraints>
+              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+              <gridbag weightx="0.0" weighty="0.0"/>
+            </constraints>
             <properties/>
-            <border type="none"/>
-            <children>
-              <component id="58f74" class="javax.swing.JButton" binding="btnAddRowBefore">
-                <constraints>
-                  <grid row="0" column="4" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-                  <gridbag weightx="1.0" weighty="0.0"/>
-                </constraints>
-                <properties>
-                  <icon value="media/icons/add-row-before.png"/>
-                  <text value=""/>
-                  <toolTipText value="Add row before"/>
-                  <visible value="false"/>
-                </properties>
-              </component>
-              <component id="bcbc6" class="javax.swing.JButton" binding="btnAddRow">
-                <constraints>
-                  <grid row="0" column="5" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <gridbag weightx="1.0" weighty="0.0"/>
-                </constraints>
-                <properties>
-                  <icon value="media/icons/add-row.png"/>
-                  <maximumSize width="56" height="28"/>
-                  <minimumSize width="56" height="28"/>
-                  <preferredSize width="56" height="28"/>
-                  <toolTipText value="Add row"/>
-                  <visible value="false"/>
-                </properties>
-              </component>
-              <component id="294f4" class="javax.swing.JButton" binding="btnRemoveRow">
-                <constraints>
-                  <grid row="0" column="6" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <gridbag weightx="1.0" weighty="0.0"/>
-                </constraints>
-                <properties>
-                  <icon value="media/icons/remove-row.png"/>
-                  <text value=""/>
-                  <toolTipText value="Remove row"/>
-                  <visible value="false"/>
-                </properties>
-              </component>
-              <component id="cc28c" class="javax.swing.JButton" binding="btnAddColumnBefore">
-                <constraints>
-                  <grid row="0" column="7" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <gridbag weightx="1.0" weighty="0.0"/>
-                </constraints>
-                <properties>
-                  <icon value="media/icons/add-column-before.png"/>
-                  <text value=""/>
-                  <toolTipText value="Add column before"/>
-                  <visible value="false"/>
-                </properties>
-              </component>
-              <component id="7de12" class="javax.swing.JButton" binding="btnAddColumn">
-                <constraints>
-                  <grid row="0" column="8" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <gridbag weightx="1.0" weighty="0.0"/>
-                </constraints>
-                <properties>
-                  <icon value="media/icons/add-column.png"/>
-                  <maximumSize width="56" height="28"/>
-                  <minimumSize width="56" height="28"/>
-                  <preferredSize width="56" height="28"/>
-                  <toolTipText value="Add column"/>
-                  <visible value="false"/>
-                </properties>
-              </component>
-              <component id="a0fe5" class="javax.swing.JButton" binding="btnRemoveColumn">
-                <constraints>
-                  <grid row="0" column="9" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <gridbag weightx="1.0" weighty="0.0"/>
-                </constraints>
-                <properties>
-                  <icon value="media/icons/remove-column.png"/>
-                  <text value=""/>
-                  <toolTipText value="Remove column"/>
-                  <visible value="false"/>
-                </properties>
-              </component>
-              <grid id="46b01" layout-manager="FlowLayout" hgap="5" vgap="5" flow-align="1">
-                <constraints>
-                  <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
-                  <gridbag weightx="1.0" weighty="0.0"/>
-                </constraints>
-                <properties/>
-                <border type="none"/>
-                <children>
-                  <component id="bdd04" class="com.intellij.ui.components.labels.LinkLabel" binding="lnkAdjustColumnWidth">
-                    <constraints/>
-                    <properties>
-                      <icon value="media/icons/empty.png"/>
-                      <text value="Adjust column widths"/>
-                    </properties>
-                  </component>
-                  <component id="8674f" class="javax.swing.JCheckBox" binding="cbAutoColumnWidthOnOpen">
-                    <constraints/>
-                    <properties>
-                      <horizontalTextPosition value="10"/>
-                      <text value="on open:"/>
-                    </properties>
-                  </component>
-                  <component id="cb548" class="javax.swing.JToolBar$Separator">
-                    <constraints/>
-                    <properties/>
-                  </component>
-                  <component id="83d80" class="javax.swing.JCheckBox" binding="cbFixedHeaders">
-                    <constraints/>
-                    <properties>
-                      <contentAreaFilled value="false"/>
-                      <horizontalTextPosition value="10"/>
-                      <label value="Header row fixed:"/>
-                      <text value="Header row fixed:"/>
-                    </properties>
-                  </component>
-                  <component id="b81ce" class="javax.swing.JToolBar$Separator">
-                    <constraints/>
-                    <properties/>
-                  </component>
-                  <component id="9bf69" class="javax.swing.JLabel" binding="lblTextlines">
-                    <constraints/>
-                    <properties>
-                      <text value="Text-lines per row:  "/>
-                    </properties>
-                  </component>
-                  <component id="65e44" class="javax.swing.JComboBox" binding="comboRowHeight">
-                    <constraints/>
-                    <properties>
-                      <maximumSize width="100" height="32767"/>
-                      <model>
-                        <item value="Auto"/>
-                        <item value="1"/>
-                        <item value="2"/>
-                        <item value="3"/>
-                        <item value="4"/>
-                        <item value="5"/>
-                        <item value="6"/>
-                        <item value="7"/>
-                        <item value="8"/>
-                        <item value="9"/>
-                        <item value="10"/>
-                      </model>
-                    </properties>
-                  </component>
-                  <component id="8daaf" class="javax.swing.JToolBar$Separator">
-                    <constraints/>
-                    <properties/>
-                  </component>
-                  <component id="484e4" class="javax.swing.JButton" binding="btnUndo">
-                    <constraints/>
-                    <properties>
-                      <icon value="actions/undo.png"/>
-                      <maximumSize width="56" height="28"/>
-                      <minimumSize width="56" height="28"/>
-                      <preferredSize width="56" height="28"/>
-                      <toolTipText value="Undo"/>
-                    </properties>
-                  </component>
-                  <component id="e3fa2" class="javax.swing.JButton" binding="btnRedo">
-                    <constraints/>
-                    <properties>
-                      <icon value="actions/redo.png"/>
-                      <maximumSize width="56" height="28"/>
-                      <minimumSize width="56" height="28"/>
-                      <preferredSize width="56" height="28"/>
-                      <toolTipText value="Redo"/>
-                    </properties>
-                  </component>
-                </children>
-              </grid>
-              <component id="8e338" class="com.intellij.ui.components.labels.LinkLabel" binding="lnkTextEditor" custom-create="true">
-                <constraints>
-                  <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <gridbag weightx="0.0" weighty="0.0"/>
-                </constraints>
-                <properties>
-                  <horizontalTextPosition value="10"/>
-                  <text value="Open file in text editor"/>
-                </properties>
-              </component>
-              <component id="157b0" class="javax.swing.JLabel" binding="lblErrorText">
-                <constraints>
-                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <gridbag weightx="0.0" weighty="0.0"/>
-                </constraints>
-                <properties>
-                  <font size="12" style="1"/>
-                  <foreground color="-65536"/>
-                  <text value="  ATTENTION: Error while parsing content - please fix issues in text editor!"/>
-                </properties>
-              </component>
-              <component id="d8426" class="javax.swing.JToolBar$Separator">
-                <constraints>
-                  <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-                  <gridbag weightx="0.0" weighty="0.0"/>
-                </constraints>
-                <properties/>
-              </component>
-            </children>
-          </grid>
+          </component>
         </children>
-      </scrollpane>
+      </grid>
       <scrollpane id="6b9c5" binding="tableScrollPane">
         <constraints>
           <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
@@ -273,7 +104,7 @@
                 <properties>
                   <horizontalTextPosition value="10"/>
                   <iconTextGap value="2"/>
-                  <text value="CSV plugin"/>
+                  <text value="CSV Editor"/>
                 </properties>
               </component>
             </children>

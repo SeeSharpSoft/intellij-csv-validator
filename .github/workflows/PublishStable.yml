@@ -23,7 +23,7 @@ jobs:
       run: chmod +x gradlew
     - name: Build with Gradle
       env:
-        IDEA_VERSION: IU-2020.3.3
+        IDEA_VERSION: IU-2022.1.1
         GRAMMAR_KIT_VERSION: 2021.1.2
         IDEA_SOURCES: false
         JI_CHANNELS: Stable

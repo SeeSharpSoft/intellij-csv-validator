@@ -1,0 +1,4 @@
+CSV File(0,0)
+  CsvRecordImpl(RECORD)(0,0)
+    CsvFieldImpl(FIELD)(0,0)
+      <empty list>

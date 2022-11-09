@@ -1,18 +1,18 @@
-<idea-plugin require-restart="true">
+<idea-plugin require-restart="false">
     <id>net.seesharpsoft.intellij.plugins.csv</id>
-    <name>CSV</name>
+    <name>CSV Editor</name>
     <vendor url="https://github.com/SeeSharpSoft/intellij-csv-validator">
         Martin Sommer
     </vendor>
 
     <description><![CDATA[
 
-        <p>Lightweight plugin for editing CSV/TSV/PSV files with a flexible Table Editor, syntax validation, structure highlighting, customizable coloring, new intentions and helpful inspections.</p><br>
-        <img width="600" height="297" src="https://plugins.jetbrains.com/files/10037/screenshot_22766.png" /><br><br>
+        <p>Plugin for editing CSV files with a rainbow colored text- & table-editor. It supports are syntax validation, customization, intentions and many more.</p><br>
+        <img width="600" height="297" src="https://plugins.jetbrains.com/files/10037/screenshot_80656a25-da46-4f76-b5c1-a9e8263b8bf3.png" /><br><br>
         <p><b>Features:</b><br>
         <ul>
             <li>support for CSV/TSV/PSV file extensions</li>
-            <li>customizable Table Editor</li>
+            <li>customizable table editor</li>
             <li>customizable text editor</li>
             <li>customizable column coloring</li>
             <li>customizable line comment</li>
@@ -22,7 +22,6 @@
             <li>quick fix inspections</li>
             <li>intentions (Alt+Enter), e.g. Quote/Unquote (all), Shift Column Left/Right</li>
             <li>balloon help & spell checker</li>
-            <li>structure view (header-entry layout)</li>
             <li>support for ',', ';', '|' or '&#8633;' as value separator</li>
             <li>support for '"' or '\' as escape character</li>
             <li>support line comments (# by default, customizable)</li>
@@ -34,9 +33,7 @@
         <p>
         <b>TSV/PSV file support:</b> <em>TSV/PSV files are recognized as such but treated as a variant of CSV files, the same syntax highlighting and code style settings are applied.</em>
         <br><br>
-        <b>Code formatting:</b> <em>Default code formatting is 'Tabularize'. Can be changed in Settings -> Editor -> Code Style -> CSV/TSV/PSV</em>
-        <br><br>
-        For more detailed information please have a look at the <a href="https://github.com/SeeSharpSoft/intellij-csv-validator/blob/master/README.md">README</a>.
+        For more detailed information please have a look at the <a href="https://github.com/SeeSharpSoft/intellij-csv-validator/blob/main/README.md">README</a>.
         <br><br><br>
         <em>Thanks to @royqh1979, @egoisticalgoat, @sabi0, @ptahchiev, @ghost, @MarkJeronimus, <a href="https://finevisuals.de" target="_blank">FineVisuals</a> and others for supporting me and the project!</em>
         <br><br><br>
@@ -49,24 +46,19 @@
     ]]></description>
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
-    <idea-version since-build="201" />
+    <idea-version since-build="221" />
 
-    <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
-         on how to target different products -->
+    <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html on how to target different products -->
     <depends>com.intellij.modules.lang</depends>
+    <depends optional="true" config-file="withGithub.xml">org.jetbrains.plugins.github</depends>
 
     <extensions defaultExtensionNs="com.intellij">
         <fileType name="CSV" language="csv" implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvFileType" extensions="csv" fieldName="INSTANCE"/>
-        <fileType name="TSV" language="tsv" implementationClass="net.seesharpsoft.intellij.plugins.tsv.TsvFileType" extensions="tsv;tab" fieldName="INSTANCE"/>
-        <fileType name="PSV" language="psv" implementationClass="net.seesharpsoft.intellij.plugins.psv.PsvFileType" extensions="psv" fieldName="INSTANCE"/>
-        <fileTypeOverrider implementation="net.seesharpsoft.intellij.plugins.csv.CsvFileTypeOverrider" />
+        <fileType name="TSV" language="csv" implementationClass="net.seesharpsoft.intellij.plugins.tsv.TsvFileType" extensions="tsv;tab" fieldName="INSTANCE"/>
+        <fileType name="PSV" language="csv" implementationClass="net.seesharpsoft.intellij.plugins.psv.PsvFileType" extensions="psv" fieldName="INSTANCE"/>
 
         <lang.parserDefinition language="csv"
                                implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvParserDefinition"/>
-        <lang.parserDefinition language="tsv"
-                               implementationClass="net.seesharpsoft.intellij.plugins.tsv.TsvParserDefinition"/>
-        <lang.parserDefinition language="psv"
-                               implementationClass="net.seesharpsoft.intellij.plugins.psv.PsvParserDefinition"/>
 
         <lang.syntaxHighlighterFactory language="csv"
                                        implementationClass="net.seesharpsoft.intellij.plugins.csv.highlighter.CsvSyntaxHighlighterFactory"/>
@@ -100,8 +92,6 @@
         <langCodeStyleSettingsProvider
                 implementation="net.seesharpsoft.intellij.plugins.csv.settings.CsvLanguageCodeStyleSettingsProvider"/>
 
-        <lang.psiStructureViewFactory language="csv"
-                                      implementationClass="net.seesharpsoft.intellij.plugins.csv.structureview.CsvStructureViewFactory"/>
         <iconProvider implementation="net.seesharpsoft.intellij.plugins.csv.CsvIconProvider"/>
 
         <localInspection
@@ -154,7 +144,10 @@
 
         <lang.commenter implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvCommenter" language="csv" />
 
+        <!-- support for URL referencing -->
         <psi.referenceContributor language="csv" implementation="net.seesharpsoft.intellij.plugins.csv.psi.CsvPsiReferenceContributor" />
+
+        <notificationGroup displayType="STICKY_BALLOON" id="net.seesharpsoft.intellij.plugins.csv" isLogByDefault="true" hideFromSettings="true" />
     </extensions>
 
     <actions>
@@ -170,21 +163,21 @@
         </group>
         <action class="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AddColumnBefore"
                 id="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AddColumnBefore"
-                text="New column before (Ctrl+Left)"
+                text="New column before (Ctrl+Shift+Left)"
                 icon="/media/icons/add-column-before.png"
         >
             <add-to-group group-id="CsvTableEditorColumnContextMenu" anchor="first" />
         </action>
         <action class="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AddColumnAfter"
                 id="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AddColumnAfter"
-                text="New column after (Ctrl+Right)"
+                text="New column after (Ctrl+Shift+Right)"
                 icon="/media/icons/add-column.png"
         >
             <add-to-group group-id="CsvTableEditorColumnContextMenu" relative-to-action="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AddColumnBefore" anchor="after" />
         </action>
         <action class="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$DeleteSelectedColumns"
                 id="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$DeleteSelectedColumns"
-                text="Delete selected column (Ctrl+Shift+Del)"
+                text="Delete selected columns (Ctrl+Shift+Del)"
                 icon="/media/icons/remove-column.png"
         >
             <add-to-group group-id="CsvTableEditorColumnContextMenu" relative-to-action="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AddColumnAfter" anchor="after" />
@@ -214,7 +207,7 @@
 
         <action class="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AdjustColumnWidths"
                 id="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AdjustColumnWidths"
-                text="Adjust column widths"
+                text="Auto-fit columns width (Ctrl+Shift+Space)"
                 icon="/media/icons/adjust-column-width.png"
         >
             <add-to-group group-id="CsvTableEditorColumnContextMenu" />
@@ -222,7 +215,7 @@
         </action>
         <action class="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$ResetColumnWidths"
                 id="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$ResetColumnWidths"
-                text="Reset column widths to default"
+                text="Reset columns width to default"
                 icon="/media/icons/reset-column-width.png"
         >
             <add-to-group group-id="CsvTableEditorColumnContextMenu" relative-to-action="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AdjustColumnWidths" anchor="after" />

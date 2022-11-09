@@ -26,23 +26,13 @@ public class CsvFormatterTest extends BasePlatformTestCase {
     private void initCsvCodeStyleSettings(boolean SPACE_BEFORE_SEPARATOR,
                                           boolean SPACE_AFTER_SEPARATOR,
                                           boolean TRIM_LEADING_WHITE_SPACES,
-                                          boolean TRIM_TRAILING_WHITE_SPACES,
-                                          boolean TABULARIZE,
-                                          boolean WHITE_SPACES_OUTSIDE_QUOTES,
-                                          boolean LEADING_WHITE_SPACES,
-                                          boolean ENABLE_WIDE_CHARACTER_DETECTION,
-                                          boolean TREAT_AMBIGUOUS_CHARACTERS_AS_WIDE) {
+                                          boolean TRIM_TRAILING_WHITE_SPACES) {
 //        CsvCodeStyleSettings csvCodeStyleSettings = CodeStyleSettingsManager.getSettings(getProject()).getCustomSettings(CsvCodeStyleSettings.class);
         CsvCodeStyleSettings csvCodeStyleSettings = CodeStyleSettingsManager.getInstance(getProject()).getTemporarySettings().getCustomSettings(CsvCodeStyleSettings.class);
         csvCodeStyleSettings.SPACE_BEFORE_SEPARATOR = SPACE_BEFORE_SEPARATOR;
         csvCodeStyleSettings.SPACE_AFTER_SEPARATOR = SPACE_AFTER_SEPARATOR;
         csvCodeStyleSettings.TRIM_LEADING_WHITE_SPACES = TRIM_LEADING_WHITE_SPACES;
         csvCodeStyleSettings.TRIM_TRAILING_WHITE_SPACES = TRIM_TRAILING_WHITE_SPACES;
-        csvCodeStyleSettings.TABULARIZE = TABULARIZE;
-        csvCodeStyleSettings.WHITE_SPACES_OUTSIDE_QUOTES = WHITE_SPACES_OUTSIDE_QUOTES;
-        csvCodeStyleSettings.LEADING_WHITE_SPACES = LEADING_WHITE_SPACES;
-        csvCodeStyleSettings.ENABLE_WIDE_CHARACTER_DETECTION = ENABLE_WIDE_CHARACTER_DETECTION;
-        csvCodeStyleSettings.TREAT_AMBIGUOUS_CHARACTERS_AS_WIDE = TREAT_AMBIGUOUS_CHARACTERS_AS_WIDE;
     }
 
     private void initCsvCodeStyleSettings(int binarySettings) {
@@ -50,12 +40,7 @@ public class CsvFormatterTest extends BasePlatformTestCase {
                 (binarySettings & 1) != 0,
                 (binarySettings & 2) != 0,
                 (binarySettings & 4) != 0,
-                (binarySettings & 8) != 0,
-                (binarySettings & 16) != 0,
-                (binarySettings & 32) != 0,
-                (binarySettings & 64) != 0,
-                (binarySettings & 128) != 0,
-                (binarySettings & 256) != 0);
+                (binarySettings & 8) != 0);
     }
 
     private void executeTestConfiguration(int binarySettings, String relativeTargetPath) {
@@ -89,7 +74,7 @@ public class CsvFormatterTest extends BasePlatformTestCase {
     }
 
     public void testGeneratedFormattedFiles() throws Exception {
-        for (int i = 0; i < 128; ++i) {
+        for (int i = 0; i < 16; ++i) {
             tearDown();
             setUp();
             executeTestConfiguration(i, "/generated");
@@ -97,11 +82,11 @@ public class CsvFormatterTest extends BasePlatformTestCase {
     }
 
     public void testFormattedFilesSingle() throws Exception {
-        executeTestConfiguration(16, "/header/4");
+        executeTestConfiguration(1, "/header/1");
     }
 
     public void testSpecialFormattedFiles() throws Exception {
-        int[] optionsToTest = new int[]{0, 1, 16, 17, 18, 19, 48, 80, 112};
+        int[] optionsToTest = new int[]{0, 1};
         for (int i = 0; i < optionsToTest.length; ++i) {
             tearDown();
             setUp();
@@ -109,26 +94,8 @@ public class CsvFormatterTest extends BasePlatformTestCase {
         }
     }
 
-    public void testWideCharacterFormattedFiles() throws Exception {
-        int[] optionsToTest = new int[]{128, 129, 144, 145, 146, 147, 176, 208, 240};
-        for (int i = 0; i < optionsToTest.length; ++i) {
-            tearDown();
-            setUp();
-            executeTestConfiguration(optionsToTest[i], "/widechar");
-        }
-    }
-
-    public void testWideCharacterAmbiguousFormattedFiles() throws Exception {
-        int[] optionsToTest = new int[]{384, 400, 496};
-        for (int i = 0; i < optionsToTest.length; ++i) {
-            tearDown();
-            setUp();
-            executeTestConfiguration(optionsToTest[i], "/widecharambiguous");
-        }
-    }
-
     public void testHeader() throws Exception {
-        int[] optionsToTest = new int[]{0, 1, 4, 16, 17, 18, 19, 48, 80, 112};
+        int[] optionsToTest = new int[]{0, 1, 4};
         for (int subTest = 1; subTest < 7; ++subTest) {
             for (int i = 0; i < optionsToTest.length; ++i) {
                 tearDown();
@@ -161,7 +128,7 @@ public class CsvFormatterTest extends BasePlatformTestCase {
      * @throws Exception
      */
     public void _testResultGenerator() throws Exception {
-        for (int binarySettings = 0; binarySettings < 128; ++binarySettings) {
+        for (int binarySettings = 0; binarySettings < 16; ++binarySettings) {
             tearDown();
             setUp();
 

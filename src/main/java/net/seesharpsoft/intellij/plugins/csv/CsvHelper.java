@@ -24,12 +24,16 @@ import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import net.seesharpsoft.intellij.plugins.psv.PsvFileType;
 import net.seesharpsoft.intellij.plugins.tsv.TsvFileType;
+import net.seesharpsoft.intellij.psi.PsiHelper;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public final class CsvHelper {
 
@@ -55,7 +59,7 @@ public final class CsvHelper {
             return false;
         }
         // simple check to always in include the defaults even if association was removed
-        switch(extension.toLowerCase()) {
+        switch (extension.toLowerCase()) {
             case "csv":
             case "tsv":
             case "tab":
@@ -82,33 +86,33 @@ public final class CsvHelper {
         if (file == null) {
             return false;
         }
-        return isCsvFile(file.getProject(), file.getOriginalFile().getVirtualFile());
+        return isCsvFile(file.getProject(), getVirtualFile(file));
     }
 
-    public static IElementType getElementType(PsiElement element) {
-        return element == null || element.getNode() == null ? null : element.getNode().getElementType();
+    public static boolean isCommentElement(PsiElement element) {
+        return PsiHelper.getElementType(element) == CsvTypes.COMMENT;
     }
 
-    public static PsiElement getParentFieldElement(final PsiElement element) {
+    public static CsvField getParentFieldElement(final PsiElement element) {
         PsiElement currentElement = element;
-        IElementType elementType = CsvHelper.getElementType(currentElement);
+        IElementType elementType = PsiHelper.getElementType(currentElement);
 
         if (elementType == CsvTypes.COMMA || elementType == CsvTypes.CRLF) {
             currentElement = currentElement.getPrevSibling();
-            elementType = CsvHelper.getElementType(currentElement);
+            elementType = PsiHelper.getElementType(currentElement);
         }
 
         if (elementType == CsvTypes.RECORD) {
             currentElement = currentElement.getLastChild();
-            elementType = CsvHelper.getElementType(currentElement);
+            elementType = PsiHelper.getElementType(currentElement);
         }
 
         if (elementType == TokenType.WHITE_SPACE) {
-            if (CsvHelper.getElementType(currentElement.getParent()) == CsvTypes.FIELD) {
+            if (PsiHelper.getElementType(currentElement.getParent()) == CsvTypes.FIELD) {
                 currentElement = currentElement.getParent();
-            } else if (CsvHelper.getElementType(currentElement.getPrevSibling()) == CsvTypes.FIELD) {
+            } else if (PsiHelper.getElementType(currentElement.getPrevSibling()) == CsvTypes.FIELD) {
                 currentElement = currentElement.getPrevSibling();
-            } else if (CsvHelper.getElementType(currentElement.getNextSibling()) == CsvTypes.FIELD) {
+            } else if (PsiHelper.getElementType(currentElement.getNextSibling()) == CsvTypes.FIELD) {
                 currentElement = currentElement.getNextSibling();
             } else {
                 currentElement = null;
@@ -116,46 +120,21 @@ public final class CsvHelper {
         } else {
             while (currentElement != null && elementType != CsvTypes.FIELD) {
                 currentElement = currentElement.getParent();
-                elementType = CsvHelper.getElementType(currentElement);
+                elementType = PsiHelper.getElementType(currentElement);
             }
         }
-        return currentElement;
+        return (CsvField) currentElement;
     }
 
     public static int getFieldIndex(@NotNull final PsiElement element) {
-        PsiElement fieldElement = getParentFieldElement(element);
-        return findIndex(fieldElement.getParent(), fieldElement, CsvTypes.FIELD);
-    }
-
-    @Nullable
-    public static PsiElement getNthChild(@Nullable final PsiElement parent, int n, @Nullable IElementType countable) {
-        if (parent != null) {
-            int count = 0;
-            for (PsiElement child = parent.getFirstChild(); child != null; child = child.getNextSibling()) {
-                if (countable != null && getElementType(child) != countable) continue;
-                if (count == n) return child;
-                ++count;
-            }
-        }
-        return null;
-    }
-
-    public static int findIndex(@Nullable final PsiElement parent, @NotNull PsiElement needle, @Nullable IElementType countable) {
-        if (parent != null) {
-            int index = 0;
-            for (PsiElement child = parent.getFirstChild(); child != null; child = child.getNextSibling()) {
-                if (countable != null && getElementType(child) != countable) continue;
-                if (needle == child) return index;
-                ++index;
-            }
-        }
-        return -1;
+        CsvField fieldElement = getParentFieldElement(element);
+        return PsiHelper.getChildIndexOfType(fieldElement.getParent(), fieldElement, CsvField.class);
     }
 
     public static PsiElement getPreviousCRLF(final PsiElement element) {
         PsiElement currentElement = element;
         while (currentElement != null) {
-            if (CsvHelper.getElementType(currentElement) == CsvTypes.CRLF) {
+            if (PsiHelper.getElementType(currentElement) == CsvTypes.CRLF) {
                 break;
             }
             currentElement = currentElement.getPrevSibling();
@@ -166,7 +145,7 @@ public final class CsvHelper {
     public static PsiElement getNextCRLF(final PsiElement element) {
         PsiElement currentElement = element;
         while (currentElement != null) {
-            if (CsvHelper.getElementType(currentElement) == CsvTypes.CRLF) {
+            if (PsiHelper.getElementType(currentElement) == CsvTypes.CRLF) {
                 break;
             }
             currentElement = currentElement.getNextSibling();
@@ -177,7 +156,7 @@ public final class CsvHelper {
     public static PsiElement getPreviousSeparator(PsiElement fieldElement) {
         PsiElement current = fieldElement;
         while (current != null) {
-            if (CsvHelper.getElementType(current) == CsvTypes.COMMA) {
+            if (PsiHelper.getElementType(current) == CsvTypes.COMMA) {
                 break;
             }
             current = current.getPrevSibling();
@@ -188,7 +167,7 @@ public final class CsvHelper {
     public static PsiElement getNextSeparator(PsiElement fieldElement) {
         PsiElement current = fieldElement;
         while (current != null) {
-            if (CsvHelper.getElementType(current) == CsvTypes.COMMA) {
+            if (PsiHelper.getElementType(current) == CsvTypes.COMMA) {
                 break;
             }
             current = current.getNextSibling();
@@ -213,7 +192,12 @@ public final class CsvHelper {
     }
 
     public static VirtualFile getVirtualFile(PsiFile psiFile) {
-        return psiFile == null ? null : psiFile.getOriginalFile().getVirtualFile();
+        if (psiFile == null) return null;
+        PsiFile original = psiFile.getOriginalFile();
+        if (original != null && original != psiFile) return getVirtualFile(psiFile.getOriginalFile());
+        if (psiFile.getVirtualFile() != null) return psiFile.getVirtualFile();
+        if (psiFile.getViewProvider() != null) return psiFile.getViewProvider().getVirtualFile();
+        return null;
     }
 
     public static Project getProject(PsiFile psiFile) {
@@ -263,7 +247,7 @@ public final class CsvHelper {
         boolean hasComments = false;
         for (PsiElement child = csvFile.getFirstChild(); child != null; child = child.getNextSibling()) {
             if (!(child instanceof CsvRecord)) {
-                if (getElementType(child) == CsvTypes.COMMENT) {
+                if (PsiHelper.getElementType(child) == CsvTypes.COMMENT) {
                     hasComments = true;
                 }
                 continue;
@@ -286,26 +270,37 @@ public final class CsvHelper {
         return new CsvColumnInfoMap(columnInfoMap, PsiTreeUtil.hasErrorElements(csvFile), hasComments);
     }
 
+    public static String getFieldValue(PsiElement field, CsvEscapeCharacter escapeCharacter) {
+        if (field == null) return "";
+        if (isCommentElement(field)) {
+            return field.getText().substring(CsvEditorSettings.getInstance().getCommentIndicator().length());
+        }
+        return PsiHelper.findChildrenOfAnyElement(field, CsvTypes.TEXT, CsvTypes.ESCAPED_TEXT)
+                .stream()
+                .map(element -> {
+                    String text = element.getText();
+                    return PsiHelper.getElementType(element) == CsvTypes.ESCAPED_TEXT && escapeCharacter.isEscapedQuote(text) ? "\"" : text;
+                })
+                .reduce(String::concat)
+                .orElse("");
+    }
+
     public static String unquoteCsvValue(String content, CsvEscapeCharacter escapeCharacter) {
         if (content == null) {
             return "";
         }
-        String result = content.trim();
-        if (result.length() > 1 && result.startsWith("\"") && result.endsWith("\"")) {
-            result = result.substring(1, result.length() - 1);
+        String result = content;
+        String trimmedContent = content.trim();
+        if (trimmedContent.length() > 1 && trimmedContent.startsWith("\"") && trimmedContent.endsWith("\"")) {
+            result = trimmedContent.substring(1, trimmedContent.length() - 1);
+            result = result.replaceAll("(?:" + escapeCharacter.getRegexPattern() + ")\"", "\"");
         }
-        if (escapeCharacter != CsvEscapeCharacter.QUOTE) {
-            result = result.replaceAll("(?:" + escapeCharacter.getRegexPattern() + ")" +
-                    escapeCharacter.getRegexPattern(), escapeCharacter.getRegexPattern());
-        }
-        result = result.replaceAll("(?:" + escapeCharacter.getRegexPattern() + ")\"", "\"");
         return result;
     }
 
-    private static boolean isQuotingRequired(String content, CsvEscapeCharacter escapeCharacter, CsvValueSeparator valueSeparator) {
+    private static boolean isQuotingRequired(String content, CsvValueSeparator valueSeparator) {
         return content != null &&
-                (content.contains(valueSeparator.getCharacter()) || content.contains("\"") || content.contains("\n") || content.contains(escapeCharacter.getCharacter()) ||
-                        content.startsWith(" ") || content.endsWith(" "));
+                (content.contains(valueSeparator.getCharacter()) || content.contains("\"") || content.contains("\n"));
     }
 
     public static String quoteCsvField(String content,
@@ -315,12 +310,12 @@ public final class CsvHelper {
         if (content == null) {
             return "";
         }
-        if (quotingEnforced || isQuotingRequired(content, escapeCharacter, valueSeparator)) {
+        if (quotingEnforced || isQuotingRequired(content, valueSeparator)) {
             String result = content;
-            if (escapeCharacter != CsvEscapeCharacter.QUOTE) {
-                result = result.replaceAll(escapeCharacter.getRegexPattern(),
-                        escapeCharacter.getRegexPattern() + escapeCharacter.getRegexPattern());
-            }
+//            if (escapeCharacter != CsvEscapeCharacter.QUOTE) {
+//                result = result.replaceAll(escapeCharacter.getRegexPattern(),
+//                        escapeCharacter.getRegexPattern() + escapeCharacter.getRegexPattern());
+//            }
             result = result.replaceAll("\"", escapeCharacter.getRegexPattern() + "\"");
             return "\"" + result + "\"";
         }
@@ -347,6 +342,27 @@ public final class CsvHelper {
 
     public static int getMaxTextLineLength(String text) {
         return getMaxTextLineLength(text, input -> input == null ? 0 : input.length());
+    }
+
+    // source: https://www.baeldung.com/java-string-formatting-named-placeholders
+    public static String formatString(String template, Map<String, Object> parameters) {
+        StringBuilder newTemplate = new StringBuilder(template);
+        List<Object> valueList = new ArrayList<>();
+
+        Matcher matcher = Pattern.compile("[$][{](\\w+)}").matcher(template);
+
+        while (matcher.find()) {
+            String key = matcher.group(1);
+
+            String paramName = "${" + key + "}";
+            int index = newTemplate.indexOf(paramName);
+            if (index != -1) {
+                newTemplate.replace(index, index + paramName.length(), "%s");
+                valueList.add(parameters.get(key));
+            }
+        }
+
+        return String.format(newTemplate.toString(), valueList.toArray());
     }
 
     private CsvHelper() {

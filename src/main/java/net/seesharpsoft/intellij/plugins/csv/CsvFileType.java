@@ -22,13 +22,18 @@ public final class CsvFileType extends LanguageFileType {
     @NotNull
     @Override
     public String getDescription() {
-        return "CSV file";
+        return "CSV (Comma Separated Values)";
     }
 
     @NotNull
     @Override
     public String getDefaultExtension() {
         return "csv";
+    }
+
+    @Override
+    public @NotNull String getDisplayName() {
+        return getName() + " (CSV Editor)";
     }
 
     @Nullable

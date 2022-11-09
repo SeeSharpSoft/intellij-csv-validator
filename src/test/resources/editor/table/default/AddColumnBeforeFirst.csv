@@ -1,0 +1,10 @@
+,Header 1, "Header 2"  ,  Header 3 , " Header 4","Header, ""5""",
+,Value 1, "Value 2"  ,  Value 3 , " Value 4","Value, ""5""",
+,,
+,""
+,
+# I am a comment ,;|" nothing happens ,,,,,,,,,,,
+,,,,,,,,,
+,42,,"  ",all good,#not a comment, me neither
+,;:|	#,;:|	2,"value ;:|	1",";:|
+	value 2",\\,\\\\end

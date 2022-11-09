@@ -4,63 +4,36 @@ import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.editor.colors.EditorColorsScheme;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.psi.PsiElement;
 import com.intellij.ui.components.labels.LinkLabel;
-import com.intellij.ui.table.JBTable;
-import com.intellij.util.ArrayUtil;
-import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfo;
-import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfoMap;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
-import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
+import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableActions;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditor;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditorState;
-import net.seesharpsoft.intellij.plugins.csv.editor.table.api.TableActions;
-import net.seesharpsoft.intellij.plugins.csv.editor.table.api.TableDataChangeEvent;
-import net.seesharpsoft.intellij.plugins.csv.psi.CsvFile;
-import net.seesharpsoft.intellij.util.CheckedDisposableAwareRunnable;
+import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableModel;
+import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
-import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
-import javax.swing.table.TableModel;
 import java.awt.*;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
-public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChangeEvent.Listener {
+public class CsvTableEditorSwing extends CsvTableEditor {
 
-    private static final int TOTAL_CELL_HEIGHT_SPACING = 3;
-    private static final int TOTAL_CELL_WIDTH_SPACING = 8;
+    private static final int COLUMN_WIDTH_MAX_TEXT_SAMPLE_SIZE = 10;
+    private static final int TOTAL_CELL_WIDTH_SPACING = 16;
 
-    private JBTable tblEditor;
+    private JTable tblEditor;
     private JPanel panelMain;
-    private JButton btnUndo;
-    private JButton btnRedo;
-    protected JButton btnAddRow;
     private LinkLabel lnkTextEditor;
-    private JLabel lblErrorText;
-    protected JButton btnAddColumn;
-    protected JButton btnRemoveRow;
-    protected JButton btnRemoveColumn;
-    protected JButton btnAddRowBefore;
-    protected JButton btnAddColumnBefore;
     private LinkLabel lnkPlugin;
+    private JLabel lblErrorText;
     private JButton btnCloseInfoPanel;
     private JComponent panelInfo;
-    private JComboBox comboRowHeight;
-    private JLabel lblTextlines;
-    private JCheckBox cbFixedHeaders;
-    private JCheckBox cbAutoColumnWidthOnOpen;
-    protected LinkLabel lnkAdjustColumnWidth;
     private JScrollPane tableScrollPane;
+    private JPanel panelTop;
 
     private JTable rowHeadersTable;
 
@@ -74,12 +47,14 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
 
     private boolean listenerApplied = false;
 
-    private CsvColumnInfoMap lastColumnInfoMap;
+
+    // temporary stored values when table data is updated
+    private int mySelectedColumn;
+    private int mySelectedRow;
+    private boolean myIsInCellEditMode;
 
     public CsvTableEditorSwing(@NotNull Project projectArg, @NotNull VirtualFile fileArg) {
         super(projectArg, fileArg);
-
-        this.getDataHandler().addDataChangeListener(this);
 
         this.tableEditorListener = new CsvTableEditorChangeListener(this);
         this.tableEditorMouseListener = new CsvTableEditorMouseListener(this);
@@ -91,73 +66,46 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
     }
 
     protected void createUIComponents() {
-        tblEditor = new JBTable(new DefaultTableModel(0, 0));
+        tblEditor = new CsvTable(new CsvTableModelSwing(this));
+        tblEditor.setRowSorter(null);
         lnkTextEditor = new LinkLabel("Open file in text editor", null);
     }
 
     private void initializedUIComponents() {
-        applyEditorState(getFileEditorState());
-
         EditorColorsScheme editorColorsScheme = EditorColorsManager.getInstance().getGlobalScheme();
 
-        btnRedo.addActionListener(tableEditorActions.redo);
-        btnUndo.addActionListener(tableEditorActions.undo);
-        btnAddRow.addActionListener(tableEditorActions.addRow);
-        btnRemoveRow.addActionListener(tableEditorActions.deleteRow);
-        btnAddColumn.addActionListener(tableEditorActions.addColumn);
-        btnRemoveColumn.addActionListener(tableEditorActions.deleteColumn);
-        lnkAdjustColumnWidth.setListener(this.tableEditorActions.adjustColumnWidthLink, null);
         lnkTextEditor.setListener(this.tableEditorActions.openTextEditor, null);
         lnkPlugin.setListener(this.tableEditorActions.openCsvPluginLink, null);
 
         panelInfo.setVisible(CsvEditorSettings.getInstance().showTableEditorInfoPanel());
         btnCloseInfoPanel.addActionListener(e -> {
             panelInfo.setVisible(false);
-            getFileEditorState().setShowInfoPanel(false);
-        });
-
-        comboRowHeight.addActionListener(e -> {
-            getFileEditorState().setRowLines(comboRowHeight.getSelectedIndex());
-            setTableRowHeight(getPreferredRowHeight());
-            updateRowHeights(null);
-        });
-
-        cbFixedHeaders.addActionListener(e -> {
-            Object[][] values = storeCurrentState();
-            getFileEditorState().setFixedHeaders(cbFixedHeaders.isSelected());
-            updateTableComponentData(values);
-        });
-
-        cbAutoColumnWidthOnOpen.addActionListener(e -> {
-            getFileEditorState().setAutoColumnWidthOnOpen(cbAutoColumnWidthOnOpen.isSelected());
+            getTableEditorState().setShowInfoPanel(false);
         });
 
         tblEditor.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-        tblEditor.setShowColumns(true);
         tblEditor.setFont(getEditorFont());
         tblEditor.setBackground(editorColorsScheme.getDefaultBackground());
         tblEditor.setForeground(editorColorsScheme.getDefaultForeground());
-        setTableRowHeight(0);
-
         tblEditor.getColumnModel().addColumnModelListener(tableEditorListener);
 
-        MultiLineCellRenderer cellRenderer = new MultiLineCellRenderer(this.tableEditorKeyListener, this);
-        MultiLineCellRenderer cellEditor = new MultiLineCellRenderer(this.tableEditorKeyListener, this);
+        CsvMultiLineCellRenderer cellRenderer = new CsvMultiLineCellRenderer(this.tableEditorKeyListener, this);
+        CsvMultiLineCellRenderer cellEditor = new CsvMultiLineCellRenderer(this.tableEditorKeyListener, this);
         tblEditor.setDefaultRenderer(String.class, cellRenderer);
         tblEditor.setDefaultRenderer(Object.class, cellRenderer);
+        tblEditor.setDefaultRenderer(CsvTable.CommentColumn.class, new CsvMultiLineCellRenderer.Comment(this.tableEditorKeyListener, this));
         tblEditor.setDefaultEditor(String.class, cellEditor);
         tblEditor.setDefaultEditor(Object.class, cellEditor);
-        tblEditor.registerKeyboardAction(this.tableEditorActions.undo,
-                KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_DOWN_MASK), JComponent.WHEN_FOCUSED);
-        tblEditor.registerKeyboardAction(this.tableEditorActions.redo,
-                KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK), JComponent.WHEN_FOCUSED);
-        tblEditor.registerKeyboardAction(this.tableEditorActions.redo,
-                KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_DOWN_MASK), JComponent.WHEN_FOCUSED);
+        tblEditor.setDefaultEditor(CsvTable.CommentColumn.class, new CsvMultiLineCellRenderer.Comment(this.tableEditorKeyListener, this));
+        tblEditor.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        tblEditor.setRowHeight(1);
 
         setFontSize(getGlobalFontSize());
         baseFontHeight = getFontHeight();
 
-        rowHeadersTable = TableRowUtilities.addNumberColumn(tblEditor, 1);
+        rowHeadersTable = CsvTableRowUtilities.addNumberColumn(this, tblEditor, 1);
+
+        applyEditorState(getTableEditorState());
     }
 
     protected void applyTableChangeListener() {
@@ -184,42 +132,23 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
 
     @Override
     protected void applyEditorState(CsvTableEditorState editorState) {
-        cbFixedHeaders.setSelected(editorState.getFixedHeaders());
-        if (comboRowHeight.getEditor() != null) {
-            comboRowHeight.setSelectedIndex(editorState.getRowLines());
+        tblEditor.setRowHeight(editorState.getRowHeight());
+        if (rowHeadersTable != null) {
+            rowHeadersTable.setRowHeight(tblEditor.getRowHeight());
         }
-        cbAutoColumnWidthOnOpen.setSelected(editorState.getAutoColumnWidthOnOpen());
-        setTableRowHeight(getPreferredRowHeight());
-    }
-
-    public void setTableRowHeight(int rowHeight) {
-        this.getTable().setRowHeight(rowHeight == 0 ? getPreferredRowHeight() : rowHeight);
-    }
-
-    private Object[] generateColumnIdentifiers(Object[][] values, int columnCount) {
-        if (getFileEditorState().getFixedHeaders()) {
-            return values != null && values.length > 0 ? values[0] : new Object[columnCount];
-        }
-
-        int columnOffset = CsvEditorSettings.getInstance().isZeroBasedColumnNumbering() ? 0 : 1;
-        Object[] identifiers = new Object[columnCount];
-        for (int i = 0; i < columnCount; ++i) {
-            identifiers[i] = i + columnOffset;
-        }
-        return identifiers;
     }
 
     @Override
-    protected void updateEditorLayout() {
+    public void updateEditorLayout() {
+        setEditable(!getTableModel().hasErrors());
+        panelInfo.setVisible(getTableEditorState().showInfoPanel());
+
         int currentColumnCount = this.getTableModel().getColumnCount();
-        int[] columnWidths = getFileEditorState().getColumnWidths();
+        int[] columnWidths = getTableEditorState().getColumnWidths();
         int prevColumnCount = columnWidths.length;
         if (prevColumnCount != currentColumnCount) {
-            columnWidths = ArrayUtil.realloc(columnWidths, currentColumnCount);
-            if (prevColumnCount < currentColumnCount) {
-                Arrays.fill(columnWidths, prevColumnCount, currentColumnCount, CsvEditorSettings.getInstance().getTableDefaultColumnWidth());
-            }
-            getFileEditorState().setColumnWidths(columnWidths);
+            adjustAllColumnWidths();
+            columnWidths = getTableEditorState().getColumnWidths();
         }
 
         float zoomFactor = getZoomFactor();
@@ -229,55 +158,12 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
             column.setWidth(Math.round(columnWidths[i] * zoomFactor));
         }
 
-        this.updateRowHeights(null);
-        panelInfo.setVisible(getFileEditorState().showInfoPanel());
+        storeCurrentTableLayout();
     }
 
     private float getZoomFactor() {
         float fontHeight = getFontHeight();
         return fontHeight / baseFontHeight;
-    }
-
-    public void updateRowHeights(TableModelEvent e) {
-        final int first;
-        final int last;
-        if (e == null || e.getFirstRow() == TableModelEvent.HEADER_ROW) {
-            first = 0;
-            last = this.getTable().getRowCount();
-        } else {
-            first = e.getFirstRow();
-            last = e.getLastRow() + 1;
-        }
-
-        SwingUtilities.invokeLater(CheckedDisposableAwareRunnable.create(() -> updateRowHeights(first, last), this));
-    }
-
-    private void updateRowHeights(int first, int last) {
-        removeTableChangeListener();
-        try {
-            JTable table = getTable();
-            int columnCount = table.getColumnCount();
-            int actualFirst = Math.min(first, table.getRowCount());
-            int actualLast = Math.min(last, table.getRowCount());
-            boolean isCalculated = getFileEditorState().getRowLines() == 0;
-            for (int row = actualFirst; row < actualLast; row++) {
-                int rowHeight = getPreferredRowHeight();
-                if (isCalculated) {
-                    for (int column = 0; column < columnCount; column++) {
-                        Component comp = table.prepareRenderer(table.getCellRenderer(row, column), row, column);
-                        rowHeight = Math.max(rowHeight, comp.getPreferredSize().height);
-                    }
-                }
-                table.setRowHeight(row, rowHeight);
-                rowHeadersTable.setRowHeight(row, rowHeight);
-            }
-        } finally {
-            applyTableChangeListener();
-        }
-    }
-
-    public void syncTableModelWithUI() {
-        updateTableComponentData(this.storeCurrentState());
     }
 
     @Override
@@ -286,64 +172,45 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
     }
 
     @Override
-    protected void beforeTableComponentUpdate() {
+    public void beforeTableModelUpdate() {
+        mySelectedColumn = tblEditor.getSelectedColumn();
+        mySelectedRow = tblEditor.getSelectedRow();
+        myIsInCellEditMode = tblEditor.isEditing();
+    }
+
+    @Override
+    public void afterTableModelUpdate() {
         removeTableChangeListener();
-    }
-
-    @Override
-    protected void afterTableComponentUpdate(Object[][] values) {
         try {
-            DefaultTableModel tableModel = this.getTableModel();
-            tableModel.setColumnIdentifiers(generateColumnIdentifiers(values, tableModel.getColumnCount()));
+            this.tblEditor.tableChanged(new TableModelEvent(tblEditor.getModel(), TableModelEvent.ALL_COLUMNS));
             this.updateEditorLayout();
-        } finally {
-            this.applyTableChangeListener();
-        }
-    }
-
-    @Override
-    protected void setTableComponentData(Object[][] values) {
-        DefaultTableModel tableModel = getTableModel();
-
-        boolean fixedHeader = getFileEditorState().getFixedHeaders();
-        int firstRow = fixedHeader ? 1 : 0;
-        int rowCount = values.length - firstRow;
-        int columnCount = values.length == 0 ? 0 : values[0].length;
-        tableModel.setRowCount(rowCount);
-        tableModel.setColumnCount(columnCount);
-
-        for (int row = 0; row < rowCount; ++row) {
-            for (int column = 0; column < columnCount; ++column) {
-                tableModel.setValueAt(values[row + firstRow][column], row, column);
+            int selectedRow = Math.min(tblEditor.getRowCount(), mySelectedRow);
+            int selectedCol = Math.min(tblEditor.getColumnCount(), mySelectedColumn);
+            tblEditor.changeSelection(selectedRow, selectedCol, false, false);
+            if (myIsInCellEditMode) {
+                tblEditor.editCellAt(selectedRow, selectedCol);
             }
+        } finally {
+            applyTableChangeListener();
         }
     }
 
     @Override
     protected void updateInteractionElements() {
+        panelTop.setVisible(getTableModel().hasErrors());
         updateEditActionElements(isEditable());
-
-        lblErrorText.setVisible(hasErrors());
-        lblTextlines.setVisible(!hasErrors());
-        comboRowHeight.setVisible(!hasErrors());
-        cbFixedHeaders.setVisible(!hasErrors());
-        lnkAdjustColumnWidth.setVisible(!hasErrors());
-        cbAutoColumnWidthOnOpen.setVisible(!hasErrors());
-
-        this.removeTableChangeListener();
-        this.applyTableChangeListener();
     }
 
     private void updateEditActionElements(boolean isEditable) {
         tblEditor.setEnabled(isEditable);
-        tblEditor.setDragEnabled(isEditable);
-        tblEditor.getTableHeader().setReorderingAllowed(isEditable);
-        btnUndo.setVisible(isEditable);
-        btnRedo.setVisible(isEditable);
+        // TODO support later
+//        tblEditor.setDragEnabled(isEditable);
+        tblEditor.setDragEnabled(false);
+//        tblEditor.getTableHeader().setReorderingAllowed(isEditable);
+        tblEditor.getTableHeader().setReorderingAllowed(false);
     }
 
-
-    protected JBTable getTable() {
+    protected JTable getTable() {
         return this.tblEditor;
     }
 
@@ -351,47 +218,9 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
         return this.tableScrollPane;
     }
 
-    protected DefaultTableModel getTableModel() {
-        return (DefaultTableModel) tblEditor.getModel();
-    }
-
     @Override
-    protected void updateUIComponents() {
-        if (!isEditorSelected()) {
-            return;
-        }
-        CsvFile csvFile = getCsvFile();
-        if (csvFile == null) {
-            return;
-        }
-
-        CsvColumnInfoMap<PsiElement> columnInfoMap = csvFile.getColumnInfoMap();
-        if (Objects.equals(lastColumnInfoMap, columnInfoMap)) {
-            return;
-        }
-
-        lastColumnInfoMap = columnInfoMap;
-        updateInteractionElements();
-        DefaultTableModel tableModel = new DefaultTableModel(0, 0);
-        if (!columnInfoMap.hasErrors()) {
-            int startRow = getFileEditorState().getFixedHeaders() ? 1 : 0;
-            for (int columnIndex = 0; columnIndex < columnInfoMap.getColumnInfos().size(); ++columnIndex) {
-                CsvColumnInfo<PsiElement> columnInfo = columnInfoMap.getColumnInfo(columnIndex);
-                List<PsiElement> elements = columnInfo.getElements();
-                if (columnIndex == 0 && CsvEditorSettings.getInstance().isFileEndLineBreak() &&
-                        lastColumnInfoMap.hasEmptyLastLine()) {
-                    elements.remove(elements.size() - 1);
-                }
-
-                tableModel.addColumn(String.format("Column %s (%s entries)", columnIndex + 1, elements.size()),
-                        elements.stream()
-                                .skip(startRow)
-                                .map(psiElement -> psiElement == null ? "" : CsvHelper.unquoteCsvValue(psiElement.getText(), currentEscapeCharacter))
-                                .collect(Collectors.toList()).toArray(new String[0]));
-            }
-        }
-        Object[][] values = getTableComponentData(tableModel, true);
-        updateTableComponentData(dataManagement.addState(values));
+    public CsvTableModel getTableModel() {
+        return (CsvTableModel) tblEditor.getModel();
     }
 
     public void selectColumn(int currentColumn, boolean append) {
@@ -407,7 +236,7 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
 
     @NotNull
     @Override
-    public TableActions getActions() {
+    public CsvTableActions getActions() {
         return this.tableEditorActions;
     }
 
@@ -423,21 +252,15 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
         return this.tblEditor;
     }
 
+    @Override
     public void storeCurrentTableLayout() {
         int[] widths = getCurrentColumnsWidths();
         float zoomFactor = getZoomFactor();
         for (int i = 0; i < widths.length; i++) {
             widths[i] /= zoomFactor;
         }
-        getFileEditorState().setColumnWidths(widths);
-    }
-
-    protected Object[][] storeCurrentState() {
-        return storeStateChange(false);
-    }
-
-    protected Object[][] storeStateChange(boolean tableModelIsLeading) {
-        return super.storeStateChange(getTableComponentData(this.getTableModel(), tableModelIsLeading));
+        getTableEditorState().setColumnWidths(widths);
+        getTableEditorState().setRowHeight(tblEditor.getRowHeight());
     }
 
     protected int[] getCurrentColumnsWidths() {
@@ -450,53 +273,6 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
         return width;
     }
 
-    private Object[] getFixedHeaderValues() {
-        CsvColumnInfoMap columnInfoMap = getColumnInfoMap();
-        Object[] headerValues = new Object[columnInfoMap.getColumnInfos().size()];
-        if (!columnInfoMap.hasErrors()) {
-            for (int i = 0; i < columnInfoMap.getColumnInfos().size(); ++i) {
-                CsvColumnInfo<PsiElement> columnInfo = columnInfoMap.getColumnInfo(i);
-                PsiElement psiElement = columnInfo.getHeaderElement();
-                headerValues[i] = psiElement == null ? "" : CsvHelper.unquoteCsvValue(psiElement.getText(), currentEscapeCharacter);
-            }
-        }
-        return headerValues;
-    }
-
-    protected Object[][] getTableComponentData(TableModel tableModel, boolean tableModelIsLeading) {
-        boolean fixedHeader = getFileEditorState().getFixedHeaders();
-        int rowCount = tableModel.getRowCount();
-        int columnCount = tableModel.getColumnCount();
-        Object[][] values;
-        if (fixedHeader) {
-            values = new Object[rowCount + 1][];
-            values[0] = getFixedHeaderValues();
-        } else {
-            values = new Object[rowCount][];
-        }
-        for (int row = 0; row < rowCount; ++row) {
-            int valuesRowIndex = row + (fixedHeader ? 1 : 0);
-            int modelRow = tableModelIsLeading ? row : tblEditor.convertRowIndexToModel(row);
-            values[valuesRowIndex] = new Object[columnCount];
-            for (int column = 0; column < columnCount; ++column) {
-                int modelColumn = tableModelIsLeading ? column : tblEditor.convertColumnIndexToModel(column);
-                values[valuesRowIndex][column] = tableModel.getValueAt(modelRow, modelColumn);
-            }
-        }
-        return values;
-    }
-
-    @Override
-    public void onTableDataChanged(TableDataChangeEvent event) {
-        btnUndo.setEnabled(this.dataManagement.canGetLastState());
-        btnRedo.setEnabled(this.dataManagement.canGetNextState());
-    }
-
-    @Override
-    protected String generateCsv(Object[][] data) {
-        return super.generateCsv(data);
-    }
-
     private int getGlobalFontSize() {
         return EditorColorsManager.getInstance().getGlobalScheme().getEditorFontSize();
     }
@@ -505,10 +281,27 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
         return getTable().getFontMetrics(getTable().getFont()).getHeight();
     }
 
+    protected int[] getMaxTextWidthForAllColumns() {
+        CsvTableModel tableModel = getTableModel();
+        int maxRow = Math.min(tableModel.getRowCount(), COLUMN_WIDTH_MAX_TEXT_SAMPLE_SIZE);
+        int[] textLengths = new int[tableModel.getColumnCount()];
+
+        for (int row = 0; row < maxRow; ++row) {
+            if (!tableModel.isCommentRow(row)) {
+                for (int col = 0; col < textLengths.length; ++col) {
+                    String currentText = tableModel.getValue(row, col);
+                    textLengths[col] = Math.max(getStringWidth(currentText), textLengths[col]);
+                }
+            }
+        }
+
+        return textLengths;
+    }
+
     @Override
     protected int getStringWidth(String text) {
-        if (text == null) {
-            return TOTAL_CELL_WIDTH_SPACING;
+        if (text == null || text.length() == 0) {
+            return 0;
         }
         JTable table = getTable();
         FontMetrics fontMetrics = getTable().getFontMetrics(table.getFont());
@@ -525,15 +318,6 @@ public class CsvTableEditorSwing extends CsvTableEditor implements TableDataChan
         int newSize = oldSize + changeAmount;
         setFontSize(newSize);
         updateEditorLayout();
-    }
-
-    @Override
-    public int getPreferredRowHeight() {
-        if (getFileEditorState().getRowLines() == 0) {
-            return getFontHeight() + TOTAL_CELL_HEIGHT_SPACING;
-        }
-        return getFileEditorState().getRowLines() * getFontHeight() + TOTAL_CELL_HEIGHT_SPACING;
-
     }
 
     private void setFontSize(int size) {

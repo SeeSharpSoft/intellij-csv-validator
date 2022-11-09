@@ -86,7 +86,7 @@
           </grid>
         </children>
       </grid>
-      <grid id="3e325" layout-manager="GridLayoutManager" row-count="8" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+      <grid id="3e325" layout-manager="GridLayoutManager" row-count="6" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
         <margin top="10" left="10" bottom="10" right="10"/>
         <constraints>
           <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
@@ -96,7 +96,7 @@
         <children>
           <component id="97488" class="javax.swing.JCheckBox" binding="cbShowInfoPanel">
             <constraints>
-              <grid row="6" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+              <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
               <text value="Show info panel"/>
@@ -104,7 +104,7 @@
           </component>
           <component id="d6a8e" class="javax.swing.JCheckBox" binding="cbQuotingEnforced">
             <constraints>
-              <grid row="7" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+              <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
               <text value="Enforce value quoting"/>
@@ -112,18 +112,10 @@
           </component>
           <component id="e470c" class="javax.swing.JCheckBox" binding="cbFileEndLineBreak">
             <constraints>
-              <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-            </constraints>
-            <properties>
-              <text value="Keep/ignore linebreak at file end"/>
-            </properties>
-          </component>
-          <component id="5214d" class="javax.swing.JCheckBox" binding="cbAdjustColumnWidthOnOpen">
-            <constraints>
               <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <text value="Adjust column width on open (default)"/>
+              <text value="Keep/ignore linebreak at file end"/>
             </properties>
           </component>
           <grid id="8ebb6" layout-manager="GridLayoutManager" row-count="1" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
@@ -139,27 +131,7 @@
                   <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
-                  <text value="Text-lines per row (default):"/>
-                </properties>
-              </component>
-              <component id="d6ab5" class="javax.swing.JComboBox" binding="cbRowHeight">
-                <constraints>
-                  <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <model>
-                    <item value="Auto"/>
-                    <item value="1"/>
-                    <item value="2"/>
-                    <item value="3"/>
-                    <item value="4"/>
-                    <item value="5"/>
-                    <item value="6"/>
-                    <item value="7"/>
-                    <item value="8"/>
-                    <item value="9"/>
-                    <item value="10"/>
-                  </model>
+                  <text value="Default row height (10-100):"/>
                 </properties>
               </component>
               <hspacer id="48a70">
@@ -167,6 +139,14 @@
                   <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
               </hspacer>
+              <component id="c75c8" class="javax.swing.JFormattedTextField" binding="tfDefaultRowHeight">
+                <constraints>
+                  <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="0" indent="0" use-parent-layout="false">
+                    <preferred-size width="150" height="-1"/>
+                  </grid>
+                </constraints>
+                <properties/>
+              </component>
             </children>
           </grid>
           <grid id="3256a" layout-manager="GridLayoutManager" row-count="1" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
@@ -231,14 +211,6 @@
               </hspacer>
             </children>
           </grid>
-          <component id="8e063" class="javax.swing.JCheckBox" binding="cbHeaderRowFixed">
-            <constraints>
-              <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-            </constraints>
-            <properties>
-              <text value="Header row fixed (default)"/>
-            </properties>
-          </component>
         </children>
       </grid>
       <vspacer id="ff292">

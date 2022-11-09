@@ -1,12 +1,11 @@
 package net.seesharpsoft.intellij.plugins.csv.actions;
 
-import com.intellij.lang.Language;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.actionSystem.ToggleAction;
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.fileEditor.FileEditor;
+import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.psi.PsiFile;
 import com.intellij.util.FileContentUtilCore;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
@@ -16,7 +15,7 @@ import net.seesharpsoft.intellij.plugins.csv.components.CsvFileAttributes;
 import org.jetbrains.annotations.NotNull;
 
 public class CsvChangeSeparatorAction extends ToggleAction {
-    private CsvValueSeparator mySeparator;
+    private final CsvValueSeparator mySeparator;
 
     CsvChangeSeparatorAction(CsvValueSeparator separator) {
         super(separator.getDisplay());
@@ -38,13 +37,13 @@ public class CsvChangeSeparatorAction extends ToggleAction {
         if (!CsvHelper.isCsvFile(psiFile)) {
             return;
         }
-        Language language = psiFile.getLanguage();
-        if (language instanceof CsvSeparatorHolder) {
+        FileType fileType = psiFile.getFileType();
+        if (fileType instanceof CsvSeparatorHolder) {
             return;
         }
-        CsvFileAttributes csvFileAttributes = ServiceManager.getService(psiFile.getProject(), CsvFileAttributes.class);
+        CsvFileAttributes csvFileAttributes = psiFile.getProject().getService(CsvFileAttributes.class);
         csvFileAttributes.setFileSeparator(psiFile, this.mySeparator);
-        FileContentUtilCore.reparseFiles(psiFile.getVirtualFile());
+        FileContentUtilCore.reparseFiles(CsvHelper.getVirtualFile(psiFile));
 
         FileEditor fileEditor = anActionEvent.getData(PlatformDataKeys.FILE_EDITOR);
         if (fileEditor != null) {

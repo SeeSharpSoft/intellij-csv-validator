@@ -4,11 +4,13 @@ import com.intellij.psi.tree.IElementType;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
 import com.intellij.psi.TokenType;
 import com.intellij.lexer.FlexLexer;
+import net.seesharpsoft.intellij.plugins.csv.CsvSeparatorHolder;
 
 %%
 
 %class CsvLexer
 %implements FlexLexer
+%implements CsvSeparatorHolder
 %unicode
 %function advance
 %type IElementType
@@ -19,6 +21,11 @@ import com.intellij.lexer.FlexLexer;
 
     private boolean isActualValueSeparator() {
         return myValueSeparator.isValueSeparator(yycharat(0));
+    }
+
+    @Override
+    public CsvValueSeparator getSeparator() {
+        return myValueSeparator;
     }
 
     /**
@@ -34,12 +41,12 @@ import com.intellij.lexer.FlexLexer;
 %eof{  return;
 %eof}
 
-WHITE_SPACE=[ \f]+
 VALUE_SEPARATOR=[,:;|\t]
 RECORD_SEPARATOR=\n
 ESCAPED_QUOTE=\"\"|\\\"
-QUOTE=\"
-TEXT=[^ ,:;|\t\r\n\"\\#]+
+OPENING_QUOTE=[ \f]*\"
+CLOSING_QUOTE=\"[ \f]*
+TEXT=[^,:;|\t\r\n\"\\#]+
 BACKSLASH=\\+
 HASHTAG=#
 COMMENT=\#[^\n]*
@@ -70,7 +77,7 @@ COMMENT=\#[^\n]*
     return CsvTypes.TEXT;
 }
 
-<YYINITIAL, UNQUOTED> {QUOTE}
+<YYINITIAL, UNQUOTED> {OPENING_QUOTE}
 {
     yybegin(QUOTED);
     return CsvTypes.QUOTE;
@@ -136,15 +143,10 @@ COMMENT=\#[^\n]*
     return CsvTypes.ESCAPED_TEXT;
 }
 
-<QUOTED> {QUOTE}
+<QUOTED> {CLOSING_QUOTE}
 {
     yybegin(UNQUOTED);
     return CsvTypes.QUOTE;
-}
-
-{WHITE_SPACE}
-{
-    return TokenType.WHITE_SPACE;
 }
 
 .

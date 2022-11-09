@@ -37,7 +37,7 @@ public interface CsvHighlightingElement {
 
         static {
             COLUMNS = new ColumnBased[CsvColorSettings.MAX_COLUMN_COLORING_COLORS];
-            for(int i = 0; i < CsvColorSettings.MAX_COLUMN_COLORING_COLORS; ++i) {
+            for (int i = 0; i < CsvColorSettings.MAX_COLUMN_COLORING_COLORS; ++i) {
                 COLUMNS[i] = new ColumnBased(String.format("Column %s", i), i);
             }
         }

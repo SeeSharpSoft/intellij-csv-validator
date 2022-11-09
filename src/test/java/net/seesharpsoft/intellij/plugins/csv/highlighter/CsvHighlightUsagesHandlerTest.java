@@ -47,13 +47,13 @@ public class CsvHighlightUsagesHandlerTest extends BasePlatformTestCase {
     public void testHighlightUsages01() {
         RangeHighlighter[] rangeHighlighters = testHighlightUsages("HighlightUsagesTestData01.csv");
 
-        assertHighlightedTexts(rangeHighlighters, "Header 2", "Value 2");
+        assertHighlightedTexts(rangeHighlighters, " Header 2", " Value 2");
     }
 
     public void testHighlightUsages02() {
         RangeHighlighter[] rangeHighlighters = testHighlightUsages("HighlightUsagesTestData02.csv");
 
-        assertHighlightedTexts(rangeHighlighters, "Header 2", "Value 2");
+        assertHighlightedTexts(rangeHighlighters, " Header 2", " Value 2");
     }
 
     public void testHighlightUsages03() {
@@ -65,19 +65,19 @@ public class CsvHighlightUsagesHandlerTest extends BasePlatformTestCase {
     public void testHighlightUsages04() {
         RangeHighlighter[] rangeHighlighters = testHighlightUsages("HighlightUsagesTestData04.csv");
 
-        assertHighlightedTexts(rangeHighlighters, "Value 3");
+        assertHighlightedTexts(rangeHighlighters, " Value 3");
     }
 
     public void testHighlightUsages05() {
         RangeHighlighter[] rangeHighlighters = testHighlightUsages("HighlightUsagesTestData05.csv");
 
-        assertHighlightedTexts(rangeHighlighters, "Header 2", "Value 2");
+        assertHighlightedTexts(rangeHighlighters, " Header 2", " Value 2");
     }
 
     public void testHighlightUsages06() {
         RangeHighlighter[] rangeHighlighters = testHighlightUsages("HighlightUsagesTestData06.csv");
 
-        assertHighlightedTexts(rangeHighlighters, "Value 3");
+        assertHighlightedTexts(rangeHighlighters, " Value 3");
     }
 
     public void testHighlightUsages07() {

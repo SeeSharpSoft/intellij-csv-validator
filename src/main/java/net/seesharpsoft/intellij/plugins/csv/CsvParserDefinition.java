@@ -61,7 +61,8 @@ public class CsvParserDefinition implements FileParserDefinition {
 
     @Override
     public PsiFile createFile(FileViewProvider viewProvider) {
-        return new CsvFile(viewProvider, CsvFileType.INSTANCE);
+        return new CsvFile(viewProvider, viewProvider.getFileType());
+//        return new CsvFile(viewProvider, CsvFileType.INSTANCE);
     }
 
     @Override

@@ -10,7 +10,7 @@ public class CsvHelperTest extends PlatformLiteFixture {
     }
 
     public void testUnquoteCsvValueWithBackslash() {
-        String csv = "\"Header\\\" \\\\1\\\\\"";
+        String csv = "\"Header\\\" \\1\\\"";
         assertEquals("Header\" \\1\\", CsvHelper.unquoteCsvValue(csv, CsvEscapeCharacter.BACKSLASH));
     }
 
@@ -21,6 +21,6 @@ public class CsvHelperTest extends PlatformLiteFixture {
 
     public void testQuoteCsvValueWithBackslash() {
         String csv = "Header\" \\1\\";
-        assertEquals("\"Header\\\" \\\\1\\\\\"",  CsvHelper.quoteCsvField(csv, CsvEscapeCharacter.BACKSLASH, CsvValueSeparator.COMMA, false));
+        assertEquals("\"Header\\\" \\1\\\"",  CsvHelper.quoteCsvField(csv, CsvEscapeCharacter.BACKSLASH, CsvValueSeparator.COMMA, false));
     }
 }

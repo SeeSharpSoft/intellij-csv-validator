@@ -7,7 +7,10 @@ import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
 import com.intellij.util.Consumer;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
-import net.seesharpsoft.intellij.plugins.csv.psi.*;
+import net.seesharpsoft.intellij.plugins.csv.psi.CsvField;
+import net.seesharpsoft.intellij.plugins.csv.psi.CsvFile;
+import net.seesharpsoft.intellij.plugins.csv.psi.CsvRecord;
+import net.seesharpsoft.intellij.psi.PsiHelper;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
@@ -15,7 +18,7 @@ import java.util.List;
 
 public class CsvHighlightUsagesHandler extends HighlightUsagesHandlerBase {
 
-    private static int MAX_HIGHLIGHTING_ROWS = 1000;
+    private static final int MAX_HIGHLIGHTING_ROWS = 1000;
 
     protected CsvHighlightUsagesHandler(@NotNull Editor editor, @NotNull CsvFile file) {
         super(editor, file);
@@ -66,7 +69,7 @@ public class CsvHighlightUsagesHandler extends HighlightUsagesHandlerBase {
         for (PsiElement sibling = backward ? csvRecord.getPrevSibling() : csvRecord;
              count != 0 && sibling != null;
              sibling = backward ? sibling.getPrevSibling() : sibling.getNextSibling(), --count) {
-            PsiElement field = CsvHelper.getNthChild(sibling, index, CsvTypes.FIELD);
+            PsiElement field = PsiHelper.getNthChildOfType(sibling, index, CsvField.class);
             if (field != null) {
                 TextRange range = field.getTextRange();
                 if (range != null && range.getLength() > 0) {
