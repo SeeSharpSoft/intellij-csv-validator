@@ -8,7 +8,6 @@ import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.editor.colors.EditorFontType;
 import com.intellij.openapi.fileEditor.*;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.CheckedDisposable;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.UserDataHolder;
 import com.intellij.openapi.util.UserDataHolderBase;
@@ -32,7 +31,7 @@ import java.beans.PropertyChangeSupport;
 import java.util.Arrays;
 import java.util.Collection;
 
-public abstract class CsvTableEditor implements FileEditor, FileEditorLocation, CheckedDisposable, PsiFileHolder {
+public abstract class CsvTableEditor implements FileEditor, FileEditorLocation, PsiFileHolder {
 
     public static final String EDITOR_NAME = "Table Editor";
 
@@ -190,7 +189,6 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation, 
         getTableModel().dispose();
     }
 
-    @Override
     public boolean isDisposed() {
         return this.myDisposed;
     }
