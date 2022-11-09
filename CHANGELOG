@@ -1,3 +1,34 @@
+3.0.0
+Nov 09, 2022
+
+MAJOR UPDATE VERSION 3
+
+General
+-------
+
+- renamed plugin to 'CSV Editor'
+- fixed all compatibility issues with respect to IntelliJ platform 2022.*
+- rework language lexer
+- simplification of formatter & remove 'Tabularize' formatting
+- remove slow & (useless) structure view
+- adjusted setting dialogs
+- integrated GitHub issue reporter in case plugin raises an exception
+- removed TSV & PSV language, only CSV language but different filetypes
+
+Table Editor
+------------
+
+- use PSI Tree as data source
+- integrate with native IntelliJ IDE document change handler (e.g. for undo/redo)
+- simplify UI/UX & remove header toolbar
+- support showing and editing comment lines
+- auto adjust row width
+- manually adjust row height via dragging
+- always use first line for header/column text
+
+
+/* VERSION 2 */
+
 2.21.0
 Oct 26, 2022
 
@@ -301,6 +332,8 @@ FIX: applying row height for newly opened files
 Nov 20, 2018
 
 NEW: CSV/TSV table editor!!!
+
+/* VERSION 1 */
 
 1.9.1
 Oct 12, 2018

@@ -5,14 +5,14 @@
 [![Known Vulnerabilities](https://snyk.io/test/github/SeeSharpSoft/intellij-csv-validator/badge.svg?targetFile=build.gradle)](https://snyk.io/test/github/SeeSharpSoft/intellij-csv-validator?targetFile=build.gradle)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/97769359388e44bfb7101346d510fccf)](https://www.codacy.com/gh/SeeSharpSoft/intellij-csv-validator/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=SeeSharpSoft/intellij-csv-validator&amp;utm_campaign=Badge_Grade)
 
-# CSV Table Editor Plugin for JetBrains IDE family
+# CSV Editor Plugin for JetBrains IDE family
 
 Compatible with _IntelliJ IDEA  PhpStorm  WebStorm  PyCharm  RubyMine  AppCode  CLion  Gogland  DataGrip  Rider  MPS  Android Studio_ - __2022.1 and newer__
 
 This plugin introduces CSV (_Comma-Separated Values_) as a language to Jetbrains IDE with a syntax definition, structured language elements and associated file types (.csv/.tsv/.psv).
 This enables default editor features like syntax validation, highlighting and inspections for CSV-alike files.
 
-![CSV Table Editor Example](./docs/example.png)
+![CSV Editor Example](./docs/example.png)
 
 ## Features
 
@@ -356,11 +356,11 @@ You can also download the JAR package from the [Jetbrains plugin repository](htt
 
 ## Troubleshooting
 
-#### CSV Table Editor doesn't seem to work
+#### CSV Editor doesn't seem to work
 
 Please ensure in the settings that the corresponding files types (csv, tab/tsv, psv) are properly mapped (_File > Settings > Editor > File Types_). 
 
-#### CSV Table Editor causes the IDE to stop working properly
+#### CSV Editor causes the IDE to stop working properly
 
 Since version 2.14.0, the plugins requires the IntelliJ platform to be executed on JRE11 or higher. If this is not the case, the following error log can be noticed:
 
@@ -370,7 +370,7 @@ In some cases the error log doesn't seem to point this out in a noticeable manne
 
 Please read the [official instructions](https://intellij-support.jetbrains.com/hc/en-us/articles/206544879-Selecting-the-JDK-version-the-IDE-will-run-under) on how to switch to a newer JRE, or [manually install](https://github.com/SeeSharpSoft/intellij-csv-validator#installation) a [prior CSV plugin version](https://github.com/SeeSharpSoft/intellij-csv-validator/releases/tag/2.10.0).
 
-#### Features of the CSV Table Editor are not available
+#### Features of the CSV Editor are not available
 
 If another plugin for CSV files like [Rainbow CSV](https://plugins.jetbrains.com/plugin/12896-rainbow-csv) is enabled, this plugin might not be taken into account for parsing and presenting CSV file content.
 

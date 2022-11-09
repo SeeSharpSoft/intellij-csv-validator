@@ -47,8 +47,8 @@ public class CsvCodeStyleSettingsProvider extends CodeStyleSettingsProvider {
 
         @Override
         protected void initTabs(CodeStyleSettings settings) {
-//            addTab(new CsvIntendPanel(settings));
             addTab(new CsvSpacesPanel(settings));
+            addTab(new CsvIntendPanel(settings));
             addTab(new CsvWrappingPanel(settings));
         }
 

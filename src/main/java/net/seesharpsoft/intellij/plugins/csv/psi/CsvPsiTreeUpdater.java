@@ -345,7 +345,7 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
             CommandProcessor.getInstance().executeCommand(
                     getPsiFile().getProject(),
                     () -> DocumentUtil.executeInBulk(document, runnable),
-                    "CSV Table Editor changes",
+                    "CSV Editor changes",
                     null,
                     document);
         });

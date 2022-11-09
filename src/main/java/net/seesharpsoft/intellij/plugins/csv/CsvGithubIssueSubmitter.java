@@ -40,7 +40,7 @@ public class CsvGithubIssueSubmitter extends ErrorReportSubmitter {
     @NotNull
     @Override
     public String getReportActionText() {
-        return "Report to 'CSV Table Editor' (Github)";
+        return "Report to 'CSV Editor' (Github)";
     }
 
     @Override

@@ -360,7 +360,7 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation, 
 //                CommandProcessor.getInstance().executeCommand(
 //                        getProject(),
 //                        () -> DocumentUtil.executeInBulk(getDocument(), runnable),
-//                        "CSV Table Editor changes",
+//                        "CSV Editor changes",
 //                        null,
 //                        getDocument());
 //            }

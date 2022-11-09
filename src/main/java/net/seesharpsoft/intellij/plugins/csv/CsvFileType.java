@@ -33,7 +33,7 @@ public final class CsvFileType extends LanguageFileType {
 
     @Override
     public @NotNull String getDisplayName() {
-        return getName() + " (CSV Table Editor)";
+        return getName() + " (CSV Editor)";
     }
 
     @Nullable

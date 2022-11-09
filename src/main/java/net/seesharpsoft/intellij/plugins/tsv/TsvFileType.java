@@ -39,7 +39,7 @@ public final class TsvFileType extends LanguageFileType implements CsvSeparatorH
 
     @Override
     public @NotNull String getDisplayName() {
-        return getName() + " (CSV Table Editor)";
+        return getName() + " (CSV Editor)";
     }
 
     @Nullable

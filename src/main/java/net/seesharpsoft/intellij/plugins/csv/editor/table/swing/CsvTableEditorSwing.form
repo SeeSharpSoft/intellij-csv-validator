@@ -104,7 +104,7 @@
                 <properties>
                   <horizontalTextPosition value="10"/>
                   <iconTextGap value="2"/>
-                  <text value="CSV Table Editor"/>
+                  <text value="CSV Editor"/>
                 </properties>
               </component>
             </children>
