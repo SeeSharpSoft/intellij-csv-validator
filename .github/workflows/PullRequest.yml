@@ -17,10 +17,10 @@ jobs:
       matrix:
         include:
           - ideaVersion: 2022.2.1
-            ideaType: PC
-            gkVersion: 2021.1.2
-          - ideaVersion: 2022.2.4
             ideaType: PS
+            gkVersion: 2021.1.2
+          - ideaVersion: 2022.2.3
+            ideaType: PY
             gkVersion: 2021.1.2
 
     steps:
