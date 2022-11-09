@@ -39,6 +39,8 @@ public class CsvFormattingModelBuilder implements FormattingModelBuilder {
         return builder;
     }
 
+    private static ExternalFormattingModelBuilderImpl DUMMY_FORMATTING_MODEL_PROVIDER = new ExternalFormattingModelBuilderImpl(null);
+
     @Override
     @NotNull
     public FormattingModel createModel(FormattingContext formattingContext) {
@@ -46,7 +48,8 @@ public class CsvFormattingModelBuilder implements FormattingModelBuilder {
             case ADJUST_INDENT:
             case ADJUST_INDENT_ON_ENTER:
                 // do not care about indent during editing (baaad performance)
-                return FormatterImpl.getInstance().createDummyFormattingModel(formattingContext.getPsiElement());
+                // NOTE: Formatter.getInstance().createDummyFormattingModel(formattingContext.getPsiElement()); <-- marked as internal, but this DummyFormattingModel is all I want
+                return DUMMY_FORMATTING_MODEL_PROVIDER.createModel(formattingContext);
             case REFORMAT:
                 PsiElement element = formattingContext.getPsiElement();
                 CodeStyleSettings settings = formattingContext.getCodeStyleSettings();

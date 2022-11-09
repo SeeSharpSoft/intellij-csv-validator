@@ -12,6 +12,15 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - ideaVersion: IC-2022.1.1
+            gkVersion: 2021.1.2
+          - ideaVersion: IC-2022.2.1
+            gkVersion: 2021.1.2
+
     steps:
     - uses: actions/checkout@v2
     - name: Set up JDK 17
@@ -23,8 +32,9 @@ jobs:
       run: chmod +x gradlew
     - name: Build with Gradle
       env:
-        IDEA_VERSION: IU-2022.1.1
-        GRAMMAR_KIT_VERSION: 2021.1.2
+
+        IDEA_VERSION: ${{ matrix.ideaVersion }}
+        GRAMMAR_KIT_VERSION: ${{ matrix.gkVersion }}
         IDEA_SOURCES: false
         JI_CHANNELS: Stable
         JI_TOKEN: ${{ secrets.JI_TOKEN }}
