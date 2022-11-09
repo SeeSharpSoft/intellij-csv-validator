@@ -7,12 +7,12 @@
 
     <description><![CDATA[
 
-        <p>Lightweight plugin for editing CSV/TSV/PSV files with a flexible Table Editor, syntax validation, structure highlighting, customizable coloring, new intentions and helpful inspections.</p><br>
-        <img width="600" height="297" src="https://plugins.jetbrains.com/files/10037/screenshot_22766.png" /><br><br>
+        <p>Plugin for editing CSV files with a rainbow colored text- & table-editor. It supports are syntax validation, customization, intentions and many more.</p><br>
+        <img width="600" height="297" src="https://plugins.jetbrains.com/files/10037/screenshot_80656a25-da46-4f76-b5c1-a9e8263b8bf3.png" /><br><br>
         <p><b>Features:</b><br>
         <ul>
             <li>support for CSV/TSV/PSV file extensions</li>
-            <li>customizable Table Editor</li>
+            <li>customizable table editor</li>
             <li>customizable text editor</li>
             <li>customizable column coloring</li>
             <li>customizable line comment</li>
@@ -22,7 +22,6 @@
             <li>quick fix inspections</li>
             <li>intentions (Alt+Enter), e.g. Quote/Unquote (all), Shift Column Left/Right</li>
             <li>balloon help & spell checker</li>
-            <li>structure view (header-entry layout)</li>
             <li>support for ',', ';', '|' or '&#8633;' as value separator</li>
             <li>support for '"' or '\' as escape character</li>
             <li>support line comments (# by default, customizable)</li>
@@ -33,8 +32,6 @@
 
         <p>
         <b>TSV/PSV file support:</b> <em>TSV/PSV files are recognized as such but treated as a variant of CSV files, the same syntax highlighting and code style settings are applied.</em>
-        <br><br>
-        <b>Code formatting:</b> <em>Default code formatting is 'Tabularize'. Can be changed in Settings -> Editor -> Code Style -> CSV/TSV/PSV</em>
         <br><br>
         For more detailed information please have a look at the <a href="https://github.com/SeeSharpSoft/intellij-csv-validator/blob/main/README.md">README</a>.
         <br><br><br>

@@ -4,6 +4,7 @@ import com.intellij.ui.table.JBTable;
 import net.seesharpsoft.intellij.ui.EditableCellFocusAction;
 
 import javax.swing.*;
+import javax.swing.plaf.TableUI;
 import javax.swing.plaf.basic.BasicTableUI;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
@@ -25,6 +26,17 @@ public class CsvTable extends JBTable {
         new EditableCellFocusAction(this, KeyStroke.getKeyStroke("LEFT"));
         new EditableCellFocusAction(this, KeyStroke.getKeyStroke("UP"));
         new EditableCellFocusAction(this, KeyStroke.getKeyStroke("DOWN"));
+    }
+
+    @Override
+    public void setUI(TableUI ui) {
+        TableUI newUI = ui instanceof MultiSpanCellTableUI ? ui : new MultiSpanCellTableUI();
+        super.setUI(newUI);
+    }
+
+    @Override
+    public MultiSpanCellTableUI getUI() {
+        return (MultiSpanCellTableUI) super.getUI();
     }
 
     @Override
@@ -84,11 +96,6 @@ public class CsvTable extends JBTable {
     @Override
     public boolean isCellEditable(int row, int column) {
         return (!isCommentRow(row) || convertColumnIndexToModel(column) == 0) && super.isCellEditable(row, column);
-    }
-
-    @Override
-    public MultiSpanCellTableUI getUI() {
-        return (MultiSpanCellTableUI) super.getUI();
     }
 
     public class MultiSpanCellTableUI extends BasicTableUI {

@@ -35,7 +35,9 @@ This enables default editor features like syntax validation, highlighting and in
 
 **!!Please note!!**
 
-- Previous versions can be downloaded and installed manually from the following locations: [GitHub Releases](https://github.com/SeeSharpSoft/intellij-csv-validator/releases), [Plugin Repository](https://plugins.jetbrains.com/plugin/10037-csv-plugin/versions) (see also section [Installation](https://github.com/SeeSharpSoft/intellij-csv-validator#installation)).
+For release 3.*, the plugin got a major overhaul focusing on performance and table editor usage.
+Some features and settings were removed for simplification and consistency.
+The previous version (incl README) can still be accessed [here](https://github.com/SeeSharpSoft/intellij-csv-validator/tree/release_2) and installed manually (see section [Installation](https://github.com/SeeSharpSoft/intellij-csv-validator#installation)).
 
 ### Syntax parser & validation
 
