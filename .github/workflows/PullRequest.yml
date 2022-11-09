@@ -16,9 +16,11 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - ideaVersion: PY-2022.1.1
+          - ideaVersion: 2022.2.1
+            ideaType: PS
             gkVersion: 2021.1.2
-          - ideaVersion: IC-2022.2.1
+          - ideaVersion: 2022.2.3
+            ideaType: PY
             gkVersion: 2021.1.2
 
     steps:
@@ -33,6 +35,7 @@ jobs:
     - name: Build with Gradle
       env:
         IDEA_VERSION: ${{ matrix.ideaVersion }}
+        IDEA_TYPE: ${{ matrix.ideaType }}
         GRAMMAR_KIT_VERSION: ${{ matrix.gkVersion }}
         IDEA_SOURCES: false
       run: xvfb-run ./gradlew test
