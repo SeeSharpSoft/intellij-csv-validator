@@ -19,7 +19,6 @@ jacocoTestReport {
 }
 
 group 'net.seesharpsoft.intellij.plugins'
-version '3.0.0'
 
 apply plugin: 'java'
 project.sourceCompatibility = JavaVersion.VERSION_11
@@ -67,20 +66,30 @@ idea {
     }
 }
 
+var final EAP_VERSION = 'LATEST-EAP-SNAPSHOT';
+// IDE version - https://www.jetbrains.com/intellij-repository/releases
+var idea_version = System.getenv().getOrDefault('IDEA_VERSION', 'IC-2022.1.1')
+var build_version = idea_version == EAP_VERSION ? idea_version : idea_version.substring(5, 7) + idea_version.charAt(8) // extract e.g. '221' from 'IC-2022.1.1'
+
+version '3.0.0-' + build_version
+
 apply plugin: 'org.jetbrains.intellij'
 intellij {
-    // IDE version - https://www.jetbrains.com/intellij-repository/releases
-    version = System.getenv().getOrDefault('IDEA_VERSION', 'IC-2022.1.1')
+    version = idea_version
     pluginName = 'CSV'
-    updateSinceUntilBuild = false
+    updateSinceUntilBuild = true
     downloadSources = Boolean.parseBoolean(System.getenv().getOrDefault('IDEA_SOURCES', "true"))
 
     plugins = [
-            System.getenv().getOrDefault('GIT_PLUGIN_VERSION', 'Git4Idea'),
-            System.getenv().getOrDefault('GITHUB_PLUGIN_VERSION', 'org.jetbrains.plugins.github')
+            'Git4Idea',
+            'org.jetbrains.plugins.github'
     ]
 }
 patchPluginXml {
+    // see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description
+    sinceBuild = build_version == EAP_VERSION ? '221' : build_version
+    untilBuild = build_version == EAP_VERSION ? '*' : build_version + ".*"
+
     changeNotes = """<pre style="font-family: sans-serif">
 Major update release 3.*!
 
