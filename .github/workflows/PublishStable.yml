@@ -16,9 +16,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - ideaVersion: IC-2022.1.1
+          - ideaVersion: 2022.2.1
             gkVersion: 2021.1.2
-          - ideaVersion: IC-2022.2.1
+          - ideaVersion: LATEST-EAP-SNAPSHOT
             gkVersion: 2021.1.2
 
     steps:
@@ -32,7 +32,6 @@ jobs:
       run: chmod +x gradlew
     - name: Build with Gradle
       env:
-
         IDEA_VERSION: ${{ matrix.ideaVersion }}
         GRAMMAR_KIT_VERSION: ${{ matrix.gkVersion }}
         IDEA_SOURCES: false

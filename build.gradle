@@ -21,8 +21,8 @@ jacocoTestReport {
 group 'net.seesharpsoft.intellij.plugins'
 
 apply plugin: 'java'
-project.sourceCompatibility = JavaVersion.VERSION_11
-project.targetCompatibility = JavaVersion.VERSION_11
+project.sourceCompatibility = JavaVersion.VERSION_17
+project.targetCompatibility = JavaVersion.VERSION_17
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
     options.compilerArgs << "-Xlint:deprecation"
@@ -66,18 +66,21 @@ idea {
     }
 }
 
-var final EAP_VERSION = 'LATEST-EAP-SNAPSHOT';
+var final EAP_VERSION = 'LATEST-EAP-SNAPSHOT'
+
 // IDE version - https://www.jetbrains.com/intellij-repository/releases
-var idea_version = System.getenv().getOrDefault('IDEA_VERSION', 'IC-2022.1.1')
-var build_version = idea_version == EAP_VERSION ? idea_version : idea_version.substring(5, 7) + idea_version.charAt(8) // extract e.g. '221' from 'IC-2022.1.1'
+var idea_version = System.getenv().getOrDefault('IDEA_VERSION', '2022.2.1')
+var build_version = idea_version == EAP_VERSION ? '223' : idea_version.substring(2, 4) + idea_version.charAt(5) // extract e.g. '221' from '2022.1.1'
 
 version '3.0.0-' + build_version
 
 apply plugin: 'org.jetbrains.intellij'
 intellij {
     version = idea_version
-    pluginName = 'CSV'
+    type = System.getenv().getOrDefault('IDEA_TYPE', 'IC')
+    pluginName = 'CSVEditor'
     updateSinceUntilBuild = true
+    sameSinceUntilBuild = true
     downloadSources = Boolean.parseBoolean(System.getenv().getOrDefault('IDEA_SOURCES', "true"))
 
     plugins = [
@@ -87,8 +90,7 @@ intellij {
 }
 patchPluginXml {
     // see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description
-    sinceBuild = build_version == EAP_VERSION ? '221' : build_version
-    untilBuild = build_version == EAP_VERSION ? '*' : build_version + ".*"
+    sinceBuild = build_version
 
     changeNotes = """<pre style="font-family: sans-serif">
 Major update release 3.*!
