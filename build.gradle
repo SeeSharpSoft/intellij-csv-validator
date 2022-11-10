@@ -105,6 +105,15 @@ Due to incompatible code changes, file specific settings (value separator & esca
 Feedback is welcome!
 
 PS: The previous versions are still available on the project page.
+
+
+Update 3.0.1
+
+FIX: cannot init component state (componentName=CsvFileAttributes) #359
+FIX: image in plugin description
+FIX: plugin update restart
+
+
 </pre>"""
 }
 publishPlugin {
