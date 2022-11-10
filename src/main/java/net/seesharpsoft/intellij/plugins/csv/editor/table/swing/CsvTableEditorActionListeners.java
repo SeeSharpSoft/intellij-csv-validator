@@ -1,5 +1,6 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
+import com.intellij.ide.BrowserUtil;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.ui.components.labels.LinkLabel;
@@ -7,10 +8,7 @@ import com.intellij.ui.components.labels.LinkListener;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableActions;
 
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.ActionListener;
-import java.io.IOException;
-import java.net.URI;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
@@ -173,16 +171,7 @@ public class CsvTableEditorActionListeners extends CsvTableEditorUtilBase implem
     private final class OpenCsvPluginLink implements LinkListener {
         @Override
         public void linkSelected(LinkLabel linkLabel, Object o) {
-            if (Desktop.isDesktopSupported()) {
-                Desktop desktop = Desktop.getDesktop();
-                if (desktop.isSupported(Desktop.Action.BROWSE)) {
-                    try {
-                        desktop.browse(URI.create("https://github.com/SeeSharpSoft/intellij-csv-validator"));
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
+            BrowserUtil.browse("https://github.com/SeeSharpSoft/intellij-csv-validator");
         }
     }
 }

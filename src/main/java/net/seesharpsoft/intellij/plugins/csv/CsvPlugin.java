@@ -1,9 +1,9 @@
 package net.seesharpsoft.intellij.plugins.csv;
 
+import com.intellij.ide.BrowserUtil;
 import com.intellij.ide.actions.ShowSettingsUtilImpl;
 import com.intellij.ide.plugins.IdeaPluginDescriptor;
 import com.intellij.ide.plugins.PluginManagerCore;
-import com.intellij.ide.ui.IdeUiService;
 import com.intellij.notification.*;
 import com.intellij.openapi.extensions.PluginId;
 import com.intellij.openapi.options.ShowSettingsUtil;
@@ -37,7 +37,7 @@ public class CsvPlugin implements StartupActivity, StartupActivity.DumbAware, St
         if (link.startsWith("#")) {
             ((ShowSettingsUtilImpl) ShowSettingsUtil.getInstance()).showSettingsDialog(project, link.substring(1), null);
         } else {
-            IdeUiService.getInstance().browse(link);
+            BrowserUtil.browse(link);
         }
     }
 
