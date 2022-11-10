@@ -9,7 +9,7 @@
 # the `language` matrix defined below to confirm you have the correct set of
 # supported CodeQL languages.
 #
-name: "CI CodeQL (main)"
+name: "Build (main)"
 
 on:
   push:
