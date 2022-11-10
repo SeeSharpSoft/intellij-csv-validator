@@ -10,7 +10,7 @@ import com.intellij.util.PathUtil;
 import java.util.regex.Pattern;
 
 public final class CsvStorageHelper {
-    public static final String CSV_STATE_STORAGE_FILE = "csv-plugin.xml";
+    public static final String CSV_STATE_STORAGE_FILE = "csv-editor.xml";
 
     public static final Key<String> RELATIVE_FILE_URL = Key.create("CSV_PLUGIN_RELATIVE_URL");
 

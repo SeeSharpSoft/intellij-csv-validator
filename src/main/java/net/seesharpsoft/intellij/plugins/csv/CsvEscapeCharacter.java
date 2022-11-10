@@ -1,6 +1,7 @@
 package net.seesharpsoft.intellij.plugins.csv;
 
 import com.intellij.util.xmlb.Converter;
+import com.intellij.xml.util.XmlStringUtil;
 
 import java.util.Objects;
 import java.util.regex.Pattern;
@@ -48,11 +49,11 @@ public class CsvEscapeCharacter {
 
     public static class CsvEscapeCharacterConverter extends Converter<CsvEscapeCharacter> {
         public CsvEscapeCharacter fromString(String value) {
-            return CsvEscapeCharacter.create(value);
+            return CsvEscapeCharacter.create(XmlStringUtil.unescapeIllegalXmlChars(value));
         }
 
         public String toString(CsvEscapeCharacter value) {
-            return value.getCharacter();
+            return XmlStringUtil.escapeIllegalXmlChars(value.getCharacter());
         }
     }
 
