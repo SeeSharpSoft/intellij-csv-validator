@@ -73,7 +73,7 @@ var final EAP_BUILD = '223'
 var idea_version = System.getenv().getOrDefault('IDEA_VERSION', '2022.2.1')
 var build_version = idea_version == EAP_VERSION ? EAP_BUILD : idea_version.substring(2, 4) + idea_version.charAt(5) // extract e.g. '221' from '2022.1.1'
 
-version '3.0.0-' + build_version
+version '3.0.1-' + build_version
 
 apply plugin: 'org.jetbrains.intellij'
 intellij {
@@ -99,6 +99,8 @@ Major update release 3.*!
 For this release, the plugin was reworked quite a bit, focusing on performance and table editor usage. The table editor is now the default editor!
 
 Some options were removed for simplification and consistency (e.g. 'Tabularize' formatting), while new features were added (e.g. comment support in table editor).
+
+Due to incompatible code changes, file specific settings (value separator & escape character) are lost and might need to be set again accordingly.
 
 Feedback is welcome!
 

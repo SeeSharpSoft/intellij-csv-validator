@@ -1,4 +1,4 @@
-<idea-plugin require-restart="false">
+<idea-plugin require-restart="true">
     <id>net.seesharpsoft.intellij.plugins.csv</id>
     <name>CSV Editor</name>
     <vendor url="https://github.com/SeeSharpSoft/intellij-csv-validator">
@@ -6,9 +6,8 @@
     </vendor>
 
     <description><![CDATA[
-
         <p>Plugin for editing CSV files with a rainbow colored text- & table-editor. It supports are syntax validation, customization, intentions and many more.</p><br>
-        <img width="600" height="297" src="https://plugins.jetbrains.com/files/10037/screenshot_80656a25-da46-4f76-b5c1-a9e8263b8bf3" /><br><br>
+        <img width="600" height="297" src="https://plugins.jetbrains.com/files/10037/screenshot_80656a25-da46-4f76-b5c1-a9e8263b8bf3" />
         <p><b>Features:</b><br>
         <ul>
             <li>support for CSV/TSV/PSV file extensions</li>
@@ -29,7 +28,6 @@
             <li>tab (&#8633;) separator highlighting</li>
         </ul>
         </p><br>
-
         <p>
         <b>TSV/PSV file support:</b> <em>TSV/PSV files are recognized as such but treated as a variant of CSV files, the same syntax highlighting and code style settings are applied.</em>
         <br><br>

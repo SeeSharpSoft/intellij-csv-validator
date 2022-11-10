@@ -11,7 +11,6 @@ import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
-import com.intellij.util.PathUtil;
 import com.intellij.util.xmlb.XmlSerializerUtil;
 import com.intellij.util.xmlb.annotations.OptionTag;
 import net.seesharpsoft.commons.collection.Pair;
@@ -22,16 +21,16 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @State(
         name = "CsvFileAttributes",
         storages = {@Storage(CsvStorageHelper.CSV_STATE_STORAGE_FILE)}
 )
-@SuppressWarnings("all")
 public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttributes> {
     private final static Logger LOG = Logger.getInstance(CsvFileAttributes.class);
 
-    public Map<String, Attribute> attributeMap = new HashMap<>();
+    public Map<String, Attribute> attributeMap = new ConcurrentHashMap<>();
 
     public static class Attribute {
         @OptionTag(converter = CsvValueSeparator.CsvValueSeparatorConverter.class)
@@ -58,7 +57,6 @@ public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttrib
 
     public void cleanupAttributeMap(@NotNull Project project) {
         List<String> faultyFiles = new ArrayList<>();
-        final String projectBasePath = PathUtil.getLocalPath(project.getBasePath());
         attributeMap.forEach((fileName, attribute) -> {
             if (!CsvStorageHelper.csvFileExists(project, fileName)) {
                 LOG.debug(fileName + " not found or not CSV file");
@@ -72,21 +70,17 @@ public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttrib
         attributeMap.clear();
     }
 
-    protected String generateMapKey(@NotNull PsiFile psiFile) {
-        return generateMapKey(psiFile.getProject(), psiFile.getOriginalFile().getVirtualFile());
-    }
-
     protected String generateMapKey(@NotNull Project project, @NotNull VirtualFile virtualFile) {
         return CsvStorageHelper.getRelativeFilePath(project, virtualFile);
     }
 
     @Nullable
-    private Attribute getFileAttribute(@NotNull Project project, @NotNull VirtualFile virtualFile, boolean createIfMissing) {
+    private synchronized Attribute getFileAttribute(@NotNull Project project, @NotNull VirtualFile virtualFile, boolean createIfMissing) {
         String key = generateMapKey(project, virtualFile);
         if (key == null) {
             return null;
         }
-        Attribute attribute = key != null ? attributeMap.get(key) : null;
+        Attribute attribute = attributeMap.get(key);
         if (attribute == null && createIfMissing) {
             attribute = new Attribute();
             if (!CsvHelper.isCsvFile(project, virtualFile)) {
@@ -144,7 +138,7 @@ public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttrib
     private CsvValueSeparator autoDetectSeparator(Project project, VirtualFile virtualFile) {
         final Document document = FileDocumentManager.getInstance().getDocument(virtualFile);
         final String text = document == null ? "" : document.getText();
-        final List<CsvValueSeparator> applicableValueSeparators = new ArrayList(Arrays.asList(CsvValueSeparator.values()));
+        final List<CsvValueSeparator> applicableValueSeparators = new ArrayList<>(Arrays.asList(CsvValueSeparator.values()));
         final CsvValueSeparator defaultValueSeparator = CsvEditorSettings.getInstance().getDefaultValueSeparator();
         if (defaultValueSeparator.isCustom()) {
             applicableValueSeparators.add(defaultValueSeparator);
