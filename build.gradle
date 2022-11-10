@@ -67,10 +67,11 @@ idea {
 }
 
 var final EAP_VERSION = 'LATEST-EAP-SNAPSHOT'
+var final EAP_BUILD = '223'
 
 // IDE version - https://www.jetbrains.com/intellij-repository/releases
 var idea_version = System.getenv().getOrDefault('IDEA_VERSION', '2022.2.1')
-var build_version = idea_version == EAP_VERSION ? '223' : idea_version.substring(2, 4) + idea_version.charAt(5) // extract e.g. '221' from '2022.1.1'
+var build_version = idea_version == EAP_VERSION ? EAP_BUILD : idea_version.substring(2, 4) + idea_version.charAt(5) // extract e.g. '221' from '2022.1.1'
 
 version '3.0.0-' + build_version
 
