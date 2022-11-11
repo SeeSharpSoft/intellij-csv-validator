@@ -110,6 +110,7 @@ PS: The previous versions are still available on the project page.
 Update 3.0.1
 
 FIX: cannot init component state (componentName=CsvFileAttributes) #359
+FIX: cannot invoke "java.util.List.add(Object)" because "this.myUncommittedActions" is null #361
 FIX: image in plugin description
 FIX: plugin update restart
 

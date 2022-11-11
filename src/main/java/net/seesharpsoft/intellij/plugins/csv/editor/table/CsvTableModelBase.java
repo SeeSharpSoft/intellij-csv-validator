@@ -25,10 +25,8 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
     private int myCachedColumnCount = -1;
     private CsvEscapeCharacter myCachedEscapeCharacter;
     private Boolean myCachedHasErrors = null;
-
     private int myPointedRow = -1;
     private PsiElement myPointedRecord = null;
-
     private final CsvPsiTreeUpdater myPsiTreeUpdater;
 
     private final PsiTreeChangeListener myPsiTreeChangeListener = new PsiTreeAnyChangeAbstractAdapter() {
@@ -52,8 +50,8 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
     @Override
     public void dispose() {
         CsvTableModel.super.dispose();
-        getPsiFile().getManager().removePsiTreeChangeListener(myPsiTreeChangeListener);
         myPsiTreeUpdater.dispose();
+        getPsiFile().getManager().removePsiTreeChangeListener(myPsiTreeChangeListener);
     }
 
     private void onPsiTreeChanged(@Nullable PsiFile file) {

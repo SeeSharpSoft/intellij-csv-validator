@@ -34,7 +34,6 @@ public class CsvTableEditorSwing extends CsvTableEditor {
     private JComponent panelInfo;
     private JScrollPane tableScrollPane;
     private JPanel panelTop;
-
     private JTable rowHeadersTable;
 
     private int baseFontHeight;
@@ -44,7 +43,6 @@ public class CsvTableEditorSwing extends CsvTableEditor {
     protected final CsvTableEditorMouseListener tableEditorMouseListener;
     protected final CsvTableEditorKeyListener tableEditorKeyListener;
     protected final CsvTableEditorMouseWheelListener tableEditorMouseWheelListener;
-
     private boolean listenerApplied = false;
 
 
@@ -236,7 +234,7 @@ public class CsvTableEditorSwing extends CsvTableEditor {
 
     @NotNull
     @Override
-    public CsvTableActions getActions() {
+    public CsvTableActions<CsvTableEditorSwing> getActions() {
         return this.tableEditorActions;
     }
 

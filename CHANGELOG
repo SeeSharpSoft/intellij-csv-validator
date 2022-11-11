@@ -2,6 +2,7 @@
 Nov 11, 2022
 
 FIX: cannot init component state (componentName=CsvFileAttributes) #359
+FIX: cannot invoke "java.util.List.add(Object)" because "this.myUncommittedActions" is null #361
 FIX: image in plugin description
 FIX: plugin update restart
 
