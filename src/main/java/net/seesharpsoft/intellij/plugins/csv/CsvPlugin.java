@@ -66,11 +66,11 @@ public class CsvPlugin implements StartupActivity, StartupActivity.DumbAware, St
     public void runActivity(@NotNull Project project) {
         doAsyncProjectMaintenance(project);
 
-        if (CsvEditorSettings.getInstance().checkCurrentPluginVersion(getVersion())) {
+        NotificationGroup notificationGroup = NotificationGroupManager.getInstance().getNotificationGroup("net.seesharpsoft.intellij.plugins.csv");
+        if (notificationGroup == null || CsvEditorSettings.getInstance().checkCurrentPluginVersion(getVersion())) {
             return;
         }
 
-        NotificationGroup notificationGroup = NotificationGroupManager.getInstance().getNotificationGroup("net.seesharpsoft.intellij.plugins.csv");
         Notification notification = notificationGroup.createNotification(
                 "CSV Editor " + getVersion() + " - Change Notes",
                 getChangeNotes() +

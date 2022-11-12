@@ -1,9 +1,6 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table;
 
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiTreeAnyChangeAbstractAdapter;
-import com.intellij.psi.PsiTreeChangeListener;
+import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
 import net.seesharpsoft.intellij.plugins.csv.CsvEscapeCharacter;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
@@ -25,10 +22,8 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
     private int myCachedColumnCount = -1;
     private CsvEscapeCharacter myCachedEscapeCharacter;
     private Boolean myCachedHasErrors = null;
-
     private int myPointedRow = -1;
     private PsiElement myPointedRecord = null;
-
     private final CsvPsiTreeUpdater myPsiTreeUpdater;
 
     private final PsiTreeChangeListener myPsiTreeChangeListener = new PsiTreeAnyChangeAbstractAdapter() {
@@ -42,18 +37,34 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
         myPsiFileHolder = psiFileHolder;
         myPsiTreeUpdater = new CsvPsiTreeUpdater(psiFileHolder);
         myPsiTreeUpdater.addCommitListener(() -> onPsiTreeChanged(getPsiFile()));
-        getPsiFile().getManager().addPsiTreeChangeListener(myPsiTreeChangeListener, myPsiFileHolder);
+        addPsiTreeChangeListener();
     }
 
     public T getPsiFileHolder() {
         return myPsiFileHolder;
     }
 
+    protected void addPsiTreeChangeListener() {
+        PsiFile psiFile = getPsiFile();
+        if (psiFile == null) return;
+        PsiManager manager = psiFile.getManager();
+        if (manager == null) return;
+        manager.addPsiTreeChangeListener(myPsiTreeChangeListener, myPsiFileHolder);
+    }
+
+    protected void removePsiTreeChangeListener() {
+        PsiFile psiFile = getPsiFile();
+        if (psiFile == null) return;
+        PsiManager manager = psiFile.getManager();
+        if (manager == null) return;
+        manager.removePsiTreeChangeListener(myPsiTreeChangeListener);
+    }
+
     @Override
     public void dispose() {
         CsvTableModel.super.dispose();
-        getPsiFile().getManager().removePsiTreeChangeListener(myPsiTreeChangeListener);
         myPsiTreeUpdater.dispose();
+        removePsiTreeChangeListener();
     }
 
     private void onPsiTreeChanged(@Nullable PsiFile file) {
@@ -80,10 +91,9 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
         myCachedEscapeCharacter = null;
     }
 
-    private PsiElement resetPointer() {
+    private void resetPointer() {
         myPointedRecord = PsiTreeUtil.findChildOfType(getPsiFile(), CsvRecord.class);
         myPointedRow = 0;
-        return myPointedRecord;
     }
 
     protected CsvPsiTreeUpdater getPsiTreeUpdater() {
@@ -104,9 +114,7 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
             resetPointer();
             diffToCurrent = row;
         }
-        // fail gracefully or not?!
         if (myPointedRecord == null) return null;
-        assert myPointedRecord != null;
 
         CsvRecord record = PsiHelper.getNthSiblingOfType(myPointedRecord, diffToCurrent, CsvRecord.class, myPointedRow > row);
         if (record == null) return null;
@@ -176,7 +184,7 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
     }
 
     @Override
-    public String getValue(int rowIndex, int columnIndex) {
+    public @NotNull String getValue(int rowIndex, int columnIndex) {
         PsiElement field = getFieldAt(rowIndex, columnIndex);
         return CsvHelper.getFieldValue(field, getEscapeCharacter());
     }
@@ -184,6 +192,7 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
     @Override
     public void addRow(int anchorRowIndex, boolean before) {
         CsvRecord row = PsiHelper.getNthChildOfType(getPsiFile(), anchorRowIndex, CsvRecord.class);
+        if (row == null) return;
         getPsiTreeUpdater().addRow(row, before);
         getPsiTreeUpdater().commit();
     }

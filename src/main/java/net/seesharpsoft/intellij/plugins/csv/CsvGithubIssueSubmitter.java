@@ -63,8 +63,7 @@ public class CsvGithubIssueSubmitter extends ErrorReportSubmitter {
         }
         GithubAccount githubAccount = githubAuthManager.getSingleOrDefaultAccount(project);
         assert githubAccount != null;
-        // the cast shouldn't be needed due to inheritance, but Java complains for some reason in 2022.1
-        GithubApiRequestExecutor githubExecutor = GithubApiRequestExecutor.class.cast(GithubApiRequestExecutorManager.getInstance().getExecutor(githubAccount, project));
+        GithubApiRequestExecutor githubExecutor = GithubApiRequestExecutorManager.getInstance().getExecutor(githubAccount, project);
 
         Task submitTask = new Task.Backgroundable(project, getReportActionText()) {
             @Override

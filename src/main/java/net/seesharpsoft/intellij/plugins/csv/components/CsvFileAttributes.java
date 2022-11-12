@@ -51,11 +51,11 @@ public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttrib
     }
 
     @Override
-    public void loadState(@NotNull CsvFileAttributes state) {
+    public synchronized void loadState(@NotNull CsvFileAttributes state) {
         XmlSerializerUtil.copyBean(state, this);
     }
 
-    public void cleanupAttributeMap(@NotNull Project project) {
+    public synchronized void cleanupAttributeMap(@NotNull Project project) {
         List<String> faultyFiles = new ArrayList<>();
         attributeMap.forEach((fileName, attribute) -> {
             if (!CsvStorageHelper.csvFileExists(project, fileName)) {
@@ -153,7 +153,7 @@ public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttrib
                         // ignore non-matched separators
                         .filter(p -> p.getSecond() > 0)
                         // get the one with most hits
-                        .max((p1, p2) -> p1.getSecond() - p2.getSecond())
+                        .max(Comparator.comparingInt(Pair::getSecond))
                         // failsafe (e.g. empty document)
                         .orElse(null);
 

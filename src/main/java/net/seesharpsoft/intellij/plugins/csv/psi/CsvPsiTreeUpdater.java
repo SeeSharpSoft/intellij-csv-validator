@@ -30,7 +30,7 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
 
     private final CsvPsiParserFileType myFileType;
 
-    protected final EventListenerList listenerList = new EventListenerList();
+    protected final EventListenerList myEventListenerList = new EventListenerList();
 
     private List<PsiAction> myUncommittedActions = new ArrayList<>();
 
@@ -83,7 +83,6 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
     @Override
     public void dispose() {
         Suspendable.super.dispose();
-        myUncommittedActions = null;
     }
 
     public @Nullable PsiElement createValueSeparator() {
@@ -95,7 +94,7 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
     }
 
     public void doAction(PsiAction action) {
-        myUncommittedActions.add(action);
+        if (myUncommittedActions != null) myUncommittedActions.add(action);
     }
 
     public void appendEmptyFields(@NotNull PsiElement anchor, int no) {
@@ -325,7 +324,6 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
             try {
                 actionsToCommit.forEach(PsiAction::execute);
             } finally {
-                PsiDocumentManager.getInstance(getPsiFile().getProject()).doPostponedOperationsAndUnblockDocument(getDocument());
                 resume();
                 fireCommitted();
             }
@@ -354,16 +352,16 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
     }
 
     public void addCommitListener(CommitListener l) {
-        listenerList.add(CommitListener.class, l);
+        myEventListenerList.add(CommitListener.class, l);
     }
 
     public void removeCommitListener(CommitListener l) {
-        listenerList.remove(CommitListener.class, l);
+        myEventListenerList.remove(CommitListener.class, l);
     }
 
     protected void fireCommitted() {
         // Guaranteed to return a non-null array
-        Object[] listeners = listenerList.getListenerList();
+        Object[] listeners = myEventListenerList.getListenerList();
         // Process the listeners last to first, notifying
         // those that are interested in this event
         for (int i = listeners.length - 2; i >= 0; i -= 2) {

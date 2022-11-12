@@ -4,6 +4,7 @@ import com.intellij.openapi.Disposable;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public interface Suspendable extends Disposable {
     SuspensionMonitor MONITOR = new SuspensionMonitor();
@@ -25,14 +26,14 @@ public interface Suspendable extends Disposable {
     }
 
     class SuspensionMonitor {
-        private final Map<Suspendable, Integer> suspendableCounterMap = new HashMap<>();
+        private final Map<Suspendable, Integer> suspendableCounterMap = new ConcurrentHashMap<>();
 
         private Integer getSuspendableCounter(Suspendable suspendable) {
             if (suspendableCounterMap.containsKey(suspendable)) return suspendableCounterMap.get(suspendable);
             return null;
         }
 
-        void suspend(Suspendable suspendable) {
+        synchronized void suspend(Suspendable suspendable) {
             Integer suspendableCounter = getSuspendableCounter(suspendable);
             if (suspendableCounter == null) {
                 suspendableCounterMap.put(suspendable, 1);
@@ -41,7 +42,7 @@ public interface Suspendable extends Disposable {
             }
         }
 
-        void resume(Suspendable suspendable) {
+        synchronized void resume(Suspendable suspendable) {
             Integer suspendableCounter = getSuspendableCounter(suspendable);
             // this usually shouldn't happen but doesn't hurt, so fail gracefully
             if (suspendableCounter == null) return;
@@ -55,7 +56,7 @@ public interface Suspendable extends Disposable {
             return suspendableCounter != null;
         }
 
-        void unwatch(Suspendable suspendable) {
+        synchronized void unwatch(Suspendable suspendable) {
             suspendableCounterMap.remove(suspendable);
         }
     }
