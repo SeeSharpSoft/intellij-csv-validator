@@ -1,8 +1,10 @@
 3.0.1
-Nov 11, 2022
+Nov 12, 2022
 
 FIX: cannot init component state (componentName=CsvFileAttributes) #359
-FIX: cannot invoke "java.util.List.add(Object)" because "this.myUncommittedActions" is null #361
+FIX: cannot invoke "add(Object)" because "this.myUncommittedActions" is null #361
+FIX: cannot invoke "createNotification(...)" because "notificationGroup" is null #362
+FIX: cannot invoke "getManager()" because the return value of "getPsiFile()" is null #363
 FIX: image in plugin description
 FIX: plugin update restart
 
