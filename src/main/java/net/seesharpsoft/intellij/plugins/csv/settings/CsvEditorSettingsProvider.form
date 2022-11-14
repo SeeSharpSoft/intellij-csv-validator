@@ -131,7 +131,7 @@
                   <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
-                  <text value="Default row height (10-100):"/>
+                  <text value="Default row height in px (20-100):"/>
                 </properties>
               </component>
               <hspacer id="48a70">
@@ -162,7 +162,7 @@
                   <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
-                  <text value="Default column width (10 - 10000):"/>
+                  <text value="Default column width in px (10 - 10000):"/>
                 </properties>
               </component>
               <component id="15921" class="javax.swing.JFormattedTextField" binding="tfDefaultColumnWidth" custom-create="true">
@@ -193,7 +193,7 @@
                   <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
-                  <text value="Maximum column width (0 = no maximum):"/>
+                  <text value="Maximum column width in px (0 = no maximum):"/>
                 </properties>
               </component>
               <component id="8554c" class="javax.swing.JFormattedTextField" binding="tfMaxColumnWidth" custom-create="true">

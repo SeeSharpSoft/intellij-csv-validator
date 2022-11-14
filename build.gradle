@@ -57,8 +57,8 @@ sourceSets {
 apply plugin: 'idea'
 idea {
     project {
-        jdkName = JavaVersion.VERSION_11
-        languageLevel = JavaVersion.VERSION_11
+        jdkName = JavaVersion.VERSION_17
+        languageLevel = JavaVersion.VERSION_17
         vcs = 'Git'
     }
     module {
@@ -79,7 +79,7 @@ apply plugin: 'org.jetbrains.intellij'
 intellij {
     version = idea_version
     type = System.getenv().getOrDefault('IDEA_TYPE', 'IC')
-    pluginName = 'CSVEditor'
+    pluginName = 'CSV Editor'
     updateSinceUntilBuild = true
     sameSinceUntilBuild = true
     downloadSources = Boolean.parseBoolean(System.getenv().getOrDefault('IDEA_SOURCES', "true"))
