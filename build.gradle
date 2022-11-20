@@ -79,7 +79,7 @@ apply plugin: 'org.jetbrains.intellij'
 intellij {
     version = idea_version
     type = System.getenv().getOrDefault('IDEA_TYPE', 'IC')
-    pluginName = 'CSV Editor'
+    pluginName = 'CSVEditor'
     updateSinceUntilBuild = true
     sameSinceUntilBuild = true
     downloadSources = Boolean.parseBoolean(System.getenv().getOrDefault('IDEA_SOURCES', "true"))
