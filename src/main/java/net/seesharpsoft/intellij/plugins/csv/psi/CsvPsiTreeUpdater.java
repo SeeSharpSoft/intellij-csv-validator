@@ -262,12 +262,16 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
     }
 
     public void deleteRows(Collection<Integer> indices) {
-        Set<PsiElement> toDelete = new HashSet<>();
         PsiFile psiFile = getPsiFile();
+        if (psiFile == null) return;
+
+        Set<PsiElement> toDelete = new HashSet<>();
         List<Integer> sortedIndices = new ArrayList<>(indices);
         Collections.sort(sortedIndices);
         for (int rowIndex : sortedIndices) {
             CsvRecord row = PsiHelper.getNthChildOfType(psiFile, rowIndex, CsvRecord.class);
+            if (row == null) continue;
+
             boolean removePreviousLF = rowIndex > 0;
             PsiElement lf = PsiHelper.getSiblingOfType(row, CsvTypes.CRLF, removePreviousLF);
             if (lf == null || toDelete.contains(lf)) {
