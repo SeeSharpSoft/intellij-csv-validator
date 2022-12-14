@@ -2,11 +2,13 @@ package net.seesharpsoft.intellij.plugins.csv.psi;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.command.CommandProcessor;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.*;
+import com.intellij.psi.impl.source.tree.LeafPsiElement;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.DocumentUtil;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
@@ -23,6 +25,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
+
+    private final static Logger LOG = Logger.getInstance(CsvPsiTreeUpdater.class);
 
     private final PsiFileHolder myPsiFileHolder;
 
@@ -54,13 +58,21 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
         return text.trim().startsWith(CsvEditorSettings.getInstance().getCommentIndicator());
     }
 
-    public @Nullable CsvField createField(@NotNull String text, boolean enquoteCommentIndicator) {
+    public @NotNull CsvField createField(@NotNull String text, boolean enquoteCommentIndicator) {
         boolean enforceQuoting = CsvEditorSettings.getInstance().isQuotingEnforced();
         if (enquoteCommentIndicator && isIndicatingComment(text)) enforceQuoting = true;
 
         String sanitizedValue = CsvHelper.quoteCsvField(text, CsvHelper.getEscapeCharacter(getPsiFile()), CsvHelper.getValueSeparator(getPsiFile()), enforceQuoting);
 
-        return SyntaxTraverser.psiTraverser(createFile(sanitizedValue)).filter(CsvField.class).first();
+        CsvField field = SyntaxTraverser.psiTraverser(createFile(sanitizedValue)).filter(CsvField.class).first();
+        if (field == null) {
+            LOG.warn(
+                    CsvHelper.formatString("Couldn't create field for text: ${sanitizedValue}",
+                            Collections.singletonMap("sanitizedValue", sanitizedValue))
+            );
+            field = (CsvField) CsvTypes.Factory.createElement(new LeafPsiElement(CsvTypes.FIELD, ""));
+        }
+        return field;
     }
 
     public @NotNull CsvRecord createRecord() {
