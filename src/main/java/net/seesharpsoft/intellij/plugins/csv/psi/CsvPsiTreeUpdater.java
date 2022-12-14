@@ -340,34 +340,34 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
     public synchronized void commit() {
         if (isSuspended() || myUncommittedActions == null || myUncommittedActions.size() == 0) return;
 
-        suspend();
         List<PsiAction> actionsToCommit = new ArrayList<>(myUncommittedActions);
         myUncommittedActions.clear();
-        if (!doCommit(() -> {
-            try {
-                actionsToCommit.forEach(PsiAction::execute);
-            } finally {
-                resume();
-                fireCommitted();
-            }
-        })) {
-            resume();
-        }
+
+        doCommit(() -> actionsToCommit.forEach(PsiAction::execute));
     }
 
     private boolean doCommit(@NotNull Runnable runnable) {
         PsiFile psiFile = getPsiFile();
         Document document = getDocument();
 
-        if (psiFile == null || !psiFile.isWritable() || document == null || !document.isWritable()) return false;
+        if (psiFile == null || !psiFile.isWritable() || document == null || !document.isWritable())
+        {
+            return false;
+        }
 
+        suspend();
         ApplicationManager.getApplication().runWriteAction(() -> {
-            CommandProcessor.getInstance().executeCommand(
-                    getPsiFile().getProject(),
-                    () -> DocumentUtil.executeInBulk(document, runnable),
-                    "CSV Editor changes",
-                    null,
-                    document);
+            try {
+                CommandProcessor.getInstance().executeCommand(
+                        getPsiFile().getProject(),
+                        () -> DocumentUtil.executeInBulk(document, runnable),
+                        "CSV Editor changes",
+                        null,
+                        document);
+            } finally {
+                resume();
+                fireCommitted();
+            }
         });
 
         return true;
