@@ -24,7 +24,7 @@ import java.util.Objects;
 @SuppressWarnings("all")
 public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSettings.OptionSet> {
 
-    public static final int TABLE_EDITOR_ROW_HEIGHT_MIN = 10;
+    public static final int TABLE_EDITOR_ROW_HEIGHT_MIN = 20;
     public static final int TABLE_EDITOR_ROW_HEIGHT_MAX = 100;
     public static final int TABLE_EDITOR_ROW_HEIGHT_DEFAULT = 48;
     public static final int TABLE_AUTO_MAX_COLUMN_WIDTH_DEFAULT = 300;
@@ -188,14 +188,13 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
     }
 
     public int getTableEditorRowHeight() {
+        // ensure the current state of row height fits the boundaries (which is checked in the setTableEditorRowHeight method
+        setTableEditorRowHeight(getState().TABLE_EDITOR_ROW_HEIGHT);
         return getState().TABLE_EDITOR_ROW_HEIGHT;
     }
 
     public void setTableEditorRowHeight(int rowHeight) {
-        int finalRowHeight = rowHeight;
-        if (finalRowHeight > TABLE_EDITOR_ROW_HEIGHT_MAX) finalRowHeight = TABLE_EDITOR_ROW_HEIGHT_MAX;
-        if (finalRowHeight < TABLE_EDITOR_ROW_HEIGHT_MIN) finalRowHeight = TABLE_EDITOR_ROW_HEIGHT_MIN;
-        getState().TABLE_EDITOR_ROW_HEIGHT = finalRowHeight;
+        getState().TABLE_EDITOR_ROW_HEIGHT = rowHeight > TABLE_EDITOR_ROW_HEIGHT_MAX || rowHeight < TABLE_EDITOR_ROW_HEIGHT_MIN ? TABLE_EDITOR_ROW_HEIGHT_DEFAULT : rowHeight;
     }
 
     public boolean isQuotingEnforced() {
