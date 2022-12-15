@@ -1,6 +1,6 @@
 plugins {
     // https://github.com/JetBrains/gradle-intellij-plugin
-    id 'org.jetbrains.intellij' version '1.9.0'
+    id 'org.jetbrains.intellij' version '1.10.1'
     id 'jacoco'
     id 'com.github.kt3k.coveralls' version '2.8.4'
     id 'com.github.ManifestClasspath' version '0.1.0-RELEASE'
@@ -73,7 +73,7 @@ var final EAP_BUILD = '223'
 var idea_version = System.getenv().getOrDefault('IDEA_VERSION', '2022.2.1')
 var build_version = idea_version == EAP_VERSION ? EAP_BUILD : idea_version.substring(2, 4) + idea_version.charAt(5) // extract e.g. '221' from '2022.1.1'
 
-version '3.0.1-' + build_version
+version '3.0.2-' + build_version
 
 apply plugin: 'org.jetbrains.intellij'
 intellij {
@@ -107,15 +107,17 @@ Feedback is welcome!
 PS: The previous versions are still available on the project page.
 
 
-Update 3.0.1
+Update 3.0.2
 
-FIX: cannot init component state (componentName=CsvFileAttributes) #359
-FIX: cannot invoke "add(Object)" because "this.myUncommittedActions" is null #361
-FIX: cannot invoke "createNotification(...)" because "notificationGroup" is null #362
-FIX: cannot invoke "getManager()" because the return value of "getPsiFile()" is null #363
-FIX: image in plugin description
-FIX: plugin update restart
-
+FIX: Detected bulk mode status update from DocumentBulkUpdateListener #384
+FIX: Argument for @NotNull parameter 'parent' of PsiHelper.getNthChildOfType must not be null #372
+FIX: Argument for @NotNull parameter 'element' of PsiHelper.getSiblingOfType must not be null #375
+FIX: Cannot invoke "Document.getText()" because "document" is null #388
+FIX: Cannot invoke "PsiFile.getProject()" because the return value of "CsvPsiTreeUpdater.getPsiFile()" is null #378
+FIX: Argument for @NotNull parameter 'replacement' of CsvPsiTreeUpdater\$ReplacePsiAction.<init> must not be null #380
+FIX: provide project parameter for opening link
+FIX: Cannot invoke "Document.insertString(int, java.lang.CharSequence)" because "document" is null #386
+FIX: first extension sanity check
 
 </pre>"""
 }
@@ -163,11 +165,4 @@ tasks.named("generateLexer").configure {
 
 compileJava {
     dependsOn generateLexer
-}
-
-// TODO https://youtrack.jetbrains.com/issue/IDEA-298989 - remove after gradle plugin v1.9.1 or v1.10.0 released
-setupDependencies {
-    doLast {
-        fileTree("$buildDir/instrumented/instrumentCode") { include("**/*TableEditorSwing.class") }.files.forEach { delete(it) }
-    }
 }

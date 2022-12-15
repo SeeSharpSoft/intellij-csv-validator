@@ -121,8 +121,9 @@ public class CsvValidationInspection extends LocalInspectionTool {
         public void applyFix(@NotNull Project project, @NotNull ProblemDescriptor descriptor) {
             PsiElement element = descriptor.getPsiElement();
             Document document = PsiDocumentManager.getInstance(project).getDocument(element.getContainingFile());
-            List<Integer> quotePositions = new ArrayList<>();
+            if (document == null) return;
 
+            List<Integer> quotePositions = new ArrayList<>();
             int quotePosition = CsvIntentionHelper.getOpeningQuotePosition(element);
             if (quotePosition != -1) {
                 quotePositions.add(quotePosition);
@@ -147,6 +148,8 @@ public class CsvValidationInspection extends LocalInspectionTool {
             try {
                 PsiElement element = descriptor.getPsiElement();
                 Document document = PsiDocumentManager.getInstance(project).getDocument(element.getContainingFile());
+                if (document == null) return;
+
                 CsvValueSeparator separator = CsvHelper.getValueSeparator(element.getContainingFile());
                 String text = document.getText();
                 document.setText(text.substring(0, element.getTextOffset()) + separator.getCharacter() + text.substring(element.getTextOffset()));
@@ -166,6 +169,8 @@ public class CsvValidationInspection extends LocalInspectionTool {
             try {
                 PsiElement element = descriptor.getPsiElement();
                 Document document = PsiDocumentManager.getInstance(project).getDocument(element.getContainingFile());
+                if (document == null) return;
+
                 document.setText(document.getText() + "\"");
             } catch (IncorrectOperationException e) {
                 LOG.error(e);

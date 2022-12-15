@@ -75,7 +75,7 @@ public final class CsvHelper {
     }
 
     public static boolean isCsvFile(Project project, VirtualFile file) {
-        if (project == null || file == null) {
+        if (project == null || file == null || !isCsvFile(file.getExtension())) {
             return false;
         }
         final Language language = LanguageUtil.getLanguageForPsi(project, file);
@@ -312,10 +312,6 @@ public final class CsvHelper {
         }
         if (quotingEnforced || isQuotingRequired(content, valueSeparator)) {
             String result = content;
-//            if (escapeCharacter != CsvEscapeCharacter.QUOTE) {
-//                result = result.replaceAll(escapeCharacter.getRegexPattern(),
-//                        escapeCharacter.getRegexPattern() + escapeCharacter.getRegexPattern());
-//            }
             result = result.replaceAll("\"", escapeCharacter.getRegexPattern() + "\"");
             return "\"" + result + "\"";
         }

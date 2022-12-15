@@ -24,6 +24,8 @@ public abstract class CsvShiftColumnIntentionAction extends CsvIntentionAction {
                                                         CsvColumnInfo<PsiElement> leftColumnInfo,
                                                         CsvColumnInfo<PsiElement> rightColumnInfo) {
         Document document = PsiDocumentManager.getInstance(project).getDocument(csvFile);
+        if (document == null) return;
+
         document.setText(
                 changeLeftAndRightColumnOrder(document.getText(), CsvHelper.getValueSeparator(csvFile), leftColumnInfo, rightColumnInfo)
         );

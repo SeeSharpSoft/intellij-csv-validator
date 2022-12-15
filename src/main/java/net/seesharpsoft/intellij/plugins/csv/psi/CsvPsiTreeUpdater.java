@@ -24,30 +24,46 @@ import java.util.stream.Collectors;
 
 public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
 
+    protected final EventListenerList myEventListenerList = new EventListenerList();
+
     private final PsiFileHolder myPsiFileHolder;
 
-    private final PsiFileFactory myFileFactory;
+    private PsiFileFactory myFileFactory;
 
-    private final CsvPsiParserFileType myFileType;
-
-    protected final EventListenerList myEventListenerList = new EventListenerList();
+    private CsvPsiParserFileType myFileType;
 
     private List<PsiAction> myUncommittedActions = new ArrayList<>();
 
     public CsvPsiTreeUpdater(@NotNull PsiFileHolder psiFileHolder) {
         myPsiFileHolder = psiFileHolder;
-        myFileFactory = PsiFileFactory.getInstance(getPsiFile().getProject());
-        myFileType = new CsvPsiParserFileType(CsvHelper.getValueSeparator(psiFileHolder.getPsiFile()), CsvHelper.getEscapeCharacter(psiFileHolder.getPsiFile()));
     }
 
     private FileType getFileType() {
-        myFileType.setSeparator(CsvHelper.getValueSeparator(getPsiFile()));
-        myFileType.setEscapeCharacter(CsvHelper.getEscapeCharacter(getPsiFile()));
+        PsiFile psiFile = getPsiFile();
+        if (psiFile == null) return null;
+
+        if (myFileType == null) {
+            myFileType = new CsvPsiParserFileType(CsvHelper.getValueSeparator(psiFile), CsvHelper.getEscapeCharacter(psiFile));
+        } else {
+            myFileType.setSeparator(CsvHelper.getValueSeparator(psiFile));
+            myFileType.setEscapeCharacter(CsvHelper.getEscapeCharacter(psiFile));
+        }
         return myFileType;
     }
 
+    private PsiFileFactory getFileFactory() {
+        PsiFile psiFile = getPsiFile();
+        if (psiFile == null) return null;
+
+        if (myFileFactory == null) {
+            myFileFactory = PsiFileFactory.getInstance(getPsiFile().getProject());
+        }
+        return myFileFactory;
+    }
+
     private PsiFile createFile(@NotNull String text) {
-        return myFileFactory.createFileFromText("a.csv", getFileType(), text);
+        PsiFileFactory fileFactory = getFileFactory();
+        return fileFactory == null ? null : getFileFactory().createFileFromText("a.csv", getFileType(), text);
     }
 
     private boolean isIndicatingComment(@NotNull String text) {
@@ -63,7 +79,7 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
         return SyntaxTraverser.psiTraverser(createFile(sanitizedValue)).filter(CsvField.class).first();
     }
 
-    public @NotNull CsvRecord createRecord() {
+    public @Nullable CsvRecord createRecord() {
         return SyntaxTraverser.psiTraverser(createFile("\n")).filter(CsvRecord.class).first();
     }
 
@@ -73,6 +89,8 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
 
     public Document getDocument() {
         PsiFile psiFile = getPsiFile();
+        if (psiFile == null) return null;
+
         return PsiDocumentManager.getInstance(psiFile.getProject()).getDocument(psiFile);
     }
 
@@ -244,12 +262,16 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
     }
 
     public void deleteRows(Collection<Integer> indices) {
-        Set<PsiElement> toDelete = new HashSet<>();
         PsiFile psiFile = getPsiFile();
+        if (psiFile == null) return;
+
+        Set<PsiElement> toDelete = new HashSet<>();
         List<Integer> sortedIndices = new ArrayList<>(indices);
         Collections.sort(sortedIndices);
         for (int rowIndex : sortedIndices) {
             CsvRecord row = PsiHelper.getNthChildOfType(psiFile, rowIndex, CsvRecord.class);
+            if (row == null) continue;
+
             boolean removePreviousLF = rowIndex > 0;
             PsiElement lf = PsiHelper.getSiblingOfType(row, CsvTypes.CRLF, removePreviousLF);
             if (lf == null || toDelete.contains(lf)) {
@@ -318,34 +340,34 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
     public synchronized void commit() {
         if (isSuspended() || myUncommittedActions == null || myUncommittedActions.size() == 0) return;
 
-        suspend();
         List<PsiAction> actionsToCommit = new ArrayList<>(myUncommittedActions);
-        if (!doCommit(() -> {
+        myUncommittedActions.clear();
+
+        doCommit(() -> actionsToCommit.forEach(PsiAction::execute));
+    }
+
+    private boolean doCommit(@NotNull Runnable runnable) {
+        PsiFile psiFile = getPsiFile();
+        Document document = getDocument();
+
+        if (psiFile == null || !psiFile.isWritable() || document == null || !document.isWritable())
+        {
+            return false;
+        }
+
+        suspend();
+        ApplicationManager.getApplication().runWriteAction(() -> {
             try {
-                actionsToCommit.forEach(PsiAction::execute);
+                CommandProcessor.getInstance().executeCommand(
+                        getPsiFile().getProject(),
+                        () -> DocumentUtil.executeInBulk(document, runnable),
+                        "CSV Editor changes",
+                        null,
+                        document);
             } finally {
                 resume();
                 fireCommitted();
             }
-        })) {
-            resume();
-        } else {
-            myUncommittedActions.clear();
-        }
-    }
-
-    private boolean doCommit(@NotNull Runnable runnable) {
-        if (!getPsiFile().isWritable()) return false;
-
-        Document document = getDocument();
-
-        ApplicationManager.getApplication().runWriteAction(() -> {
-            CommandProcessor.getInstance().executeCommand(
-                    getPsiFile().getProject(),
-                    () -> DocumentUtil.executeInBulk(document, runnable),
-                    "CSV Editor changes",
-                    null,
-                    document);
         });
 
         return true;
@@ -394,11 +416,11 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
         private final PsiElement myElementToAdd;
         private final boolean myBefore;
 
-        AddSiblingPsiAction(@NotNull PsiElement anchor, @NotNull PsiElement elementToAdd) {
+        AddSiblingPsiAction(@NotNull PsiElement anchor, @Nullable PsiElement elementToAdd) {
             this(anchor, elementToAdd, false);
         }
 
-        AddSiblingPsiAction(@NotNull PsiElement anchor, @NotNull PsiElement elementToAdd, boolean before) {
+        AddSiblingPsiAction(@NotNull PsiElement anchor, @Nullable PsiElement elementToAdd, boolean before) {
             super(anchor);
             myElementToAdd = elementToAdd;
             myBefore = before;
@@ -406,6 +428,8 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
 
         @Override
         public void execute() {
+            if (myElementToAdd == null) return;
+
             PsiElement anchor = getAnchor();
             if (anchor.getParent() == null) return;
             if (myBefore) {
@@ -420,13 +444,15 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
 
         private final PsiElement myElementToAdd;
 
-        AddChildPsiAction(@NotNull PsiElement parent, @NotNull PsiElement elementToAdd) {
+        AddChildPsiAction(@NotNull PsiElement parent, @Nullable PsiElement elementToAdd) {
             super(parent);
             myElementToAdd = elementToAdd;
         }
 
         @Override
         public void execute() {
+            if (myElementToAdd == null) return;
+
             PsiElement anchor = getAnchor();
             anchor.add(myElementToAdd);
         }
@@ -436,13 +462,15 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
 
         private final PsiElement myReplacement;
 
-        ReplacePsiAction(@NotNull PsiElement anchor, @NotNull PsiElement replacement) {
+        ReplacePsiAction(@NotNull PsiElement anchor, @Nullable PsiElement replacement) {
             super(anchor);
             myReplacement = replacement;
         }
 
         @Override
         public void execute() {
+            if (myReplacement == null) return;
+
             getAnchor().replace(myReplacement);
         }
     }
@@ -491,6 +519,8 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
 
             PsiDocumentManager manager = PsiDocumentManager.getInstance(psiFile.getProject());
             Document document = manager.getDocument(psiFile);
+            if (document == null) return;
+
             manager.doPostponedOperationsAndUnblockDocument(document);
 
             int offset = 0;
