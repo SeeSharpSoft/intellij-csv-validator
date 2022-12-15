@@ -37,7 +37,7 @@ public class CsvPlugin implements StartupActivity, StartupActivity.DumbAware, St
         if (link.startsWith("#")) {
             ((ShowSettingsUtilImpl) ShowSettingsUtil.getInstance()).showSettingsDialog(project, link.substring(1), null);
         } else {
-            BrowserUtil.browse(link);
+            BrowserUtil.browse(link, project);
         }
     }
 

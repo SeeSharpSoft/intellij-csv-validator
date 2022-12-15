@@ -47,8 +47,9 @@ public final class CsvIntentionHelper {
 
     public static void quoteAll(@NotNull Project project, @NotNull PsiFile psiFile) {
         Document document = PsiDocumentManager.getInstance(project).getDocument(psiFile);
-        List<Integer> quotePositions = new ArrayList<>();
+        if (document == null) return;
 
+        List<Integer> quotePositions = new ArrayList<>();
         PsiTreeUtil.processElements(psiFile, CsvField.class, field -> {
             if (PsiHelper.getElementType(field.getFirstChild()) != CsvTypes.QUOTE) {
                 quotePositions.add(field.getTextRange().getStartOffset());
@@ -63,6 +64,8 @@ public final class CsvIntentionHelper {
 
     public static void quoteValue(@NotNull Project project, @NotNull final PsiElement field) {
         Document document = PsiDocumentManager.getInstance(project).getDocument(field.getContainingFile());
+        if (document == null) return;
+
         List<Integer> quotePositions = new ArrayList<>();
         if (PsiHelper.getElementType(field.getFirstChild()) != CsvTypes.QUOTE) {
             quotePositions.add(field.getTextRange().getStartOffset());
@@ -75,9 +78,9 @@ public final class CsvIntentionHelper {
 
     public static void unquoteAll(@NotNull Project project, @NotNull PsiFile psiFile) {
         Document document = PsiDocumentManager.getInstance(project).getDocument(psiFile);
+        if (document == null) return;
 
         final List<PsiElement> quotePositions = new ArrayList<>();
-
         PsiTreeUtil.processElements(psiFile, CsvField.class, field -> {
             if (getChildren(field).stream().noneMatch(element -> PsiHelper.getElementType(element) == CsvTypes.ESCAPED_TEXT)) {
                 Pair<PsiElement, PsiElement> positions = getQuotePositions(field);
@@ -115,7 +118,7 @@ public final class CsvIntentionHelper {
         return null;
     }
 
-    public static void addQuotes(final Document document, List<Integer> quotePositions) {
+    public static void addQuotes(@NotNull final Document document, List<Integer> quotePositions) {
         int offset = 0;
         String quote = "\"";
         quotePositions.sort(Integer::compareTo);

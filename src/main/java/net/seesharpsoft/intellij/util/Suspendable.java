@@ -28,7 +28,7 @@ public interface Suspendable extends Disposable {
     class SuspensionMonitor {
         private final Map<Suspendable, Integer> suspendableCounterMap = new ConcurrentHashMap<>();
 
-        private Integer getSuspendableCounter(Suspendable suspendable) {
+        private synchronized Integer getSuspendableCounter(Suspendable suspendable) {
             if (suspendableCounterMap.containsKey(suspendable)) return suspendableCounterMap.get(suspendable);
             return null;
         }

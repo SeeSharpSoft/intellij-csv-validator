@@ -6,7 +6,7 @@
     </vendor>
 
     <description><![CDATA[
-        <p>Plugin for editing CSV files with a rainbow colored text- & table-editor. It supports are syntax validation, customization, intentions and many more.</p><br>
+        <p>Plugin for editing CSV files with a rainbow colored table- & text-editor. It provides syntax-validation, highlighting, customization, and plenty more besides.</p>
         <img width="600" height="297" src="https://plugins.jetbrains.com/files/10037/screenshot_80656a25-da46-4f76-b5c1-a9e8263b8bf3" />
         <p><b>Features:</b><br>
         <ul>

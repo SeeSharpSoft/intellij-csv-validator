@@ -157,7 +157,9 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
     }
 
     private int getColumnCount(int rowIndex) {
-        return getColumnCount(PsiHelper.getNthChildOfType(getPsiTreeUpdater().getPsiFile(), rowIndex, CsvRecord.class));
+        PsiFile psiFile = getPsiFile();
+        if (psiFile == null) return 0;
+        return getColumnCount(PsiHelper.getNthChildOfType(psiFile, rowIndex, CsvRecord.class));
     }
 
     private int getColumnCount(PsiElement record) {

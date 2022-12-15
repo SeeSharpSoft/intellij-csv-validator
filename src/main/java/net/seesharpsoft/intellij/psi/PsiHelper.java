@@ -103,7 +103,7 @@ public class PsiHelper {
         return prevSibling == element ? null : prevSibling;
     }
 
-    public static PsiElement findFirst(@NotNull final PsiElement root, @NotNull IElementType type) {
+    public static PsiElement findFirst(@Nullable final PsiElement root, @NotNull IElementType type) {
         return SyntaxTraverser.psiTraverser(root).filterTypes(elementType -> elementType == type).filter(PsiElement.class).first();
     }
 
