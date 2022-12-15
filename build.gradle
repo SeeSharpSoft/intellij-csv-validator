@@ -114,7 +114,7 @@ FIX: Argument for @NotNull parameter 'parent' of PsiHelper.getNthChildOfType mus
 FIX: Argument for @NotNull parameter 'element' of PsiHelper.getSiblingOfType must not be null #375
 FIX: Cannot invoke "Document.getText()" because "document" is null #388
 FIX: Cannot invoke "PsiFile.getProject()" because the return value of "CsvPsiTreeUpdater.getPsiFile()" is null #378
-FIX: Argument for @NotNull parameter 'replacement' of CsvPsiTreeUpdater$ReplacePsiAction.<init> must not be null #380
+FIX: Argument for @NotNull parameter 'replacement' of CsvPsiTreeUpdater\$ReplacePsiAction.<init> must not be null #380
 FIX: provide project parameter for opening link
 FIX: Cannot invoke "Document.insertString(int, java.lang.CharSequence)" because "document" is null #386
 FIX: first extension sanity check
