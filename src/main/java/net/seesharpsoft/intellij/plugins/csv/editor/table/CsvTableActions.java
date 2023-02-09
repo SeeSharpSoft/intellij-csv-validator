@@ -6,19 +6,29 @@ public interface CsvTableActions<T extends CsvTableEditor> {
 
     CsvTableActions DUMMY = new CsvTableActions() {
         @Override
-        public void addRow(CsvTableEditor tableEditor, boolean before) { }
+        public void addRow(CsvTableEditor tableEditor, boolean before) {
+            // dummy
+        }
 
         @Override
-        public void addColumn(CsvTableEditor tableEditor, boolean before) { }
+        public void addColumn(CsvTableEditor tableEditor, boolean before) {
+            // dummy
+        }
 
         @Override
-        public void deleteSelectedRows(CsvTableEditor tableEditor) { }
+        public void deleteSelectedRows(CsvTableEditor tableEditor) {
+            // dummy
+        }
 
         @Override
-        public void deleteSelectedColumns(CsvTableEditor tableEditor) { }
+        public void deleteSelectedColumns(CsvTableEditor tableEditor) {
+            // dummy
+        }
 
         @Override
-        public void clearSelectedCells(CsvTableEditor tableEditor) { }
+        public void clearSelectedCells(CsvTableEditor tableEditor) {
+            // dummy
+        }
     };
 
     void addRow(@NotNull T tableEditor, boolean before);
