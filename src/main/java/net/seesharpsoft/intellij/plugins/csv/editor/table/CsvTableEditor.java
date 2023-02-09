@@ -330,42 +330,4 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation, 
     public final void clearCells(Collection<Integer> rows, Collection<Integer> columns) {
         this.getTableModel().clearCells(rows, columns);
     }
-
-//    protected boolean canUpdate() {
-//        return !ApplicationManager.getApplication().isUnitTestMode() && this.isEditable() && this.getDocument().isWritable();
-//    }
-
-//    public final boolean doUpdateDocument(@NotNull Consumer<Document> ...updates) {
-//        return doUpdateDocument(Arrays.asList(updates));
-//    }
-//
-//    public final boolean doUpdateDocument(@NotNull List<Consumer<Document>> updates) {
-//        if (updates.size() == 0) return true;
-//
-//        return doUpdateDocument(() -> {
-//            for (Consumer consumer : updates) {
-//                consumer.accept(getDocument());
-//            }
-//        });
-//    }
-//
-//    public final boolean doUpdateDocument(@NotNull Runnable runnable) {
-//        if (!canUpdate()) return false;
-//
-//        DocumentRunnable documentRunnable = new DocumentRunnable(getDocument(), getProject()) {
-//            @Override
-//            public void run() {
-//                CommandProcessor.getInstance().executeCommand(
-//                        getProject(),
-//                        () -> DocumentUtil.executeInBulk(getDocument(), runnable),
-//                        "CSV Editor changes",
-//                        null,
-//                        getDocument());
-//            }
-//        };
-//
-//        ApplicationManager.getApplication().runWriteAction(documentRunnable);
-//
-//        return true;
-//    }
 }

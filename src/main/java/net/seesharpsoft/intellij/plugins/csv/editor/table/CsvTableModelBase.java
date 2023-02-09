@@ -173,8 +173,10 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
         if (field == null) {
             int currentColumnCount = getColumnCount(rowIndex);
             field = getFieldAt(rowIndex, currentColumnCount - 1);
-            updater.appendField(field, value, true);
-            updater.appendEmptyFields(field, columnIndex - currentColumnCount);
+            if (field != null) {
+                updater.appendField(field, value, true);
+                updater.appendEmptyFields(field, columnIndex - currentColumnCount);
+            }
         } else {
             if (CsvHelper.isCommentElement(field)) {
                 updater.replaceComment(field, value);

@@ -75,6 +75,7 @@ public abstract class CsvTableEditorActions extends AnAction {
     }
 
     public static CsvTableActions getTableActions(@NotNull AnActionEvent anActionEvent) {
-        return getTableEditor(anActionEvent).getActions();
+        CsvTableEditor tableEditor = getTableEditor(anActionEvent);
+        return tableEditor == null ? CsvTableActions.DUMMY : tableEditor.getActions();
     }
 }
