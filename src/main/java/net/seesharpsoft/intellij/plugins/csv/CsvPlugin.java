@@ -52,9 +52,13 @@ public class CsvPlugin implements StartupActivity, StartupActivity.DumbAware, St
                 progressIndicator.setText("Validating CSV file attributes");
 
                 // start process
-                CsvFileAttributes csvFileAttributes = CsvFileAttributes.getInstance(project);
-                csvFileAttributes.cleanupAttributeMap(project);
-
+                try {
+                    CsvFileAttributes csvFileAttributes = CsvFileAttributes.getInstance(getProject());
+                    csvFileAttributes.cleanupAttributeMap(getProject());
+                } catch (Exception exception) {
+                    // repeated unresolved bug-reports when retrieving the component
+                    // while this cleanup is an optional and non-critical task
+                }
                 // finished
                 progressIndicator.setFraction(1.0);
                 progressIndicator.setText("finished");

@@ -112,8 +112,15 @@ public class CsvTableEditorActionListeners extends CsvTableEditorUtilBase implem
                 return;
             }
             int focusedRow = table.getSelectedRow();
+            final int columnCount = table.getColumnCount();
 
-            tableEditor.removeColumns(Arrays.stream(selectedColumns).map(col -> table.convertColumnIndexToModel(col)).boxed().collect(Collectors.toList()));
+            tableEditor.removeColumns(
+                    Arrays.stream(selectedColumns)
+                            .filter(selectedColumn -> selectedColumn >= 0 && selectedColumn < columnCount)
+                            .map(col -> table.convertColumnIndexToModel(col))
+                            .boxed()
+                            .collect(Collectors.toList())
+            );
 
             selectCell(table, focusedRow, selectedColumns[0]);
         } finally {

@@ -1,3 +1,12 @@
+3.0.3
+Feb 10, 2023
+
+FIX: Argument for @NotNull parameter 'anchor' of CsvPsiTreeUpdater.appendField must not be null #392
+FIX: ArrayIndexOutOfBoundsException: 8 >= 8 #396
+NEW: 358 ms to call on EDT CsvChangeSeparatorActionGroup#update@EditorPopup #401
+FIX: catch unreasonable exception when retrieving service #410
+FIX: NullPointerException: Cannot invoke "CsvTableEditor.getActions()" because the return value of "CsvTableEditorActions.getTableEditor(AnActionEvent)" is null #394
+
 3.0.2
 Dec 15, 2022
 
