@@ -51,7 +51,7 @@ public class CsvTable extends JBTable {
     @Override
     public Rectangle getCellRect(int row, int column, boolean includeSpacing) {
         Rectangle rect = super.getCellRect(row, column, includeSpacing);
-        if (isCommentRow(row)) {
+        if (getColumnCount() > 0 && isCommentRow(row)) {
             if (convertColumnIndexToModel(column) == 0) {
                 rect.width = this.getWidth();
             } else {
