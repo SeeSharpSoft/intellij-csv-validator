@@ -209,10 +209,6 @@ The maximum width of a single table column in _px_, which is used when adjusting
 
 If the file ends with a completely empty line (no spaces or tabs either), the table editor will not show this line as empty values but ignore it. When table data is serialized, an existing empty line is kept at the end of the file.
 
-##### Show info panel
-
-Enables/disables the info panel at the bottom of the table editor.
-
 ##### Enforce value quoting
 
 Always quotes a single value on save - even if not required.

@@ -23,7 +23,7 @@ group 'net.seesharpsoft.intellij.plugins'
 apply plugin: 'java'
 project.sourceCompatibility = JavaVersion.VERSION_17
 project.targetCompatibility = JavaVersion.VERSION_17
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
     options.compilerArgs << "-Xlint:deprecation"
 }
@@ -69,11 +69,13 @@ idea {
 var final EAP_VERSION = 'LATEST-EAP-SNAPSHOT'
 var final EAP_BUILD = '231'
 
+var final DEFAULT_VERSION = '2022.2.1' //'LATEST-EAP-SNAPSHOT'
+
 // IDE version - https://www.jetbrains.com/intellij-repository/releases
-var idea_version = System.getenv().getOrDefault('IDEA_VERSION', '2022.2.1')
+var idea_version = System.getenv().getOrDefault('IDEA_VERSION', DEFAULT_VERSION)
 var build_version = idea_version == EAP_VERSION ? EAP_BUILD : idea_version.substring(2, 4) + idea_version.charAt(5) // extract e.g. '221' from '2022.1.1'
 
-version '3.0.3-' + build_version
+version '3.1.0-' + build_version
 
 apply plugin: 'org.jetbrains.intellij'
 intellij {
