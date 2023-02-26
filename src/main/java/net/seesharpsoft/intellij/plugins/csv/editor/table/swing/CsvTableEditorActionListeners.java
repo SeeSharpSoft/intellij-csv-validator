@@ -26,7 +26,6 @@ public class CsvTableEditorActionListeners extends CsvTableEditorUtilBase implem
     protected ActionListener resetColumnWidthAction = event -> resetColumnWidths(csvTableEditor);
 
     protected LinkListener openTextEditor = new OpenTextEditor();
-    protected LinkListener openCsvPluginLink = new OpenCsvPluginLink();
 
     public CsvTableEditorActionListeners(CsvTableEditorSwing tableEditor) {
         super(tableEditor);
@@ -172,13 +171,6 @@ public class CsvTableEditorActionListeners extends CsvTableEditorUtilBase implem
         @Override
         public void linkSelected(LinkLabel linkLabel, Object o) {
             FileEditorManager.getInstance(csvTableEditor.getProject()).openTextEditor(new OpenFileDescriptor(csvTableEditor.getProject(), csvTableEditor.getFile()), true);
-        }
-    }
-
-    private final class OpenCsvPluginLink implements LinkListener {
-        @Override
-        public void linkSelected(LinkLabel linkLabel, Object o) {
-            BrowserUtil.browse("https://github.com/SeeSharpSoft/intellij-csv-validator");
         }
     }
 }

@@ -15,7 +15,6 @@ import java.util.List;
 public class CsvTableEditorState implements FileEditorState {
 
     private int[] columnWidths;
-    private Boolean showInfoPanel;
     private Integer rowHeight;
 
     public CsvTableEditorState() {
@@ -28,14 +27,6 @@ public class CsvTableEditorState implements FileEditorState {
 
     public void setColumnWidths(int[] widths) {
         this.columnWidths = widths;
-    }
-
-    public boolean showInfoPanel() {
-        return showInfoPanel == null ? CsvEditorSettings.getInstance().showTableEditorInfoPanel() : showInfoPanel;
-    }
-
-    public void setShowInfoPanel(boolean showInfoPanelArg) {
-        showInfoPanel = showInfoPanelArg;
     }
 
     public int getRowHeight() {
@@ -55,7 +46,6 @@ public class CsvTableEditorState implements FileEditorState {
     }
 
     public void write(@NotNull Project project, @NotNull Element element) {
-        element.setAttribute("showInfoPanel", "" + showInfoPanel());
         element.setAttribute("rowHeight", "" + getRowHeight());
         for (int i = 0; i < columnWidths.length; ++i) {
             Element cwElement = new Element("column");
@@ -69,11 +59,6 @@ public class CsvTableEditorState implements FileEditorState {
 
     public static CsvTableEditorState create(@NotNull Element element, @NotNull Project project, @NotNull VirtualFile file) {
         CsvTableEditorState state = new CsvTableEditorState();
-
-        Attribute attribute = element.getAttribute("showInfoPanel");
-        state.setShowInfoPanel(
-                attribute == null ? CsvEditorSettings.getInstance().showTableEditorInfoPanel() : Boolean.parseBoolean(attribute.getValue())
-        );
 
         state.setRowHeight(
                 StringUtilRt.parseInt(element.getAttributeValue("rowHeight"), CsvEditorSettings.getInstance().getTableEditorRowHeight())

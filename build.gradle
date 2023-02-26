@@ -1,6 +1,6 @@
 plugins {
     // https://github.com/JetBrains/gradle-intellij-plugin
-    id 'org.jetbrains.intellij' version '1.12.0'
+    id 'org.jetbrains.intellij' version '1.10.1'
     id 'jacoco'
     id 'com.github.kt3k.coveralls' version '2.8.4'
     id 'com.github.ManifestClasspath' version '0.1.0-RELEASE'
@@ -23,7 +23,7 @@ group 'net.seesharpsoft.intellij.plugins'
 apply plugin: 'java'
 project.sourceCompatibility = JavaVersion.VERSION_17
 project.targetCompatibility = JavaVersion.VERSION_17
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
     options.compilerArgs << "-Xlint:deprecation"
 }
@@ -32,7 +32,7 @@ repositories {
 }
 dependencies {
     implementation 'net.seesharpsoft.sharping:sharping-commons:0.21.0'
-    compileOnly 'org.apache.ant:ant:1.10.12'
+    compileOnly 'org.apache.ant:ant:1.10.13'
     testImplementation 'org.mockito:mockito-core:4.8.1'
 }
 sourceSets {
@@ -69,11 +69,13 @@ idea {
 var final EAP_VERSION = 'LATEST-EAP-SNAPSHOT'
 var final EAP_BUILD = '231'
 
+var final DEFAULT_VERSION = '2022.2.1' //'LATEST-EAP-SNAPSHOT'
+
 // IDE version - https://www.jetbrains.com/intellij-repository/releases
-var idea_version = System.getenv().getOrDefault('IDEA_VERSION', '2022.2.1')
+var idea_version = System.getenv().getOrDefault('IDEA_VERSION', DEFAULT_VERSION)
 var build_version = idea_version == EAP_VERSION ? EAP_BUILD : idea_version.substring(2, 4) + idea_version.charAt(5) // extract e.g. '221' from '2022.1.1'
 
-version '3.0.3-' + build_version
+version '3.1.0-' + build_version
 
 apply plugin: 'org.jetbrains.intellij'
 intellij {
@@ -107,13 +109,10 @@ Feedback is welcome!
 PS: The previous versions are still available on the project page.
 
 
-Update 3.0.3
+Update 3.1.0
 
-NEW: 358 ms to call on EDT CsvChangeSeparatorActionGroup#update@EditorPopup #401
-FIX: Argument for @NotNull parameter 'anchor' of CsvPsiTreeUpdater.appendField must not be null #392
-FIX: ArrayIndexOutOfBoundsException: 8 >= 8 #396
-FIX: catch unreasonable exception when retrieving service #410
-FIX: NullPointerException: Cannot invoke "CsvTableEditor.getActions()" because the return value of "CsvTableEditorActions.getTableEditor(AnActionEvent)" is null #394
+FIX: NullPointerException: Cannot invoke "URL.toExternalForm()" because "location" is null #424
+FIX: java.lang.ArrayIndexOutOfBoundsException: 0 >= 0 #418
 
 </pre>"""
 }
