@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="net.seesharpsoft.intellij.plugins.csv.editor.table.swing.CsvTableEditorSwing">
-  <grid id="27dc6" binding="panelMain" layout-manager="GridLayoutManager" row-count="3" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+  <grid id="27dc6" binding="panelMain" layout-manager="GridLayoutManager" row-count="2" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="0" left="0" bottom="0" right="0"/>
     <constraints>
       <xy x="20" y="20" width="1364" height="446"/>
@@ -62,53 +62,6 @@
               <columnSelectionAllowed value="true"/>
             </properties>
           </component>
-        </children>
-      </scrollpane>
-      <scrollpane id="d27f" binding="panelInfo">
-        <constraints>
-          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties/>
-        <border type="none"/>
-        <children>
-          <grid id="90794" layout-manager="FlowLayout" hgap="5" vgap="5" flow-align="0">
-            <constraints/>
-            <properties>
-              <autoscrolls value="true"/>
-            </properties>
-            <border type="none"/>
-            <children>
-              <component id="fbd00" class="javax.swing.JButton" binding="btnCloseInfoPanel">
-                <constraints/>
-                <properties>
-                  <autoscrolls value="false"/>
-                  <background color="-855310"/>
-                  <borderPainted value="false"/>
-                  <contentAreaFilled value="false"/>
-                  <focusPainted value="false"/>
-                  <icon value="actions/close.png"/>
-                  <maximumSize width="24" height="24"/>
-                  <minimumSize width="24" height="24"/>
-                  <preferredSize width="24" height="24"/>
-                  <text value=""/>
-                </properties>
-              </component>
-              <component id="c0dc0" class="javax.swing.JLabel">
-                <constraints/>
-                <properties>
-                  <text value="Editing via Table Editor might change the format of the CSV file. Follow the link for more infos, addressing issues and providing suggestions:"/>
-                </properties>
-              </component>
-              <component id="7fcf0" class="com.intellij.ui.components.labels.LinkLabel" binding="lnkPlugin">
-                <constraints/>
-                <properties>
-                  <horizontalTextPosition value="10"/>
-                  <iconTextGap value="2"/>
-                  <text value="CSV Editor"/>
-                </properties>
-              </component>
-            </children>
-          </grid>
         </children>
       </scrollpane>
     </children>

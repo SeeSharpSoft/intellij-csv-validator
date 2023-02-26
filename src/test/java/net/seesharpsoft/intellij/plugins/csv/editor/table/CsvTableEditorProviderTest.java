@@ -62,7 +62,6 @@ public class CsvTableEditorProviderTest extends BasePlatformTestCase {
         CsvTableEditorState editorState = new CsvTableEditorState();
         editorState.setColumnWidths(new int[]{ 120, 32, 9});
         editorState.setRowHeight(142);
-        editorState.setShowInfoPanel(false);
 
         Element element = new Element("state");
         fileEditorProvider.writeState(editorState, getProject(), element);
@@ -74,6 +73,5 @@ public class CsvTableEditorProviderTest extends BasePlatformTestCase {
         CsvTableEditorState editorStateRead = (CsvTableEditorState)readState;
         assertTrue(Objects.deepEquals(editorState.getColumnWidths(), editorStateRead.getColumnWidths()));
         assertEquals(editorState.getRowHeight(), editorStateRead.getRowHeight());
-        assertEquals(editorState.showInfoPanel(), editorStateRead.showInfoPanel());
     }
 }

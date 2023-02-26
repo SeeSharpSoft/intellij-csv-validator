@@ -24,7 +24,6 @@ public class CsvTableEditorStateTest extends BasePlatformTestCase {
 
         originalTableEditorState.setColumnWidths(new int[] { 100, 50, 200, 42});
         originalTableEditorState.setRowHeight(42);
-        originalTableEditorState.setShowInfoPanel(!originalTableEditorState.showInfoPanel());
 
         originalTableEditorState.write(getProject(), domElement);
 
@@ -32,6 +31,5 @@ public class CsvTableEditorStateTest extends BasePlatformTestCase {
 
         assertOrderedEquals(deserializeEditorState.getColumnWidths(), originalTableEditorState.getColumnWidths());
         assertEquals(originalTableEditorState.getRowHeight(), deserializeEditorState.getRowHeight());
-        assertEquals(originalTableEditorState.showInfoPanel(), deserializeEditorState.showInfoPanel());
     }
 }

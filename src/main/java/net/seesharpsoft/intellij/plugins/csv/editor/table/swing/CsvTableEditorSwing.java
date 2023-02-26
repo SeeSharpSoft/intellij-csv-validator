@@ -28,10 +28,7 @@ public class CsvTableEditorSwing extends CsvTableEditor {
     private JTable tblEditor;
     private JPanel panelMain;
     private LinkLabel lnkTextEditor;
-    private LinkLabel lnkPlugin;
     private JLabel lblErrorText;
-    private JButton btnCloseInfoPanel;
-    private JComponent panelInfo;
     private JScrollPane tableScrollPane;
     private JPanel panelTop;
     private JTable rowHeadersTable;
@@ -71,15 +68,6 @@ public class CsvTableEditorSwing extends CsvTableEditor {
 
     private void initializedUIComponents() {
         EditorColorsScheme editorColorsScheme = EditorColorsManager.getInstance().getGlobalScheme();
-
-        lnkTextEditor.setListener(this.tableEditorActions.openTextEditor, null);
-        lnkPlugin.setListener(this.tableEditorActions.openCsvPluginLink, null);
-
-        panelInfo.setVisible(CsvEditorSettings.getInstance().showTableEditorInfoPanel());
-        btnCloseInfoPanel.addActionListener(e -> {
-            panelInfo.setVisible(false);
-            getTableEditorState().setShowInfoPanel(false);
-        });
 
         tblEditor.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         tblEditor.setFont(getEditorFont());
@@ -139,7 +127,6 @@ public class CsvTableEditorSwing extends CsvTableEditor {
     @Override
     public void updateEditorLayout() {
         setEditable(!getTableModel().hasErrors());
-        panelInfo.setVisible(getTableEditorState().showInfoPanel());
 
         int currentColumnCount = this.getTableModel().getColumnCount();
         int[] columnWidths = getTableEditorState().getColumnWidths();
