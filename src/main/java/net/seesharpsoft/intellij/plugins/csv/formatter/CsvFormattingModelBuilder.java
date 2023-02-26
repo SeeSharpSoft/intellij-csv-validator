@@ -16,6 +16,8 @@ import org.jetbrains.annotations.Nullable;
 
 public class CsvFormattingModelBuilder implements FormattingModelBuilder {
 
+    private static ExternalFormattingModelBuilderImpl DUMMY_FORMATTING_MODEL_PROVIDER = new ExternalFormattingModelBuilderImpl(null);
+
     private static SpacingBuilder createSpaceBuilder(CodeStyleSettings settings) {
         CsvCodeStyleSettings csvCodeStyleSettings = settings.getCustomSettings(CsvCodeStyleSettings.class);
         SpacingBuilder builder = new SpacingBuilder(settings, CsvLanguage.INSTANCE);
@@ -39,15 +41,13 @@ public class CsvFormattingModelBuilder implements FormattingModelBuilder {
         return builder;
     }
 
-    private static ExternalFormattingModelBuilderImpl DUMMY_FORMATTING_MODEL_PROVIDER = new ExternalFormattingModelBuilderImpl(null);
-
     @Override
     @NotNull
     public FormattingModel createModel(FormattingContext formattingContext) {
         switch (formattingContext.getFormattingMode()) {
             case ADJUST_INDENT:
             case ADJUST_INDENT_ON_ENTER:
-                // do not care about indent during editing (baaad performance)
+                // do not care about indent during editing (bad performance)
                 // NOTE: Formatter.getInstance().createDummyFormattingModel(formattingContext.getPsiElement()); <-- marked as internal, but this DummyFormattingModel is all I want
                 return DUMMY_FORMATTING_MODEL_PROVIDER.createModel(formattingContext);
             case REFORMAT:
