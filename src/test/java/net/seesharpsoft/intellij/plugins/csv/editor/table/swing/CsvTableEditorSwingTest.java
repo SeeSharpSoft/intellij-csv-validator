@@ -1,6 +1,5 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
-import com.intellij.ide.structureView.StructureViewBuilder;
 import com.intellij.openapi.fileEditor.FileEditorStateLevel;
 import com.intellij.openapi.util.Key;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditor;
@@ -14,7 +13,7 @@ public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
 
     public void testBasics() {
         assertEquals(CsvTableEditor.EDITOR_NAME, fileEditor.getName());
-        assertEquals(fileEditor, fileEditor.getCurrentLocation());
+        assertEquals(null, fileEditor.getCurrentLocation());
         assertInstanceOf(fileEditor.getState(FileEditorStateLevel.FULL), CsvTableEditorState.class);
         assertInstanceOf(fileEditor.getState(FileEditorStateLevel.NAVIGATION), CsvTableEditorState.class);
         assertInstanceOf(fileEditor.getState(FileEditorStateLevel.UNDO), CsvTableEditorState.class);
