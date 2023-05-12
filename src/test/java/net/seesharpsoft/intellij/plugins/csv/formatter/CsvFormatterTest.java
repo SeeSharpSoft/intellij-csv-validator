@@ -4,12 +4,12 @@ import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.psi.codeStyle.CodeStyleManager;
 import com.intellij.psi.codeStyle.CodeStyleSettingsManager;
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
-import com.intellij.util.containers.ContainerUtil;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvCodeStyleSettings;
 import org.junit.Assert;
 
 import java.io.PrintWriter;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Properties;
 
 public class CsvFormatterTest extends BasePlatformTestCase {
@@ -58,7 +58,7 @@ public class CsvFormatterTest extends BasePlatformTestCase {
 
         WriteCommandAction.writeCommandAction(getProject()).run(() -> {
             CodeStyleManager.getInstance(getProject()).reformatText(myFixture.getFile(),
-                    ContainerUtil.newArrayList(myFixture.getFile().getTextRange()));
+                    Arrays.asList(myFixture.getFile().getTextRange()));
         });
         if (checkResults) {
             myFixture.checkResultByFile(relativeTargetPath + String.format("/TestResult%08d.csv", binarySettings));
@@ -138,7 +138,7 @@ public class CsvFormatterTest extends BasePlatformTestCase {
 
             WriteCommandAction.writeCommandAction(getProject()).run(() -> {
                 CodeStyleManager.getInstance(getProject()).reformatText(myFixture.getFile(),
-                        ContainerUtil.newArrayList(myFixture.getFile().getTextRange()));
+                        Arrays.asList(myFixture.getFile().getTextRange()));
             });
 
             try (PrintWriter writer = new PrintWriter(getTestDataPath() + String.format("/generated/TestResult%08d.csv", binarySettings))
