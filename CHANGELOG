@@ -1,3 +1,11 @@
+3.2.0
+May 12, 2023
+
+FIX: Argument for @NotNull parameter 'tableEditor' of CsvTableActions.adjustColumnWidths must not be null #431
+FIX: NullPointerException #429
+NEW: prevent error report flooding
+FIX: Comment handling breaking in table editor #451
+
 3.1.0
 Feb 27, 2023
 

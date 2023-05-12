@@ -1,6 +1,6 @@
 plugins {
     // https://github.com/JetBrains/gradle-intellij-plugin
-    id 'org.jetbrains.intellij' version '1.10.1'
+    id 'org.jetbrains.intellij' version '1.13.3'
     id 'jacoco'
     id 'com.github.kt3k.coveralls' version '2.8.4'
     id 'com.github.ManifestClasspath' version '0.1.0-RELEASE'
@@ -75,7 +75,7 @@ var final DEFAULT_VERSION = '2022.2.1' //'LATEST-EAP-SNAPSHOT'
 var idea_version = System.getenv().getOrDefault('IDEA_VERSION', DEFAULT_VERSION)
 var build_version = idea_version == EAP_VERSION ? EAP_BUILD : idea_version.substring(2, 4) + idea_version.charAt(5) // extract e.g. '221' from '2022.1.1'
 
-version '3.1.0-' + build_version
+version '3.2.0-' + build_version
 
 apply plugin: 'org.jetbrains.intellij'
 intellij {
@@ -96,24 +96,10 @@ patchPluginXml {
     sinceBuild = build_version
 
     changeNotes = """<pre style="font-family: sans-serif">
-Major update release 3.*!
-
-For this release, the plugin was reworked quite a bit, focusing on performance and table editor usage. The table editor is now the default editor!
-
-Some options were removed for simplification and consistency (e.g. 'Tabularize' formatting), while new features were added (e.g. comment support in table editor).
-
-Due to incompatible code changes, file specific settings (value separator & escape character) are lost and might need to be set again accordingly.
-
-Feedback is welcome!
-
-PS: The previous versions are still available on the project page.
-
-
-Update 3.1.0
-
-FIX: NullPointerException: Cannot invoke "URL.toExternalForm()" because "location" is null #424
-FIX: java.lang.ArrayIndexOutOfBoundsException: 0 >= 0 #418
-
+FIX: Argument for @NotNull parameter 'tableEditor' of CsvTableActions.adjustColumnWidths must not be null #431
+FIX: NullPointerException #429
+NEW: prevent error report flooding
+FIX: Comment handling breaking in table editor #451
 </pre>"""
 }
 publishPlugin {

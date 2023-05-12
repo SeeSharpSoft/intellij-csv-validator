@@ -10,6 +10,7 @@ import com.intellij.openapi.diagnostic.IdeaLoggingEvent;
 import com.intellij.openapi.diagnostic.SubmittedReportInfo;
 import com.intellij.openapi.progress.*;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.text.Strings;
 import com.intellij.util.Consumer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -97,7 +98,9 @@ public class CsvGithubIssueSubmitter extends ErrorReportSubmitter {
                 githubExecutor.execute(progressIndicator, createNewIssue(issueTitle, issueDetails));
                 status = SubmittedReportInfo.SubmissionStatus.NEW_ISSUE;
             } else {
-                githubExecutor.execute(progressIndicator, updateExistingIssue(foundIssueId, issueDetails));
+                if (!Strings.isEmpty(additionalInfo)) {
+                    githubExecutor.execute(progressIndicator, updateExistingIssue(foundIssueId, issueDetails));
+                }
                 status = SubmittedReportInfo.SubmissionStatus.DUPLICATE;
             }
             consumer.consume(new SubmittedReportInfo(status));
@@ -128,8 +131,8 @@ public class CsvGithubIssueSubmitter extends ErrorReportSubmitter {
                 Collections.emptyList());
     }
 
-    protected String searchExistingIssues(GithubApiRequestExecutor githubExecutor, String needleArg, ProgressIndicator progressIndicator) throws IOException {
-        String needle = needleArg;
+    protected String searchExistingIssues(GithubApiRequestExecutor githubExecutor, String title, ProgressIndicator progressIndicator) throws IOException {
+        String needle = title.replaceAll("\\s*\\[.*?]\\s*", "");
         if (needle.length() > 255) {
             needle = needle.substring(0, needle.substring(0, 255).lastIndexOf(" "));
         }
@@ -146,7 +149,7 @@ public class CsvGithubIssueSubmitter extends ErrorReportSubmitter {
         GithubResponsePage<GithubSearchedIssue> foundIssuesPage = githubExecutor.execute(progressIndicator, existingIssueRequest);
         if (foundIssuesPage != null && !foundIssuesPage.getItems().isEmpty()) {
             for (GithubSearchedIssue foundIssue : foundIssuesPage.getItems()) {
-                if (foundIssue.getTitle().equals(needleArg)) {
+                if (foundIssue.getTitle().equals(title)) {
                     return Long.toString(foundIssue.getNumber());
                 }
             }
@@ -163,7 +166,7 @@ public class CsvGithubIssueSubmitter extends ErrorReportSubmitter {
 
     protected String getIssueDetails(IdeaLoggingEvent event, String additionalInfo) {
         return "Message\n---\n" +
-                (additionalInfo != null && !additionalInfo.isEmpty() ? additionalInfo : "<no message>") +
+                (!Strings.isEmpty(additionalInfo) ? additionalInfo : "<no message>") +
                 "\n\n" +
                 "Stacktrace\n---\n" +
                 event.getThrowableText() +

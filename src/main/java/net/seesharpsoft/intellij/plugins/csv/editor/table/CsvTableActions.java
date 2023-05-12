@@ -29,6 +29,16 @@ public interface CsvTableActions<T extends CsvTableEditor> {
         public void clearSelectedCells(CsvTableEditor tableEditor) {
             // dummy
         }
+
+        @Override
+        public void adjustColumnWidths(CsvTableEditor tableEditor) {
+            // dummy
+        }
+
+        @Override
+        public void resetColumnWidths(CsvTableEditor tableEditor) {
+            // dummy
+        }
     };
 
     void addRow(@NotNull T tableEditor, boolean before);
