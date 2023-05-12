@@ -5,7 +5,10 @@ import com.intellij.psi.PsiElement;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditor;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableModelBase;
+import net.seesharpsoft.intellij.plugins.csv.psi.CsvField;
+import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
+import net.seesharpsoft.intellij.psi.PsiHelper;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -94,7 +97,10 @@ public class CsvTableModelSwing extends CsvTableModelBase<CsvTableEditor> implem
 
     @Override
     public String getColumnName(int column) {
-        PsiElement headerField = getFieldAt(0, column);
+        PsiElement headerField = PsiHelper.findFirst(getPsiFile(), CsvTypes.FIELD);
+        if (headerField != null) {
+            headerField = PsiHelper.getNextNthSiblingOfType(headerField, column, CsvField.class);
+        }
         String headerText = headerField == null ? "" : CsvHelper.unquoteCsvValue(headerField.getText(), getEscapeCharacter()).trim();
 
         Map<String, Object> params = new HashMap<>();

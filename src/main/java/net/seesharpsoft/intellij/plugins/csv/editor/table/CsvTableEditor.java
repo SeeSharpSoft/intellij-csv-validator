@@ -31,7 +31,7 @@ import java.beans.PropertyChangeSupport;
 import java.util.Arrays;
 import java.util.Collection;
 
-public abstract class CsvTableEditor implements FileEditor, FileEditorLocation, PsiFileHolder {
+public abstract class CsvTableEditor implements FileEditor, PsiFileHolder {
 
     public static final String EDITOR_NAME = "Table Editor";
 
@@ -76,15 +76,6 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation, 
     public abstract void beforeTableModelUpdate();
 
     public abstract void afterTableModelUpdate();
-
-    public final void updateTableComponentData() {
-        beforeTableModelUpdate();
-        try {
-//            getTableModel().notifyUpdate();
-        } finally {
-            afterTableModelUpdate();
-        }
-    }
 
     public void setEditable(boolean editable) {
         this.tableIsEditable = editable;
@@ -174,12 +165,6 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation, 
         return null;
     }
 
-    @Nullable
-    @Override
-    public FileEditorLocation getCurrentLocation() {
-        return this;
-    }
-
     @Override
     public void dispose() {
         if (this.isDisposed()) return;
@@ -202,17 +187,6 @@ public abstract class CsvTableEditor implements FileEditor, FileEditorLocation, 
     @Override
     public <T> void putUserData(@NotNull Key<T> key, @Nullable T t) {
         userDataHolder.putUserData(key, t);
-    }
-
-    @NotNull
-    @Override
-    public FileEditor getEditor() {
-        return this;
-    }
-
-    @Override
-    public int compareTo(@NotNull FileEditorLocation o) {
-        return 1;
     }
 
     @Nullable

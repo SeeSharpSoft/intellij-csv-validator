@@ -10,7 +10,6 @@ import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableActions;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditor;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditorState;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableModel;
-import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -41,7 +40,6 @@ public class CsvTableEditorSwing extends CsvTableEditor {
     protected final CsvTableEditorKeyListener tableEditorKeyListener;
     protected final CsvTableEditorMouseWheelListener tableEditorMouseWheelListener;
     private boolean listenerApplied = false;
-
 
     // temporary stored values when table data is updated
     private int mySelectedColumn;
