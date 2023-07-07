@@ -6,13 +6,13 @@ import com.intellij.featureStatistics.FeatureUsageTracker;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.markup.RangeHighlighter;
 import com.intellij.openapi.util.TextRange;
-import com.intellij.testFramework.fixtures.BasePlatformTestCase;
+import net.seesharpsoft.intellij.plugins.csv.CsvBasePlatformTestCase;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class CsvHighlightUsagesHandlerTest extends BasePlatformTestCase {
+public class CsvHighlightUsagesHandlerTest extends CsvBasePlatformTestCase {
 
     @Override
     protected String getTestDataPath() {
@@ -21,7 +21,7 @@ public class CsvHighlightUsagesHandlerTest extends BasePlatformTestCase {
 
     private void assertHighlightedTexts(RangeHighlighter[] rangeHighlighters, String... texts) {
         assertSize(texts.length, rangeHighlighters);
-        List<String> needles =  new ArrayList(Arrays.asList(texts));
+        List<String> needles = new ArrayList(Arrays.asList(texts));
         for (RangeHighlighter rangeHighlighter : rangeHighlighters) {
             needles.removeIf(text -> text.equals(rangeHighlighter.getDocument().getText(TextRange.create(rangeHighlighter.getStartOffset(), rangeHighlighter.getEndOffset()))));
         }

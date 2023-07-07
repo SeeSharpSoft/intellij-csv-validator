@@ -2,12 +2,11 @@ package net.seesharpsoft.intellij.plugins.csv;
 
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.testFramework.LightVirtualFile;
-import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import com.intellij.util.PathUtil;
 
 import java.nio.file.Paths;
 
-public class CsvStorageHelperTest extends BasePlatformTestCase {
+public class CsvStorageHelperTest extends CsvBasePlatformTestCase {
 
     @Override
     protected void setUp() throws Exception {

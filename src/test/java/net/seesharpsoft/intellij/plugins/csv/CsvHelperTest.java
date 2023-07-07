@@ -16,11 +16,11 @@ public class CsvHelperTest extends PlatformLiteFixture {
 
     public void testQuoteCsvValue() {
         String csv = "Header\" \\1\\";
-        assertEquals( "\"Header\"\" \\1\\\"", CsvHelper.quoteCsvField(csv, CsvEscapeCharacter.QUOTE, CsvValueSeparator.COMMA, false));
+        assertEquals("\"Header\"\" \\1\\\"", CsvHelper.quoteCsvField(csv, CsvEscapeCharacter.QUOTE, CsvValueSeparator.COMMA, false));
     }
 
     public void testQuoteCsvValueWithBackslash() {
         String csv = "Header\" \\1\\";
-        assertEquals("\"Header\\\" \\1\\\"",  CsvHelper.quoteCsvField(csv, CsvEscapeCharacter.BACKSLASH, CsvValueSeparator.COMMA, false));
+        assertEquals("\"Header\\\" \\1\\\"", CsvHelper.quoteCsvField(csv, CsvEscapeCharacter.BACKSLASH, CsvValueSeparator.COMMA, false));
     }
 }

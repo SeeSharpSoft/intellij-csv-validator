@@ -3,7 +3,6 @@ package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableColumnModelEvent;
-import javax.swing.event.TableModelEvent;
 
 public class CsvTableEditorChangeListenerTest extends CsvTableEditorSwingTestBase {
 

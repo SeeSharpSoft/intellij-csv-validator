@@ -1,10 +1,10 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
-import com.intellij.testFramework.fixtures.BasePlatformTestCase;
+import net.seesharpsoft.intellij.plugins.csv.CsvBasePlatformTestCase;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableModel;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 
-public abstract class CsvTableEditorSwingTestBase extends BasePlatformTestCase {
+public abstract class CsvTableEditorSwingTestBase extends CsvBasePlatformTestCase {
 
     protected CsvTableEditorSwing fileEditor;
 
@@ -13,7 +13,9 @@ public abstract class CsvTableEditorSwingTestBase extends BasePlatformTestCase {
         return "./src/test/resources/editor";
     }
 
-    protected String getTestFile() { return "TableEditorFile.csv"; }
+    protected String getTestFile() {
+        return "TableEditorFile.csv";
+    }
 
     protected int myInitialRowCount;
     protected int myInitialColumnCount;

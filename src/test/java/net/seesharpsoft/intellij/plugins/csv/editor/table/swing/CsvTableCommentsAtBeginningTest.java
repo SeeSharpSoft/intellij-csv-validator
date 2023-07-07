@@ -9,7 +9,9 @@ public class CsvTableCommentsAtBeginningTest extends CsvTableEditorSwingTestBase
     }
 
     @Override
-    protected String getTestFile() { return "CommentsAtBeginning.csv"; }
+    protected String getTestFile() {
+        return "CommentsAtBeginning.csv";
+    }
 
     public void testHeaderIsFirstNonCommentLine() {
         TableModel tableModel = fileEditor.getTable().getModel();

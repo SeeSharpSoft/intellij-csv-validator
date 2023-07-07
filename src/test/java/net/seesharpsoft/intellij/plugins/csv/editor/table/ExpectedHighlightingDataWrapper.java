@@ -36,7 +36,7 @@ public class ExpectedHighlightingDataWrapper extends ExpectedHighlightingData {
     }
 
     public void checkResultWrapper(PsiFile psiFile, Collection<? extends HighlightInfo> infos, String text) {
-        if(!findMethodAndInvoke("checkResult", PsiFile.class, Collection.class, String.class)) {
+        if (!findMethodAndInvoke("checkResult", PsiFile.class, Collection.class, String.class)) {
             findMethodAndInvoke("checkResult", Collection.class, String.class);
         }
     }

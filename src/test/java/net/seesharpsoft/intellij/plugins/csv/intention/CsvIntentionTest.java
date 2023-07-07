@@ -1,11 +1,11 @@
 package net.seesharpsoft.intellij.plugins.csv.intention;
 
 import com.intellij.codeInsight.intention.IntentionAction;
-import com.intellij.testFramework.fixtures.BasePlatformTestCase;
+import net.seesharpsoft.intellij.plugins.csv.CsvBasePlatformTestCase;
 import net.seesharpsoft.intellij.plugins.csv.CsvEscapeCharacter;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 
-public class CsvIntentionTest extends BasePlatformTestCase {
+public class CsvIntentionTest extends CsvBasePlatformTestCase {
 
     @Override
     protected String getTestDataPath() {
