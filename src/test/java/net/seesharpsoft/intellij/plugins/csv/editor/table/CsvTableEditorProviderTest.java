@@ -5,13 +5,13 @@ import com.intellij.openapi.fileEditor.FileEditorPolicy;
 import com.intellij.openapi.fileEditor.FileEditorProvider;
 import com.intellij.openapi.fileEditor.FileEditorState;
 import com.intellij.openapi.fileEditor.ex.FileEditorProviderManager;
-import com.intellij.testFramework.fixtures.BasePlatformTestCase;
+import net.seesharpsoft.intellij.plugins.csv.CsvBasePlatformTestCase;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import org.jdom.Element;
 
 import java.util.Objects;
 
-public class CsvTableEditorProviderTest extends BasePlatformTestCase {
+public class CsvTableEditorProviderTest extends CsvBasePlatformTestCase {
 
     @Override
     protected String getTestDataPath() {
@@ -60,7 +60,7 @@ public class CsvTableEditorProviderTest extends BasePlatformTestCase {
         FileEditorProvider fileEditorProvider = fileEditorProviders[0];
 
         CsvTableEditorState editorState = new CsvTableEditorState();
-        editorState.setColumnWidths(new int[]{ 120, 32, 9});
+        editorState.setColumnWidths(new int[]{120, 32, 9});
         editorState.setRowHeight(142);
 
         Element element = new Element("state");
@@ -70,7 +70,7 @@ public class CsvTableEditorProviderTest extends BasePlatformTestCase {
 
         assertInstanceOf(readState, CsvTableEditorState.class);
 
-        CsvTableEditorState editorStateRead = (CsvTableEditorState)readState;
+        CsvTableEditorState editorStateRead = (CsvTableEditorState) readState;
         assertTrue(Objects.deepEquals(editorState.getColumnWidths(), editorStateRead.getColumnWidths()));
         assertEquals(editorState.getRowHeight(), editorStateRead.getRowHeight());
     }

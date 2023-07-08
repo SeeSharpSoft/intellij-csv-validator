@@ -5,7 +5,7 @@ import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.codeStyle.CodeStyleSettingsManager;
 import com.intellij.testFramework.PsiTestUtil;
-import com.intellij.testFramework.fixtures.BasePlatformTestCase;
+import net.seesharpsoft.intellij.plugins.csv.CsvBasePlatformTestCase;
 import net.seesharpsoft.intellij.plugins.csv.CsvEscapeCharacter;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvCodeStyleSettings;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
@@ -18,7 +18,7 @@ import java.util.function.Consumer;
 
 import static net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings.COMMENT_INDICATOR_DEFAULT;
 
-public class CsvTableModelBaseTest extends BasePlatformTestCase implements PsiFileHolder {
+public class CsvTableModelBaseTest extends CsvBasePlatformTestCase implements PsiFileHolder {
 
     @Override
     protected String getTestDataPath() {
@@ -230,7 +230,7 @@ public class CsvTableModelBaseTest extends BasePlatformTestCase implements PsiFi
     }
 
     public void testDeleteMultipleConnectedRows() {
-        autoCheck((csvTableModel -> csvTableModel.removeRows(Arrays.asList(2, 0 ,1))));
+        autoCheck((csvTableModel -> csvTableModel.removeRows(Arrays.asList(2, 0, 1))));
     }
 
     public void testDeleteMultipleColumns() {

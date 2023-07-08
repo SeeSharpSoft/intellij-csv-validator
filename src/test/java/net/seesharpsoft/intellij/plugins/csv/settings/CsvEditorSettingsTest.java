@@ -1,9 +1,9 @@
 package net.seesharpsoft.intellij.plugins.csv.settings;
 
-import com.intellij.testFramework.fixtures.BasePlatformTestCase;
+import net.seesharpsoft.intellij.plugins.csv.CsvBasePlatformTestCase;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 
-public class CsvEditorSettingsTest extends BasePlatformTestCase {
+public class CsvEditorSettingsTest extends CsvBasePlatformTestCase {
 
     @Override
     protected String getTestDataPath() {

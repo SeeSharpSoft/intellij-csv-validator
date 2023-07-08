@@ -14,7 +14,7 @@ import com.intellij.psi.impl.source.tree.FileElement;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.testFramework.EdtTestUtil;
 import com.intellij.testFramework.ExpectedHighlightingData;
-import com.intellij.testFramework.fixtures.BasePlatformTestCase;
+import net.seesharpsoft.intellij.plugins.csv.CsvBasePlatformTestCase;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.ExpectedHighlightingDataWrapper;
 import org.jetbrains.annotations.NotNull;
 
@@ -24,7 +24,7 @@ import java.util.List;
 
 import static net.seesharpsoft.intellij.plugins.csv.editor.CsvAnnotator.CSV_COLUMN_INFO_SEVERITY;
 
-public class CsvAnnotatorTest extends BasePlatformTestCase {
+public class CsvAnnotatorTest extends CsvBasePlatformTestCase {
 
     @Override
     protected String getTestDataPath() {
@@ -52,10 +52,10 @@ public class CsvAnnotatorTest extends BasePlatformTestCase {
         EdtTestUtil.runInEdtAndWait(() -> {
             PsiDocumentManager.getInstance(project).commitAllDocuments();
         });
-        PsiFileImpl file = (PsiFileImpl)this.getHostFile();
+        PsiFileImpl file = (PsiFileImpl) this.getHostFile();
         FileElement hardRefToFileElement = file.calcTreeElement();
         if (!DumbService.isDumb(project)) {
-            project.getService(CacheManager.class).getFilesWithWord("XXX", (short)2, GlobalSearchScope.allScope(project), true);
+            project.getService(CacheManager.class).getFilesWithWord("XXX", (short) 2, GlobalSearchScope.allScope(project), true);
         }
 
         long start = System.currentTimeMillis();
@@ -83,8 +83,8 @@ public class CsvAnnotatorTest extends BasePlatformTestCase {
         HighlightInfo prevInfo = null;
 
         HighlightInfo info;
-        for(Iterator it = infos.iterator(); it.hasNext(); prevInfo = info.type == HighlightInfoType.INJECTED_LANGUAGE_FRAGMENT ? info : null) {
-            info = (HighlightInfo)it.next();
+        for (Iterator it = infos.iterator(); it.hasNext(); prevInfo = info.type == HighlightInfoType.INJECTED_LANGUAGE_FRAGMENT ? info : null) {
+            info = (HighlightInfo) it.next();
             if (prevInfo != null && info.getSeverity() == HighlightInfoType.SYMBOL_TYPE_SEVERITY && info.getDescription() == null && info.startOffset == prevInfo.startOffset && info.endOffset == prevInfo.endOffset) {
                 it.remove();
             }

@@ -1,13 +1,13 @@
 package net.seesharpsoft.intellij.plugins.csv.settings;
 
 import com.intellij.openapi.options.ConfigurationException;
-import com.intellij.testFramework.fixtures.BasePlatformTestCase;
+import net.seesharpsoft.intellij.plugins.csv.CsvBasePlatformTestCase;
 import net.seesharpsoft.intellij.plugins.csv.CsvEscapeCharacter;
 import net.seesharpsoft.intellij.plugins.csv.CsvValueSeparator;
 
 import java.awt.*;
 
-public class CsvEditorSettingsProviderTest extends BasePlatformTestCase {
+public class CsvEditorSettingsProviderTest extends CsvBasePlatformTestCase {
 
     @Override
     protected String getTestDataPath() {
@@ -99,7 +99,7 @@ public class CsvEditorSettingsProviderTest extends BasePlatformTestCase {
         assertEquals(CsvValueSeparator.PIPE, csvEditorSettings.getDefaultValueSeparator());
         assertEquals(true, csvEditorSettings.getKeepTrailingSpaces());
         assertEquals("//", csvEditorSettings.getCommentIndicator());
-        assertEquals( CsvEditorSettings.ValueColoring.SIMPLE, csvEditorSettings.getValueColoring());
+        assertEquals(CsvEditorSettings.ValueColoring.SIMPLE, csvEditorSettings.getValueColoring());
 
         editorSettingsPanel.disposeUIResources();
     }

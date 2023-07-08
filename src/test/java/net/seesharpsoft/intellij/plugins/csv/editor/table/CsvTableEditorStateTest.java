@@ -1,10 +1,10 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table;
 
-import com.intellij.testFramework.fixtures.BasePlatformTestCase;
+import net.seesharpsoft.intellij.plugins.csv.CsvBasePlatformTestCase;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import org.jdom.Element;
 
-public class CsvTableEditorStateTest extends BasePlatformTestCase {
+public class CsvTableEditorStateTest extends CsvBasePlatformTestCase {
 
     @Override
     protected String getTestDataPath() {
@@ -22,7 +22,7 @@ public class CsvTableEditorStateTest extends BasePlatformTestCase {
         Element domElement = new Element("dummy");
         CsvTableEditorState originalTableEditorState = new CsvTableEditorState();
 
-        originalTableEditorState.setColumnWidths(new int[] { 100, 50, 200, 42});
+        originalTableEditorState.setColumnWidths(new int[]{100, 50, 200, 42});
         originalTableEditorState.setRowHeight(42);
 
         originalTableEditorState.write(getProject(), domElement);

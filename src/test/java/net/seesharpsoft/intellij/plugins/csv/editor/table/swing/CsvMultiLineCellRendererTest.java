@@ -14,19 +14,19 @@ public class CsvMultiLineCellRendererTest extends CsvTableEditorSwingTestBase {
     }
 
     public void testPreferredSize() {
-        JScrollPane jTextArea = (JScrollPane)fileEditor.getTable().getCellRenderer(0, 0);
+        JScrollPane jTextArea = (JScrollPane) fileEditor.getTable().getCellRenderer(0, 0);
 
         assertNotNull(jTextArea.getPreferredSize());
     }
 
     public void testCellEditorComponent() {
-        CsvMultiLineCellRenderer cellRenderer = (CsvMultiLineCellRenderer)fileEditor.getTable().getCellRenderer(0, 0);
+        CsvMultiLineCellRenderer cellRenderer = (CsvMultiLineCellRenderer) fileEditor.getTable().getCellRenderer(0, 0);
 
         assertEquals(cellRenderer, cellRenderer.getTableCellEditorComponent(fileEditor.getTable(), "Test", true, 0, 0));
     }
 
     public void testCellEditing() {
-        CsvMultiLineCellRenderer cellRenderer = (CsvMultiLineCellRenderer)fileEditor.getTable().getCellRenderer(0, 0);
+        CsvMultiLineCellRenderer cellRenderer = (CsvMultiLineCellRenderer) fileEditor.getTable().getCellRenderer(0, 0);
 
         assertTrue(cellRenderer.isCellEditable(null));
         assertTrue(cellRenderer.shouldSelectCell(null));

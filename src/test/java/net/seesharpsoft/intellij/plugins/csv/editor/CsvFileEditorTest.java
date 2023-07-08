@@ -7,14 +7,13 @@ import com.intellij.openapi.fileEditor.*;
 import com.intellij.openapi.fileEditor.ex.FileEditorProviderManager;
 import com.intellij.openapi.fileEditor.impl.text.TextEditorState;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.vcs.changes.PreviewDiffVirtualFile;
 import com.intellij.testFramework.LightVirtualFile;
-import com.intellij.testFramework.fixtures.BasePlatformTestCase;
+import net.seesharpsoft.intellij.plugins.csv.CsvBasePlatformTestCase;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
 
-public class CsvFileEditorTest extends BasePlatformTestCase {
+public class CsvFileEditorTest extends CsvBasePlatformTestCase {
 
     @Override
     protected String getTestDataPath() {
@@ -55,7 +54,7 @@ public class CsvFileEditorTest extends BasePlatformTestCase {
         FileEditor fileEditor = fileEditorProviders[1].createEditor(myFixture.getProject(), myFixture.getFile().getVirtualFile());
         assertInstanceOf(fileEditor, TextEditor.class);
 
-        TextEditor textEditor = (TextEditor)fileEditor;
+        TextEditor textEditor = (TextEditor) fileEditor;
 
         CsvEditorSettings csvEditorSettings = CsvEditorSettings.getInstance();
         EditorSettings editorSettings = textEditor.getEditor().getSettings();
@@ -67,7 +66,7 @@ public class CsvFileEditorTest extends BasePlatformTestCase {
 
     private TextEditor getCurrentTextEditor() {
         FileEditorProvider[] fileEditorProviders = FileEditorProviderManager.getInstance().getProviders(myFixture.getProject(), myFixture.getFile().getVirtualFile());
-        return (TextEditor)fileEditorProviders[1].createEditor(myFixture.getProject(), myFixture.getFile().getVirtualFile());
+        return (TextEditor) fileEditorProviders[1].createEditor(myFixture.getProject(), myFixture.getFile().getVirtualFile());
     }
 
     public void testCsvEditorSettingsAreApplied() {
@@ -88,7 +87,7 @@ public class CsvFileEditorTest extends BasePlatformTestCase {
         TextEditor textEditor = getCurrentTextEditor();
 
         FileEditorProvider[] fileEditorProviders = FileEditorProviderManager.getInstance().getProviders(myFixture.getProject(), myFixture.getFile().getVirtualFile());
-        CsvFileEditorProvider fileEditorProvider = (CsvFileEditorProvider)fileEditorProviders[1];
+        CsvFileEditorProvider fileEditorProvider = (CsvFileEditorProvider) fileEditorProviders[1];
         Element dummy = new Element("dummy");
 
         FileEditorState state = fileEditorProvider.readState(dummy, this.getProject(), myFixture.getFile().getVirtualFile());

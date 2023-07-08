@@ -38,7 +38,8 @@ public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
 
         PropertyChangeListener listener = new PropertyChangeListener() {
             @Override
-            public void propertyChange(PropertyChangeEvent evt) { }
+            public void propertyChange(PropertyChangeEvent evt) {
+            }
         };
         fileEditor.removePropertyChangeListener(listener);
         fileEditor.addPropertyChangeListener(listener);
