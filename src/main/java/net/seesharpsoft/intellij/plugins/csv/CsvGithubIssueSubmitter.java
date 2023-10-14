@@ -160,8 +160,8 @@ public class CsvGithubIssueSubmitter extends ErrorReportSubmitter {
         return null;
     }
 
-    protected int getIssueTitleCutIndex(String throwableText) {
-        throwableText = throwableText.replaceAll("\r", "\n");
+    protected int getIssueTitleCutIndex(String throwableTextArg) {
+        String throwableText = throwableTextArg.replaceAll("\r", "\n");
         int index = throwableText.indexOf("\n");
         if (index == -1) {
             index = throwableText.indexOf(" ", FALLBACK_ISSUE_TITLE_LENGTH);
