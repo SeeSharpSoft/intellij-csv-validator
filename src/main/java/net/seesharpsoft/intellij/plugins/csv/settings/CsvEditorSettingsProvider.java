@@ -5,6 +5,7 @@ import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.ui.ComboBox;
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.ui.CheckBoxWithColorChooser;
 import com.intellij.util.FileContentUtilCore;
 import net.seesharpsoft.intellij.plugins.csv.CsvEscapeCharacter;
@@ -72,6 +73,10 @@ public class CsvEditorSettingsProvider implements EditorOptionsProvider {
     // ensure downward compatibility
     public boolean isModified(@NotNull JToggleButton toggleButton, boolean value) {
         return toggleButton.isSelected() != value;
+    }
+
+    public boolean isModified(@NotNull JTextField textField, @NotNull String value) {
+        return !StringUtil.equals(textField.getText().trim(), value);
     }
 
     @Override

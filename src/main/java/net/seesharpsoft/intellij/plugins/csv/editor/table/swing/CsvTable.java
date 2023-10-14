@@ -49,6 +49,12 @@ public class CsvTable extends JBTable {
     }
 
     @Override
+    public int getSelectedColumn() {
+        int selectedColumn = super.getSelectedColumn();
+        return Math.min(selectedColumn, getColumnCount() - 1);
+    }
+
+    @Override
     public Rectangle getCellRect(int row, int column, boolean includeSpacing) {
         Rectangle rect = super.getCellRect(row, column, includeSpacing);
         if (getColumnCount() > 0 && isCommentRow(row)) {

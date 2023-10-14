@@ -156,6 +156,8 @@ public class CsvTableEditorSwing extends CsvTableEditor {
 
     @Override
     public void beforeTableModelUpdate() {
+        if (tblEditor == null) return;
+
         mySelectedColumn = tblEditor.getSelectedColumn();
         mySelectedRow = tblEditor.getSelectedRow();
         myIsInCellEditMode = tblEditor.isEditing();
@@ -163,6 +165,8 @@ public class CsvTableEditorSwing extends CsvTableEditor {
 
     @Override
     public void afterTableModelUpdate() {
+        if (tblEditor == null) return;
+
         removeTableChangeListener();
         try {
             this.tblEditor.tableChanged(new TableModelEvent(tblEditor.getModel(), TableModelEvent.ALL_COLUMNS));
