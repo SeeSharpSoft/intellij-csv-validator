@@ -350,7 +350,7 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
         PsiFile psiFile = getPsiFile();
         Document document = getDocument();
 
-        if (psiFile == null || !psiFile.isWritable() || document == null || !document.isWritable())
+        if (psiFile == null || !psiFile.isWritable() || document == null || !document.isWritable() || document.isInBulkUpdate())
         {
             return false;
         }
