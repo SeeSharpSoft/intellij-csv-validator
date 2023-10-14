@@ -1,3 +1,11 @@
+3.2.2
+Oct 14, 2023
+
+FIX: NullPointerException: Cannot invoke "getSelectedColumn()" because "tblEditor" is null #519
+FIX: IllegalStateException: Attempt to modify PSI for non-committed Document! #516
+FIX: StringIndexOutOfBoundsException: begin 0, end -1, length 5995 #511
+FIX: ArrayIndexOutOfBoundsException: 12 >= 12 #482
+
 3.2.1
 Jul 08, 2023
 

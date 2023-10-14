@@ -28,6 +28,8 @@ import java.util.Collections;
 
 public class CsvGithubIssueSubmitter extends ErrorReportSubmitter {
 
+    private static final int FALLBACK_ISSUE_TITLE_LENGTH = 600;
+
     public static final String GIT_USER = "SeeSharpSoft";
     public static final String GIT_REPO = "intellij-csv-validator";
     public static final GHRepositoryPath GITHUB_FULL_PATH = new GHRepositoryPath(GIT_USER, GIT_REPO);
@@ -132,7 +134,7 @@ public class CsvGithubIssueSubmitter extends ErrorReportSubmitter {
     }
 
     protected String searchExistingIssues(GithubApiRequestExecutor githubExecutor, String title, ProgressIndicator progressIndicator) throws IOException {
-        String needle = title.replaceAll("\\s*\\[.*?]\\s*", "");
+        String needle = title.replaceAll("\\s*(\\[.*?]|\\(.*?\\)|\\{.*?})\\s*", "");
         if (needle.length() > 255) {
             needle = needle.substring(0, needle.substring(0, 255).lastIndexOf(" "));
         }
@@ -158,9 +160,18 @@ public class CsvGithubIssueSubmitter extends ErrorReportSubmitter {
         return null;
     }
 
+    protected int getIssueTitleCutIndex(String throwableTextArg) {
+        String throwableText = throwableTextArg.replaceAll("\r", "\n");
+        int index = throwableText.indexOf("\n");
+        if (index == -1) {
+            index = throwableText.indexOf(" ", FALLBACK_ISSUE_TITLE_LENGTH);
+        }
+        return index == -1 ? Math.min(throwableText.length(), FALLBACK_ISSUE_TITLE_LENGTH) : index;
+    }
+
     protected String getIssueTitle(IdeaLoggingEvent event) {
         String throwableText = event.getThrowableText();
-        int index = Math.min(throwableText.indexOf("\r"), throwableText.indexOf("\n"));
+        int index = getIssueTitleCutIndex(throwableText);
         return "[Automated Report] " + event.getThrowableText().substring(0, index);
     }
 
