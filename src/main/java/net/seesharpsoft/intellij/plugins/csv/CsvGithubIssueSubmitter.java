@@ -38,15 +38,14 @@ public class CsvGithubIssueSubmitter extends ErrorReportSubmitter {
     public static final String GIT_REPO = "intellij-csv-validator";
     public static final GHRepositoryPath GITHUB_FULL_PATH = new GHRepositoryPath(GIT_USER, GIT_REPO);
 
+    private static ScheduledFuture recentlySentReport = null;
+    private static ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+
     private static class CsvGithubSubmitException extends RuntimeException {
         CsvGithubSubmitException(Throwable exception) {
             super(exception);
         }
     }
-
-    private static ScheduledFuture recentlySentReport = null;
-
-    private static ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();;
 
     @NotNull
     @Override
