@@ -25,6 +25,10 @@ import org.jetbrains.plugins.github.authentication.accounts.GithubAccount;
 import java.awt.*;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 public class CsvGithubIssueSubmitter extends ErrorReportSubmitter {
 
@@ -33,6 +37,9 @@ public class CsvGithubIssueSubmitter extends ErrorReportSubmitter {
     public static final String GIT_USER = "SeeSharpSoft";
     public static final String GIT_REPO = "intellij-csv-validator";
     public static final GHRepositoryPath GITHUB_FULL_PATH = new GHRepositoryPath(GIT_USER, GIT_REPO);
+
+    private static ScheduledFuture recentlySentReport = null;
+    private static ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
 
     private static class CsvGithubSubmitException extends RuntimeException {
         CsvGithubSubmitException(Throwable exception) {
@@ -47,7 +54,9 @@ public class CsvGithubIssueSubmitter extends ErrorReportSubmitter {
     }
 
     @Override
-    public boolean submit(IdeaLoggingEvent @NotNull [] events, @Nullable String additionalInfo, @NotNull Component parentComponent, @NotNull Consumer<? super SubmittedReportInfo> consumer) {
+    public synchronized boolean submit(IdeaLoggingEvent @NotNull [] events, @Nullable String additionalInfo, @NotNull Component parentComponent, @NotNull Consumer<? super SubmittedReportInfo> consumer) {
+        if (reportWasRecentlySent()) return true;
+
         final DataContext dataContext = DataManager.getInstance().getDataContext(parentComponent);
         final Project project = CommonDataKeys.PROJECT.getData(dataContext);
 
@@ -56,7 +65,17 @@ public class CsvGithubIssueSubmitter extends ErrorReportSubmitter {
                 return false;
             }
         }
+
+        reportWasSent();
         return true;
+    }
+
+    protected void reportWasSent() {
+        recentlySentReport = executorService.schedule(() -> { recentlySentReport = null; }, 15, TimeUnit.MINUTES);
+    }
+
+    protected boolean reportWasRecentlySent() {
+        return recentlySentReport != null;
     }
 
     protected boolean submit(IdeaLoggingEvent event, String additionalInfo, Project project, Consumer<? super SubmittedReportInfo> consumer) {
@@ -172,7 +191,8 @@ public class CsvGithubIssueSubmitter extends ErrorReportSubmitter {
     protected String getIssueTitle(IdeaLoggingEvent event) {
         String throwableText = event.getThrowableText();
         int index = getIssueTitleCutIndex(throwableText);
-        return "[Automated Report] " + event.getThrowableText().substring(0, index);
+        String issueTitle = throwableText.substring(0, index).replaceAll("@[0-9a-fA-F]+", "");
+        return "[Automated Report] " + issueTitle;
     }
 
     protected String getIssueDetails(IdeaLoggingEvent event, String additionalInfo) {

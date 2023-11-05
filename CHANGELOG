@@ -1,3 +1,9 @@
+3.2.3
+Nov 05, 2023
+
+NEW: Prevent github issue submitter spam
+FIX: Improve issue duplicate finder
+
 3.2.2
 Oct 14, 2023
 
