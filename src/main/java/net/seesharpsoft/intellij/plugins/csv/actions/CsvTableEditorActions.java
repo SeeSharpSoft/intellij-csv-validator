@@ -1,5 +1,6 @@
 package net.seesharpsoft.intellij.plugins.csv.actions;
 
+import com.intellij.openapi.actionSystem.ActionUpdateThreadAware;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
@@ -8,7 +9,7 @@ import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableActions;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditor;
 import org.jetbrains.annotations.NotNull;
 
-public abstract class CsvTableEditorActions extends AnAction {
+public abstract class CsvTableEditorActions extends AnAction implements ActionUpdateThreadBGT {
 
     public static class AddRowBefore extends CsvTableEditorActions {
         @Override

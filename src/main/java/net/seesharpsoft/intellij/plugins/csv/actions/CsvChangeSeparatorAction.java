@@ -14,7 +14,7 @@ import net.seesharpsoft.intellij.plugins.csv.CsvValueSeparator;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvFileAttributes;
 import org.jetbrains.annotations.NotNull;
 
-public class CsvChangeSeparatorAction extends ToggleAction {
+public class CsvChangeSeparatorAction extends ToggleAction implements ActionUpdateThreadBGT {
     private final CsvValueSeparator mySeparator;
 
     CsvChangeSeparatorAction(CsvValueSeparator separator) {

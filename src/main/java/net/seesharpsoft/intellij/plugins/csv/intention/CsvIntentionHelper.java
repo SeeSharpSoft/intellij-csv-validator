@@ -96,7 +96,9 @@ public final class CsvIntentionHelper {
     }
 
     public static void unquoteValue(@NotNull Project project, @NotNull final PsiElement field) {
-        unquoteValue(Objects.requireNonNull(PsiDocumentManager.getInstance(project).getDocument(field.getContainingFile())), field);
+        Document document = PsiDocumentManager.getInstance(project).getDocument(field.getContainingFile());
+        if (document == null) return;
+        unquoteValue(document, field);
     }
 
     public static void unquoteValue(@NotNull Document document, @NotNull final PsiElement field) {

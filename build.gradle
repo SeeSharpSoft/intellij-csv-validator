@@ -1,11 +1,11 @@
 plugins {
     // https://github.com/JetBrains/gradle-intellij-plugin
-    id 'org.jetbrains.intellij' version '1.13.3'
+    id 'org.jetbrains.intellij' version '1.17.2'
     id 'jacoco'
     id 'com.github.kt3k.coveralls' version '2.8.4'
     id 'com.github.ManifestClasspath' version '0.1.0-RELEASE'
     // https://github.com/JetBrains/gradle-grammar-kit-plugin
-    id 'org.jetbrains.grammarkit' version '2021.2.2'
+    id 'org.jetbrains.grammarkit' version '2022.3.2.2'
 }
 
 jacoco {
@@ -38,7 +38,7 @@ dependencies {
 sourceSets {
     main {
         java {
-            srcDirs = ['src/main/java', 'gen']
+            srcDirs = ['src/main/java', 'src/gen/java']
         }
         resources {
             srcDirs = ['src/main/resources']
@@ -67,7 +67,7 @@ idea {
 }
 
 var final EAP_VERSION = 'LATEST-EAP-SNAPSHOT'
-var final EAP_BUILD = '233'
+var final EAP_BUILD = '241'
 
 var final DEFAULT_VERSION = '2022.2.1' //'LATEST-EAP-SNAPSHOT' //
 
@@ -75,7 +75,7 @@ var final DEFAULT_VERSION = '2022.2.1' //'LATEST-EAP-SNAPSHOT' //
 var idea_version = System.getenv().getOrDefault('IDEA_VERSION', DEFAULT_VERSION)
 var build_version = idea_version == EAP_VERSION ? EAP_BUILD : idea_version.substring(2, 4) + idea_version.charAt(5) // extract e.g. '221' from '2022.1.1'
 
-version '3.2.3-' + build_version
+version '3.3.0-' + build_version
 
 apply plugin: 'org.jetbrains.intellij'
 intellij {
@@ -96,8 +96,12 @@ patchPluginXml {
     sinceBuild = build_version
 
     changeNotes = """<pre style="font-family: sans-serif">
-NEW: Prevent github issue submitter spam
-FIX: Improve issue duplicate finder
+CHORE: Update gradle build
+FIX: PluginException: xxx ms to call on EDT CsvChangeSeparatorActionGroup#update@EditorPopup #401
+FIX: AlreadyDisposedException: Already disposed #639
+FIX: Exceptions occurred on invoking the intention 'Unquote' on a copy of the file #670 #816
+FIX: StringIndexOutOfBoundsException: begin 0, end -1, length 5993 #801
+FIX: Unhandled exception in [CoroutineName(PsiAwareFileEditorManagerImpl)] #666
 </pre>"""
 }
 publishPlugin {
@@ -122,24 +126,25 @@ grammarKit {
     // version of IntelliJ patched JFlex - https://bintray.com/jetbrains/intellij-third-party-dependencies/jflex
     jflexRelease = '1.7.0-1'
     // tag or short commit hash of Grammar-Kit to use - https://github.com/JetBrains/Grammar-Kit
-    grammarKitRelease = System.getenv().getOrDefault('GRAMMAR_KIT_VERSION', '2021.1.2')
+    // USE DEFAULT
+    // grammarKitRelease = System.getenv().getOrDefault('GRAMMAR_KIT_VERSION', '2022.3.2')
 }
 
 tasks.named("generateParser").configure {
-    source = 'src/main/java/net/seesharpsoft/intellij/plugins/csv/Csv.bnf'
-    targetRoot = 'gen'
-    pathToParser = '/net/seesharpsoft/intellij/plugins/csv/parser/CsvParser.java'
-    pathToPsiRoot = '/net/seesharpsoft/intellij/plugins/csv/psi'
+    sourceFile = file('src/main/java/net/seesharpsoft/intellij/plugins/csv/Csv.bnf')
+    targetRootOutputDir = file('src/gen/java')
+    pathToParser = 'net/seesharpsoft/intellij/plugins/csv/parser/CsvParser.java'
+    pathToPsiRoot = 'net/seesharpsoft/intellij/plugins/csv/psi'
     purgeOldFiles = true
 }
 
 tasks.named("generateLexer").configure {
     dependsOn generateParser
 
-    source = 'src/main/java/net/seesharpsoft/intellij/plugins/csv/CsvLexer.flex'
-    targetDir = './gen/net/seesharpsoft/intellij/plugins/csv/'
+    sourceFile = file('src/main/java/net/seesharpsoft/intellij/plugins/csv/CsvLexer.flex')
+    targetOutputDir = file('src/gen/java/net/seesharpsoft/intellij/plugins/csv')
     targetClass = 'CsvLexer'
-    purgeOldFiles = true
+    purgeOldFiles = false
 }
 
 compileJava {

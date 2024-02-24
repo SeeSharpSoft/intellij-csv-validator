@@ -82,7 +82,8 @@ public class CsvFileEditorProvider implements AsyncFileEditorProvider, DumbAware
         return new Builder() {
             @Override
             public FileEditor build() {
-                TextEditor textEditor = (TextEditor) TextEditorProvider.getInstance().createEditor(project, virtualFile);
+                TextEditorProvider provider = TextEditorProvider.getInstance();
+                TextEditor textEditor = (TextEditor) provider.createEditor(project, virtualFile);
                 applySettings(textEditor.getEditor().getSettings(), CsvEditorSettings.getInstance());
                 return textEditor;
             }

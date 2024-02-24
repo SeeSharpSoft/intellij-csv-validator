@@ -155,7 +155,11 @@ public class CsvGithubIssueSubmitter extends ErrorReportSubmitter {
     protected String searchExistingIssues(GithubApiRequestExecutor githubExecutor, String title, ProgressIndicator progressIndicator) throws IOException {
         String needle = title.replaceAll("\\s*(\\[.*?]|\\(.*?\\)|\\{.*?})\\s*", "");
         if (needle.length() > 255) {
-            needle = needle.substring(0, needle.substring(0, 255).lastIndexOf(" "));
+            int endIndex = needle.substring(0, 255).lastIndexOf(" ");
+            if (endIndex == -1) {
+                endIndex = 255;
+            }
+            needle = needle.substring(0, endIndex);
         }
         GithubApiRequest<GithubResponsePage<GithubSearchedIssue>> existingIssueRequest =
                 GithubApiRequests.Search.Issues.get(
