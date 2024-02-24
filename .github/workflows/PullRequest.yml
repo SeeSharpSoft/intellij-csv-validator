@@ -18,10 +18,10 @@ jobs:
         include:
           - ideaVersion: 2022.2.1
             ideaType: PS
-            gkVersion: 2021.1.2
           - ideaVersion: 2022.2.3
             ideaType: PY
-            gkVersion: 2021.1.2
+          - ideaVersion: 2023.3.1
+            ideaType: IC
 
     steps:
     - uses: actions/checkout@v2
@@ -36,6 +36,5 @@ jobs:
       env:
         IDEA_VERSION: ${{ matrix.ideaVersion }}
         IDEA_TYPE: ${{ matrix.ideaType }}
-        GRAMMAR_KIT_VERSION: ${{ matrix.gkVersion }}
         IDEA_SOURCES: false
       run: xvfb-run ./gradlew test

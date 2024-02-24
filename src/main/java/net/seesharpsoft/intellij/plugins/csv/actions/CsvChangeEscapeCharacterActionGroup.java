@@ -1,6 +1,5 @@
 package net.seesharpsoft.intellij.plugins.csv.actions;
 
-import com.intellij.lang.Language;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.psi.PsiFile;
 import net.seesharpsoft.intellij.plugins.csv.CsvEscapeCharacter;
@@ -9,7 +8,7 @@ import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class CsvChangeEscapeCharacterActionGroup extends ActionGroup implements ActionUpdateThreadAware {
+public class CsvChangeEscapeCharacterActionGroup extends CsvActionGroup {
 
     private static final AnAction[] CSV_ESCAPE_CHARACTER_CHANGE_ACTIONS;
 

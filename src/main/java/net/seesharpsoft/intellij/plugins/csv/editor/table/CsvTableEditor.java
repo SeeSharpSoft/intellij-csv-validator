@@ -9,6 +9,7 @@ import com.intellij.openapi.editor.colors.EditorFontType;
 import com.intellij.openapi.fileEditor.*;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
+import com.intellij.openapi.util.TraceableDisposable;
 import com.intellij.openapi.util.UserDataHolder;
 import com.intellij.openapi.util.UserDataHolderBase;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -146,7 +147,8 @@ public abstract class CsvTableEditor implements FileEditor, PsiFileHolder {
     }
 
     public boolean isEditorSelected() {
-        return ApplicationManager.getApplication().isUnitTestMode() || FileEditorManager.getInstance(this.project).getSelectedEditor(this.getFile()) == this;
+        return !this.isDisposed() &&
+                (ApplicationManager.getApplication().isUnitTestMode() || FileEditorManager.getInstance(this.project).getSelectedEditor(this.getFile()) == this);
     }
 
     @Override

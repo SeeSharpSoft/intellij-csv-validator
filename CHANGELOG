@@ -1,3 +1,13 @@
+3.3.0
+Feb 24, 2024
+
+CHORE: Update gradle build
+FIX: PluginException: xxx ms to call on EDT CsvChangeSeparatorActionGroup#update@EditorPopup #401
+FIX: AlreadyDisposedException: Already disposed #639
+FIX: Exceptions occurred on invoking the intention 'Unquote' on a copy of the file #670 #816
+FIX: StringIndexOutOfBoundsException: begin 0, end -1, length 5993 #801
+FIX: Unhandled exception in [CoroutineName(PsiAwareFileEditorManagerImpl)] #666
+
 3.2.3
 Nov 05, 2023
 

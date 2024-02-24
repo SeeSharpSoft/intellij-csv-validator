@@ -8,7 +8,7 @@ import net.seesharpsoft.intellij.plugins.csv.components.CsvFileAttributes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class CsvChangeSeparatorActionGroup extends ActionGroup implements ActionUpdateThreadAware {
+public class CsvChangeSeparatorActionGroup extends CsvActionGroup {
 
     private static final AnAction[] CSV_SEPARATOR_CHANGE_ACTIONS;
 
