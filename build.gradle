@@ -59,17 +59,17 @@ idea {
 var final EAP_VERSION = 'LATEST-EAP-SNAPSHOT'
 var final EAP_BUILD = '242'
 
-var final DEFAULT_VERSION = '2024.1.5' //'LATEST-EAP-SNAPSHOT' //
+var final LATEST_SUPPORTED_VERSION = '2024.1.5' //EAP_VERSION
 
 // IDE version - https://www.jetbrains.com/intellij-repository/releases
-var idea_version = System.getenv().getOrDefault('IDEA_VERSION', DEFAULT_VERSION)
+var idea_version = System.getenv().getOrDefault('IDEA_VERSION', LATEST_SUPPORTED_VERSION)
 var build_version = idea_version == EAP_VERSION ? EAP_BUILD : idea_version.substring(2, 4) + idea_version.charAt(5) // extract e.g. '221' from '2022.1.1'
 
 version '3.4.0-' + build_version
 
 apply plugin: 'org.jetbrains.intellij'
 intellij {
-    version = DEFAULT_VERSION
+    version = idea_version > LATEST_SUPPORTED_VERSION || idea_version == EAP_VERSION ? LATEST_SUPPORTED_VERSION : idea_version
     type = System.getenv().getOrDefault('IDEA_TYPE', 'IC')
     pluginName = 'CSVEditor'
     updateSinceUntilBuild = true
