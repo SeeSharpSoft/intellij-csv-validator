@@ -8,7 +8,7 @@ import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvFileAttributes;
 import org.jetbrains.annotations.NotNull;
 
-public class CsvDefaultEscapeCharacterAction extends ToggleAction implements ActionUpdateThreadBGT {
+public class CsvDefaultEscapeCharacterAction extends ToggleAction implements ActionUpdateThreadAware {
     CsvDefaultEscapeCharacterAction() {
         super("Project Default");
     }
@@ -35,5 +35,10 @@ public class CsvDefaultEscapeCharacterAction extends ToggleAction implements Act
         if (fileEditor != null) {
             fileEditor.selectNotify();
         }
+    }
+
+    @Override
+    public @NotNull ActionUpdateThread getActionUpdateThread() {
+        return ActionUpdateThread.BGT;
     }
 }

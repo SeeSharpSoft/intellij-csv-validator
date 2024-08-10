@@ -8,7 +8,7 @@ import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvFileAttributes;
 import org.jetbrains.annotations.NotNull;
 
-public class CsvDefaultSeparatorAction extends ToggleAction implements ActionUpdateThreadBGT {
+public class CsvDefaultSeparatorAction extends ToggleAction implements ActionUpdateThreadAware {
     CsvDefaultSeparatorAction() {
         super("Project Default");
     }
@@ -35,5 +35,10 @@ public class CsvDefaultSeparatorAction extends ToggleAction implements ActionUpd
         if (fileEditor != null) {
             fileEditor.selectNotify();
         }
+    }
+
+    @Override
+    public @NotNull ActionUpdateThread getActionUpdateThread() {
+        return ActionUpdateThread.BGT;
     }
 }

@@ -154,10 +154,10 @@ public class CsvGithubIssueSubmitter extends ErrorReportSubmitter {
 
     protected String searchExistingIssues(GithubApiRequestExecutor githubExecutor, String title, ProgressIndicator progressIndicator) throws IOException {
         String needle = title.replaceAll("\\s*(\\[.*?]|\\(.*?\\)|\\{.*?})\\s*", "");
-        if (needle.length() > 255) {
-            int endIndex = needle.substring(0, 255).lastIndexOf(" ");
+        if (needle.length() > 250) {
+            int endIndex = needle.substring(0, 250).lastIndexOf(" ");
             if (endIndex == -1) {
-                endIndex = 255;
+                endIndex = 250;
             }
             needle = needle.substring(0, endIndex);
         }

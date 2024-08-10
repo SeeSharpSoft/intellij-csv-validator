@@ -8,16 +8,6 @@ plugins {
     id 'org.jetbrains.grammarkit' version '2022.3.2.2'
 }
 
-jacoco {
-    toolVersion = "0.8.8"
-}
-
-jacocoTestReport {
-    reports {
-        xml.enabled true
-    }
-}
-
 group 'net.seesharpsoft.intellij.plugins'
 
 apply plugin: 'java'
@@ -67,19 +57,19 @@ idea {
 }
 
 var final EAP_VERSION = 'LATEST-EAP-SNAPSHOT'
-var final EAP_BUILD = '241'
+var final EAP_BUILD = '242'
 
-var final DEFAULT_VERSION = '2022.2.1' //'LATEST-EAP-SNAPSHOT' //
+var final DEFAULT_VERSION = '2024.1.5' //'LATEST-EAP-SNAPSHOT' //
 
 // IDE version - https://www.jetbrains.com/intellij-repository/releases
 var idea_version = System.getenv().getOrDefault('IDEA_VERSION', DEFAULT_VERSION)
 var build_version = idea_version == EAP_VERSION ? EAP_BUILD : idea_version.substring(2, 4) + idea_version.charAt(5) // extract e.g. '221' from '2022.1.1'
 
-version '3.3.0-' + build_version
+version '3.4.0-' + build_version
 
 apply plugin: 'org.jetbrains.intellij'
 intellij {
-    version = idea_version
+    version = DEFAULT_VERSION
     type = System.getenv().getOrDefault('IDEA_TYPE', 'IC')
     pluginName = 'CSVEditor'
     updateSinceUntilBuild = true
@@ -97,11 +87,8 @@ patchPluginXml {
 
     changeNotes = """<pre style="font-family: sans-serif">
 CHORE: Update gradle build
-FIX: PluginException: xxx ms to call on EDT CsvChangeSeparatorActionGroup#update@EditorPopup #401
-FIX: AlreadyDisposedException: Already disposed #639
-FIX: Exceptions occurred on invoking the intention 'Unquote' on a copy of the file #670 #816
-FIX: StringIndexOutOfBoundsException: begin 0, end -1, length 5993 #801
-FIX: Unhandled exception in [CoroutineName(PsiAwareFileEditorManagerImpl)] #666
+FIX: ActionUpdateThread.OLD_EDT is deprecated and going to be removed soon
+FIX: Cannot create class CsvEditorSettingsProvider
 </pre>"""
 }
 publishPlugin {

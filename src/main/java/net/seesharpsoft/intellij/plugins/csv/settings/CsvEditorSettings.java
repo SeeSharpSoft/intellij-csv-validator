@@ -85,10 +85,20 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
         public ValueColoring VALUE_COLORING = ValueColoring.RAINBOW;
         public boolean AUTO_DETECT_VALUE_SEPARATOR = true;
 
-        public OptionSet() {
+        private boolean isInitialized = false;
+
+        public OptionSet() {}
+
+        public void init() {
+            if (this.isInitialized) {
+                return;
+            }
+
             EditorSettingsExternalizable editorSettingsExternalizable = EditorSettingsExternalizable.getInstance();
             CARET_ROW_SHOWN = editorSettingsExternalizable == null ? true : editorSettingsExternalizable.isCaretRowShown();
             USE_SOFT_WRAP = editorSettingsExternalizable == null ? false : editorSettingsExternalizable.isUseSoftWraps();
+
+            this.isInitialized = true;
         }
     }
 
@@ -116,6 +126,7 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
 
     @Override
     public OptionSet getState() {
+        this.myOptions.init();
         return this.myOptions;
     }
 
