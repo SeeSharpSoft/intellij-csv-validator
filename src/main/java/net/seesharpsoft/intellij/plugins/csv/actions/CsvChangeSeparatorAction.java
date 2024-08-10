@@ -1,9 +1,6 @@
 package net.seesharpsoft.intellij.plugins.csv.actions;
 
-import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.CommonDataKeys;
-import com.intellij.openapi.actionSystem.PlatformDataKeys;
-import com.intellij.openapi.actionSystem.ToggleAction;
+import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.psi.PsiFile;
@@ -14,7 +11,7 @@ import net.seesharpsoft.intellij.plugins.csv.CsvValueSeparator;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvFileAttributes;
 import org.jetbrains.annotations.NotNull;
 
-public class CsvChangeSeparatorAction extends ToggleAction implements ActionUpdateThreadBGT {
+public class CsvChangeSeparatorAction extends ToggleAction implements ActionUpdateThreadAware {
     private final CsvValueSeparator mySeparator;
 
     CsvChangeSeparatorAction(CsvValueSeparator separator) {
@@ -49,5 +46,10 @@ public class CsvChangeSeparatorAction extends ToggleAction implements ActionUpda
         if (fileEditor != null) {
             fileEditor.selectNotify();
         }
+    }
+
+    @Override
+    public @NotNull ActionUpdateThread getActionUpdateThread() {
+        return ActionUpdateThread.BGT;
     }
 }

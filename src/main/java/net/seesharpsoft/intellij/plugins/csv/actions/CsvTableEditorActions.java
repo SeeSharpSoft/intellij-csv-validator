@@ -1,15 +1,12 @@
 package net.seesharpsoft.intellij.plugins.csv.actions;
 
-import com.intellij.openapi.actionSystem.ActionUpdateThreadAware;
-import com.intellij.openapi.actionSystem.AnAction;
-import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.PlatformDataKeys;
+import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.fileEditor.FileEditor;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableActions;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditor;
 import org.jetbrains.annotations.NotNull;
 
-public abstract class CsvTableEditorActions extends AnAction implements ActionUpdateThreadBGT {
+public abstract class CsvTableEditorActions extends AnAction implements ActionUpdateThreadAware {
 
     public static class AddRowBefore extends CsvTableEditorActions {
         @Override
@@ -78,5 +75,10 @@ public abstract class CsvTableEditorActions extends AnAction implements ActionUp
     public static CsvTableActions getTableActions(@NotNull AnActionEvent anActionEvent) {
         CsvTableEditor tableEditor = getTableEditor(anActionEvent);
         return tableEditor == null ? CsvTableActions.DUMMY : tableEditor.getActions();
+    }
+
+    @Override
+    public @NotNull ActionUpdateThread getActionUpdateThread() {
+        return ActionUpdateThread.BGT;
     }
 }

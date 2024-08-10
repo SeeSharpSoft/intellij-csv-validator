@@ -1,3 +1,10 @@
+3.4.0
+Aug 10, 2024
+
+CHORE: Update gradle build
+FIX: ActionUpdateThread.OLD_EDT is deprecated and going to be removed soon
+FIX: Cannot create class CsvEditorSettingsProvider
+
 3.3.0
 Feb 24, 2024
 

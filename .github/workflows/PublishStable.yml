@@ -21,6 +21,7 @@ jobs:
           - ideaVersion: 2023.1.1
           - ideaVersion: 2023.2.1
           - ideaVersion: 2023.3.1
+          - ideaVersion: 2024.1.1
           - ideaVersion: LATEST-EAP-SNAPSHOT
 
     steps:
