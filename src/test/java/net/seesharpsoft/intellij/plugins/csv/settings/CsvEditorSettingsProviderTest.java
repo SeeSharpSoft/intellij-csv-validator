@@ -130,6 +130,7 @@ public class CsvEditorSettingsProviderTest extends CsvBasePlatformTestCase {
         editorSettingsPanel.apply();
 
         CsvEditorSettings.OptionSet freshOptionSet = new CsvEditorSettings.OptionSet();
+        freshOptionSet.init();
 
         assertEquals(false, editorSettingsPanel.isModified());
         assertEquals(freshOptionSet.CARET_ROW_SHOWN, csvEditorSettings.isCaretRowShown());
