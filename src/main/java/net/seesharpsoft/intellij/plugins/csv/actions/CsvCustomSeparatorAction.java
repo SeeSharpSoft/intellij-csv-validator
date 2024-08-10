@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 
-public class CsvCustomSeparatorAction extends ToggleAction implements ActionUpdateThreadBGT {
+public class CsvCustomSeparatorAction extends ToggleAction implements ActionUpdateThreadAware {
     CsvCustomSeparatorAction() {
         super("Custom");
     }
@@ -53,5 +53,10 @@ public class CsvCustomSeparatorAction extends ToggleAction implements ActionUpda
         if (fileEditor != null) {
             fileEditor.selectNotify();
         }
+    }
+
+    @Override
+    public @NotNull ActionUpdateThread getActionUpdateThread() {
+        return ActionUpdateThread.BGT;
     }
 }

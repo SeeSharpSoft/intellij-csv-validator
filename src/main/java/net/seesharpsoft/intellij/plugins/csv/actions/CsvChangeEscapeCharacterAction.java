@@ -1,9 +1,6 @@
 package net.seesharpsoft.intellij.plugins.csv.actions;
 
-import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.CommonDataKeys;
-import com.intellij.openapi.actionSystem.PlatformDataKeys;
-import com.intellij.openapi.actionSystem.ToggleAction;
+import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.psi.PsiFile;
 import com.intellij.util.FileContentUtilCore;
@@ -12,7 +9,7 @@ import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvFileAttributes;
 import org.jetbrains.annotations.NotNull;
 
-public class CsvChangeEscapeCharacterAction extends ToggleAction implements ActionUpdateThreadBGT {
+public class CsvChangeEscapeCharacterAction extends ToggleAction implements ActionUpdateThreadAware {
     private final CsvEscapeCharacter myEscapeCharacter;
 
     CsvChangeEscapeCharacterAction(CsvEscapeCharacter escapeCharacter) {
@@ -42,5 +39,10 @@ public class CsvChangeEscapeCharacterAction extends ToggleAction implements Acti
         if (fileEditor != null) {
             fileEditor.selectNotify();
         }
+    }
+
+    @Override
+    public @NotNull ActionUpdateThread getActionUpdateThread() {
+        return ActionUpdateThread.BGT;
     }
 }
