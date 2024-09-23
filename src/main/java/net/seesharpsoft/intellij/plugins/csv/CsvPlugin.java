@@ -6,7 +6,6 @@ import com.intellij.ide.plugins.IdeaPluginDescriptor;
 import com.intellij.ide.plugins.PluginManagerCore;
 import com.intellij.notification.*;
 import com.intellij.openapi.extensions.PluginId;
-import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
@@ -17,7 +16,7 @@ import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettingsProvider;
 import org.jetbrains.annotations.NotNull;
 
-public class CsvPlugin implements StartupActivity, StartupActivity.DumbAware, StartupActivity.Background {
+public class CsvPlugin implements StartupActivity, StartupActivity.DumbAware {
 
     protected static IdeaPluginDescriptor getPluginDescriptor() {
         return PluginManagerCore.getPlugin(PluginId.getId("net.seesharpsoft.intellij.plugins.csv"));
@@ -35,7 +34,7 @@ public class CsvPlugin implements StartupActivity, StartupActivity.DumbAware, St
         if (project.isDisposed()) return;
 
         if (link.startsWith("#")) {
-            ((ShowSettingsUtilImpl) ShowSettingsUtil.getInstance()).showSettingsDialog(project, link.substring(1), null);
+            ShowSettingsUtilImpl.showSettingsDialog(project, link.substring(1), null);
         } else {
             BrowserUtil.browse(link, project);
         }
@@ -61,7 +60,7 @@ public class CsvPlugin implements StartupActivity, StartupActivity.DumbAware, St
                 }
                 // finished
                 progressIndicator.setFraction(1.0);
-                progressIndicator.setText("finished");
+                progressIndicator.setText("Finished");
             }
         });
     }
