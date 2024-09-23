@@ -194,10 +194,9 @@ public final class CsvHelper {
     public static VirtualFile getVirtualFile(PsiFile psiFile) {
         if (psiFile == null) return null;
         PsiFile original = psiFile.getOriginalFile();
-        if (original != null && original != psiFile) return getVirtualFile(psiFile.getOriginalFile());
+        if (original != psiFile) return getVirtualFile(psiFile.getOriginalFile());
         if (psiFile.getVirtualFile() != null) return psiFile.getVirtualFile();
-        if (psiFile.getViewProvider() != null) return psiFile.getViewProvider().getVirtualFile();
-        return null;
+        return psiFile.getViewProvider().getVirtualFile();
     }
 
     public static Project getProject(PsiFile psiFile) {
@@ -240,8 +239,11 @@ public final class CsvHelper {
         return CsvFileAttributes.getInstance(getProject(psiFile)).hasEscapeCharacterAttribute(getProject(psiFile), getVirtualFile(psiFile));
     }
 
-    public static CsvColumnInfoMap<PsiElement> createColumnInfoMap(CsvFile csvFile) {
-        CsvEscapeCharacter escapeCharacter = getEscapeCharacter(csvFile);
+    public static CsvColumnInfoMap<PsiElement> createColumnInfoMap(PsiFile csvFile) {
+        return createColumnInfoMap(csvFile, CsvHelper::getMaxTextLineLength);
+    }
+
+    public static CsvColumnInfoMap<PsiElement> createColumnInfoMap(PsiFile csvFile, Function<CsvField, Integer> fnMaxTextLength) {
         Map<Integer, CsvColumnInfo<PsiElement>> columnInfoMap = new HashMap<>();
         int row = 0;
         boolean hasComments = false;
@@ -256,9 +258,9 @@ public final class CsvHelper {
             CsvRecord record = (CsvRecord) child;
             int column = 0;
             for (CsvField field : record.getFieldList()) {
-                Integer length = CsvHelper.getMaxTextLineLength(unquoteCsvValue(field.getText(), escapeCharacter));
+                int length = fnMaxTextLength.apply(field);
                 if (!columnInfoMap.containsKey(column)) {
-                    columnInfoMap.put(column, new CsvColumnInfo(column, length, row));
+                    columnInfoMap.put(column, new CsvColumnInfo<>(column, length, row));
                 } else if (columnInfoMap.get(column).getMaxLength() < length) {
                     columnInfoMap.get(column).setMaxLength(length, row);
                 }
@@ -267,7 +269,7 @@ public final class CsvHelper {
             }
             ++row;
         }
-        return new CsvColumnInfoMap(columnInfoMap, PsiTreeUtil.hasErrorElements(csvFile), hasComments);
+        return new CsvColumnInfoMap<>(columnInfoMap, PsiTreeUtil.hasErrorElements(csvFile), hasComments);
     }
 
     public static String getFieldValue(PsiElement field, CsvEscapeCharacter escapeCharacter) {
@@ -285,6 +287,10 @@ public final class CsvHelper {
                 .orElse("");
     }
 
+    public static String unquoteCsvValue(String content) {
+        return unquoteCsvValue(content, null);
+    }
+
     public static String unquoteCsvValue(String content, CsvEscapeCharacter escapeCharacter) {
         if (content == null) {
             return "";
@@ -293,7 +299,9 @@ public final class CsvHelper {
         String trimmedContent = content.trim();
         if (trimmedContent.length() > 1 && trimmedContent.startsWith("\"") && trimmedContent.endsWith("\"")) {
             result = trimmedContent.substring(1, trimmedContent.length() - 1);
-            result = result.replaceAll("(?:" + escapeCharacter.getRegexPattern() + ")\"", "\"");
+            if (escapeCharacter != null) {
+                result = result.replaceAll("(?:" + escapeCharacter.getRegexPattern() + ")\"", "\"");
+            }
         }
         return result;
     }
@@ -336,8 +344,8 @@ public final class CsvHelper {
         return maxLength;
     }
 
-    public static int getMaxTextLineLength(String text) {
-        return getMaxTextLineLength(text, input -> input == null ? 0 : input.length());
+    public static int getMaxTextLineLength(CsvField field) {
+        return getMaxTextLineLength(field.getText().strip(), input -> input == null ? 0 : input.length());
     }
 
     // source: https://www.baeldung.com/java-string-formatting-named-placeholders
