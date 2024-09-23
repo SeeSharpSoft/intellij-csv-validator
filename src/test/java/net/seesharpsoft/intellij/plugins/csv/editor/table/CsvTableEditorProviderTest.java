@@ -9,6 +9,7 @@ import net.seesharpsoft.intellij.plugins.csv.CsvBasePlatformTestCase;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import org.jdom.Element;
 
+import java.util.List;
 import java.util.Objects;
 
 public class CsvTableEditorProviderTest extends CsvBasePlatformTestCase {
@@ -26,28 +27,28 @@ public class CsvTableEditorProviderTest extends CsvBasePlatformTestCase {
     }
 
     public void testCsvTableEditorProviderIsAvailableAndHasCorrectNameAndPolicy() {
-        FileEditorProvider[] fileEditorProviders = FileEditorProviderManager.getInstance().getProviders(getProject(), myFixture.getFile().getVirtualFile());
-        assertEquals(2, fileEditorProviders.length);
-        assertInstanceOf(fileEditorProviders[0], CsvTableEditorProvider.class);
+        List<FileEditorProvider> fileEditorProviders = FileEditorProviderManager.getInstance().getProviderList(myFixture.getProject(), myFixture.getFile().getVirtualFile());
+        assertEquals(2, fileEditorProviders.size());
+        assertInstanceOf(fileEditorProviders.get(1), CsvTableEditorProvider.class);
 
-        FileEditorProvider fileEditorProvider = fileEditorProviders[0];
+        FileEditorProvider fileEditorProvider = fileEditorProviders.get(1);
         assertEquals(CsvTableEditorProvider.EDITOR_TYPE_ID, fileEditorProvider.getEditorTypeId());
-        assertEquals(FileEditorPolicy.HIDE_DEFAULT_EDITOR, fileEditorProvider.getPolicy());
-        assertEquals(true, fileEditorProvider.accept(getProject(), myFixture.getFile().getVirtualFile()));
+        assertEquals(FileEditorPolicy.PLACE_AFTER_DEFAULT_EDITOR, fileEditorProvider.getPolicy());
+        assertTrue(fileEditorProvider.accept(getProject(), myFixture.getFile().getVirtualFile()));
 
         CsvEditorSettings csvEditorSettings = CsvEditorSettings.getInstance();
         csvEditorSettings.setEditorPrio(CsvEditorSettings.EditorPrio.TEXT_ONLY);
         assertEquals(FileEditorPolicy.PLACE_AFTER_DEFAULT_EDITOR, fileEditorProvider.getPolicy());
-        assertEquals(false, fileEditorProvider.accept(getProject(), myFixture.getFile().getVirtualFile()));
+        assertFalse(fileEditorProvider.accept(getProject(), myFixture.getFile().getVirtualFile()));
 
         csvEditorSettings.setEditorPrio(CsvEditorSettings.EditorPrio.TEXT_FIRST);
         assertEquals(FileEditorPolicy.PLACE_AFTER_DEFAULT_EDITOR, fileEditorProvider.getPolicy());
-        assertEquals(true, fileEditorProvider.accept(getProject(), myFixture.getFile().getVirtualFile()));
+        assertTrue(fileEditorProvider.accept(getProject(), myFixture.getFile().getVirtualFile()));
     }
 
     public void testCsvTableEditorCreatesInstanceOfCsvTableEditor() {
-        FileEditorProvider[] fileEditorProviders = FileEditorProviderManager.getInstance().getProviders(getProject(), myFixture.getFile().getVirtualFile());
-        FileEditorProvider fileEditorProvider = fileEditorProviders[0];
+        List<FileEditorProvider> fileEditorProviders = FileEditorProviderManager.getInstance().getProviderList(myFixture.getProject(), myFixture.getFile().getVirtualFile());
+        FileEditorProvider fileEditorProvider = fileEditorProviders.get(1);
 
         FileEditor fileEditor = fileEditorProvider.createEditor(getProject(), myFixture.getFile().getVirtualFile());
         assertInstanceOf(fileEditor, CsvTableEditor.class);
@@ -56,8 +57,8 @@ public class CsvTableEditorProviderTest extends CsvBasePlatformTestCase {
     }
 
     public void testWriteAndReadTableEditorState() {
-        FileEditorProvider[] fileEditorProviders = FileEditorProviderManager.getInstance().getProviders(getProject(), myFixture.getFile().getVirtualFile());
-        FileEditorProvider fileEditorProvider = fileEditorProviders[0];
+        List<FileEditorProvider> fileEditorProviders = FileEditorProviderManager.getInstance().getProviderList(myFixture.getProject(), myFixture.getFile().getVirtualFile());
+        FileEditorProvider fileEditorProvider = fileEditorProviders.get(1);
 
         CsvTableEditorState editorState = new CsvTableEditorState();
         editorState.setColumnWidths(new int[]{120, 32, 9});
