@@ -37,7 +37,6 @@ public class CsvEditorSettingsProvider implements EditorOptionsProvider {
     private JComboBox<CsvEditorSettings.EditorPrio> cbEditorUsage;
     private JCheckBox cbQuotingEnforced;
     private JCheckBox cbZeroBasedColumnNumbering;
-    private JCheckBox cbFileEndLineBreak;
     private JFormattedTextField tfMaxColumnWidth;
     private JFormattedTextField tfDefaultColumnWidth;
     private JComboBox<CsvEscapeCharacter> comboEscapeCharacter;
