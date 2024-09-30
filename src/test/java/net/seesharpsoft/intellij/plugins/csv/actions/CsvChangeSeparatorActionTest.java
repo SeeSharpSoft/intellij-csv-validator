@@ -9,7 +9,7 @@ public class CsvChangeSeparatorActionTest extends CsvActionTestBase {
     public void testActionGroupVisibilityForCsv() {
         myFixture.configureByFiles("CommaSeparated.csv");
 
-        Presentation presentation = testActionGroup(new CsvChangeSeparatorActionGroup(), myFixture);
+        Presentation presentation = doTestActionGroup(new CsvChangeSeparatorActionGroup(), myFixture);
         assertTrue(presentation.isVisible());
         assertTrue(presentation.isEnabled());
     }
@@ -17,7 +17,7 @@ public class CsvChangeSeparatorActionTest extends CsvActionTestBase {
     public void testActionGroupVisibilityForTsv() {
         myFixture.configureByFiles("TabSeparated.tsv");
 
-        Presentation presentation = testActionGroup(new CsvChangeSeparatorActionGroup(), myFixture);
+        Presentation presentation = doTestActionGroup(new CsvChangeSeparatorActionGroup(), myFixture);
         assertFalse(presentation.isVisible());
         assertFalse(presentation.isEnabled());
     }

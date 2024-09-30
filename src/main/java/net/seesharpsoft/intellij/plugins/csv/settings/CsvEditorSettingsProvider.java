@@ -82,7 +82,6 @@ public class CsvEditorSettingsProvider implements EditorOptionsProvider {
                 Configurable.isCheckboxModified(cbQuotingEnforced, csvEditorSettings.isQuotingEnforced()) ||
                 !Objects.equals(cbEditorUsage.getSelectedItem(), csvEditorSettings.getEditorPrio()) ||
                 Configurable.isCheckboxModified(cbZeroBasedColumnNumbering, csvEditorSettings.isZeroBasedColumnNumbering()) ||
-                Configurable.isCheckboxModified(cbFileEndLineBreak, csvEditorSettings.isFileEndLineBreak()) ||
                 !tfMaxColumnWidth.getValue().equals(csvEditorSettings.getTableAutoMaxColumnWidth()) ||
                 !tfDefaultColumnWidth.getValue().equals(csvEditorSettings.getTableDefaultColumnWidth()) ||
                 !Objects.equals(comboEscapeCharacter.getSelectedItem(), csvEditorSettings.getDefaultEscapeCharacter()) ||
@@ -105,7 +104,6 @@ public class CsvEditorSettingsProvider implements EditorOptionsProvider {
         cbEditorUsage.setSelectedItem(csvEditorSettings.getEditorPrio());
         cbQuotingEnforced.setSelected(csvEditorSettings.isQuotingEnforced());
         cbZeroBasedColumnNumbering.setSelected(csvEditorSettings.isZeroBasedColumnNumbering());
-        cbFileEndLineBreak.setSelected(csvEditorSettings.isFileEndLineBreak());
         tfMaxColumnWidth.setValue(csvEditorSettings.getTableAutoMaxColumnWidth());
         tfDefaultColumnWidth.setValue(csvEditorSettings.getTableDefaultColumnWidth());
         comboEscapeCharacter.setSelectedItem(csvEditorSettings.getDefaultEscapeCharacter());
@@ -128,7 +126,6 @@ public class CsvEditorSettingsProvider implements EditorOptionsProvider {
         csvEditorSettings.setEditorPrio((CsvEditorSettings.EditorPrio) cbEditorUsage.getSelectedItem());
         csvEditorSettings.setQuotingEnforced(cbQuotingEnforced.isSelected());
         csvEditorSettings.setZeroBasedColumnNumbering(cbZeroBasedColumnNumbering.isSelected());
-        csvEditorSettings.setFileEndLineBreak(cbFileEndLineBreak.isSelected());
         csvEditorSettings.setTableAutoMaxColumnWidth((int) tfMaxColumnWidth.getValue());
         csvEditorSettings.setTableDefaultColumnWidth((int) tfDefaultColumnWidth.getValue());
         csvEditorSettings.setDefaultEscapeCharacter((CsvEscapeCharacter) comboEscapeCharacter.getSelectedItem());

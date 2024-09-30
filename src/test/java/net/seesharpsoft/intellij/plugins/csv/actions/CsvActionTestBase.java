@@ -1,15 +1,17 @@
 package net.seesharpsoft.intellij.plugins.csv.actions;
 
 import com.intellij.openapi.actionSystem.AnAction;
+import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.actionSystem.ex.ActionUtil;
-import com.intellij.testFramework.TestActionEvent;
 import com.intellij.testFramework.fixtures.CodeInsightTestFixture;
 import net.seesharpsoft.intellij.plugins.csv.CsvBasePlatformTestCase;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvFileAttributes;
 import org.jetbrains.annotations.NotNull;
 
-public class CsvActionTestBase extends CsvBasePlatformTestCase {
+import static com.intellij.testFramework.TestActionEvent.createTestEvent;
+
+public abstract class CsvActionTestBase extends CsvBasePlatformTestCase {
 
     @Override
     protected String getTestDataPath() {
@@ -23,10 +25,8 @@ public class CsvActionTestBase extends CsvBasePlatformTestCase {
     }
 
     @NotNull
-    public Presentation testActionGroup(@NotNull AnAction action, CodeInsightTestFixture myFixture) {
-        // TODO this function is used instead of myFixture.testAction, due to an error with respect to missing component in datacontext
-//        return myFixture.testAction(action);
-        TestActionEvent e = new TestActionEvent(action);
+    public Presentation doTestActionGroup(@NotNull AnAction action, CodeInsightTestFixture myFixture) {
+        AnActionEvent e = createTestEvent(action);
         if (ActionUtil.lastUpdateAndCheckDumb(action, e, true)) {
             action.update(e);
         }

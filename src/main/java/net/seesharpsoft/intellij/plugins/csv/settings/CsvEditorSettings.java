@@ -85,7 +85,6 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
 
         public boolean SHOW_TABLE_EDITOR_INFO_PANEL = true;
         public boolean QUOTING_ENFORCED = false;
-        public boolean FILE_END_LINE_BREAK = true;
         @OptionTag(converter = CsvEscapeCharacter.CsvEscapeCharacterConverter.class)
         public CsvEscapeCharacter DEFAULT_ESCAPE_CHARACTER = ESCAPE_CHARACTER_DEFAULT;
         @OptionTag(converter = CsvValueSeparator.CsvValueSeparatorConverter.class)
@@ -232,14 +231,6 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
 
     public void setZeroBasedColumnNumbering(boolean zeroBasedColumnNumbering) {
         getState().ZERO_BASED_COLUMN_NUMBERING = zeroBasedColumnNumbering;
-    }
-
-    public boolean isFileEndLineBreak() {
-        return getState().FILE_END_LINE_BREAK;
-    }
-
-    public void setFileEndLineBreak(boolean fileEndLineBreak) {
-        getState().FILE_END_LINE_BREAK = fileEndLineBreak;
     }
 
     public int getTableAutoMaxColumnWidth() {

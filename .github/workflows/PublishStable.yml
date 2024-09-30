@@ -16,13 +16,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - ideaVersion: 2022.2.1
-          - ideaVersion: 2022.3.1
-          - ideaVersion: 2023.1.1
-          - ideaVersion: 2023.2.1
-          - ideaVersion: 2023.3.1
-          - ideaVersion: 2024.1.1
-          - ideaVersion: LATEST-EAP-SNAPSHOT
+          - ideaVersion: 2024.1
 
     steps:
     - uses: actions/checkout@v2
