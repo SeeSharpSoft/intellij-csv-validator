@@ -2,7 +2,13 @@ import org.jetbrains.changelog.Changelog
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.intellij.platform.gradle.extensions.intellijPlatform
 
+/**
+ * Shortcut for <code>project.findProperty(key).toString()</code>.
+ */
 fun properties(key: String) = project.findProperty(key).toString()
+/**
+ * Shortcut for <code>System.getenv().getOrDefault(key, default).toString()</code>.
+ */
 fun environment(key: String, default: String) = System.getenv().getOrDefault(key, default).toString()
 
 version = properties("pluginVersion")
@@ -125,8 +131,4 @@ tasks {
     processTestResources {
         duplicatesStrategy = DuplicatesStrategy.WARN
     }
-
-//    test {
-//        include("**/*Test.class")
-//    }
 }

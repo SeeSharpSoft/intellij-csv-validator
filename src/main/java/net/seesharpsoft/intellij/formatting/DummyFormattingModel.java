@@ -101,5 +101,6 @@ final class DummyFormattingModel implements FormattingModel {
 
     @Override
     public void commitChanges() {
+        // do nothing
     }
 }
