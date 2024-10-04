@@ -39,9 +39,19 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
     private static final CsvEditorSettings STATIC_TEST_INSTANCE = new CsvEditorSettings();
 
     public enum EditorPrio {
-        TEXT_FIRST,
-        TABLE_FIRST,
-        TEXT_ONLY
+        TEXT_FIRST("Text editor first"),
+        TABLE_FIRST("Table editor first"),
+        TEXT_ONLY("Text editor only");
+
+        private final String label;
+        
+        private EditorPrio(String label) {
+            this.label = label;
+        }
+
+        public String getDisplay() {
+            return label;
+        }
     }
 
     public enum ValueColoring {
@@ -67,7 +77,7 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
         public boolean HIGHTLIGHT_TAB_SEPARATOR = true;
         public boolean SHOW_INFO_BALLOON = true;
         public String TAB_HIGHLIGHT_COLOR = "-7984";
-        public EditorPrio EDITOR_PRIO = EditorPrio.TABLE_FIRST;
+        public EditorPrio EDITOR_PRIO = EditorPrio.TEXT_FIRST;
         public int TABLE_EDITOR_ROW_HEIGHT = TABLE_EDITOR_ROW_HEIGHT_DEFAULT;
         public int TABLE_AUTO_MAX_COLUMN_WIDTH = TABLE_AUTO_MAX_COLUMN_WIDTH_DEFAULT;
         public int TABLE_DEFAULT_COLUMN_WIDTH = TABLE_DEFAULT_COLUMN_WIDTH_DEFAULT;
@@ -75,7 +85,6 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
 
         public boolean SHOW_TABLE_EDITOR_INFO_PANEL = true;
         public boolean QUOTING_ENFORCED = false;
-        public boolean FILE_END_LINE_BREAK = true;
         @OptionTag(converter = CsvEscapeCharacter.CsvEscapeCharacterConverter.class)
         public CsvEscapeCharacter DEFAULT_ESCAPE_CHARACTER = ESCAPE_CHARACTER_DEFAULT;
         @OptionTag(converter = CsvValueSeparator.CsvValueSeparatorConverter.class)
@@ -222,14 +231,6 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
 
     public void setZeroBasedColumnNumbering(boolean zeroBasedColumnNumbering) {
         getState().ZERO_BASED_COLUMN_NUMBERING = zeroBasedColumnNumbering;
-    }
-
-    public boolean isFileEndLineBreak() {
-        return getState().FILE_END_LINE_BREAK;
-    }
-
-    public void setFileEndLineBreak(boolean fileEndLineBreak) {
-        getState().FILE_END_LINE_BREAK = fileEndLineBreak;
     }
 
     public int getTableAutoMaxColumnWidth() {

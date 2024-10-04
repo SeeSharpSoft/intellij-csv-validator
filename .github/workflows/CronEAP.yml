@@ -23,6 +23,7 @@ jobs:
       run: chmod +x gradlew
     - name: Build with Gradle
       env:
-        IDEA_VERSION: LATEST-EAP-SNAPSHOT
+        IDEA_PLATFORM: IC
+        IDEA_VERSION: 2024.1
         IDEA_SOURCES: false
-      run: xvfb-run ./gradlew test
+      run: xvfb-run ./gradlew verifyPlugin

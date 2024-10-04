@@ -515,23 +515,27 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
 
         @Override
         public void execute() {
-            PsiFile psiFile = (PsiFile) getAnchor();
+            ApplicationManager.getApplication().runWriteAction(
+                    () -> {
+                        PsiFile psiFile = (PsiFile) getAnchor();
 
-            PsiDocumentManager manager = PsiDocumentManager.getInstance(psiFile.getProject());
-            Document document = manager.getDocument(psiFile);
-            if (document == null) return;
+                        PsiDocumentManager manager = PsiDocumentManager.getInstance(psiFile.getProject());
+                        Document document = manager.getDocument(psiFile);
+                        if (document == null) return;
 
-            manager.doPostponedOperationsAndUnblockDocument(document);
+                        manager.doPostponedOperationsAndUnblockDocument(document);
 
-            int offset = 0;
-            for (Pair<TextRange, String> replacement : myReplacements) {
-                TextRange textRange = replacement.getFirst().shiftRight(offset);
-                String text = replacement.getSecond();
-                document.replaceString(textRange.getStartOffset(), textRange.getEndOffset(), text);
-                offset += text.length() - textRange.getLength();
-            }
+                        int offset = 0;
+                        for (Pair<TextRange, String> replacement : myReplacements) {
+                            TextRange textRange = replacement.getFirst().shiftRight(offset);
+                            String text = replacement.getSecond();
+                            document.replaceString(textRange.getStartOffset(), textRange.getEndOffset(), text);
+                            offset += text.length() - textRange.getLength();
+                        }
 
-            manager.commitDocument(document);
+                        manager.commitDocument(document);
+                    }
+            );
         }
     }
 }

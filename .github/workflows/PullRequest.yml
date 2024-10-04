@@ -16,12 +16,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - ideaVersion: 2022.2.3
-            ideaType: PY
-          - ideaVersion: 2023.3.1
-            ideaType: PS
+          - ideaVersion: 2024.1.1
+            ideaPlatform: IC
           - ideaVersion: 2024.2.1
-            ideaType: IC
+            ideaPlatform: PY
 
     steps:
     - uses: actions/checkout@v2
@@ -35,6 +33,6 @@ jobs:
     - name: Build with Gradle
       env:
         IDEA_VERSION: ${{ matrix.ideaVersion }}
-        IDEA_TYPE: ${{ matrix.ideaType }}
+        IDEA_PLATFORM: ${{ matrix.ideaPlatform }}
         IDEA_SOURCES: false
       run: xvfb-run ./gradlew test

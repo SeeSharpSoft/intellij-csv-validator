@@ -65,7 +65,7 @@ public class CsvTableModelBaseTest extends CsvBasePlatformTestCase implements Ps
         model.dispose();
 
         Document doc = this.myFixture.getDocument(getPsiFile());
-        PsiDocumentManager.getInstance(getProject()).doPostponedOperationsAndUnblockDocument(doc);
+//        PsiDocumentManager.getInstance(getProject()).doPostponedOperationsAndUnblockDocument(doc);
         PsiTestUtil.checkFileStructure(getPsiFile());
 
         myFixture.checkResultByFile(relativeTargetPath + String.format("/%s.csv", testName));

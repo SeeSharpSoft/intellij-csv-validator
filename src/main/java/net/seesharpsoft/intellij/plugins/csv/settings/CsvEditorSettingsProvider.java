@@ -2,11 +2,12 @@ package net.seesharpsoft.intellij.plugins.csv.settings;
 
 import com.intellij.application.options.editor.EditorOptionsProvider;
 import com.intellij.openapi.fileEditor.FileEditorManager;
+import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.ui.ComboBox;
-import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.ui.CheckBoxWithColorChooser;
+import com.intellij.ui.JBColor;
 import com.intellij.util.FileContentUtilCore;
 import net.seesharpsoft.intellij.plugins.csv.CsvEscapeCharacter;
 import net.seesharpsoft.intellij.plugins.csv.CsvValueSeparator;
@@ -16,7 +17,6 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import javax.swing.text.NumberFormatter;
-import java.awt.*;
 import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.Objects;
@@ -34,17 +34,16 @@ public class CsvEditorSettingsProvider implements EditorOptionsProvider {
     private JCheckBox cbUseSoftWraps;
     private CheckBoxWithColorChooser cbTabHighlightColor;
     private JCheckBox cbShowInfoBalloonCheckBox;
-    private JComboBox cbEditorUsage;
+    private JComboBox<CsvEditorSettings.EditorPrio> cbEditorUsage;
     private JCheckBox cbQuotingEnforced;
     private JCheckBox cbZeroBasedColumnNumbering;
-    private JCheckBox cbFileEndLineBreak;
     private JFormattedTextField tfMaxColumnWidth;
     private JFormattedTextField tfDefaultColumnWidth;
-    private JComboBox comboEscapeCharacter;
-    private JComboBox comboValueSeparator;
+    private JComboBox<CsvEscapeCharacter> comboEscapeCharacter;
+    private JComboBox<CsvValueSeparator> comboValueSeparator;
     private JCheckBox cbKeepTrailingWhitespaces;
     private JTextField tfCommentIndicator;
-    private JComboBox comboValueColoring;
+    private JComboBox<CsvEditorSettings.ValueColoring> comboValueColoring;
     private JCheckBox cbAutoDetectSeparator;
     private JFormattedTextField tfDefaultRowHeight;
 
@@ -70,37 +69,26 @@ public class CsvEditorSettingsProvider implements EditorOptionsProvider {
         return myMainPanel;
     }
 
-    // ensure downward compatibility
-    public boolean isModified(@NotNull JToggleButton toggleButton, boolean value) {
-        return toggleButton.isSelected() != value;
-    }
-
-    public boolean isModified(@NotNull JTextField textField, @NotNull String value) {
-        return !StringUtil.equals(textField.getText().trim(), value);
-    }
-
     @Override
     public boolean isModified() {
         CsvEditorSettings csvEditorSettings = CsvEditorSettings.getInstance();
-        return isModified(cbCaretRowShown, csvEditorSettings.isCaretRowShown()) ||
-                isModified(cbUseSoftWraps, csvEditorSettings.isUseSoftWraps()) ||
-                isModified(cbShowInfoBalloonCheckBox, csvEditorSettings.isShowInfoBalloon()) ||
+        return Configurable.isCheckboxModified(cbCaretRowShown, csvEditorSettings.isCaretRowShown()) ||
+                Configurable.isCheckboxModified(cbUseSoftWraps, csvEditorSettings.isUseSoftWraps()) ||
+                Configurable.isCheckboxModified(cbShowInfoBalloonCheckBox, csvEditorSettings.isShowInfoBalloon()) ||
                 cbTabHighlightColor.isSelected() != csvEditorSettings.isHighlightTabSeparator() ||
                 !Objects.equals(cbTabHighlightColor.getColor(), csvEditorSettings.getTabHighlightColor()) ||
                 !tfDefaultRowHeight.getValue().equals(csvEditorSettings.getTableEditorRowHeight()) ||
-                !Objects.equals(cbEditorUsage.getSelectedIndex(), csvEditorSettings.getEditorPrio().ordinal()) ||
-                isModified(cbQuotingEnforced, csvEditorSettings.isQuotingEnforced()) ||
-                !Objects.equals(cbEditorUsage.getSelectedIndex(), csvEditorSettings.getEditorPrio().ordinal()) ||
-                isModified(cbZeroBasedColumnNumbering, csvEditorSettings.isZeroBasedColumnNumbering()) ||
-                isModified(cbFileEndLineBreak, csvEditorSettings.isFileEndLineBreak()) ||
+                Configurable.isCheckboxModified(cbQuotingEnforced, csvEditorSettings.isQuotingEnforced()) ||
+                !Objects.equals(cbEditorUsage.getSelectedItem(), csvEditorSettings.getEditorPrio()) ||
+                Configurable.isCheckboxModified(cbZeroBasedColumnNumbering, csvEditorSettings.isZeroBasedColumnNumbering()) ||
                 !tfMaxColumnWidth.getValue().equals(csvEditorSettings.getTableAutoMaxColumnWidth()) ||
                 !tfDefaultColumnWidth.getValue().equals(csvEditorSettings.getTableDefaultColumnWidth()) ||
                 !Objects.equals(comboEscapeCharacter.getSelectedItem(), csvEditorSettings.getDefaultEscapeCharacter()) ||
                 !Objects.equals(comboValueSeparator.getSelectedItem(), csvEditorSettings.getDefaultValueSeparator()) ||
-                isModified(cbKeepTrailingWhitespaces, csvEditorSettings.getKeepTrailingSpaces()) ||
-                isModified(tfCommentIndicator, csvEditorSettings.getCommentIndicator()) ||
+                Configurable.isCheckboxModified(cbKeepTrailingWhitespaces, csvEditorSettings.getKeepTrailingSpaces()) ||
+                Configurable.isFieldModified(tfCommentIndicator, csvEditorSettings.getCommentIndicator()) ||
                 !Objects.equals(comboValueColoring.getSelectedItem(), csvEditorSettings.getValueColoring()) ||
-                isModified(cbAutoDetectSeparator, csvEditorSettings.isAutoDetectValueSeparator());
+                Configurable.isCheckboxModified(cbAutoDetectSeparator, csvEditorSettings.isAutoDetectValueSeparator());
     }
 
     @Override
@@ -112,10 +100,9 @@ public class CsvEditorSettingsProvider implements EditorOptionsProvider {
         cbTabHighlightColor.setSelected(csvEditorSettings.isHighlightTabSeparator());
         cbTabHighlightColor.setColor(csvEditorSettings.getTabHighlightColor());
         tfDefaultRowHeight.setValue(csvEditorSettings.getTableEditorRowHeight());
-        cbEditorUsage.setSelectedIndex(csvEditorSettings.getEditorPrio().ordinal());
+        cbEditorUsage.setSelectedItem(csvEditorSettings.getEditorPrio());
         cbQuotingEnforced.setSelected(csvEditorSettings.isQuotingEnforced());
         cbZeroBasedColumnNumbering.setSelected(csvEditorSettings.isZeroBasedColumnNumbering());
-        cbFileEndLineBreak.setSelected(csvEditorSettings.isFileEndLineBreak());
         tfMaxColumnWidth.setValue(csvEditorSettings.getTableAutoMaxColumnWidth());
         tfDefaultColumnWidth.setValue(csvEditorSettings.getTableDefaultColumnWidth());
         comboEscapeCharacter.setSelectedItem(csvEditorSettings.getDefaultEscapeCharacter());
@@ -135,10 +122,9 @@ public class CsvEditorSettingsProvider implements EditorOptionsProvider {
         csvEditorSettings.setHighlightTabSeparator(cbTabHighlightColor.isSelected());
         csvEditorSettings.setTabHighlightColor(cbTabHighlightColor.getColor());
         csvEditorSettings.setTableEditorRowHeight((int) tfDefaultRowHeight.getValue());
-        csvEditorSettings.setEditorPrio(CsvEditorSettings.EditorPrio.values()[cbEditorUsage.getSelectedIndex()]);
+        csvEditorSettings.setEditorPrio((CsvEditorSettings.EditorPrio) cbEditorUsage.getSelectedItem());
         csvEditorSettings.setQuotingEnforced(cbQuotingEnforced.isSelected());
         csvEditorSettings.setZeroBasedColumnNumbering(cbZeroBasedColumnNumbering.isSelected());
-        csvEditorSettings.setFileEndLineBreak(cbFileEndLineBreak.isSelected());
         csvEditorSettings.setTableAutoMaxColumnWidth((int) tfMaxColumnWidth.getValue());
         csvEditorSettings.setTableDefaultColumnWidth((int) tfDefaultColumnWidth.getValue());
         csvEditorSettings.setDefaultEscapeCharacter((CsvEscapeCharacter) comboEscapeCharacter.getSelectedItem());
@@ -165,17 +151,20 @@ public class CsvEditorSettingsProvider implements EditorOptionsProvider {
     }
 
     protected void createUIComponents() {
-        comboEscapeCharacter = new ComboBox(CsvEscapeCharacter.values());
-        comboEscapeCharacter.setRenderer(new CustomDisplayListCellRenderer<CsvEscapeCharacter>(ec -> ec.getDisplay()));
+        cbEditorUsage = new ComboBox<>(CsvEditorSettings.EditorPrio.values());
+        cbEditorUsage.setRenderer(new CustomDisplayListCellRenderer<>(CsvEditorSettings.EditorPrio::getDisplay));
+        
+        comboEscapeCharacter = new ComboBox<>(CsvEscapeCharacter.values());
+        comboEscapeCharacter.setRenderer(new CustomDisplayListCellRenderer<>(CsvEscapeCharacter::getDisplay));
 
-        comboValueSeparator = new ComboBox(CsvValueSeparator.values());
-        comboValueSeparator.setRenderer(new CustomDisplayListCellRenderer<CsvValueSeparator>(ec -> ec.getDisplay()));
+        comboValueSeparator = new ComboBox<>(CsvValueSeparator.values());
+        comboValueSeparator.setRenderer(new CustomDisplayListCellRenderer<>(CsvValueSeparator::getDisplay));
 
-        comboValueColoring = new ComboBox(CsvEditorSettings.ValueColoring.values());
-        comboValueColoring.setRenderer(new CustomDisplayListCellRenderer<CsvEditorSettings.ValueColoring>(ec -> ec.getDisplay()));
+        comboValueColoring = new ComboBox<>(CsvEditorSettings.ValueColoring.values());
+        comboValueColoring.setRenderer(new CustomDisplayListCellRenderer<>(CsvEditorSettings.ValueColoring::getDisplay));
 
         cbTabHighlightColor = new CheckBoxWithColorChooser("Highlight tab separator   ");
-        cbTabHighlightColor.setColor(Color.CYAN);
+        cbTabHighlightColor.setColor(JBColor.CYAN);
 
         NumberFormat numberFormat = NumberFormat.getIntegerInstance();
         NumberFormatter numberFormatter = new NumberFormatter(numberFormat);

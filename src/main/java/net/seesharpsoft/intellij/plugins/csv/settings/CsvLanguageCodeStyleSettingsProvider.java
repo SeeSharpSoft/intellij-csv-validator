@@ -27,13 +27,34 @@ public class CsvLanguageCodeStyleSettingsProvider extends LanguageCodeStyleSetti
                     "Separator");
 
             consumer.showCustomOption(CsvCodeStyleSettings.class,
+                    "TABULARIZE",
+                    "Format as table",
+                    "Tabularize");
+            consumer.showCustomOption(CsvCodeStyleSettings.class,
+                    "WHITE_SPACES_OUTSIDE_QUOTES",
+                    "Keep quoted value as is",
+                    "Tabularize");
+            consumer.showCustomOption(CsvCodeStyleSettings.class,
+                    "LEADING_WHITE_SPACES",
+                    "Align right",
+                    "Tabularize");
+            consumer.showCustomOption(CsvCodeStyleSettings.class,
+                    "ENABLE_WIDE_CHARACTER_DETECTION",
+                    "Enhanced width calculation (slower)",
+                    "Tabularize");
+//            consumer.showCustomOption(CsvCodeStyleSettings.class,
+//                    "TREAT_AMBIGUOUS_CHARACTERS_AS_WIDE",
+//                    "Ambiguous as wide characters",
+//                    "Tabularize");
+
+            consumer.showCustomOption(CsvCodeStyleSettings.class,
                     "TRIM_LEADING_WHITE_SPACES",
                     "Trim leading whitespaces",
-                    "Trimming");
+                    "Trimming (only if not tabularized)");
             consumer.showCustomOption(CsvCodeStyleSettings.class,
                     "TRIM_TRAILING_WHITE_SPACES",
                     "Trim trailing whitespaces",
-                    "Trimming");
+                    "Trimming (only if not tabularized)");
         } else if (settingsType == SettingsType.WRAPPING_AND_BRACES_SETTINGS) {
             consumer.showStandardOptions(
                     CodeStyleSettingsCustomizable.WrappingOrBraceOption.WRAP_LONG_LINES.name(),
@@ -51,13 +72,16 @@ public class CsvLanguageCodeStyleSettingsProvider extends LanguageCodeStyleSetti
 
     @Override
     public String getCodeSample(@NotNull SettingsType settingsType) {
-        return "1 ,\"Eldon Base for stackable storage shelf, platinum\", Muhammed MacIntyre   ,3,-213.25 ,   38.94  \n" +
-                "   2 ,\"   1.7 Cubic Foot Compact \"\"Cube\"\" Office Refrigerators\",Barry French,  293,457.81,208.16\n" +
-                "\n" +
-                "3,\"Cardinal Slant-D® Ring Binder, Heavy Gauge Vinyl   \",Barry French, 293 ,46.71 ,8.69\n" +
-                "4   ,    R380 ,Clay Rozendal,483,  1198.97,195.99 \n" +
-                "3.1\n" +
-                "5 ,Holmes HEPA Air Purifier,Carlos Soltero,汉字宋,30.94,21.78";
+        return """
+            ID,Name,Age,Misc
+            ,,,
+              1,  "  Mike ""Mute"" Masters",  29, spaces front
+            2  ,"Mustermann, Max   "  ,23 ,spaces after  \s
+            3,Ally Allison,48,no space & no quote
+             42 ,  "  Berta  Boston  "  ,  75  ,  spaces everywhere
+              169 ,  Charlie   Chaplin  ,  33  ,  spaces everywhere & no quote
+            200,汉字宋,00,char test
+            """;
     }
 
     protected void customizeDefaults(@NotNull CommonCodeStyleSettings commonSettings, @NotNull CommonCodeStyleSettings.IndentOptions indentOptions) {

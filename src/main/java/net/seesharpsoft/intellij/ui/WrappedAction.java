@@ -136,8 +136,7 @@ abstract class WrappedAction implements Action {
 //  Implement some AbstractAction methods
 //
     public Object[] getKeys() {
-        if (originalAction instanceof AbstractAction) {
-            AbstractAction abstractAction = (AbstractAction) originalAction;
+        if (originalAction instanceof AbstractAction abstractAction) {
             return abstractAction.getKeys();
         }
 
@@ -145,8 +144,7 @@ abstract class WrappedAction implements Action {
     }
 
     public PropertyChangeListener[] getPropertyChangeListeners() {
-        if (originalAction instanceof AbstractAction) {
-            AbstractAction abstractAction = (AbstractAction) originalAction;
+        if (originalAction instanceof AbstractAction abstractAction) {
             return abstractAction.getPropertyChangeListeners();
         }
 
