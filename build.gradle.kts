@@ -75,8 +75,9 @@ dependencies {
         testFramework(TestFrameworkType.JUnit5)
     }
 
-    testImplementation("org.mockito:mockito-core:4.8.1")
+    testImplementation("org.mockito:mockito-core:5.14.1")
     testImplementation("junit:junit:4.13.2")
+    testImplementation("org.opentest4j:opentest4j:1.3.0")
 }
 
 intellijPlatform {
