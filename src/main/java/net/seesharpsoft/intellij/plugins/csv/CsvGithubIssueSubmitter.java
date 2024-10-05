@@ -19,6 +19,7 @@ import org.jetbrains.plugins.github.api.data.GithubIssueState;
 import org.jetbrains.plugins.github.api.data.GithubResponsePage;
 import org.jetbrains.plugins.github.api.data.GithubSearchedIssue;
 import org.jetbrains.plugins.github.api.data.request.GithubRequestPagination;
+import org.jetbrains.plugins.github.authentication.GHAccountAuthData;
 import org.jetbrains.plugins.github.authentication.GHAccountsUtil;
 import org.jetbrains.plugins.github.authentication.accounts.GithubAccount;
 import org.jetbrains.plugins.github.util.GHCompatibilityUtil;
@@ -81,7 +82,13 @@ public class CsvGithubIssueSubmitter extends ErrorReportSubmitter {
 
     protected boolean submit(IdeaLoggingEvent event, String additionalInfo, Project project, Consumer<? super SubmittedReportInfo> consumer) {
         GithubAccount account = GHAccountsUtil.getSingleOrDefaultAccount(project);
-        if (account == null) return false;
+        if (account == null) {
+            GHAccountAuthData accountData = GHAccountsUtil.requestNewAccount(project);
+            if (accountData == null) {
+                return false;
+            }
+            account = accountData.getAccount();
+        }
         String token = GHCompatibilityUtil.getOrRequestToken(account, project);
         if (token == null) return false;
         

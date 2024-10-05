@@ -1,7 +1,7 @@
 [![Plugin version](https://img.shields.io/jetbrains/plugin/d/10037-csv-plugin.svg)](https://plugins.jetbrains.com/plugin/10037-csv-plugin)
 [![Build Action Status](https://github.com/SeeSharpSoft/intellij-csv-validator/actions/workflows/CIBuild.yml/badge.svg)](https://github.com/SeeSharpSoft/intellij-csv-validator/actions)
 [![EAP Status](https://github.com/SeeSharpSoft/intellij-csv-validator/actions/workflows/CronEAP.yml/badge.svg)](https://github.com/SeeSharpSoft/intellij-csv-validator/actions)
-[![Coverage Status](https://coveralls.io/repos/github/SeeSharpSoft/intellij-csv-validator/badge.svg?branch=master)](https://coveralls.io/github/SeeSharpSoft/intellij-csv-validator?branch=main)
+[![Coverage Status](https://coveralls.io/repos/github/SeeSharpSoft/intellij-csv-validator/badge.svg?branch=main)](https://coveralls.io/github/SeeSharpSoft/intellij-csv-validator?branch=main)
 [![Known Vulnerabilities](https://snyk.io/test/github/SeeSharpSoft/intellij-csv-validator/badge.svg?targetFile=build.gradle)](https://snyk.io/test/github/SeeSharpSoft/intellij-csv-validator?targetFile=build.gradle)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/97769359388e44bfb7101346d510fccf)](https://www.codacy.com/gh/SeeSharpSoft/intellij-csv-validator/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=SeeSharpSoft/intellij-csv-validator&amp;utm_campaign=Badge_Grade)
 
@@ -30,7 +30,7 @@ This enables default editor features like syntax validation, highlighting and in
 - support for line comments (# per default, customizable)
 - tab (&#8633;) separator highlighting
 
-(see [full changelog](./CHANGELOG))
+(see [full changelog](./CHANGELOG.md))
 
 **NOTE**
 
@@ -38,7 +38,7 @@ Release 4.* is focusing on text-editor features.
 Text-editor is the default editor (again).
 It requires IntelliJ platform version 2024.1 or newer.
 
-The previous version (incl README) can still be accessed [here](https://github.com/SeeSharpSoft/intellij-csv-validator/tree/release_2) and installed manually (see section [Installation](https://github.com/SeeSharpSoft/intellij-csv-validator#installation)).
+Previous versions (incl README) can still be accessed and installed manually (see section [Installation](https://github.com/SeeSharpSoft/intellij-csv-validator#installation)).
 
 ### Syntax parser & validation
 

@@ -12,12 +12,6 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - ideaVersion: 2024.1
-
     steps:
     - uses: actions/checkout@v2
     - name: Set up JDK 17
@@ -29,7 +23,7 @@ jobs:
       run: chmod +x gradlew
     - name: Build with Gradle
       env:
-        IDEA_VERSION: ${{ matrix.ideaVersion }}
+        IDEA_VERSION: 2024.1
       run: xvfb-run ./gradlew test
     - name: Coveralls
       uses: coverallsapp/github-action@v2.3.0
