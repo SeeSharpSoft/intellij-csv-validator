@@ -17,10 +17,9 @@ This enables default editor features like syntax validation, highlighting and in
 ## Features
 
 - CSV/TSV/PSV file detection
-- flexible Table Editor
 - customizable text editor
 - customizable column coloring (rainbow coloring)
-- customizable line comment
+- flexible table editor
 - syntax validation
 - syntax highlighting (customizable)
 - content formatting (customizable)
@@ -33,10 +32,12 @@ This enables default editor features like syntax validation, highlighting and in
 
 (see [full changelog](./CHANGELOG))
 
-**!!Please note!!**
+**NOTE**
 
-For release 3.*, the plugin got a major overhaul focusing on performance and table editor usage.
-Some features and settings were removed for simplification and consistency.
+Release 4.* is focusing on text-editor features.
+Text-editor is the default editor (again).
+It requires IntelliJ platform version 2024.1 or newer.
+
 The previous version (incl README) can still be accessed [here](https://github.com/SeeSharpSoft/intellij-csv-validator/tree/release_2) and installed manually (see section [Installation](https://github.com/SeeSharpSoft/intellij-csv-validator#installation)).
 
 ### Syntax parser & validation
@@ -271,6 +272,53 @@ _Space after separator_
 "name", "city", "position"
 Annasusanna, Amsterdam, 1
   Ben  , Berlin  , 2
+```
+
+##### Tabularize
+
+Separator settings can be used in combination with Tabularize, while trimming options are ignored completely.
+All options in this section only show effect if `Format as table` is enabled.
+
+_Format as table_
+
+Adds/removes leading and trailing whitespaces to format the text as a human-readable table.
+
+Note: Formatting a CSV file alters its values, and can conflict with the use of visual table editor.
+
+```
+"name     ","city   ","position"
+Annasusanna,Amsterdam,1
+Ben        ,Berlin   ,2
+```
+
+_Keep quoted value as is_
+
+Note: With this option, values in quotes are kept intact.
+Additionally activating `Enforce value quoting` for the table editor enables seamless editing and formatting CSV in either text or table mode.
+
+```
+"name"     ,"city"   ,"position"
+Annasusanna,Amsterdam,1
+Ben        ,Berlin   ,2
+```
+
+_Align right_
+
+```
+"     name","   city","position"
+Annasusanna,Amsterdam,         1
+        Ben,   Berlin,         2
+```
+
+_Enhanced width calculation_
+
+Calculates the width of a text based on each characters width, and taking wide characters into account.
+This can have a noticeable performance impact on large files.
+
+```
+"name     ","city   ","position"
+Annasusanna,Amsterdam,1
+汉字宋      ,Berlin   ,2
 ```
 
 ##### Trimming

@@ -10,13 +10,13 @@
 
 ### Fixed
 
-## [4.0.0] - Oct 01, 2024
+## [4.0.0] - Oct 07, 2024
 
 ### Added
-- Tabularize
+- Tabularize formatting is back!
 
 ### Changed
-- Text first
+- Text editor is shown first by default
 
 ## 3.4.0 - Aug 10, 2024
 
