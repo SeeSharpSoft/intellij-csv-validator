@@ -1,3 +1,4 @@
+import org.gradle.internal.impldep.org.testng.reporters.XMLUtils
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.intellij.platform.gradle.extensions.intellijPlatform
@@ -16,6 +17,8 @@ version = properties("pluginVersion")
 plugins {
     java
     id("idea")
+    id("jacoco")
+    id("com.github.kt3k.coveralls") version "2.12.0"
     id("org.jetbrains.intellij.platform") version "2.1.0"
     id("org.jetbrains.changelog") version "2.2.0"
     id("org.jetbrains.grammarkit") version "2022.3.2.2"
@@ -131,5 +134,25 @@ tasks {
 
     processTestResources {
         duplicatesStrategy = DuplicatesStrategy.WARN
+    }
+
+    test {
+        configure<JacocoTaskExtension> {
+            isEnabled = true
+            isIncludeNoLocationClasses = true
+            excludes = listOf("jdk.internal.*")
+        }
+
+        finalizedBy(jacocoTestReport)
+    }
+
+    jacocoTestReport {
+        dependsOn(test)
+        classDirectories.setFrom(instrumentCode)
+    }
+
+    jacocoTestCoverageVerification {
+        dependsOn(test)
+        classDirectories.setFrom(instrumentCode)
     }
 }
