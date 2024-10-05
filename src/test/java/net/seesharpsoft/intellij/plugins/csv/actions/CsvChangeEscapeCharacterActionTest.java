@@ -9,7 +9,7 @@ public class CsvChangeEscapeCharacterActionTest extends CsvActionTestBase {
     public void testActionGroupVisibilityForCsv() {
         myFixture.configureByFiles("CommaSeparated.csv");
 
-        Presentation presentation = testActionGroup(new CsvChangeEscapeCharacterActionGroup(), myFixture);
+        Presentation presentation = doTestActionGroup(new CsvChangeEscapeCharacterActionGroup(), myFixture);
         assertTrue(presentation.isVisible());
         assertTrue(presentation.isEnabled());
     }
@@ -17,7 +17,7 @@ public class CsvChangeEscapeCharacterActionTest extends CsvActionTestBase {
     public void testActionGroupVisibilityForTsv() {
         myFixture.configureByFiles("TabSeparated.tsv");
 
-        Presentation presentation = testActionGroup(new CsvChangeEscapeCharacterActionGroup(), myFixture);
+        Presentation presentation = doTestActionGroup(new CsvChangeEscapeCharacterActionGroup(), myFixture);
         assertTrue(presentation.isVisible());
         assertTrue(presentation.isEnabled());
     }

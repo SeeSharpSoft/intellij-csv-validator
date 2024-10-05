@@ -70,7 +70,6 @@ public class CsvEditorSettingsProviderTest extends CsvBasePlatformTestCase {
         csvEditorSettings.setTabHighlightColor(Color.BLACK);
         csvEditorSettings.setQuotingEnforced(true);
         csvEditorSettings.setZeroBasedColumnNumbering(true);
-        csvEditorSettings.setFileEndLineBreak(false);
         csvEditorSettings.setTableDefaultColumnWidth(500);
         csvEditorSettings.setTableAutoMaxColumnWidth(1000);
         csvEditorSettings.setDefaultEscapeCharacter(CsvEscapeCharacter.BACKSLASH);
@@ -92,7 +91,6 @@ public class CsvEditorSettingsProviderTest extends CsvBasePlatformTestCase {
         assertEquals(Color.BLACK, csvEditorSettings.getTabHighlightColor());
         assertEquals(true, csvEditorSettings.isQuotingEnforced());
         assertEquals(true, csvEditorSettings.isZeroBasedColumnNumbering());
-        assertEquals(false, csvEditorSettings.isFileEndLineBreak());
         assertEquals(500, csvEditorSettings.getTableDefaultColumnWidth());
         assertEquals(1000, csvEditorSettings.getTableAutoMaxColumnWidth());
         assertEquals(CsvEscapeCharacter.BACKSLASH, csvEditorSettings.getDefaultEscapeCharacter());
@@ -118,7 +116,6 @@ public class CsvEditorSettingsProviderTest extends CsvBasePlatformTestCase {
         csvEditorSettings.setTabHighlightColor(Color.BLACK);
         csvEditorSettings.setQuotingEnforced(true);
         csvEditorSettings.setZeroBasedColumnNumbering(true);
-        csvEditorSettings.setFileEndLineBreak(false);
         csvEditorSettings.setTableDefaultColumnWidth(500);
         csvEditorSettings.setTableAutoMaxColumnWidth(1000);
         csvEditorSettings.setDefaultEscapeCharacter(CsvEscapeCharacter.BACKSLASH);
@@ -140,7 +137,6 @@ public class CsvEditorSettingsProviderTest extends CsvBasePlatformTestCase {
         assertEquals(freshOptionSet.TAB_HIGHLIGHT_COLOR, "" + csvEditorSettings.getTabHighlightColor().getRGB());
         assertEquals(freshOptionSet.QUOTING_ENFORCED, csvEditorSettings.isQuotingEnforced());
         assertEquals(freshOptionSet.ZERO_BASED_COLUMN_NUMBERING, csvEditorSettings.isZeroBasedColumnNumbering());
-        assertEquals(freshOptionSet.FILE_END_LINE_BREAK, csvEditorSettings.isFileEndLineBreak());
         assertEquals(freshOptionSet.TABLE_DEFAULT_COLUMN_WIDTH, csvEditorSettings.getTableDefaultColumnWidth());
         assertEquals(freshOptionSet.TABLE_AUTO_MAX_COLUMN_WIDTH, csvEditorSettings.getTableAutoMaxColumnWidth());
         assertEquals(freshOptionSet.DEFAULT_ESCAPE_CHARACTER, csvEditorSettings.getDefaultEscapeCharacter());

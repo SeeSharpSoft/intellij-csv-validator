@@ -10,6 +10,11 @@ public class CsvCodeStyleSettings extends CustomCodeStyleSettings {
     public boolean SPACE_AFTER_SEPARATOR = false;
     public boolean TRIM_LEADING_WHITE_SPACES = false;
     public boolean TRIM_TRAILING_WHITE_SPACES = false;
+    public boolean TABULARIZE = false;
+    public boolean WHITE_SPACES_OUTSIDE_QUOTES = false;
+    public boolean LEADING_WHITE_SPACES = false;
+    public boolean ENABLE_WIDE_CHARACTER_DETECTION = false;
+    public boolean TREAT_AMBIGUOUS_CHARACTERS_AS_WIDE = false; // not a user setting
 
     public CsvCodeStyleSettings(CodeStyleSettings settings) {
         super("CsvCodeStyleSettings", settings);

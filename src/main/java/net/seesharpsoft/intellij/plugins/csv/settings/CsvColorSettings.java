@@ -122,11 +122,11 @@ public class CsvColorSettings implements ColorSettingsPage {
     @NotNull
     @Override
     public String getDemoText() {
-        return "1,\"Eldon Base for stackable storage shelf, platinum\",Muhammed MacIntyre,3,-213.25,38.94,35,Nunavut,Storage & Organization,0.8\n" +
-                "2,\"1.7 Cubic Foot Compact \"\"Cube\"\" Office Refrigerators\",Barry French,293,457.81,208.16,68.02,Nunavut,Appliances,0.58\n" +
-                "3,\"Cardinal Slant-D® Ring Binder, Heavy Gauge Vinyl\",Barry French,293,46.71,8.69,2.99,Nunavut,Binders and Binder Accessories,0.39\n" +
-                "#4,R380,Clay Rozendal,483,1198.97,195.99,3.99,Nunavut,Telephones and Communication,0.58\n" +
-                "5,Holmes HEPA Air Purifier,Carlos Soltero,515,30.94,21.78,5.94,Nunavut,Appliances,0.5";
+        return """
+                header1,header2,header3,header4,header5,header6,header7,header8,header9,header10,header11
+                1,2,3,4,5,6,7,8,9,10,11
+                value1,value2,value3,value4,value5,value6,value7,value8,value9,value10,value11
+                """;
     }
 
     @Nullable

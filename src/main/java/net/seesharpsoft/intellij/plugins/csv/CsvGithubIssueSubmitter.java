@@ -19,8 +19,10 @@ import org.jetbrains.plugins.github.api.data.GithubIssueState;
 import org.jetbrains.plugins.github.api.data.GithubResponsePage;
 import org.jetbrains.plugins.github.api.data.GithubSearchedIssue;
 import org.jetbrains.plugins.github.api.data.request.GithubRequestPagination;
-import org.jetbrains.plugins.github.authentication.GithubAuthenticationManager;
+import org.jetbrains.plugins.github.authentication.GHAccountAuthData;
+import org.jetbrains.plugins.github.authentication.GHAccountsUtil;
 import org.jetbrains.plugins.github.authentication.accounts.GithubAccount;
+import org.jetbrains.plugins.github.util.GHCompatibilityUtil;
 
 import java.awt.*;
 import java.io.IOException;
@@ -38,8 +40,8 @@ public class CsvGithubIssueSubmitter extends ErrorReportSubmitter {
     public static final String GIT_REPO = "intellij-csv-validator";
     public static final GHRepositoryPath GITHUB_FULL_PATH = new GHRepositoryPath(GIT_USER, GIT_REPO);
 
-    private static ScheduledFuture recentlySentReport = null;
-    private static ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+    private static ScheduledFuture<?> recentlySentReport = null;
+    private static final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
 
     private static class CsvGithubSubmitException extends RuntimeException {
         CsvGithubSubmitException(Throwable exception) {
@@ -79,13 +81,18 @@ public class CsvGithubIssueSubmitter extends ErrorReportSubmitter {
     }
 
     protected boolean submit(IdeaLoggingEvent event, String additionalInfo, Project project, Consumer<? super SubmittedReportInfo> consumer) {
-        GithubAuthenticationManager githubAuthManager = GithubAuthenticationManager.getInstance();
-        if (!githubAuthManager.ensureHasAccounts(project)) {
-            return false;
+        GithubAccount account = GHAccountsUtil.getSingleOrDefaultAccount(project);
+        if (account == null) {
+            GHAccountAuthData accountData = GHAccountsUtil.requestNewAccount(project);
+            if (accountData == null) {
+                return false;
+            }
+            account = accountData.getAccount();
         }
-        GithubAccount githubAccount = githubAuthManager.getSingleOrDefaultAccount(project);
-        assert githubAccount != null;
-        GithubApiRequestExecutor githubExecutor = GithubApiRequestExecutorManager.getInstance().getExecutor(githubAccount, project);
+        String token = GHCompatibilityUtil.getOrRequestToken(account, project);
+        if (token == null) return false;
+        
+        GithubApiRequestExecutor githubExecutor = GithubApiRequestExecutor.Factory.getInstance().create(token);
 
         Task submitTask = new Task.Backgroundable(project, getReportActionText()) {
             @Override
@@ -130,7 +137,7 @@ public class CsvGithubIssueSubmitter extends ErrorReportSubmitter {
         }
     }
 
-    protected GithubApiRequest updateExistingIssue(String issueId, String content) throws IOException {
+    protected GithubApiRequest<?> updateExistingIssue(String issueId, String content) throws IOException {
         return GithubApiRequests.Repos.Issues.Comments.create(
                 GithubServerPath.DEFAULT_SERVER,
                 GIT_USER,
@@ -140,7 +147,7 @@ public class CsvGithubIssueSubmitter extends ErrorReportSubmitter {
         );
     }
 
-    protected GithubApiRequest createNewIssue(String title, String content) throws IOException {
+    protected GithubApiRequest<?> createNewIssue(String title, String content) throws IOException {
         return GithubApiRequests.Repos.Issues.create(
                 GithubServerPath.DEFAULT_SERVER,
                 GIT_USER,

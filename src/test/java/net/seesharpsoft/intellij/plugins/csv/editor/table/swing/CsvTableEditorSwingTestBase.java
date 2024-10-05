@@ -46,6 +46,5 @@ public abstract class CsvTableEditorSwingTestBase extends CsvBasePlatformTestCas
 
     protected void initializeEditorSettings(CsvEditorSettings instance) {
         instance.loadState(new CsvEditorSettings.OptionSet());
-        instance.setFileEndLineBreak(false);
     }
 }
