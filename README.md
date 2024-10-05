@@ -36,7 +36,7 @@ This enables default editor features like syntax validation, highlighting and in
 
 Release 4.* is focusing on text-editor features.
 Text-editor is the default editor (again).
-It requires IntelliJ platform version 2024.1 or newer.
+**IntelliJ platform version 2024.2 or newer required.**
 
 Previous versions (incl README) can still be accessed and installed manually (see section [Installation](https://github.com/SeeSharpSoft/intellij-csv-validator#installation)).
 

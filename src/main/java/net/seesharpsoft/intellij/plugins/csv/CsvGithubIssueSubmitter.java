@@ -92,7 +92,7 @@ public class CsvGithubIssueSubmitter extends ErrorReportSubmitter {
         String token = GHCompatibilityUtil.getOrRequestToken(account, project);
         if (token == null) return false;
         
-        GithubApiRequestExecutor githubExecutor = GithubApiRequestExecutor.Factory.getInstance().create(token);
+        GithubApiRequestExecutor githubExecutor = GithubApiRequestExecutor.Factory.getInstance().create(account.getServer(), token);
 
         Task submitTask = new Task.Backgroundable(project, getReportActionText()) {
             @Override

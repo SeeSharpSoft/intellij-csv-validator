@@ -23,7 +23,7 @@ jobs:
       run: chmod +x gradlew
     - name: Build with Gradle
       env:
-        IDEA_VERSION: 2024.1
+        IDEA_VERSION: 2024.2.1
       run: xvfb-run ./gradlew test
     - name: Coveralls
       uses: coverallsapp/github-action@v2.3.0

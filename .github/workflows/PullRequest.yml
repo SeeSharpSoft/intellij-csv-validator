@@ -16,7 +16,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - ideaVersion: 2024.1.1
+          - ideaVersion: 2024.2.1
             ideaPlatform: IC
           - ideaVersion: 2024.2.1
             ideaPlatform: PY

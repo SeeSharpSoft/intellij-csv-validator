@@ -16,7 +16,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - ideaVersion: 2024.1
+          - ideaVersion: 2024.2.1
 
     steps:
     - uses: actions/checkout@v2

@@ -1,6 +1,5 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table;
 
-import com.intellij.codeHighlighting.BackgroundEditorHighlighter;
 import com.intellij.ide.structureView.StructureViewBuilder;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Document;
@@ -9,7 +8,6 @@ import com.intellij.openapi.editor.colors.EditorFontType;
 import com.intellij.openapi.fileEditor.*;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
-import com.intellij.openapi.util.TraceableDisposable;
 import com.intellij.openapi.util.UserDataHolder;
 import com.intellij.openapi.util.UserDataHolderBase;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -60,7 +58,7 @@ public abstract class CsvTableEditor implements FileEditor, PsiFileHolder {
     }
 
     @NotNull
-    public abstract CsvTableActions getActions();
+    public abstract CsvTableActions<?> getActions();
 
     protected abstract boolean isInCellEditMode();
 
@@ -109,26 +107,25 @@ public abstract class CsvTableEditor implements FileEditor, PsiFileHolder {
     }
 
     @Override
+    @NotNull
     public FileEditorState getState(@NotNull FileEditorStateLevel level) {
         return getTableEditorState();
     }
 
     @Override
     public void setState(@NotNull FileEditorState fileEditorState) {
-        CsvTableEditorState tableEditorState = fileEditorState instanceof CsvTableEditorState ? (CsvTableEditorState) fileEditorState : new CsvTableEditorState();
-        this.storedState = tableEditorState;
+        this.storedState = fileEditorState instanceof CsvTableEditorState ? (CsvTableEditorState) fileEditorState : new CsvTableEditorState();
         applyEditorState(getTableEditorState());
     }
 
     @Override
     public boolean isModified() {
-//        return this.dataManagement != null && initialState != null && !this.dataManagement.equalsCurrentState(initialState);
         return false;
     }
 
     @Override
     public boolean isValid() {
-        if (this.isDisposed() || file == null || !file.isValid()) {
+        if (this.isDisposed() || !file.isValid()) {
             return false;
         }
         CsvFile csvFile = this.getCsvFile();
@@ -161,12 +158,6 @@ public abstract class CsvTableEditor implements FileEditor, PsiFileHolder {
         this.changeSupport.removePropertyChangeListener(propertyChangeListener);
     }
 
-    @Nullable
-    @Override
-    public BackgroundEditorHighlighter getBackgroundHighlighter() {
-        return null;
-    }
-
     @Override
     public void dispose() {
         if (this.isDisposed()) return;
@@ -193,7 +184,7 @@ public abstract class CsvTableEditor implements FileEditor, PsiFileHolder {
 
     @Nullable
     public StructureViewBuilder getStructureViewBuilder() {
-        return isValid() ? StructureViewBuilder.PROVIDER.getStructureViewBuilder(file.getFileType(), file, this.project) : null;
+        return isValid() ? StructureViewBuilder.getProvider().getStructureViewBuilder(file.getFileType(), file, this.project) : null;
     }
 
     @Nullable
@@ -218,7 +209,7 @@ public abstract class CsvTableEditor implements FileEditor, PsiFileHolder {
 
     @Nullable
     public final CsvFile getCsvFile() {
-        if (project == null || project.isDisposed()) {
+        if (project.isDisposed()) {
             return null;
         }
         if (this.psiFile == null || !this.psiFile.isValid()) {

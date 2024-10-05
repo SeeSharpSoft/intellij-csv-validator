@@ -27,7 +27,6 @@ public class CsvFormattingModelBuilder implements FormattingModelBuilder {
                 ASTNode root = element.getNode();
                 CsvFormattingInfo formattingInfo = new CsvFormattingInfo(
                         settings,
-                        CsvFormatHelper.createSpaceBuilder(settings),
                         element.getContainingFile()
                 );
 
