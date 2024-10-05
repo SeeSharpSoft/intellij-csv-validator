@@ -149,6 +149,10 @@ tasks {
     jacocoTestReport {
         dependsOn(test)
         classDirectories.setFrom(instrumentCode)
+        reports {
+            xml.required = true
+            html.required = true
+        }
     }
 
     jacocoTestCoverageVerification {
