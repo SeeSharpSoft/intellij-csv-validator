@@ -1,4 +1,3 @@
-import org.gradle.internal.impldep.org.testng.reporters.XMLUtils
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.intellij.platform.gradle.extensions.intellijPlatform
@@ -35,8 +34,7 @@ repositories {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_21
 }
 
 sourceSets {
@@ -74,8 +72,9 @@ dependencies {
         zipSigner()
         
         jetbrainsRuntime()
+        javaCompiler("21")
+
         testFramework(TestFrameworkType.Platform)
-        testFramework(TestFrameworkType.JUnit5)
     }
 
     testImplementation("org.mockito:mockito-core:5.14.1")
@@ -129,11 +128,11 @@ tasks {
     }
 
     processResources {
-        duplicatesStrategy = DuplicatesStrategy.WARN
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     }
 
     processTestResources {
-        duplicatesStrategy = DuplicatesStrategy.WARN
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     }
 
     test {

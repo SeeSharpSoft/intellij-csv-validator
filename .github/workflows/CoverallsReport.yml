@@ -14,16 +14,16 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Set up JDK 17
+    - name: Set up JDK 21
       uses: actions/setup-java@v2
       with:
-        java-version: '17'
+        java-version: '21'
         distribution: 'adopt'
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     - name: Build with Gradle
       env:
-        IDEA_VERSION: 2024.1
+        IDEA_VERSION: 2024.2.1
       run: xvfb-run ./gradlew test
     - name: Coveralls
       uses: coverallsapp/github-action@v2.3.0

@@ -1,12 +1,8 @@
 package net.seesharpsoft.intellij.plugins.csv.formatter;
 
-import com.intellij.formatting.SpacingBuilder;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.codeStyle.CodeStyleSettings;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
-import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
-import net.seesharpsoft.intellij.plugins.csv.psi.CsvElementType;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvCodeStyleSettings;
 import org.jetbrains.annotations.Nullable;
@@ -174,29 +170,6 @@ public final class CsvFormatHelper {
 
     public static int getTextLength(PsiElement psiElement, CsvCodeStyleSettings csvCodeStyleSettings) {
         return CsvFormatHelper.getTextLength(psiElement.getText().strip(), csvCodeStyleSettings);
-    }
-
-    public static SpacingBuilder createSpaceBuilder(CodeStyleSettings settings) {
-        CsvCodeStyleSettings csvCodeStyleSettings = settings.getCustomSettings(CsvCodeStyleSettings.class);
-        SpacingBuilder builder = new SpacingBuilder(settings, CsvLanguage.INSTANCE);
-        if (csvCodeStyleSettings.TRIM_LEADING_WHITE_SPACES || csvCodeStyleSettings.TABULARIZE) {
-            builder
-                    .after(CsvTypes.COMMA).spaceIf(csvCodeStyleSettings.SPACE_AFTER_SEPARATOR)
-                    .after(CsvTypes.CRLF).spaces(0)
-                    .after(CsvElementType.DOCUMENT_START).spaces(0);
-        } else if (csvCodeStyleSettings.SPACE_AFTER_SEPARATOR) {
-            builder.after(CsvTypes.COMMA).spaces(1);
-        }
-
-        if (csvCodeStyleSettings.TRIM_TRAILING_WHITE_SPACES || csvCodeStyleSettings.TABULARIZE) {
-            builder
-                    .before(CsvTypes.COMMA).spaceIf(csvCodeStyleSettings.SPACE_BEFORE_SEPARATOR)
-                    .before(CsvTypes.CRLF).spaces(0);
-        } else if (csvCodeStyleSettings.SPACE_BEFORE_SEPARATOR) {
-            builder.before(CsvTypes.COMMA).spaces(1);
-        }
-
-        return builder;
     }
 
     public static boolean isFieldNode(@Nullable ASTNode node) {

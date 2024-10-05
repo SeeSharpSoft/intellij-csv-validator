@@ -50,17 +50,14 @@ public class CsvFormattingBlock extends AbstractBlock {
                     || (CsvFormatHelper.isQuoteNode(node1) && !CsvFormatHelper.isSeparatorNode(node2))
                     || (CsvFormatHelper.isRecordNode(node2) && (settings.WHITE_SPACES_OUTSIDE_QUOTES || !CsvFormatHelper.isQuotedField(node2.getFirstChildNode())));
         }
-        // case !settings.LEADING_WHITE_SPACES
         return (!CsvFormatHelper.isQuoteNode(node1) && CsvFormatHelper.isSeparatorNode(node2))
                 || (!CsvFormatHelper.isSeparatorNode(node1) && CsvFormatHelper.isQuoteNode(node2));
     }
 
-    private int getDefaultSpacing(@Nullable Block child1, @NotNull Block child2) {
-        Spacing defaultSpacing = myFormattingInfo.getSpacingBuilder().getSpacing(this, child1, child2);
-        if (defaultSpacing instanceof SpacingImpl spacing) {
-            return spacing.getMinSpaces();
-        }
-        return 0;
+    private int getDefaultSpacing(@Nullable ASTNode node1, @NotNull ASTNode node2) {
+        CsvCodeStyleSettings settings = myFormattingInfo.getCsvCodeStyleSettings();
+        return (CsvFormatHelper.isSeparatorNode(node1) && settings.SPACE_AFTER_SEPARATOR ||
+                CsvFormatHelper.isSeparatorNode(node2) && settings.SPACE_BEFORE_SEPARATOR) ? 1 : 0;
     }
 
     protected int getRequiredTabularizationSpacing(PsiElement psiElement) {
@@ -141,7 +138,7 @@ public class CsvFormattingBlock extends AbstractBlock {
     public Spacing getSpacing(@Nullable Block child1, @NotNull Block child2) {
         ASTNode childNode1 = child1 == null ? null : ((CsvFormattingBlock)child1).myNode;
         ASTNode childNode2 = ((CsvFormattingBlock)child2).myNode;
-        int spacing = this.getDefaultSpacing(child1, child2);
+        int spacing = this.getDefaultSpacing(childNode1, childNode2);
         if (this.requiresTabularization(childNode1, childNode2)) {
             PsiElement targetPsiElement = CsvFormatHelper.isFieldNode(childNode1) ? childNode1.getPsi() : (
                     CsvFormatHelper.isRecordNode(childNode2) ? childNode2.getFirstChildNode().getPsi() : (
