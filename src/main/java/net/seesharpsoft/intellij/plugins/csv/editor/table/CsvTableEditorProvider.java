@@ -18,7 +18,7 @@ public class CsvTableEditorProvider implements AsyncFileEditorProvider, DumbAwar
     public static final String EDITOR_TYPE_ID = "csv-table-editor";
 
     @Override
-    public String getEditorTypeId() {
+    public @NotNull String getEditorTypeId() {
         return EDITOR_TYPE_ID;
     }
 
@@ -48,16 +48,15 @@ public class CsvTableEditorProvider implements AsyncFileEditorProvider, DumbAwar
     }
 
     @Override
-    public FileEditorState readState(@NotNull Element sourceElement, @NotNull Project project, @NotNull VirtualFile file) {
+    public @NotNull FileEditorState readState(@NotNull Element sourceElement, @NotNull Project project, @NotNull VirtualFile file) {
         return CsvTableEditorState.create(sourceElement, project, file);
     }
 
     @Override
     public void writeState(@NotNull FileEditorState state, @NotNull Project project, @NotNull Element targetElement) {
-        if (!(state instanceof CsvTableEditorState)) {
+        if (!(state instanceof CsvTableEditorState csvTableEditorState)) {
             return;
         }
-        CsvTableEditorState csvTableEditorState = (CsvTableEditorState) state;
         csvTableEditorState.write(project, targetElement);
     }
 
@@ -66,7 +65,7 @@ public class CsvTableEditorProvider implements AsyncFileEditorProvider, DumbAwar
     public Builder createEditorAsync(@NotNull Project project, @NotNull VirtualFile virtualFile) {
         return new Builder() {
             @Override
-            public FileEditor build() {
+            public @NotNull FileEditor build() {
                 return new CsvTableEditorSwing(project, virtualFile);
             }
         };
