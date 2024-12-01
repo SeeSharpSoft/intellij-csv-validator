@@ -18,10 +18,14 @@ public class CsvFileEditorProvider implements AsyncFileEditorProvider, DumbAware
     public static final String EDITOR_TYPE_ID = "csv-text-editor";
 
     public static boolean acceptCsvFile(@NotNull Project project, @NotNull VirtualFile file) {
-        return CsvHelper.isCsvFile(project, file)
-                && !SingleRootFileViewProvider.isTooLargeForContentLoading(file)
-                && !SingleRootFileViewProvider.isTooLargeForIntelligence(file)
-                && !(file instanceof DiffViewerVirtualFile);
+        try {
+            return !SingleRootFileViewProvider.isTooLargeForContentLoading(file)
+                    && !SingleRootFileViewProvider.isTooLargeForIntelligence(file)
+                    && !(file instanceof DiffViewerVirtualFile)
+                    && CsvHelper.isCsvFile(project, file);
+        } catch(Exception exc) {
+            return false;
+        }
     }
 
     @Override
