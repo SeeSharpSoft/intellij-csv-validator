@@ -26,7 +26,7 @@
             </constraints>
             <properties>
               <horizontalTextPosition value="10"/>
-              <text value="Open file in text editor"/>
+              <text resource-bundle="i18n/CSVEditorResources" key="open.file.in.text.editor"/>
             </properties>
           </component>
           <component id="157b0" class="javax.swing.JLabel" binding="lblErrorText">
@@ -37,7 +37,7 @@
             <properties>
               <font size="12" style="1"/>
               <foreground color="-65536"/>
-              <text value="  Error while parsing content - please fix issues in text editor!"/>
+              <text resource-bundle="i18n/CSVEditorResources" key="error.while.parsing.content.please.fix.issues.in.text.editor"/>
             </properties>
           </component>
           <component id="d8426" class="javax.swing.JToolBar$Separator">

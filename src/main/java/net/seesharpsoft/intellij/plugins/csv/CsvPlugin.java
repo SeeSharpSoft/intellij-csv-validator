@@ -16,8 +16,12 @@ import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettingsProvider;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ResourceBundle;
+
 public class CsvPlugin implements StartupActivity, StartupActivity.DumbAware {
 
+    private static ResourceBundle _resourceBundle;
+    
     protected static IdeaPluginDescriptor getPluginDescriptor() {
         return PluginManagerCore.getPlugin(PluginId.getId("net.seesharpsoft.intellij.plugins.csv"));
     }
@@ -100,5 +104,16 @@ public class CsvPlugin implements StartupActivity, StartupActivity.DumbAware {
         }));
 
         Notifications.Bus.notify(notification);
+    }
+    
+    public static ResourceBundle getResourceBundle() {
+        if (_resourceBundle == null) {
+            _resourceBundle = ResourceBundle.getBundle("i18n/CSVEditorResources");
+        }
+        return _resourceBundle;
+    }
+
+    public static String getLocalizedText(String token) {
+        return getResourceBundle().getString(token);
     }
 }
