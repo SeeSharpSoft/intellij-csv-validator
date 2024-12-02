@@ -9,16 +9,20 @@ import com.intellij.openapi.extensions.PluginId;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
+import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.startup.StartupActivity;
+import com.intellij.openapi.startup.ProjectActivity;
+import kotlin.Unit;
+import kotlin.coroutines.Continuation;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvFileAttributes;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettingsProvider;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ResourceBundle;
 
-public class CsvPlugin implements StartupActivity, StartupActivity.DumbAware {
+public class CsvPlugin implements ProjectActivity, DumbAware {
 
     private static ResourceBundle _resourceBundle;
     
@@ -70,12 +74,12 @@ public class CsvPlugin implements StartupActivity, StartupActivity.DumbAware {
     }
 
     @Override
-    public void runActivity(@NotNull Project project) {
+    public @Nullable Object execute(@NotNull Project project, @NotNull Continuation<? super Unit> continuation) {
         doAsyncProjectMaintenance(project);
-
+        
         NotificationGroup notificationGroup = NotificationGroupManager.getInstance().getNotificationGroup("net.seesharpsoft.intellij.plugins.csv");
         if (notificationGroup == null || CsvEditorSettings.getInstance().checkCurrentPluginVersion(getVersion())) {
-            return;
+            return continuation;
         }
 
         Notification notification = notificationGroup.createNotification(
@@ -104,6 +108,8 @@ public class CsvPlugin implements StartupActivity, StartupActivity.DumbAware {
         }));
 
         Notifications.Bus.notify(notification);
+        
+        return continuation;
     }
     
     public static ResourceBundle getResourceBundle() {
@@ -116,4 +122,6 @@ public class CsvPlugin implements StartupActivity, StartupActivity.DumbAware {
     public static String getLocalizedText(String token) {
         return getResourceBundle().getString(token);
     }
+
+
 }
