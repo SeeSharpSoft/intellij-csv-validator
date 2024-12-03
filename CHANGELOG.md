@@ -10,7 +10,25 @@
 
 ### Fixed
 
-## [4.0.0] - Oct 07, 2024
+## [4.0.1] - Dec 01, 2024
+
+### Added
+
+- Localization support
+
+### Changed
+
+- Upgrade to gradle 8.10
+- Improve check for CsvFile
+- Code cleanup
+
+### Fixed
+
+- Read access is allowed from inside read-action only #878
+- Failsafe acceptCsvFile check #882
+- Use ProjectActivity instead of StartupActivity
+
+## 4.0.0 - Oct 07, 2024
 
 ### Added
 - Tabularize formatting is back!

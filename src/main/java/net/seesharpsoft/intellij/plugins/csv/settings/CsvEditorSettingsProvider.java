@@ -10,6 +10,7 @@ import com.intellij.ui.CheckBoxWithColorChooser;
 import com.intellij.ui.JBColor;
 import com.intellij.util.FileContentUtilCore;
 import net.seesharpsoft.intellij.plugins.csv.CsvEscapeCharacter;
+import net.seesharpsoft.intellij.plugins.csv.CsvPlugin;
 import net.seesharpsoft.intellij.plugins.csv.CsvValueSeparator;
 import net.seesharpsoft.intellij.ui.CustomDisplayListCellRenderer;
 import org.jetbrains.annotations.NotNull;
@@ -55,12 +56,12 @@ public class CsvEditorSettingsProvider implements EditorOptionsProvider {
 
     @Override
     public String getDisplayName() {
-        return "CSV/TSV/PSV";
+        return CsvPlugin.getLocalizedText("settings.title");
     }
 
     @Override
     public String getHelpTopic() {
-        return "Editor Options for CSV/TSV/PSV files";
+        return CsvPlugin.getLocalizedText("settings.editor.help");
     }
 
     @Nullable
@@ -163,7 +164,7 @@ public class CsvEditorSettingsProvider implements EditorOptionsProvider {
         comboValueColoring = new ComboBox<>(CsvEditorSettings.ValueColoring.values());
         comboValueColoring.setRenderer(new CustomDisplayListCellRenderer<>(CsvEditorSettings.ValueColoring::getDisplay));
 
-        cbTabHighlightColor = new CheckBoxWithColorChooser("Highlight tab separator   ");
+        cbTabHighlightColor = new CheckBoxWithColorChooser(CsvPlugin.getLocalizedText("settings.editor.highlight.tab.separator"));
         cbTabHighlightColor.setColor(JBColor.CYAN);
 
         NumberFormat numberFormat = NumberFormat.getIntegerInstance();

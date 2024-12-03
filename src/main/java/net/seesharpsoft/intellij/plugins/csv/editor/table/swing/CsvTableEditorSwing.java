@@ -26,7 +26,7 @@ public class CsvTableEditorSwing extends CsvTableEditor {
 
     private JTable tblEditor;
     private JPanel panelMain;
-    private LinkLabel lnkTextEditor;
+    private LinkLabel<Object> lnkTextEditor;
     private JLabel lblErrorText;
     private JScrollPane tableScrollPane;
     private JPanel panelTop;
@@ -61,10 +61,12 @@ public class CsvTableEditorSwing extends CsvTableEditor {
     protected void createUIComponents() {
         tblEditor = new CsvTable(new CsvTableModelSwing(this));
         tblEditor.setRowSorter(null);
-        lnkTextEditor = new LinkLabel("Open file in text editor", null);
+        lnkTextEditor = new LinkLabel<>("Open.file.in.text.editor", null);
     }
 
     private void initializedUIComponents() {
+        lnkTextEditor.setListener(this.tableEditorActions.openTextEditor, null);
+        
         EditorColorsScheme editorColorsScheme = EditorColorsManager.getInstance().getGlobalScheme();
 
         tblEditor.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);

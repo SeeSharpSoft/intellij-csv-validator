@@ -5,12 +5,12 @@ import com.intellij.openapi.editor.colors.EditorColorsScheme;
 import com.intellij.openapi.editor.markup.TextAttributes;
 import com.intellij.openapi.util.UserDataHolder;
 import com.intellij.ui.components.JBScrollPane;
+import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvColorSettings;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import javax.swing.event.CellEditorListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.table.TableCellEditor;
@@ -21,7 +21,6 @@ import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.geom.Rectangle2D;
 import java.util.EventObject;
-import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -80,7 +79,7 @@ public class CsvMultiLineCellRenderer extends JBScrollPane implements TableCellR
                 myTextArea.setBackground(UIManager.getColor(editorColorsScheme.getDefaultBackground()));
             }
         } else {
-            myTextArea.setBorder(new EmptyBorder(1, 2, 1, 2));
+            myTextArea.setBorder(JBUI.Borders.empty(1, 2));
         }
 
         this.setFont(table.getFont());
@@ -153,9 +152,8 @@ public class CsvMultiLineCellRenderer extends JBScrollPane implements TableCellR
     protected void fireStopCellEditing() {
         ChangeEvent changeEvent = new ChangeEvent(this);
         synchronized (cellEditorListenerSet) {
-            Iterator<CellEditorListener> it = cellEditorListenerSet.iterator();
-            while (it.hasNext()) {
-                it.next().editingStopped(changeEvent);
+            for (CellEditorListener cellEditorListener : cellEditorListenerSet) {
+                cellEditorListener.editingStopped(changeEvent);
             }
         }
     }
@@ -163,9 +161,8 @@ public class CsvMultiLineCellRenderer extends JBScrollPane implements TableCellR
     protected void fireCancelCellEditing() {
         ChangeEvent changeEvent = new ChangeEvent(this);
         synchronized (cellEditorListenerSet) {
-            Iterator<CellEditorListener> it = cellEditorListenerSet.iterator();
-            while (it.hasNext()) {
-                it.next().editingCanceled(changeEvent);
+            for (CellEditorListener cellEditorListener : cellEditorListenerSet) {
+                cellEditorListener.editingCanceled(changeEvent);
             }
         }
     }

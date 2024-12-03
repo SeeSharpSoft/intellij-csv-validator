@@ -108,7 +108,7 @@ public class CsvColumnInfo<T> {
             this(element, row, -1, -1);
         }
 
-        RowInfo(@NotNull T element, @NotNull int row, int startIndex, int endIndex) {
+        RowInfo(@NotNull T element, int row, int startIndex, int endIndex) {
             this.myElement = element;
             this.myRow = row;
             if (startIndex <= endIndex && startIndex >= 0) {
@@ -140,7 +140,7 @@ public class CsvColumnInfo<T> {
             if (!(other instanceof CsvColumnInfo.RowInfo)) {
                 return false;
             }
-            return this.myElement.equals(((RowInfo) other).myElement);
+            return this.myElement.equals(((CsvColumnInfo<?>.RowInfo) other).myElement);
         }
     }
 }

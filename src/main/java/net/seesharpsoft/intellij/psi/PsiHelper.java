@@ -20,6 +20,11 @@ public class PsiHelper {
     }
 
     @Nullable
+    public static <T extends PsiElement> T getFirstChildOfType(@NotNull final PsiElement parent, @NotNull Class<T> aClass) {
+        return getNthChildOfType(parent, 0, aClass);
+    }
+    
+    @Nullable
     public static <T extends PsiElement> T getNthChildOfType(@NotNull final PsiElement parent, int n, @NotNull Class<T> aClass) {
         PsiElement firstChild = parent.getFirstChild();
         return firstChild == null ? null : getNextNthSiblingOfType(firstChild, n, aClass);

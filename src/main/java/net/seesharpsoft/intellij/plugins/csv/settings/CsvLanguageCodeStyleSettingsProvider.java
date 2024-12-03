@@ -5,7 +5,10 @@ import com.intellij.psi.codeStyle.CodeStyleSettingsCustomizable;
 import com.intellij.psi.codeStyle.CommonCodeStyleSettings;
 import com.intellij.psi.codeStyle.LanguageCodeStyleSettingsProvider;
 import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
+import net.seesharpsoft.intellij.plugins.csv.CsvPlugin;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.ResourceBundle;
 
 public class CsvLanguageCodeStyleSettingsProvider extends LanguageCodeStyleSettingsProvider {
     @NotNull
@@ -16,45 +19,46 @@ public class CsvLanguageCodeStyleSettingsProvider extends LanguageCodeStyleSetti
 
     @Override
     public void customizeSettings(@NotNull CodeStyleSettingsCustomizable consumer, @NotNull SettingsType settingsType) {
+        ResourceBundle bundle = CsvPlugin.getResourceBundle();
         if (settingsType == SettingsType.LANGUAGE_SPECIFIC) {
             consumer.showCustomOption(CsvCodeStyleSettings.class,
                     "SPACE_BEFORE_SEPARATOR",
-                    "Space before separator",
-                    "Separator");
+                    bundle.getString("group.separator.space.before"),
+                    bundle.getString("group.separator"));
             consumer.showCustomOption(CsvCodeStyleSettings.class,
                     "SPACE_AFTER_SEPARATOR",
-                    "Space after separator",
-                    "Separator");
+                    bundle.getString("group.separator.space.after"),
+                    bundle.getString("group.separator"));
 
             consumer.showCustomOption(CsvCodeStyleSettings.class,
                     "TABULARIZE",
-                    "Format as table",
-                    "Tabularize");
+                    bundle.getString("group.tabularize.as.table"),
+                    bundle.getString("group.tabularize"));
             consumer.showCustomOption(CsvCodeStyleSettings.class,
                     "WHITE_SPACES_OUTSIDE_QUOTES",
-                    "Keep quoted value as is",
-                    "Tabularize");
+                    bundle.getString("group.tabularize.keep.quoted"),
+                    bundle.getString("group.tabularize"));
             consumer.showCustomOption(CsvCodeStyleSettings.class,
                     "LEADING_WHITE_SPACES",
-                    "Align right",
-                    "Tabularize");
+                    bundle.getString("group.tabularize.align.right"),
+                    bundle.getString("group.tabularize"));
             consumer.showCustomOption(CsvCodeStyleSettings.class,
                     "ENABLE_WIDE_CHARACTER_DETECTION",
-                    "Enhanced width calculation (slower)",
-                    "Tabularize");
+                    bundle.getString("group.tabularize.enhanced.width.calculation"),
+                    bundle.getString("group.tabularize"));
 //            consumer.showCustomOption(CsvCodeStyleSettings.class,
 //                    "TREAT_AMBIGUOUS_CHARACTERS_AS_WIDE",
 //                    "Ambiguous as wide characters",
-//                    "Tabularize");
+//                    bundle.getString("group.tabularize"));
 
             consumer.showCustomOption(CsvCodeStyleSettings.class,
                     "TRIM_LEADING_WHITE_SPACES",
-                    "Trim leading whitespaces",
-                    "Trimming (only if not tabularized)");
+                    bundle.getString("group.trimming.leading"),
+                    bundle.getString("group.trimming"));
             consumer.showCustomOption(CsvCodeStyleSettings.class,
                     "TRIM_TRAILING_WHITE_SPACES",
-                    "Trim trailing whitespaces",
-                    "Trimming (only if not tabularized)");
+                    bundle.getString("group.trimming.trailing"),
+                    bundle.getString("group.trimming"));
         } else if (settingsType == SettingsType.WRAPPING_AND_BRACES_SETTINGS) {
             consumer.showStandardOptions(
                     CodeStyleSettingsCustomizable.WrappingOrBraceOption.WRAP_LONG_LINES.name(),
