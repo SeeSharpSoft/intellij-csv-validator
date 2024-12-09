@@ -1,6 +1,5 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
-import com.intellij.ide.BrowserUtil;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.ui.components.labels.LinkLabel;
@@ -25,7 +24,7 @@ public class CsvTableEditorActionListeners extends CsvTableEditorUtilBase implem
     protected ActionListener adjustColumnWidthAction = event -> adjustColumnWidths(csvTableEditor);
     protected ActionListener resetColumnWidthAction = event -> resetColumnWidths(csvTableEditor);
 
-    protected LinkListener openTextEditor = new OpenTextEditor();
+    protected LinkListener<Object> openTextEditor = new OpenTextEditor();
 
     public CsvTableEditorActionListeners(CsvTableEditorSwing tableEditor) {
         super(tableEditor);
@@ -89,7 +88,7 @@ public class CsvTableEditorActionListeners extends CsvTableEditorUtilBase implem
             }
             int currentColumn = table.getSelectedColumn();
 
-            tableEditor.removeRows(Arrays.stream(currentRows).map(row -> table.convertRowIndexToModel(row)).boxed().collect(Collectors.toList()));
+            tableEditor.removeRows(Arrays.stream(currentRows).map(table::convertRowIndexToModel).boxed().collect(Collectors.toList()));
 
             selectCell(table, currentRows[0], currentColumn);
         } finally {
@@ -116,7 +115,7 @@ public class CsvTableEditorActionListeners extends CsvTableEditorUtilBase implem
             tableEditor.removeColumns(
                     Arrays.stream(selectedColumns)
                             .filter(selectedColumn -> selectedColumn >= 0 && selectedColumn < columnCount)
-                            .map(col -> table.convertColumnIndexToModel(col))
+                            .map(table::convertColumnIndexToModel)
                             .boxed()
                             .collect(Collectors.toList())
             );
@@ -148,8 +147,8 @@ public class CsvTableEditorActionListeners extends CsvTableEditorUtilBase implem
             int focusedColumn = table.getSelectedColumn();
 
             tableEditor.clearCells(
-                    Arrays.stream(selectedRows).map(row -> table.convertRowIndexToModel(row)).boxed().collect(Collectors.toList()),
-                    Arrays.stream(selectedColumns).map(col -> table.convertColumnIndexToModel(col)).boxed().collect(Collectors.toList())
+                    Arrays.stream(selectedRows).map(table::convertRowIndexToModel).boxed().collect(Collectors.toList()),
+                    Arrays.stream(selectedColumns).map(table::convertColumnIndexToModel).boxed().collect(Collectors.toList())
             );
 
             selectCell(table, focusedRow, focusedColumn);
@@ -167,10 +166,15 @@ public class CsvTableEditorActionListeners extends CsvTableEditorUtilBase implem
         table.changeSelection(actualRow, actualColumn, false, false);
     }
 
-    private final class OpenTextEditor implements LinkListener {
+    private final class OpenTextEditor implements LinkListener<Object> {
         @Override
         public void linkSelected(LinkLabel linkLabel, Object o) {
-            FileEditorManager.getInstance(csvTableEditor.getProject()).openTextEditor(new OpenFileDescriptor(csvTableEditor.getProject(), csvTableEditor.getFile()), true);
+            if (csvTableEditor.getProject() != null && csvTableEditor.getFile() != null) {
+                FileEditorManager.getInstance(csvTableEditor.getProject()).openTextEditor(
+                        new OpenFileDescriptor(csvTableEditor.getProject(), csvTableEditor.getFile()),
+                        true
+                );
+            }
         }
     }
 }

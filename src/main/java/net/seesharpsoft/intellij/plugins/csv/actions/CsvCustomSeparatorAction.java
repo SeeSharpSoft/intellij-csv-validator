@@ -41,7 +41,7 @@ public class CsvCustomSeparatorAction extends ToggleAction implements ActionUpda
         if (customValueSeparator == null) {
             return;
         }
-        if (customValueSeparator.length() == 0 || customValueSeparator.contains(" ")) {
+        if (customValueSeparator.isEmpty() || customValueSeparator.contains(" ")) {
             JOptionPane.showMessageDialog(fileEditor == null ? null : fileEditor.getComponent(), "Value separator must have at least one character and no spaces!");
             return;
         }

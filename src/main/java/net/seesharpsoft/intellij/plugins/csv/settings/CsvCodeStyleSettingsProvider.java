@@ -8,27 +8,28 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.codeStyle.*;
 import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
+import net.seesharpsoft.intellij.plugins.csv.CsvPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class CsvCodeStyleSettingsProvider extends CodeStyleSettingsProvider {
     @Override
-    public CustomCodeStyleSettings createCustomSettings(CodeStyleSettings settings) {
+    public CustomCodeStyleSettings createCustomSettings(@NotNull CodeStyleSettings settings) {
         return new CsvCodeStyleSettings(settings);
     }
 
     @Nullable
     @Override
     public String getConfigurableDisplayName() {
-        return "CSV/TSV/PSV";
+        return CsvPlugin.getLocalizedText("settings.title");
     }
 
     @NotNull
     @Override
-    public CodeStyleConfigurable createConfigurable(CodeStyleSettings settings, CodeStyleSettings originalSettings) {
+    public CodeStyleConfigurable createConfigurable(@NotNull CodeStyleSettings settings, @NotNull CodeStyleSettings originalSettings) {
         return new CodeStyleAbstractConfigurable(settings, originalSettings, CsvLanguage.INSTANCE.getDisplayName()) {
             @Override
-            protected CodeStyleAbstractPanel createPanel(CodeStyleSettings settings) {
+            protected @NotNull CodeStyleAbstractPanel createPanel(@NotNull CodeStyleSettings settings) {
                 return new CsvCodeStyleMainPanel(getCurrentSettings(), settings);
             }
 
@@ -64,8 +65,8 @@ public class CsvCodeStyleSettingsProvider extends CodeStyleSettingsProvider {
             }
 
             @Override
-            public String getTabTitle() {
-                return "Wrapping";
+            public @NotNull String getTabTitle() {
+                return CsvPlugin.getLocalizedText("settings.codestyle.wrapping");
             }
         }
 
@@ -75,8 +76,8 @@ public class CsvCodeStyleSettingsProvider extends CodeStyleSettingsProvider {
             }
 
             @Override
-            protected String getTabTitle() {
-                return "Spaces";
+            protected @NotNull String getTabTitle() {
+                return CsvPlugin.getLocalizedText("settings.codestyle.spaces");
             }
 
             @Override
@@ -85,7 +86,7 @@ public class CsvCodeStyleSettingsProvider extends CodeStyleSettingsProvider {
             }
 
             @Override
-            protected PsiFile doReformat(Project project, PsiFile psiFile) {
+            protected @NotNull PsiFile doReformat(Project project, @NotNull PsiFile psiFile) {
                 CodeStyleManager.getInstance(project).reformatText(psiFile, 0, psiFile.getTextLength());
                 return psiFile;
             }

@@ -14,6 +14,7 @@ import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.UserDataHolder;
 import net.seesharpsoft.UnhandledSwitchCaseException;
 import net.seesharpsoft.intellij.plugins.csv.CsvIconProvider;
+import net.seesharpsoft.intellij.plugins.csv.CsvPlugin;
 import net.seesharpsoft.intellij.plugins.csv.highlighter.CsvSyntaxHighlighter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -22,6 +23,7 @@ import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.ResourceBundle;
 
 import static com.intellij.openapi.editor.colors.TextAttributesKey.createTextAttributesKey;
 
@@ -46,20 +48,21 @@ public class CsvColorSettings implements ColorSettingsPage {
     private static final Key<List<TextAttributes>> COLUMN_COLORING_TEXT_ATTRIBUTES = Key.create("CSV_PLUGIN_COLUMN_COLORING_ATTRIBUTES");
 
     static {
-        List<AttributesDescriptor> attributesDescriptors = new ArrayList();
-        attributesDescriptors.add(new AttributesDescriptor("Separator", COMMA));
-        attributesDescriptors.add(new AttributesDescriptor("Quote", QUOTE));
-        attributesDescriptors.add(new AttributesDescriptor("Text", TEXT));
-        attributesDescriptors.add(new AttributesDescriptor("Escaped Text", ESCAPED_TEXT));
-        attributesDescriptors.add(new AttributesDescriptor("Comment", COMMENT));
+        List<AttributesDescriptor> attributesDescriptors = new ArrayList<>();
+        ResourceBundle bundle = CsvPlugin.getResourceBundle();
+        attributesDescriptors.add(new AttributesDescriptor(bundle.getString("color.attribute.separator"), COMMA));
+        attributesDescriptors.add(new AttributesDescriptor(bundle.getString("color.attribute.quote"), QUOTE));
+        attributesDescriptors.add(new AttributesDescriptor(bundle.getString("color.attribute.text"), TEXT));
+        attributesDescriptors.add(new AttributesDescriptor(bundle.getString("color.attribute.text.escaped"), ESCAPED_TEXT));
+        attributesDescriptors.add(new AttributesDescriptor(bundle.getString("color.attribute.comment"), COMMENT));
 
         COLUMN_COLORING_ATTRIBUTES = new ArrayList<>();
         for (int i = 0; i < MAX_COLUMN_COLORING_COLORS; ++i) {
             TextAttributesKey textAttributesKey = createTextAttributesKey(String.format("CSV_PLUGIN_COLUMN_COLORING_ATTRIBUTE_%d", i), TEXT);
             COLUMN_COLORING_ATTRIBUTES.add(textAttributesKey);
-            attributesDescriptors.add(new AttributesDescriptor(String.format("Column Color %d", i + 1), textAttributesKey));
+            attributesDescriptors.add(new AttributesDescriptor(String.format(bundle.getString("color.attribute.column.nr"), i + 1), textAttributesKey));
         }
-        DESCRIPTORS = attributesDescriptors.toArray(new AttributesDescriptor[attributesDescriptors.size()]);
+        DESCRIPTORS = attributesDescriptors.toArray(new AttributesDescriptor[0]);
     }
 
     public static TextAttributesKey getTextAttributesKeys(int columnIndex) {
@@ -150,6 +153,6 @@ public class CsvColorSettings implements ColorSettingsPage {
     @NotNull
     @Override
     public String getDisplayName() {
-        return "CSV/TSV/PSV";
+        return CsvPlugin.getLocalizedText("settings.title");
     }
 }
