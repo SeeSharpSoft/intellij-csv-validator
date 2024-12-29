@@ -92,7 +92,8 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
     }
 
     private void resetPointer() {
-        myPointedRecord = PsiHelper.getFirstChildOfType(getPsiFile(), CsvRecord.class);
+        PsiFile psiFile = getPsiFile();
+        myPointedRecord = psiFile == null ? null : PsiHelper.getFirstChildOfType(psiFile, CsvRecord.class);
         myPointedRow = 0;
     }
 

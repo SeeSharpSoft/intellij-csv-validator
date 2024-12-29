@@ -10,7 +10,18 @@
 
 ### Fixed
 
-## [4.0.1] - Dec 08, 2024
+## [4.0.2] - Dec 29, 2024
+
+### Added
+
+- Localization support for actions
+
+### Fixed
+
+- Usage of correct resource bundle
+- NotNull parameter 'parent' of getFirstChildOfType #886
+
+## 4.0.1 - Dec 08, 2024
 
 ### Added
 
