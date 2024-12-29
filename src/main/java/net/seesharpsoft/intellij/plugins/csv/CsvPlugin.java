@@ -5,7 +5,6 @@ import com.intellij.ide.BrowserUtil;
 import com.intellij.ide.actions.ShowSettingsUtilImpl;
 import com.intellij.ide.plugins.IdeaPluginDescriptor;
 import com.intellij.ide.plugins.PluginManagerCore;
-import com.intellij.lang.properties.ResourceBundleManager;
 import com.intellij.notification.*;
 import com.intellij.openapi.extensions.PluginId;
 import com.intellij.openapi.progress.ProgressIndicator;
@@ -116,7 +115,7 @@ public class CsvPlugin implements ProjectActivity, DumbAware {
     
     public static ResourceBundle getResourceBundle() {
         if (_resourceBundle == null) {
-            _resourceBundle = DynamicBundle.getPluginBundle(getPluginDescriptor()); //ResourceBundle.getBundle("localization/CSVEditorResources", DynamicBundle.getLocale());
+            _resourceBundle = DynamicBundle.getPluginBundle(getPluginDescriptor());
         }
         return _resourceBundle;
     }
