@@ -1,5 +1,6 @@
 package net.seesharpsoft.intellij.plugins.csv;
 
+import com.intellij.DynamicBundle;
 import com.intellij.ide.BrowserUtil;
 import com.intellij.ide.actions.ShowSettingsUtilImpl;
 import com.intellij.ide.plugins.IdeaPluginDescriptor;
@@ -114,7 +115,7 @@ public class CsvPlugin implements ProjectActivity, DumbAware {
     
     public static ResourceBundle getResourceBundle() {
         if (_resourceBundle == null) {
-            _resourceBundle = ResourceBundle.getBundle("i18n/CSVEditorResources");
+            _resourceBundle = DynamicBundle.getPluginBundle(getPluginDescriptor());
         }
         return _resourceBundle;
     }
