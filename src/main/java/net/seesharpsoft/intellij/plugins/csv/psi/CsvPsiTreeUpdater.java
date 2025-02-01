@@ -1,6 +1,7 @@
 package net.seesharpsoft.intellij.plugins.csv.psi;
 
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.command.CommandProcessor;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.fileTypes.FileType;
@@ -515,27 +516,25 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
 
         @Override
         public void execute() {
-            ApplicationManager.getApplication().runWriteAction(
-                    () -> {
-                        PsiFile psiFile = (PsiFile) getAnchor();
+            WriteAction.run(() -> {
+                PsiFile psiFile = (PsiFile) getAnchor();
 
-                        PsiDocumentManager manager = PsiDocumentManager.getInstance(psiFile.getProject());
-                        Document document = manager.getDocument(psiFile);
-                        if (document == null) return;
+                PsiDocumentManager manager = PsiDocumentManager.getInstance(psiFile.getProject());
+                Document document = manager.getDocument(psiFile);
+                if (document == null) return;
 
-                        manager.doPostponedOperationsAndUnblockDocument(document);
+                manager.doPostponedOperationsAndUnblockDocument(document);
 
-                        int offset = 0;
-                        for (Pair<TextRange, String> replacement : myReplacements) {
-                            TextRange textRange = replacement.getFirst().shiftRight(offset);
-                            String text = replacement.getSecond();
-                            document.replaceString(textRange.getStartOffset(), textRange.getEndOffset(), text);
-                            offset += text.length() - textRange.getLength();
-                        }
+                int offset = 0;
+                for (Pair<TextRange, String> replacement : myReplacements) {
+                    TextRange textRange = replacement.getFirst().shiftRight(offset);
+                    String text = replacement.getSecond();
+                    document.replaceString(textRange.getStartOffset(), textRange.getEndOffset(), text);
+                    offset += text.length() - textRange.getLength();
+                }
 
-                        manager.commitDocument(document);
-                    }
-            );
+                manager.commitDocument(document);
+            });
         }
     }
 }
