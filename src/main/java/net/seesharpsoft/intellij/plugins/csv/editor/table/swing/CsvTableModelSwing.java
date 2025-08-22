@@ -1,6 +1,7 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.util.Computable;
 import com.intellij.psi.PsiElement;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditor;
@@ -25,12 +26,9 @@ import java.util.concurrent.TimeUnit;
 
 public class CsvTableModelSwing extends CsvTableModelBase<CsvTableEditor> implements TableModel {
 
-    /**
-     * List of listeners
-     */
     protected EventListenerList listenerList = new EventListenerList();
 
-    protected ScheduledFuture delayedUpdate;
+    protected ScheduledFuture<?> delayedUpdate;
 
     protected ScheduledExecutorService executorService;
 
@@ -64,10 +62,7 @@ public class CsvTableModelSwing extends CsvTableModelBase<CsvTableEditor> implem
     }
 
     protected void fireTableChanged(TableModelEvent e) {
-        // Guaranteed to return a non-null array
         Object[] listeners = listenerList.getListenerList();
-        // Process the listeners last to first, notifying
-        // those that are interested in this event
         for (int i = listeners.length - 2; i >= 0; i -= 2) {
             if (listeners[i] == TableModelListener.class) {
                 ((TableModelListener) listeners[i + 1]).tableChanged(e);
@@ -97,17 +92,17 @@ public class CsvTableModelSwing extends CsvTableModelBase<CsvTableEditor> implem
 
     @Override
     public String getColumnName(int column) {
-        PsiElement headerField = PsiHelper.findFirst(getPsiFile(), CsvTypes.FIELD);
-        if (headerField != null) {
-            headerField = PsiHelper.getNextNthSiblingOfType(headerField, column, CsvField.class);
-        }
-        String headerText = headerField == null ? "" : CsvHelper.unquoteCsvValue(headerField.getText(), getEscapeCharacter()).trim();
-
-        Map<String, Object> params = new HashMap<>();
-        params.put("header", headerText);
-        params.put("index", CsvEditorSettings.getInstance().isZeroBasedColumnNumbering() ? column : column + 1);
-
-        return CsvHelper.formatString("${header} (${index})", params);
+        return ApplicationManager.getApplication().runReadAction((Computable<String>) () -> {
+            PsiElement headerField = PsiHelper.findFirst(getPsiFile(), CsvTypes.FIELD);
+            if (headerField != null) {
+                headerField = PsiHelper.getNextNthSiblingOfType(headerField, column, CsvField.class);
+            }
+            String headerText = headerField == null ? "" : CsvHelper.unquoteCsvValue(headerField.getText(), getEscapeCharacter()).trim();
+            Map<String, Object> params = new HashMap<>();
+            params.put("header", headerText);
+            params.put("index", CsvEditorSettings.getInstance().isZeroBasedColumnNumbering() ? column : column + 1);
+            return CsvHelper.formatString("${header} (${index})", params);
+        });
     }
 
     @Override
