@@ -26,6 +26,9 @@ import java.util.concurrent.TimeUnit;
 
 public class CsvTableModelSwing extends CsvTableModelBase<CsvTableEditor> implements TableModel {
 
+    /**
+     * List of listeners
+     */
     protected EventListenerList listenerList = new EventListenerList();
 
     protected ScheduledFuture<?> delayedUpdate;
@@ -62,7 +65,10 @@ public class CsvTableModelSwing extends CsvTableModelBase<CsvTableEditor> implem
     }
 
     protected void fireTableChanged(TableModelEvent e) {
+        // Guaranteed to return a non-null array
         Object[] listeners = listenerList.getListenerList();
+        // Process the listeners last to first, notifying
+        // those that are interested in this event
         for (int i = listeners.length - 2; i >= 0; i -= 2) {
             if (listeners[i] == TableModelListener.class) {
                 ((TableModelListener) listeners[i + 1]).tableChanged(e);
@@ -90,6 +96,10 @@ public class CsvTableModelSwing extends CsvTableModelBase<CsvTableEditor> implem
         listenerList.remove(TableModelListener.class, l);
     }
 
+    /**
+     * Gets header name for a given column, with index formatting.
+     * PSI access is wrapped in a read action for thread safety.
+     */
     @Override
     public String getColumnName(int column) {
         return ApplicationManager.getApplication().runReadAction((Computable<String>) () -> {
