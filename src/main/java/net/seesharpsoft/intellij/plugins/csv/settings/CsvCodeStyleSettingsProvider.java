@@ -4,6 +4,7 @@ import com.intellij.application.options.CodeStyleAbstractConfigurable;
 import com.intellij.application.options.CodeStyleAbstractPanel;
 import com.intellij.application.options.IndentOptionsEditor;
 import com.intellij.application.options.TabbedLanguageCodeStylePanel;
+import com.intellij.lang.Language;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.codeStyle.*;
@@ -39,6 +40,11 @@ public class CsvCodeStyleSettingsProvider extends CodeStyleSettingsProvider {
                 return null;
             }
         };
+    }
+
+    @Override
+    public Language getLanguage() {
+        return CsvLanguage.INSTANCE;
     }
 
     private static class CsvCodeStyleMainPanel extends TabbedLanguageCodeStylePanel {
