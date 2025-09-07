@@ -9,9 +9,8 @@ import com.intellij.openapi.ui.ComboBox;
 import com.intellij.ui.CheckBoxWithColorChooser;
 import com.intellij.ui.JBColor;
 import com.intellij.util.FileContentUtilCore;
-import net.seesharpsoft.intellij.plugins.csv.CsvEscapeCharacter;
-import net.seesharpsoft.intellij.plugins.csv.CsvPlugin;
-import net.seesharpsoft.intellij.plugins.csv.CsvValueSeparator;
+import net.seesharpsoft.intellij.plugins.csv.components.CsvEscapeCharacter;
+import net.seesharpsoft.intellij.plugins.csv.components.CsvValueSeparator;
 import net.seesharpsoft.intellij.ui.CustomDisplayListCellRenderer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -22,6 +21,8 @@ import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import static net.seesharpsoft.intellij.plugins.csv.CsvPluginManager.getLocalizedText;
 
 public class CsvEditorSettingsProvider implements EditorOptionsProvider {
 
@@ -56,12 +57,12 @@ public class CsvEditorSettingsProvider implements EditorOptionsProvider {
 
     @Override
     public String getDisplayName() {
-        return CsvPlugin.getLocalizedText("settings.title");
+        return getLocalizedText("settings.title");
     }
 
     @Override
     public String getHelpTopic() {
-        return CsvPlugin.getLocalizedText("settings.editor.help");
+        return getLocalizedText("settings.editor.help");
     }
 
     @Nullable
@@ -164,7 +165,7 @@ public class CsvEditorSettingsProvider implements EditorOptionsProvider {
         comboValueColoring = new ComboBox<>(CsvEditorSettings.ValueColoring.values());
         comboValueColoring.setRenderer(new CustomDisplayListCellRenderer<>(CsvEditorSettings.ValueColoring::getDisplay));
 
-        cbTabHighlightColor = new CheckBoxWithColorChooser(CsvPlugin.getLocalizedText("settings.editor.highlight.tab.separator"));
+        cbTabHighlightColor = new CheckBoxWithColorChooser(getLocalizedText("settings.editor.highlight.tab.separator"));
         cbTabHighlightColor.setColor(JBColor.CYAN);
 
         NumberFormat numberFormat = NumberFormat.getIntegerInstance();

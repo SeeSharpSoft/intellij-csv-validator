@@ -9,9 +9,10 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.codeStyle.*;
 import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
-import net.seesharpsoft.intellij.plugins.csv.CsvPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import static net.seesharpsoft.intellij.plugins.csv.CsvPluginManager.getLocalizedText;
 
 public class CsvCodeStyleSettingsProvider extends CodeStyleSettingsProvider {
     @Override
@@ -22,7 +23,7 @@ public class CsvCodeStyleSettingsProvider extends CodeStyleSettingsProvider {
     @Nullable
     @Override
     public String getConfigurableDisplayName() {
-        return CsvPlugin.getLocalizedText("settings.title");
+        return getLocalizedText("settings.title");
     }
 
     @NotNull
@@ -72,7 +73,7 @@ public class CsvCodeStyleSettingsProvider extends CodeStyleSettingsProvider {
 
             @Override
             public @NotNull String getTabTitle() {
-                return CsvPlugin.getLocalizedText("settings.codestyle.wrapping");
+                return getLocalizedText("settings.codestyle.wrapping");
             }
         }
 
@@ -83,7 +84,7 @@ public class CsvCodeStyleSettingsProvider extends CodeStyleSettingsProvider {
 
             @Override
             protected @NotNull String getTabTitle() {
-                return CsvPlugin.getLocalizedText("settings.codestyle.spaces");
+                return getLocalizedText("settings.codestyle.spaces");
             }
 
             @Override

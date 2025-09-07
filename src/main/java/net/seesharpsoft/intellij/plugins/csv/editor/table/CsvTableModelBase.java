@@ -2,7 +2,7 @@ package net.seesharpsoft.intellij.plugins.csv.editor.table;
 
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
-import net.seesharpsoft.intellij.plugins.csv.CsvEscapeCharacter;
+import net.seesharpsoft.intellij.plugins.csv.components.CsvEscapeCharacter;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvField;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvPsiTreeUpdater;

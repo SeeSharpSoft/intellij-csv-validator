@@ -1,12 +1,8 @@
 package net.seesharpsoft.intellij.plugins.csv;
 
-import com.intellij.DynamicBundle;
 import com.intellij.ide.BrowserUtil;
 import com.intellij.ide.actions.ShowSettingsUtilImpl;
-import com.intellij.ide.plugins.IdeaPluginDescriptor;
-import com.intellij.ide.plugins.PluginManagerCore;
 import com.intellij.notification.*;
-import com.intellij.openapi.extensions.PluginId;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
@@ -21,23 +17,7 @@ import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettingsProvider;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ResourceBundle;
-
 public class CsvPlugin implements ProjectActivity, DumbAware {
-
-    private static ResourceBundle _resourceBundle;
-    
-    protected static IdeaPluginDescriptor getPluginDescriptor() {
-        return PluginManagerCore.getPlugin(PluginId.getId("net.seesharpsoft.intellij.plugins.csv"));
-    }
-
-    protected static String getVersion() {
-        return getPluginDescriptor().getVersion();
-    }
-
-    protected static String getChangeNotes() {
-        return getPluginDescriptor().getChangeNotes();
-    }
 
     private static void openLink(Project project, String link) {
         if (project.isDisposed()) return;
@@ -79,13 +59,13 @@ public class CsvPlugin implements ProjectActivity, DumbAware {
         doAsyncProjectMaintenance(project);
         
         NotificationGroup notificationGroup = NotificationGroupManager.getInstance().getNotificationGroup("net.seesharpsoft.intellij.plugins.csv");
-        if (notificationGroup == null || CsvEditorSettings.getInstance().checkCurrentPluginVersion(getVersion())) {
+        if (notificationGroup == null || CsvEditorSettings.getInstance().checkCurrentPluginVersion(CsvPluginManager.getVersion())) {
             return continuation;
         }
 
         Notification notification = notificationGroup.createNotification(
-                "CSV Editor " + getVersion() + " - Change Notes",
-                getChangeNotes() +
+                "CSV Editor " + CsvPluginManager.getVersion() + " - Change Notes",
+                CsvPluginManager.getChangeNotes() +
                         "<p>You can always <b>customize plugin settings</b> to your likings (shortcuts below)!</p>" +
                         "<br>" +
                         "<p>Visit the <b>CSV Editor homepage</b> to read more about the available features & settings, " +
@@ -112,17 +92,4 @@ public class CsvPlugin implements ProjectActivity, DumbAware {
         
         return continuation;
     }
-    
-    public static ResourceBundle getResourceBundle() {
-        if (_resourceBundle == null) {
-            _resourceBundle = DynamicBundle.getPluginBundle(getPluginDescriptor());
-        }
-        return _resourceBundle;
-    }
-
-    public static String getLocalizedText(String token) {
-        return getResourceBundle().getString(token);
-    }
-
-
 }

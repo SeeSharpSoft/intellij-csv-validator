@@ -4,6 +4,10 @@ import com.intellij.openapi.fileTypes.LanguageFileType;
 import com.intellij.openapi.util.NlsContexts;
 import com.intellij.openapi.util.NlsSafe;
 import net.seesharpsoft.intellij.plugins.csv.*;
+import net.seesharpsoft.intellij.plugins.csv.components.CsvEscapeCharacter;
+import net.seesharpsoft.intellij.plugins.csv.components.CsvEscapeCharacterHolder;
+import net.seesharpsoft.intellij.plugins.csv.components.CsvSeparatorHolder;
+import net.seesharpsoft.intellij.plugins.csv.components.CsvValueSeparator;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 

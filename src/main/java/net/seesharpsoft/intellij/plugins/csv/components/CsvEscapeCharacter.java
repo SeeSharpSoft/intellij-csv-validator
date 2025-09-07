@@ -1,4 +1,4 @@
-package net.seesharpsoft.intellij.plugins.csv;
+package net.seesharpsoft.intellij.plugins.csv.components;
 
 import com.intellij.util.xmlb.Converter;
 import com.intellij.xml.util.XmlStringUtil;
