@@ -3,6 +3,7 @@ package net.seesharpsoft.intellij.plugins.csv.components;
 import com.intellij.util.xmlb.Converter;
 import com.intellij.xml.util.XmlStringUtil;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.regex.Pattern;
 
@@ -13,20 +14,13 @@ public class CsvEscapeCharacter extends CsvCustomizableElement {
     public static CsvEscapeCharacter BACKSLASH = new CsvEscapeCharacter("\\", "Backslash (\\)", "\\\\", "BACKSLASH");
 
     public static CsvEscapeCharacter[] values() {
-        return new CsvEscapeCharacter[]{QUOTE, BACKSLASH};
+        return new CsvEscapeCharacter[]{ QUOTE, BACKSLASH };
     }
 
-    public static CsvEscapeCharacter getDefaultEscapeCharacter(String character) {
-        if (character != null) {
-            switch (character) {
-                case "QUOTE":
-                case "\"":
-                    return QUOTE;
-                case "BACKSLASH":
-                case "\\":
-                    return BACKSLASH;
-                default:
-                    break;
+    private static @Nullable CsvEscapeCharacter getDefaultEscapeCharacter(@NotNull String character) {
+        for (CsvEscapeCharacter defaultEC : values()) {
+            if (defaultEC.getCharacter().equals(character) || defaultEC.getName().equals(character)) {
+                return defaultEC;
             }
         }
         return null;

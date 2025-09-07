@@ -3,6 +3,7 @@ package net.seesharpsoft.intellij.plugins.csv.components;
 import com.intellij.util.xmlb.Converter;
 import com.intellij.xml.util.XmlStringUtil;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.regex.Pattern;
 
@@ -16,29 +17,14 @@ public class CsvValueSeparator extends CsvCustomizableElement {
     public static final CsvValueSeparator COLON = new CsvValueSeparator(":", "Colon (:)", "COLON");
     public static final CsvValueSeparator RS = new CsvValueSeparator("\u001E", "Record Separator ([RS])", "RS", true);
 
-    public static CsvValueSeparator getDefaultValueSeparator(String character) {
-        if (character != null) {
-            switch (character) {
-                case "COMMA":
-                case ",":
-                    return COMMA;
-                case "SEMICOLON":
-                case ";":
-                    return SEMICOLON;
-                case "PIPE":
-                case "|":
-                    return PIPE;
-                case "TAB":
-                case "\t":
-                    return TAB;
-                case "COLON":
-                case ":":
-                    return COLON;
-                case "RS":
-                case "\u001E":
-                    return RS;
-                default:
-                    break;
+    public static CsvValueSeparator @NotNull [] values() {
+        return new CsvValueSeparator[]{ COMMA, SEMICOLON, PIPE, TAB, COLON, RS };
+    }
+
+    private static @Nullable CsvValueSeparator getDefaultValueSeparator(@NotNull String character) {
+        for (CsvValueSeparator defaultVS : values()) {
+            if (defaultVS.getCharacter().equals(character) || defaultVS.getName().equals(character)) {
+                return defaultVS;
             }
         }
         return null;
@@ -50,10 +36,6 @@ public class CsvValueSeparator extends CsvCustomizableElement {
         }
         CsvValueSeparator defaultValueSeparator = getDefaultValueSeparator(character);
         return defaultValueSeparator == null ? new CsvValueSeparator(character) : defaultValueSeparator;
-    }
-
-    public static CsvValueSeparator[] values() {
-        return new CsvValueSeparator[]{COMMA, SEMICOLON, PIPE, TAB, COLON, RS};
     }
 
     public static class CsvValueSeparatorConverter extends Converter<CsvValueSeparator> {
