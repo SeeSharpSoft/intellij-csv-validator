@@ -1,6 +1,7 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.util.Computable;
 import com.intellij.psi.PsiElement;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditor;
@@ -30,7 +31,7 @@ public class CsvTableModelSwing extends CsvTableModelBase<CsvTableEditor> implem
      */
     protected EventListenerList listenerList = new EventListenerList();
 
-    protected ScheduledFuture delayedUpdate;
+    protected ScheduledFuture<?> delayedUpdate;
 
     protected ScheduledExecutorService executorService;
 
@@ -95,19 +96,23 @@ public class CsvTableModelSwing extends CsvTableModelBase<CsvTableEditor> implem
         listenerList.remove(TableModelListener.class, l);
     }
 
+    /**
+     * Gets header name for a given column, with index formatting.
+     * PSI access is wrapped in a read action for thread safety.
+     */
     @Override
     public String getColumnName(int column) {
-        PsiElement headerField = PsiHelper.findFirst(getPsiFile(), CsvTypes.FIELD);
-        if (headerField != null) {
-            headerField = PsiHelper.getNextNthSiblingOfType(headerField, column, CsvField.class);
-        }
-        String headerText = headerField == null ? "" : CsvHelper.unquoteCsvValue(headerField.getText(), getEscapeCharacter()).trim();
-
-        Map<String, Object> params = new HashMap<>();
-        params.put("header", headerText);
-        params.put("index", CsvEditorSettings.getInstance().isZeroBasedColumnNumbering() ? column : column + 1);
-
-        return CsvHelper.formatString("${header} (${index})", params);
+        return ApplicationManager.getApplication().runReadAction((Computable<String>) () -> {
+            PsiElement headerField = PsiHelper.findFirst(getPsiFile(), CsvTypes.FIELD);
+            if (headerField != null) {
+                headerField = PsiHelper.getNextNthSiblingOfType(headerField, column, CsvField.class);
+            }
+            String headerText = headerField == null ? "" : CsvHelper.unquoteCsvValue(headerField.getText(), getEscapeCharacter()).trim();
+            Map<String, Object> params = new HashMap<>();
+            params.put("header", headerText);
+            params.put("index", CsvEditorSettings.getInstance().isZeroBasedColumnNumbering() ? column : column + 1);
+            return CsvHelper.formatString("${header} (${index})", params);
+        });
     }
 
     @Override
