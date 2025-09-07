@@ -1,9 +1,9 @@
 package net.seesharpsoft.intellij.plugins.csv.parser;
 
 import com.intellij.testFramework.ParsingTestCase;
-import net.seesharpsoft.intellij.plugins.csv.CsvEscapeCharacter;
+import net.seesharpsoft.intellij.plugins.csv.components.CsvEscapeCharacter;
 import net.seesharpsoft.intellij.plugins.csv.CsvParserDefinition;
-import net.seesharpsoft.intellij.plugins.csv.CsvValueSeparator;
+import net.seesharpsoft.intellij.plugins.csv.components.CsvValueSeparator;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 
 import static net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings.COMMENT_INDICATOR_DEFAULT;

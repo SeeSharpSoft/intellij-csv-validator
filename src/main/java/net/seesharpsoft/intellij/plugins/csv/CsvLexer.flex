@@ -1,10 +1,11 @@
 package net.seesharpsoft.intellij.plugins.csv;
 
 import com.intellij.psi.tree.IElementType;
+import net.seesharpsoft.intellij.plugins.csv.components.CsvEscapeCharacter;
+import net.seesharpsoft.intellij.plugins.csv.components.CsvValueSeparator;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
-import com.intellij.psi.TokenType;
 import com.intellij.lexer.FlexLexer;
-import net.seesharpsoft.intellij.plugins.csv.CsvSeparatorHolder;
+import net.seesharpsoft.intellij.plugins.csv.components.CsvSeparatorHolder;
 
 %%
 

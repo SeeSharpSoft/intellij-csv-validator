@@ -14,7 +14,9 @@ import com.intellij.psi.PsiFile;
 import com.intellij.util.xmlb.XmlSerializerUtil;
 import com.intellij.util.xmlb.annotations.OptionTag;
 import net.seesharpsoft.commons.collection.Pair;
-import net.seesharpsoft.intellij.plugins.csv.*;
+import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
+import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
+import net.seesharpsoft.intellij.plugins.csv.CsvStorageHelper;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import net.seesharpsoft.intellij.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -83,7 +85,7 @@ public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttrib
         Attribute attribute = attributeMap.get(key);
         if (attribute == null && createIfMissing) {
             attribute = new Attribute();
-            if (!CsvHelper.isCsvFile(project, virtualFile)) {
+            if (!CsvHelper.isCsvFile(virtualFile)) {
                 LOG.error("CSV file attribute requested for non CSV file: " + virtualFile.toString());
             } else {
                 attributeMap.put(key, attribute);
@@ -167,7 +169,7 @@ public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttrib
 
     @NotNull
     public CsvValueSeparator getValueSeparator(Project project, VirtualFile virtualFile) {
-        if (!CsvHelper.isCsvFile(project, virtualFile)) {
+        if (!CsvHelper.isCsvFile(virtualFile)) {
             return CsvEditorSettings.getInstance().getDefaultValueSeparator();
         }
         FileType fileType = virtualFile.getFileType();
@@ -207,7 +209,7 @@ public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttrib
 
     @NotNull
     public CsvEscapeCharacter getEscapeCharacter(Project project, VirtualFile virtualFile) {
-        if (!CsvHelper.isCsvFile(project, virtualFile)) {
+        if (!CsvHelper.isCsvFile(virtualFile)) {
             return CsvEditorSettings.getInstance().getDefaultEscapeCharacter();
         }
         FileType fileType = virtualFile.getFileType();

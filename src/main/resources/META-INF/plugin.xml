@@ -49,9 +49,9 @@
     <depends optional="true" config-file="withGithub.xml">org.jetbrains.plugins.github</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <fileType name="CSV" language="csv" implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvFileType" extensions="csv" fieldName="INSTANCE"/>
-        <fileType name="TSV" language="csv" implementationClass="net.seesharpsoft.intellij.plugins.tsv.TsvFileType" extensions="tsv;tab" fieldName="INSTANCE"/>
-        <fileType name="PSV" language="csv" implementationClass="net.seesharpsoft.intellij.plugins.psv.PsvFileType" extensions="psv" fieldName="INSTANCE"/>
+        <fileType name="CSV" language="csv" implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvFileType" extensions="csv"/>
+        <fileType name="TSV" language="csv" implementationClass="net.seesharpsoft.intellij.plugins.tsv.TsvFileType" extensions="tsv;tab"/>
+        <fileType name="PSV" language="csv" implementationClass="net.seesharpsoft.intellij.plugins.psv.PsvFileType" extensions="psv"/>
 
         <lang.parserDefinition language="csv"
                                implementationClass="net.seesharpsoft.intellij.plugins.csv.CsvParserDefinition"/>
@@ -59,6 +59,10 @@
         <lang.syntaxHighlighterFactory language="csv"
                                        implementationClass="net.seesharpsoft.intellij.plugins.csv.highlighter.CsvSyntaxHighlighterFactory"/>
         <editorHighlighterProvider filetype="CSV"
+                                   implementationClass="net.seesharpsoft.intellij.plugins.csv.highlighter.CsvEditorHighlighterProvider"/>
+        <editorHighlighterProvider filetype="TSV"
+                                   implementationClass="net.seesharpsoft.intellij.plugins.csv.highlighter.CsvEditorHighlighterProvider"/>
+        <editorHighlighterProvider filetype="PSV"
                                    implementationClass="net.seesharpsoft.intellij.plugins.csv.highlighter.CsvEditorHighlighterProvider"/>
         <highlightUsagesHandlerFactory
                 implementation="net.seesharpsoft.intellij.plugins.csv.highlighter.CsvHighlightUsagesHandlerFactory"/>

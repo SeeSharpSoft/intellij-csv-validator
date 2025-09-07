@@ -22,7 +22,7 @@ public class CsvFileEditorProvider implements AsyncFileEditorProvider, DumbAware
             return !SingleRootFileViewProvider.isTooLargeForContentLoading(file)
                     && !SingleRootFileViewProvider.isTooLargeForIntelligence(file)
                     && !(file instanceof DiffViewerVirtualFile)
-                    && CsvHelper.isCsvFile(project, file);
+                    && CsvHelper.isCsvFile(file);
         } catch(Exception exc) {
             return false;
         }

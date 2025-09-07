@@ -10,6 +10,18 @@
 
 ### Fixed
 
+## [4.1.0] - Sep 07, 2025
+
+### Fixed
+
+- Access is allowed with explicit read lock #898 #901
+- Rework CSV file detection for FileEditorProvider #904
+- Legacy configurable id calculation mode from localizable name will be used for configurable class CsvCodeStyleSettingsProvider. Please override getConfigurableId or getLanguage. #909
+
+### Changed
+
+- Project structure refactoring to avoid circular dependencies
+
 ## [4.0.2] - Dec 29, 2024
 
 ### Added

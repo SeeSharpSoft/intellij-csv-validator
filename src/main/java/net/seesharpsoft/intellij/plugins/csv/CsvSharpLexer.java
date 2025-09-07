@@ -4,6 +4,8 @@ import com.intellij.lexer.LexerBase;
 import com.intellij.psi.tree.IElementType;
 import net.seesharpsoft.UnhandledSwitchCaseException;
 import net.seesharpsoft.commons.util.Tokenizer;
+import net.seesharpsoft.intellij.plugins.csv.components.CsvSeparatorHolder;
+import net.seesharpsoft.intellij.plugins.csv.components.CsvValueSeparator;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

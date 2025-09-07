@@ -8,16 +8,17 @@ import com.intellij.openapi.components.Storage;
 import com.intellij.openapi.editor.ex.EditorSettingsExternalizable;
 import com.intellij.util.xmlb.annotations.OptionTag;
 import com.intellij.util.xmlb.annotations.Transient;
-import net.seesharpsoft.intellij.plugins.csv.CsvEscapeCharacter;
-import net.seesharpsoft.intellij.plugins.csv.CsvPlugin;
+import net.seesharpsoft.intellij.plugins.csv.components.CsvEscapeCharacter;
 import net.seesharpsoft.intellij.plugins.csv.CsvStorageHelper;
-import net.seesharpsoft.intellij.plugins.csv.CsvValueSeparator;
+import net.seesharpsoft.intellij.plugins.csv.components.CsvValueSeparator;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.Objects;
+
+import static net.seesharpsoft.intellij.plugins.csv.CsvPluginManager.getLocalizedText;
 
 @State(
         name = "CsvEditorSettings",
@@ -41,9 +42,9 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
     private static final CsvEditorSettings STATIC_TEST_INSTANCE = new CsvEditorSettings();
 
     public enum EditorPrio {
-        TEXT_FIRST(CsvPlugin.getLocalizedText("settings.editor.prio.text_first")),
-        TABLE_FIRST(CsvPlugin.getLocalizedText("settings.editor.prio.table_first")),
-        TEXT_ONLY(CsvPlugin.getLocalizedText("settings.editor.prio.text_only"));
+        TEXT_FIRST(getLocalizedText("settings.editor.prio.text_first")),
+        TABLE_FIRST(getLocalizedText("settings.editor.prio.table_first")),
+        TEXT_ONLY(getLocalizedText("settings.editor.prio.text_only"));
 
         private final String label;
         
@@ -57,8 +58,8 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
     }
 
     public enum ValueColoring {
-        RAINBOW(CsvPlugin.getLocalizedText("settings.editor.coloring.rainbow")),
-        SIMPLE(CsvPlugin.getLocalizedText("settings.editor.coloring.simple"));
+        RAINBOW(getLocalizedText("settings.editor.coloring.rainbow")),
+        SIMPLE(getLocalizedText("settings.editor.coloring.simple"));
 
         private final String display;
 

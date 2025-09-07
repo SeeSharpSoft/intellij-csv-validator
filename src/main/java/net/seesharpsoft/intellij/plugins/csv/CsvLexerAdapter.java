@@ -1,6 +1,9 @@
 package net.seesharpsoft.intellij.plugins.csv;
 
 import com.intellij.lexer.FlexAdapter;
+import net.seesharpsoft.intellij.plugins.csv.components.CsvEscapeCharacter;
+import net.seesharpsoft.intellij.plugins.csv.components.CsvSeparatorHolder;
+import net.seesharpsoft.intellij.plugins.csv.components.CsvValueSeparator;
 
 public class CsvLexerAdapter extends FlexAdapter implements CsvSeparatorHolder {
 
