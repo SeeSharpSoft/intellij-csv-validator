@@ -2,6 +2,7 @@ package net.seesharpsoft.intellij.plugins.csv;
 
 import com.intellij.lang.*;
 import com.intellij.lexer.Lexer;
+import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.fileTypes.FileTypeRegistry;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -51,32 +52,21 @@ public final class CsvHelper {
         return node.getPsi();
     }
 
-    public static boolean isCsvFile(String extension) {
-        if (extension == null) {
-            return false;
-        }
-        Language language = LanguageUtil.getFileTypeLanguage(
-                FileTypeRegistry.getInstance().getFileTypeByExtension(extension)
-        );
+    public static boolean isCsvFile(FileType fileType) {
+        Language language = LanguageUtil.getFileTypeLanguage(fileType);
         return language != null && language.isKindOf(CsvLanguage.INSTANCE);
     }
 
-    public static boolean isCsvFile(Project project, VirtualFile file) {
-        if (file == null) {
-            return false;
-        }
-        if (project == null) {
-            return isCsvFile(file.getExtension());
-        }
-        final Language language = LanguageUtil.getLanguageForPsi(project, file);
-        return language != null && language.isKindOf(CsvLanguage.INSTANCE);
+    public static boolean isCsvFile(String extension) {
+        return extension != null && isCsvFile(FileTypeRegistry.getInstance().getFileTypeByExtension(extension));
+    }
+
+    public static boolean isCsvFile(VirtualFile file) {
+        return file != null && isCsvFile(file.getFileType());
     }
 
     public static boolean isCsvFile(PsiFile file) {
-        if (file == null) {
-            return false;
-        }
-        return isCsvFile(file.getProject(), getVirtualFile(file));
+        return file != null && isCsvFile(getVirtualFile(file));
     }
 
     public static boolean isCommentElement(PsiElement element) {
