@@ -4,18 +4,10 @@ import com.intellij.util.xmlb.Converter;
 import com.intellij.xml.util.XmlStringUtil;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Objects;
 import java.util.regex.Pattern;
 
-public class CsvEscapeCharacter {
-    private final String myCharacter;
-    private final String myDisplay;
-    private final Pattern myPattern;
-    private final String myRegexPattern;
-    private final String myName;
-
-    private static final String CUSTOM_NAME = "CUSTOM";
-    private static final String CUSTOM_DISPLAY = "Custom";
+public class CsvEscapeCharacter extends CsvCustomizableElement {
+    private final String myStringPattern;
 
     public static CsvEscapeCharacter QUOTE = new CsvEscapeCharacter("\"", "Double Quote (\")", "\"", "QUOTE");
     public static CsvEscapeCharacter BACKSLASH = new CsvEscapeCharacter("\\", "Backslash (\\)", "\\\\", "BACKSLASH");
@@ -63,52 +55,15 @@ public class CsvEscapeCharacter {
     }
 
     private CsvEscapeCharacter(String character, String display, String regexPattern, String name) {
-        myCharacter = character;
-        myDisplay = display;
-        myRegexPattern = regexPattern;
-        myPattern = Pattern.compile(Pattern.quote(myCharacter + "\""));
-        myName = name;
-    }
-
-    public String getCharacter() {
-        return myCharacter;
-    }
-
-    public String getDisplay() {
-        return myDisplay;
-    }
-
-    public String getRegexPattern() {
-        return myRegexPattern;
+        super(character, display, Pattern.quote(character + "\""), name);
+        myStringPattern = regexPattern;
     }
 
     public boolean isEscapedQuote(String text) {
-        return myPattern.matcher(text).matches();
+        return getPattern().matcher(text).matches();
     }
 
-    public String getName() {
-        return myName;
-    }
-
-    public boolean isCustom() {
-        return CUSTOM_NAME.equals(getName());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(getCharacter(), isCustom());
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (!(obj instanceof CsvEscapeCharacter otherObj)) {
-            return false;
-        }
-        return Objects.equals(otherObj.getCharacter(), this.getCharacter()) && Objects.equals(otherObj.isCustom(), this.isCustom());
-    }
-
-    @Override
-    public String toString() {
-        return getDisplay();
+    public String getStringPattern() {
+        return myStringPattern;
     }
 }

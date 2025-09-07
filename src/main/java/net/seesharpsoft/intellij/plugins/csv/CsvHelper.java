@@ -279,7 +279,7 @@ public final class CsvHelper {
         if (trimmedContent.length() > 1 && trimmedContent.startsWith("\"") && trimmedContent.endsWith("\"")) {
             result = trimmedContent.substring(1, trimmedContent.length() - 1);
             if (escapeCharacter != null) {
-                result = result.replaceAll("(?:" + escapeCharacter.getRegexPattern() + ")\"", "\"");
+                result = result.replaceAll("(?:" + escapeCharacter.getStringPattern() + ")\"", "\"");
             }
         }
         return result;
@@ -299,7 +299,7 @@ public final class CsvHelper {
         }
         if (quotingEnforced || isQuotingRequired(content, valueSeparator)) {
             String result = content;
-            result = result.replaceAll("\"", escapeCharacter.getRegexPattern() + "\"");
+            result = result.replaceAll("\"", escapeCharacter.getStringPattern() + "\"");
             return "\"" + result + "\"";
         }
         return content;
