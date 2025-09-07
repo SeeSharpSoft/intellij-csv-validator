@@ -1,6 +1,8 @@
 package net.seesharpsoft.intellij.plugins.csv;
 
 import com.intellij.testFramework.PlatformLiteFixture;
+import net.seesharpsoft.intellij.plugins.csv.components.CsvEscapeCharacter;
+import net.seesharpsoft.intellij.plugins.csv.components.CsvValueSeparator;
 
 public class CsvHelperTest extends PlatformLiteFixture {
 

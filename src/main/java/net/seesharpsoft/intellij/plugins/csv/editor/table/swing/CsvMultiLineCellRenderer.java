@@ -7,7 +7,7 @@ import com.intellij.openapi.util.UserDataHolder;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
-import net.seesharpsoft.intellij.plugins.csv.settings.CsvColorSettings;
+import net.seesharpsoft.intellij.plugins.csv.highlighter.CsvTextAttributeKeys;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -48,7 +48,7 @@ public class CsvMultiLineCellRenderer extends JBScrollPane implements TableCellR
     }
 
     protected TextAttributes getColumnTextAttributes(int column) {
-        return CsvColorSettings.getTextAttributesOfColumn(column, myUserDataHolder);
+        return CsvTextAttributeKeys.getTextAttributesOfColumn(column, myUserDataHolder);
     }
 
     private Color getColumnForegroundColor(int column, Color fallback) {
@@ -194,7 +194,7 @@ public class CsvMultiLineCellRenderer extends JBScrollPane implements TableCellR
 
         @Override
         protected TextAttributes getColumnTextAttributes(int column) {
-            return CsvColorSettings.getCommentTextAttributes();
+            return CsvTextAttributeKeys.getCommentTextAttributes();
         }
     }
 }

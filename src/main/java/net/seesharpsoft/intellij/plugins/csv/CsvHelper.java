@@ -2,6 +2,7 @@ package net.seesharpsoft.intellij.plugins.csv;
 
 import com.intellij.lang.*;
 import com.intellij.lexer.Lexer;
+import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.fileTypes.FileTypeRegistry;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -15,7 +16,9 @@ import com.intellij.psi.impl.source.tree.FileElement;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
 import net.seesharpsoft.intellij.lang.FileParserDefinition;
+import net.seesharpsoft.intellij.plugins.csv.components.CsvEscapeCharacter;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvFileAttributes;
+import net.seesharpsoft.intellij.plugins.csv.components.CsvValueSeparator;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvField;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvFile;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvRecord;
@@ -24,10 +27,7 @@ import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import net.seesharpsoft.intellij.psi.PsiHelper;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -51,32 +51,21 @@ public final class CsvHelper {
         return node.getPsi();
     }
 
-    public static boolean isCsvFile(String extension) {
-        if (extension == null) {
-            return false;
-        }
-        Language language = LanguageUtil.getFileTypeLanguage(
-                FileTypeRegistry.getInstance().getFileTypeByExtension(extension)
-        );
+    public static boolean isCsvFile(FileType fileType) {
+        Language language = LanguageUtil.getFileTypeLanguage(fileType);
         return language != null && language.isKindOf(CsvLanguage.INSTANCE);
     }
 
-    public static boolean isCsvFile(Project project, VirtualFile file) {
-        if (file == null) {
-            return false;
-        }
-        if (project == null) {
-            return isCsvFile(file.getExtension());
-        }
-        final Language language = LanguageUtil.getLanguageForPsi(project, file);
-        return language != null && language.isKindOf(CsvLanguage.INSTANCE);
+    public static boolean isCsvFile(String extension) {
+        return extension != null && isCsvFile(FileTypeRegistry.getInstance().getFileTypeByExtension(extension));
+    }
+
+    public static boolean isCsvFile(VirtualFile file) {
+        return file != null && isCsvFile(file.getFileType());
     }
 
     public static boolean isCsvFile(PsiFile file) {
-        if (file == null) {
-            return false;
-        }
-        return isCsvFile(file.getProject(), getVirtualFile(file));
+        return file != null && isCsvFile(getVirtualFile(file));
     }
 
     public static boolean isCommentElement(PsiElement element) {
@@ -290,7 +279,7 @@ public final class CsvHelper {
         if (trimmedContent.length() > 1 && trimmedContent.startsWith("\"") && trimmedContent.endsWith("\"")) {
             result = trimmedContent.substring(1, trimmedContent.length() - 1);
             if (escapeCharacter != null) {
-                result = result.replaceAll("(?:" + escapeCharacter.getRegexPattern() + ")\"", "\"");
+                result = result.replaceAll("(?:" + escapeCharacter.getStringPattern() + ")\"", "\"");
             }
         }
         return result;
@@ -310,7 +299,7 @@ public final class CsvHelper {
         }
         if (quotingEnforced || isQuotingRequired(content, valueSeparator)) {
             String result = content;
-            result = result.replaceAll("\"", escapeCharacter.getRegexPattern() + "\"");
+            result = result.replaceAll("\"", escapeCharacter.getStringPattern() + "\"");
             return "\"" + result + "\"";
         }
         return content;

@@ -2,6 +2,7 @@ package net.seesharpsoft.intellij.plugins.csv.editor.table;
 
 import com.intellij.ide.structureView.StructureViewBuilder;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.editor.colors.EditorFontType;
@@ -14,9 +15,9 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiFile;
 import com.intellij.util.ui.UIUtil;
-import net.seesharpsoft.intellij.plugins.csv.CsvEscapeCharacter;
+import net.seesharpsoft.intellij.plugins.csv.components.CsvEscapeCharacter;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
-import net.seesharpsoft.intellij.plugins.csv.CsvValueSeparator;
+import net.seesharpsoft.intellij.plugins.csv.components.CsvValueSeparator;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvFile;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import net.seesharpsoft.intellij.psi.PsiFileHolder;
@@ -213,12 +214,11 @@ public abstract class CsvTableEditor implements FileEditor, PsiFileHolder {
             return null;
         }
         if (this.psiFile == null || !this.psiFile.isValid()) {
-            this.document = FileDocumentManager.getInstance().getDocument(this.file);
-
-            PsiDocumentManager documentManager = PsiDocumentManager.getInstance(project);
-
-            this.psiFile = documentManager.getPsiFile(this.document);
-
+            this.psiFile = ReadAction.compute(() -> {
+                this.document = FileDocumentManager.getInstance().getDocument(this.file);
+                PsiDocumentManager documentManager = PsiDocumentManager.getInstance(project);
+                return documentManager.getPsiFile(this.document);
+            });
             this.currentSeparator = CsvHelper.getValueSeparator(this.psiFile);
             this.currentEscapeCharacter = CsvHelper.getEscapeCharacter(this.psiFile);
         }

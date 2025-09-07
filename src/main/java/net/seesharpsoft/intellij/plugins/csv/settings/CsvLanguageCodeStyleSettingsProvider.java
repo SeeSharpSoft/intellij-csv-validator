@@ -5,10 +5,11 @@ import com.intellij.psi.codeStyle.CodeStyleSettingsCustomizable;
 import com.intellij.psi.codeStyle.CommonCodeStyleSettings;
 import com.intellij.psi.codeStyle.LanguageCodeStyleSettingsProvider;
 import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
-import net.seesharpsoft.intellij.plugins.csv.CsvPlugin;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ResourceBundle;
+
+import static net.seesharpsoft.intellij.plugins.csv.CsvPluginManager.getResourceBundle;
 
 public class CsvLanguageCodeStyleSettingsProvider extends LanguageCodeStyleSettingsProvider {
     @NotNull
@@ -19,7 +20,7 @@ public class CsvLanguageCodeStyleSettingsProvider extends LanguageCodeStyleSetti
 
     @Override
     public void customizeSettings(@NotNull CodeStyleSettingsCustomizable consumer, @NotNull SettingsType settingsType) {
-        ResourceBundle bundle = CsvPlugin.getResourceBundle();
+        ResourceBundle bundle = getResourceBundle();
         if (settingsType == SettingsType.LANGUAGE_SPECIFIC) {
             consumer.showCustomOption(CsvCodeStyleSettings.class,
                     "SPACE_BEFORE_SEPARATOR",

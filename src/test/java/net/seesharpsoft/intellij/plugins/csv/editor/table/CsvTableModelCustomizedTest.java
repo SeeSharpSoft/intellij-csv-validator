@@ -1,7 +1,7 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table;
 
-import net.seesharpsoft.intellij.plugins.csv.CsvEscapeCharacter;
-import net.seesharpsoft.intellij.plugins.csv.CsvValueSeparator;
+import net.seesharpsoft.intellij.plugins.csv.components.CsvEscapeCharacter;
+import net.seesharpsoft.intellij.plugins.csv.components.CsvValueSeparator;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 
 public class CsvTableModelCustomizedTest extends CsvTableModelBaseTest {
