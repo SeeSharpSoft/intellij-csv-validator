@@ -42,7 +42,7 @@ public class CsvPlugin implements ProjectActivity, DumbAware {
                 // start process
                 try {
                     CsvFileAttributes csvFileAttributes = CsvFileAttributes.getInstance(getProject());
-                    csvFileAttributes.cleanupAttributeMap(getProject());
+                    csvFileAttributes.cleanupAttributeMap(project);
                 } catch (Exception exception) {
                     // repeated unresolved bug-reports when retrieving the component
                     // while this cleanup is an optional and non-critical task
@@ -75,10 +75,10 @@ public class CsvPlugin implements ProjectActivity, DumbAware {
                 NotificationType.INFORMATION
         );
 
-        notification.addAction(NotificationAction.create("General Settings", (anActionEvent, notification1) -> {
+        notification.addAction(NotificationAction.create("General settings", (anActionEvent, notification1) -> {
             openLink(project, "#" + CsvEditorSettingsProvider.CSV_EDITOR_SETTINGS_ID);
         }));
-        notification.addAction(NotificationAction.create("Color Scheme", (anActionEvent, notification1) -> {
+        notification.addAction(NotificationAction.create("Color scheme", (anActionEvent, notification1) -> {
             openLink(project, "#reference.settingsdialog.IDE.editor.colors.CSV/TSV/PSV");
         }));
         notification.addAction(NotificationAction.create("Formatting", (anActionEvent, notification1) -> {
