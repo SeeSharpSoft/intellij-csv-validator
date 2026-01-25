@@ -1,8 +1,9 @@
 package net.seesharpsoft.intellij.plugins.csv;
 
 import com.intellij.ide.BrowserUtil;
-import com.intellij.ide.actions.ShowSettingsUtilImpl;
 import com.intellij.notification.*;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
@@ -22,11 +23,14 @@ public class CsvPlugin implements ProjectActivity, DumbAware {
     private static void openLink(Project project, String link) {
         if (project.isDisposed()) return;
 
-        if (link.startsWith("#")) {
-            ShowSettingsUtilImpl.showSettingsDialog(project, link.substring(1), null);
-        } else {
-            BrowserUtil.browse(link, project);
-        }
+        ApplicationManager.getApplication().invokeLater(() ->
+        {
+            if (link.startsWith("#")) {
+                ShowSettingsUtil.getInstance().showSettingsDialog(project, link.substring(1));
+            } else {
+                BrowserUtil.browse(link, project);
+            }
+        });
     }
 
     public static void doAsyncProjectMaintenance(@NotNull Project project) {
