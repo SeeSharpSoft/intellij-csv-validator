@@ -68,19 +68,10 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
         manager.addPsiTreeChangeListener(myPsiTreeChangeListener, myPsiFileHolder);
     }
 
-    protected void removePsiTreeChangeListener() {
-        PsiFile psiFile = getPsiFile();
-        if (psiFile == null) return;
-        PsiManager manager = psiFile.getManager();
-        if (manager == null) return;
-        manager.removePsiTreeChangeListener(myPsiTreeChangeListener);
-    }
-
     @Override
     public void dispose() {
         CsvTableModel.super.dispose();
         myPsiTreeUpdater.dispose();
-        removePsiTreeChangeListener();
     }
 
     private void onPsiTreeChanged(@Nullable PsiFile file) {

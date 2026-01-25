@@ -14,6 +14,7 @@
 
 ### Fixed
 
+- Compatibility verification issues
 - Invalid PSI Element - class CsvFile because different providers
 - PluginException - Element class CsvFile - file is invalid #923
 - NullPointerException #933

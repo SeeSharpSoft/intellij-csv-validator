@@ -39,6 +39,7 @@ public class CsvGithubIssueSubmitter extends ErrorReportSubmitter {
     public static final String GIT_USER = "SeeSharpSoft";
     public static final String GIT_REPO = "intellij-csv-validator";
     public static final GHRepositoryPath GITHUB_FULL_PATH = new GHRepositoryPath(GIT_USER, GIT_REPO);
+    private static final String REPORT_ACTION_TEXT = "Report to 'CSV Editor' (Github)";
 
     private static ScheduledFuture<?> recentlySentReport = null;
     private static final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
@@ -52,7 +53,7 @@ public class CsvGithubIssueSubmitter extends ErrorReportSubmitter {
     @NotNull
     @Override
     public String getReportActionText() {
-        return "Report to 'CSV Editor' (Github)";
+        return REPORT_ACTION_TEXT;
     }
 
     @Override
@@ -94,7 +95,7 @@ public class CsvGithubIssueSubmitter extends ErrorReportSubmitter {
         
         GithubApiRequestExecutor githubExecutor = GithubApiRequestExecutor.Factory.getInstance().create(account.getServer(), token);
 
-        Task submitTask = new Task.Backgroundable(project, getReportActionText()) {
+        Task submitTask = new Task.Backgroundable(project, REPORT_ACTION_TEXT) {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
                 submitToGithub(event, additionalInfo, githubExecutor, consumer, indicator);
