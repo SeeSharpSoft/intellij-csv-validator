@@ -1,9 +1,9 @@
 package net.seesharpsoft.intellij.plugins.csv.highlighter;
 
 import com.intellij.openapi.editor.HighlighterColors;
+import com.intellij.lang.Language;
 import com.intellij.openapi.editor.colors.TextAttributesKey;
 import com.intellij.psi.tree.IElementType;
-import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
@@ -21,7 +21,8 @@ public interface CsvHighlightingElement {
         private final TextAttributesKey[] myTextAttributesKeys;
 
         private TokenBased(@NonNls @NotNull String debugName, TextAttributesKey textAttributesKey) {
-            super(debugName, CsvLanguage.INSTANCE);
+            // Use a neutral language to avoid element type id issues across IDE versions
+            super(debugName, Language.ANY);
             myTextAttributesKeys = new TextAttributesKey[]{textAttributesKey};
         }
 

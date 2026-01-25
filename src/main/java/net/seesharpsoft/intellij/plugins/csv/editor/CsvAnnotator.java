@@ -56,14 +56,10 @@ public class CsvAnnotator implements Annotator {
                     )
             );
 
-            AnnotationBuilder annotationBuilder = holder.newAnnotation(CSV_COLUMN_INFO_SEVERITY, message)
+            holder.newAnnotation(CSV_COLUMN_INFO_SEVERITY, message)
                     .range(element)
-                    .needsUpdateOnTyping(false);
-
-            if (tooltip != null) {
-                annotationBuilder.tooltip(tooltip);
-            }
-            annotationBuilder.create();
+                    .tooltip(tooltip)
+                    .create();
         }
     }
 
@@ -98,7 +94,6 @@ public class CsvAnnotator implements Annotator {
                 holder.newAnnotation(CSV_COLUMN_INFO_SEVERITY, "↹")
                         .range(element)
                         .enforcedTextAttributes(textAttributes)
-                        .needsUpdateOnTyping(false)
                         .create();
             }
             return true;

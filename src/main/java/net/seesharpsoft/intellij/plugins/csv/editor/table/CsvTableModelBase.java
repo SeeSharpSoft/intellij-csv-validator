@@ -1,5 +1,8 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table;
 
+import com.intellij.openapi.application.ModalityState;
+import com.intellij.openapi.application.ReadAction;
+import com.intellij.util.concurrency.AppExecutorUtil;
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvEscapeCharacter;
@@ -46,25 +49,29 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
 
     protected void addPsiTreeChangeListener() {
         PsiFile psiFile = getPsiFile();
-        if (psiFile == null) return;
+        if (psiFile == null) {
+            // Resolve PSI off-EDT and register the listener when available to avoid slow operations on EDT
+            ReadAction
+                .nonBlocking(this::getPsiFile)
+                .coalesceBy(this)
+                .finishOnUiThread(ModalityState.any(), pf -> {
+                    if (pf == null) return;
+                    PsiManager mgr = pf.getManager();
+                    if (mgr == null) return;
+                    mgr.addPsiTreeChangeListener(myPsiTreeChangeListener, myPsiFileHolder);
+                })
+                .submit(AppExecutorUtil.getAppExecutorService());
+            return;
+        }
         PsiManager manager = psiFile.getManager();
         if (manager == null) return;
         manager.addPsiTreeChangeListener(myPsiTreeChangeListener, myPsiFileHolder);
-    }
-
-    protected void removePsiTreeChangeListener() {
-        PsiFile psiFile = getPsiFile();
-        if (psiFile == null) return;
-        PsiManager manager = psiFile.getManager();
-        if (manager == null) return;
-        manager.removePsiTreeChangeListener(myPsiTreeChangeListener);
     }
 
     @Override
     public void dispose() {
         CsvTableModel.super.dispose();
         myPsiTreeUpdater.dispose();
-        removePsiTreeChangeListener();
     }
 
     private void onPsiTreeChanged(@Nullable PsiFile file) {

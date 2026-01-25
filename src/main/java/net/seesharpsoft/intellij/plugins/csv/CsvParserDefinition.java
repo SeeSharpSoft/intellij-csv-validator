@@ -55,14 +55,13 @@ public class CsvParserDefinition implements FileParserDefinition {
     }
 
     @Override
-    public IFileElementType getFileNodeType() {
+    public @NotNull IFileElementType getFileNodeType() {
         return FILE;
     }
 
     @Override
-    public PsiFile createFile(FileViewProvider viewProvider) {
+    public @NotNull PsiFile createFile(@NotNull FileViewProvider viewProvider) {
         return new CsvFile(viewProvider, viewProvider.getFileType());
-//        return new CsvFile(viewProvider, CsvFileType.INSTANCE);
     }
 
     @Override

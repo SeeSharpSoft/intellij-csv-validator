@@ -35,6 +35,7 @@ public class CsvMultiLineCellRenderer extends JBScrollPane implements TableCellR
     public CsvMultiLineCellRenderer(CsvTableEditorKeyListener keyListener, UserDataHolder userDataHolderParam) {
         this.myUserDataHolder = userDataHolderParam;
         myTextArea = new JTextArea();
+        // Keep wrapping enabled for the editor use case. Renderers will no longer use this class.
         myTextArea.setLineWrap(true);
         myTextArea.setWrapStyleWord(true);
         myTextArea.setOpaque(true);
@@ -88,10 +89,9 @@ public class CsvMultiLineCellRenderer extends JBScrollPane implements TableCellR
         final int columnWidth = table.getColumnModel().getColumn(column).getWidth();
         final int rowHeight = table.getRowHeight(row);
 
+        // Apply sizes but avoid triggering validation/layout here to prevent heavy layout work during painting
         this.setSize(columnWidth, rowHeight);
-        this.validate();
         myTextArea.setSize(columnWidth, rowHeight);
-        myTextArea.validate();
 
         return this;
     }
