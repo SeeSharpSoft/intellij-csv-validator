@@ -185,7 +185,7 @@ public class CsvTable extends JBTable {
                     table.getEditingColumn() == column) {
                 Component component = table.getEditorComponent();
                 component.setBounds(cellRect);
-                component.validate();
+                // Avoid triggering validation/layout during painting to prevent EDT freezes
             } else {
                 TableCellRenderer renderer = table.getCellRenderer(row, column);
                 Component component = table.prepareRenderer(renderer, row, column);

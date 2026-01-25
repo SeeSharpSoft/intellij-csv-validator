@@ -195,7 +195,13 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
     }
 
     public EditorPrio getEditorPrio() {
-        return getState().EDITOR_PRIO;
+        // Important: avoid triggering OptionSet.init() here because it consults
+        // EditorSettingsExternalizable on first access which may require UI/EDT
+        // initialization. The file editor providers call this method from background
+        // threads during provider discovery, and any slow or blocking initialization
+        // can lead to timeouts when the IDE checks providers.
+        // Access the current option directly to keep provider checks fast and non-blocking.
+        return this.myOptions.EDITOR_PRIO;
     }
 
     public void setEditorPrio(EditorPrio editorPrio) {

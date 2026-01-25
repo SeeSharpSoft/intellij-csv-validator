@@ -39,6 +39,7 @@ public class CsvGithubIssueSubmitter extends ErrorReportSubmitter {
     public static final String GIT_USER = "SeeSharpSoft";
     public static final String GIT_REPO = "intellij-csv-validator";
     public static final GHRepositoryPath GITHUB_FULL_PATH = new GHRepositoryPath(GIT_USER, GIT_REPO);
+    private static final String REPORT_ACTION_TEXT = "Report to 'CSV Editor' (Github)";
 
     private static ScheduledFuture<?> recentlySentReport = null;
     private static final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
@@ -52,7 +53,7 @@ public class CsvGithubIssueSubmitter extends ErrorReportSubmitter {
     @NotNull
     @Override
     public String getReportActionText() {
-        return "Report to 'CSV Editor' (Github)";
+        return REPORT_ACTION_TEXT;
     }
 
     @Override
@@ -94,7 +95,7 @@ public class CsvGithubIssueSubmitter extends ErrorReportSubmitter {
         
         GithubApiRequestExecutor githubExecutor = GithubApiRequestExecutor.Factory.getInstance().create(account.getServer(), token);
 
-        Task submitTask = new Task.Backgroundable(project, getReportActionText()) {
+        Task submitTask = new Task.Backgroundable(project, REPORT_ACTION_TEXT) {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
                 submitToGithub(event, additionalInfo, githubExecutor, consumer, indicator);
@@ -160,13 +161,26 @@ public class CsvGithubIssueSubmitter extends ErrorReportSubmitter {
     }
 
     protected String searchExistingIssues(GithubApiRequestExecutor githubExecutor, String title, ProgressIndicator progressIndicator) throws IOException {
+        // Create a search needle from the title but ensure it is never null/empty to avoid GitHub 422 (Validation Failed)
         String needle = title.replaceAll("\\s*(\\[.*?]|\\(.*?\\)|\\{.*?})\\s*", "");
+
+        // If the sanitized title becomes empty (e.g., only brackets present), fall back to the raw title
+        if (Strings.isEmptyOrSpaces(needle)) {
+            needle = title == null ? "" : title.trim();
+        }
+
+        // Apply length cap with word boundary if possible
         if (needle.length() > 250) {
             int endIndex = needle.substring(0, 250).lastIndexOf(" ");
             if (endIndex == -1) {
                 endIndex = 250;
             }
             needle = needle.substring(0, endIndex);
+        }
+
+        // Final safety: if still empty, use a minimal non-empty token to satisfy GitHub API requirements
+        if (Strings.isEmptyOrSpaces(needle)) {
+            needle = "crash";
         }
         GithubApiRequest<GithubResponsePage<GithubSearchedIssue>> existingIssueRequest =
                 GithubApiRequests.Search.Issues.get(

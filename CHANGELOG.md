@@ -10,7 +10,24 @@
 
 ### Fixed
 
-## [4.1.0] - Sep 07, 2025
+## 4.2.0 - Jan 26, 2026
+
+### Fixed
+
+- Compatibility verification issues
+- Invalid PSI Element - class CsvFile because different providers
+- PluginException - Element class CsvFile - file is invalid #923
+- NullPointerException #933
+- PluginException - Cannot check provider net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditorProvider #919
+- ExceptionInInitializerError #916
+- GithubStatusCodeException - 422 Unprocessable Entity - Validation Failed [Search; q]invalid: null #920
+- com.intellij.diagnostic.Freeze #921
+- Correct short name format
+- Slow operations are prohibited on EDT #936
+- This method is forbidden on EDT because it does not pump the event queue #940
+- Argument for @NotNull parameter 'document' of PsiDocumentManagerImpl.getPsiFile must not be null #941
+
+## 4.1.0 - Sep 07, 2025
 
 ### Fixed
 
@@ -22,7 +39,7 @@
 
 - Project structure refactoring to avoid circular dependencies
 
-## [4.0.2] - Dec 29, 2024
+## 4.0.2 - Dec 29, 2024
 
 ### Added
 
@@ -54,9 +71,11 @@
 ## 4.0.0 - Oct 07, 2024
 
 ### Added
+
 - Tabularize formatting is back!
 
 ### Changed
+
 - Text editor is shown first by default
 
 ## 3.4.0 - Aug 10, 2024
@@ -67,13 +86,6 @@
 - Cannot create class CsvEditorSettingsProvider
 
 ## 3.3.0 - Feb 24, 2024
-
-### Fixed
-
-- Update gradle build
-- PluginException: xxx ms to call on EDT CsvChangeSeparatorActionGroup#update@EditorPopup #401
-- AlreadyDisposedException: Already disposed #639
-- Exceptions occurred on invoking the intention 'Unquote' on a copy of the file #670 #816
 
 ### Fixed
 
@@ -96,7 +108,6 @@
 
 - NullPointerException: Cannot invoke "getSelectedColumn()" because "tblEditor" is null #519
 - IllegalStateException: Attempt to modify PSI for non-committed Document! #516
-
 - StringIndexOutOfBoundsException: begin 0, end -1, length 5995 #511
 - ArrayIndexOutOfBoundsException: 12 >= 12 #482
 
@@ -116,7 +127,6 @@
 
 - Argument for @NotNull parameter 'tableEditor' of CsvTableActions.adjustColumnWidths must not be null #431
 - NullPointerException #429
-
 - Comment handling breaking in table editor #451
 
 ### Added
@@ -136,43 +146,20 @@
 
 - Argument for @NotNull parameter 'anchor' of CsvPsiTreeUpdater.appendField must not be null #392
 - ArrayIndexOutOfBoundsException: 8 >= 8 #396
-
 - catch unreasonable exception when retrieving service #410
 - NullPointerException: Cannot invoke "CsvTableEditor.getActions()" because the return value of "CsvTableEditorActions.getTableEditor(AnActionEvent)" is null #394
 
 ### Added
 
 - 358 ms to call on EDT CsvChangeSeparatorActionGroup#update@EditorPopup #401
+
 ## 3.0.2 - Dec 15, 2022
-
-### Fixed
-
-- Detected bulk mode status update from DocumentBulkUpdateListener #384
-- Argument for @NotNull parameter 'parent' of PsiHelper.getNthChildOfType must not be null #372
-
-- Argument for @NotNull parameter 'element' of PsiHelper.getSiblingOfType must not be null #375
-- Cannot invoke "Document.getText()" because "document" is null #388
-
-### Fixed
-
-- Cannot invoke "PsiFile.getProject()" because the return value of "CsvPsiTreeUpdater.getPsiFile()" is null #378
-- Argument for @NotNull parameter 'replacement' of CsvPsiTreeUpdater$ReplacePsiAction.<init> must not be null #380
-
-- provide project parameter for opening link
-- Cannot invoke "Document.insertString(int, java.lang.CharSequence)" because "document" is null #386
 
 ### Fixed
 
 - first extension sanity check
 
 ## 3.0.1 - Nov 12, 2022
-
-### Fixed
-
-- cannot init component state (componentName=CsvFileAttributes) #359
-- cannot invoke "add(Object)" because "this.myUncommittedActions" is null #361
-- cannot invoke "createNotification(...)" because "notificationGroup" is null #362
-- cannot invoke "getManager()" because the return value of "getPsiFile()" is null #363
 
 ### Fixed
 
@@ -183,9 +170,6 @@
 
 MAJOR UPDATE VERSION 3
 
-General
--------
-
 - renamed plugin to 'CSV Editor'
 - fixed all compatibility issues with respect to IntelliJ platform 2022.*
 - rework language lexer
@@ -194,10 +178,6 @@ General
 - adjusted setting dialogs
 - integrated GitHub issue reporter in case plugin raises an exception
 - removed TSV & PSV language, only CSV language but different filetypes
-
-Table Editor
-------------
-
 - use PSI Tree as data source
 - integrate with native IntelliJ IDE document change handler (e.g. for undo/redo)
 - simplify UI/UX & remove header toolbar
@@ -207,22 +187,6 @@ Table Editor
 - always use first line for header/column text
 
 ## 2.21.0 - Oct 26, 2022
-
-### Changed
-
-- support comments in fast lexer
-
-### Changed
-
-- reworked (rainbow) coloring
-
-### Changed
-
-- avoid formatting while typing
-
-### Changed
-
-- limit column highlighting to 1000 entries around caret
 
 ### Changed
 
@@ -237,7 +201,6 @@ Table Editor
 ### Fixed
 
 - Cannot load from object array because "data" is null #335 #337
-
 - Empty comment indicator
 
 ### Added
@@ -293,6 +256,7 @@ NOTE: Minimum version requirement changed to v2020.1 and newer
 ### Added
 
 - Plugin name ### Changed
+
 - CSV
 
 ### Fixed
@@ -387,11 +351,6 @@ NOTE: Minimum version requirement changed to v2020.1 and newer
 
 ### Added
 
-- Predefined column colors (Rainbow-style)
-- Enhanced color scheme switch
-
-### Added
-
 - Table Editor coloring
 
 ## 2.13.0 - Jul 20, 2020
@@ -454,11 +413,6 @@ NOTE: Minimum version requirement changed to v2020.1 and newer
 - selection indicator for default separator action
 
 ## 2.9.0 - Feb 07, 2020
-
-### Added
-
-- customizable escape character #159
-- value separator setting moved from 'Code Style' to 'General'
 
 ### Added
 
@@ -553,11 +507,6 @@ Support for IDE v192.*
 
 ### Added
 
-- option to keep/ignore a linebreak at the end of a file (table editor)
-- improved change detection of table editor to avoid overwriting original text representation without editing any values
-
-### Added
-
 - file based value separator (e.g. ',' or ';')
 
 ## 2.3.1 - Mar 31, 2019
@@ -604,11 +553,6 @@ Support for IDE v192.*
 
 ### Added
 
-- support column highlighting for table editor
-- support all kind of text attributes for column highlighting
-
-### Added
-
 - table editor values not longer enforced to be quoted on save (customizable)
 
 ### Fixed
@@ -642,11 +586,6 @@ Support for IDE v192.*
 - tooltip for tab separator if disabled
 
 ## 1.9.0 - Oct 01, 2018
-
-### Added
-
-- CSV/TSV editor settings (File > Settings > General > CSV/TSV Editor)
-- TAB (separator) highlighting
 
 ### Added
 
@@ -703,16 +642,6 @@ Support for IDE v192.*
 - New icons
 
 ## 1.6.0 - Apr 02, 2018
-
-### Added
-
-- TSV file support
-TSV files a recognized as such but treated as a variant of CSV files, the same syntax highlighting and code style settings are applied.
-
-### Added
-
-- tab (↹) and pipe (|) as separators added
-- spellchecker enabled
 
 ### Added
 
