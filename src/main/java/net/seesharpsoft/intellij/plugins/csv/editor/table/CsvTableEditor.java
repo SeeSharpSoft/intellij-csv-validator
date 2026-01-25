@@ -213,16 +213,30 @@ public abstract class CsvTableEditor implements FileEditor, PsiFileHolder {
         if (project.isDisposed()) {
             return null;
         }
+
+        // ensure we have a document reference
+        if (this.document == null) {
+            this.document = FileDocumentManager.getInstance().getDocument(this.file);
+        }
+
         if (this.psiFile == null || !this.psiFile.isValid()) {
-            this.psiFile = ReadAction.compute(() -> {
-                this.document = FileDocumentManager.getInstance().getDocument(this.file);
-                if (this.document == null) {
-                    // No associated document (e.g., file might be binary or not yet loaded) – avoid passing null to PsiDocumentManager
-                    return null;
+            // On EDT, avoid potentially slow PSI/index operations – use cached PSI only
+            if (ApplicationManager.getApplication().isDispatchThread()) {
+                if (this.document != null) {
+                    this.psiFile = PsiDocumentManager.getInstance(project).getCachedPsiFile(this.document);
                 }
-                PsiDocumentManager documentManager = PsiDocumentManager.getInstance(project);
-                return documentManager.getPsiFile(this.document);
-            });
+            } else {
+                // Off EDT it is safe to resolve PSI
+                this.psiFile = ReadAction.compute(() -> {
+                    if (this.document == null) {
+                        this.document = FileDocumentManager.getInstance().getDocument(this.file);
+                    }
+                    if (this.document == null) return null;
+                    PsiDocumentManager documentManager = PsiDocumentManager.getInstance(project);
+                    return documentManager.getPsiFile(this.document);
+                });
+            }
+
             if (this.psiFile != null) {
                 this.currentSeparator = CsvHelper.getValueSeparator(this.psiFile);
                 this.currentEscapeCharacter = CsvHelper.getEscapeCharacter(this.psiFile);
