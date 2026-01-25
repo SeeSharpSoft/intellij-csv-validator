@@ -60,7 +60,7 @@ public class CsvValidationInspection extends LocalInspectionTool {
 
     @NotNull
     public String getShortName() {
-        return "CsvEditorPlugin:CsvValidationInspection";
+        return "net.seesharpsoft.intellij.plugins.csv.inspection.CsvValidationInspection";
     }
 
     @Override

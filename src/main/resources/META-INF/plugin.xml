@@ -98,7 +98,7 @@
                 language="csv"
                 enabledByDefault="true"
                 groupName="CSV"
-                shortName="CsvEditorPlugin:CsvValidationInspection"
+                shortName="net.seesharpsoft.intellij.plugins.csv.inspection.CsvValidationInspection"
                 implementationClass="net.seesharpsoft.intellij.plugins.csv.inspection.CsvValidationInspection"/>
         <lang.inspectionSuppressor language="csv"
                                    implementationClass="net.seesharpsoft.intellij.plugins.csv.inspection.CsvInspectionSuppressor"/>
