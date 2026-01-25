@@ -94,8 +94,27 @@ public class CsvCodeStyleSettingsProvider extends CodeStyleSettingsProvider {
 
             @Override
             protected @NotNull PsiFile doReformat(Project project, @NotNull PsiFile psiFile) {
-                CodeStyleManager.getInstance(project).reformatText(psiFile, 0, psiFile.getTextLength());
-                return psiFile;
+                // Defensive: PSI might be invalidated by the time the settings UI triggers reformat.
+                // Guard against invalid files and run inside a read action to avoid race conditions.
+                try {
+                    return com.intellij.openapi.application.ReadAction.compute(() -> {
+                        if (!psiFile.isValid()) {
+                            return psiFile;
+                        }
+                        int endOffset;
+                        try {
+                            endOffset = psiFile.getTextLength();
+                        } catch (Throwable t) {
+                            // If accessing text length fails due to invalidation, skip reformat.
+                            return psiFile;
+                        }
+                        CodeStyleManager.getInstance(project).reformatText(psiFile, 0, endOffset);
+                        return psiFile;
+                    });
+                } catch (Throwable ignored) {
+                    // As a last resort, do nothing to avoid PluginException surfacing to users.
+                    return psiFile;
+                }
             }
         }
     }
