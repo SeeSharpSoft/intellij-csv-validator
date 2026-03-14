@@ -17,6 +17,7 @@
 - PluginException: Invalid PSI Element CsvFile when file is invalidated during annotation, intention actions, or inspection fixes
 - IncorrectOperationException: parent CsvTableEditorSwing already disposed when async PsiTreeChangeListener registration completes
 - Modified `CsvPlugin.openLink` to use `executeOnPooledThread` for setting dialogs #953
+- Modified `CsvEditorSettings.java` to ensure all getter methods access the internal `OptionSet` directly instead of calling `getState()` #954
 
 ## 4.2.0 - Jan 26, 2026
 
