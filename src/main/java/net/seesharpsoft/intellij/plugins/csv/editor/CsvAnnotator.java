@@ -36,6 +36,9 @@ public class CsvAnnotator implements Annotator {
         }
 
         CsvFile csvFile = (CsvFile) element.getContainingFile();
+        if (!csvFile.isValid()) {
+            return;
+        }
         if (handleSeparatorElement(element, holder, elementType, csvFile)) {
             return;
         }

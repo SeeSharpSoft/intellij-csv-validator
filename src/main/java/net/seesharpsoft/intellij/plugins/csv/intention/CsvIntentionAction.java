@@ -26,6 +26,7 @@ public abstract class CsvIntentionAction extends PsiElementBaseIntentionAction i
     public boolean isAvailable(@NotNull Project project, Editor editor, @Nullable PsiElement element) {
         final PsiFile containingFile = element == null ? null : element.getContainingFile();
         return containingFile != null
+                && containingFile.isValid()
                 && containingFile.getLanguage().isKindOf(CsvLanguage.INSTANCE)
                 && PsiDocumentManager.getInstance(project).getDocument(containingFile) != null;
     }
