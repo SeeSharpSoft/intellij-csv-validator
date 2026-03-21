@@ -20,6 +20,7 @@ import java.util.Collection;
 
 public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel {
     private final T myPsiFileHolder;
+    private volatile boolean myDisposed = false;
 
     private int myCachedRowCount = -1;
     private int myCachedColumnCount = -1;
@@ -55,7 +56,7 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
                 .nonBlocking(this::getPsiFile)
                 .coalesceBy(this)
                 .finishOnUiThread(ModalityState.any(), pf -> {
-                    if (pf == null) return;
+                    if (pf == null || myDisposed) return;
                     PsiManager mgr = pf.getManager();
                     if (mgr == null) return;
                     mgr.addPsiTreeChangeListener(myPsiTreeChangeListener, myPsiFileHolder);
@@ -70,6 +71,7 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
 
     @Override
     public void dispose() {
+        myDisposed = true;
         CsvTableModel.super.dispose();
         myPsiTreeUpdater.dispose();
     }
