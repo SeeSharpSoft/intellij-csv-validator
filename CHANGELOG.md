@@ -10,6 +10,12 @@
 
 ### Fixed
 
+## 4.2.1 - Mar 29, 2026
+
+### Fixed
+
+- PluginException: Invalid PSI Element CsvFile when file is invalidated during annotation, intention actions, or inspection fixes
+
 ## 4.2.0 - Jan 26, 2026
 
 ### Fixed
