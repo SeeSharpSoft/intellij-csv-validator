@@ -15,6 +15,7 @@
 ### Fixed
 
 - PluginException: Invalid PSI Element CsvFile when file is invalidated during annotation, intention actions, or inspection fixes
+- IncorrectOperationException: parent CsvTableEditorSwing already disposed when async PsiTreeChangeListener registration completes
 
 ## 4.2.0 - Jan 26, 2026
 
