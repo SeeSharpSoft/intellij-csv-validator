@@ -28,6 +28,19 @@ public class CsvGithubIssueSubmitterTest extends UsefulTestCase {
 
     private CsvGithubIssueSubmitterSubClass classUnderTest = new CsvGithubIssueSubmitterSubClass();
 
+    public String callSearchExistingIssues(String title) throws Exception {
+        return classUnderTest.searchExistingIssues(null, title, null);
+    }
+
+    public void testSearchExistingIssuesNeedle() throws Exception {
+        assertEquals("crash", classUnderTest.searchExistingIssuesNeedle(null));
+        assertEquals("crash", classUnderTest.searchExistingIssuesNeedle(""));
+        assertEquals("crash", classUnderTest.searchExistingIssuesNeedle("   "));
+        assertEquals("test", classUnderTest.searchExistingIssuesNeedle("test"));
+        assertEquals("test", classUnderTest.searchExistingIssuesNeedle("[Automated Report] test"));
+        assertEquals("[Automated Report]", classUnderTest.searchExistingIssuesNeedle("[Automated Report]"));
+    }
+
     public void testGetIssueTitle() {
         assertEquals("[Automated Report] Test", classUnderTest.getIssueTitle(new IdeaLoggingEvent("Test", new DummyException("Test"))));
         assertEquals("[Automated Report] Unhandled exception in [CoroutineName(com.intellij.openapi.fileEditor.impl.PsiAwareFileEditorManagerImpl), StandaloneCoroutine{Cancelling}, Dispatchers.Default]", classUnderTest.getIssueTitle(new IdeaLoggingEvent("Test", new DummyException("Unhandled exception in [CoroutineName(com.intellij.openapi.fileEditor.impl.PsiAwareFileEditorManagerImpl), StandaloneCoroutine{Cancelling}@5cfe3e69, Dispatchers.Default]"))));
