@@ -28,10 +28,6 @@ public class CsvGithubIssueSubmitterTest extends UsefulTestCase {
 
     private CsvGithubIssueSubmitterSubClass classUnderTest = new CsvGithubIssueSubmitterSubClass();
 
-    public String callSearchExistingIssues(String title) throws Exception {
-        return classUnderTest.searchExistingIssues(null, title, null);
-    }
-
     public void testSearchExistingIssuesNeedle() throws Exception {
         assertEquals("crash", classUnderTest.searchExistingIssuesNeedle(null));
         assertEquals("crash", classUnderTest.searchExistingIssuesNeedle(""));

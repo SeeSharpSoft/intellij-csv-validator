@@ -75,8 +75,8 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
     public static final class OptionSet {
         public String CURRENT_PLUGIN_VERSION;
 
-        public boolean CARET_ROW_SHOWN;
-        public boolean USE_SOFT_WRAP;
+        public boolean CARET_ROW_SHOWN = true;
+        public boolean USE_SOFT_WRAP = false;
         public boolean HIGHTLIGHT_TAB_SEPARATOR = true;
         public boolean SHOW_INFO_BALLOON = true;
         public String TAB_HIGHLIGHT_COLOR = "-7984";
@@ -100,18 +100,6 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
         private boolean isInitialized = false;
 
         public OptionSet() {}
-
-        public void init() {
-            if (this.isInitialized) {
-                return;
-            }
-
-            EditorSettingsExternalizable editorSettingsExternalizable = EditorSettingsExternalizable.getInstance();
-            CARET_ROW_SHOWN = editorSettingsExternalizable == null ? true : editorSettingsExternalizable.isCaretRowShown();
-            USE_SOFT_WRAP = editorSettingsExternalizable == null ? false : editorSettingsExternalizable.isUseSoftWraps();
-
-            this.isInitialized = true;
-        }
     }
 
     private OptionSet myOptions = new OptionSet();
@@ -138,7 +126,6 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
 
     @Override
     public OptionSet getState() {
-        this.myOptions.init();
         return this.myOptions;
     }
 
@@ -150,7 +137,7 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
     /*********** Settings section **********/
 
     public boolean isCaretRowShown() {
-        return this.myOptions.CARET_ROW_SHOWN;
+        return getState().CARET_ROW_SHOWN;
     }
 
     public void setCaretRowShown(boolean caretRowShown) {
@@ -158,7 +145,7 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
     }
 
     public boolean isUseSoftWraps() {
-        return this.myOptions.USE_SOFT_WRAP;
+        return getState().USE_SOFT_WRAP;
     }
 
     public void setUseSoftWraps(boolean useSoftWraps) {
@@ -166,7 +153,7 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
     }
 
     public boolean isHighlightTabSeparator() {
-        return this.myOptions.HIGHTLIGHT_TAB_SEPARATOR;
+        return getState().HIGHTLIGHT_TAB_SEPARATOR;
     }
 
     public void setHighlightTabSeparator(boolean highlightTabSeparator) {
@@ -174,7 +161,7 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
     }
 
     public boolean isShowInfoBalloon() {
-        return this.myOptions.SHOW_INFO_BALLOON;
+        return getState().SHOW_INFO_BALLOON;
     }
 
     public void setShowInfoBalloon(boolean showInfoBalloon) {
@@ -182,7 +169,7 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
     }
 
     public Color getTabHighlightColor() {
-        String color = this.myOptions.TAB_HIGHLIGHT_COLOR;
+        String color = getState().TAB_HIGHLIGHT_COLOR;
         try {
             return color == null || color.isEmpty() ? null : Color.decode(color);
         } catch (NumberFormatException exc) {
@@ -195,13 +182,7 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
     }
 
     public EditorPrio getEditorPrio() {
-        // Important: avoid triggering OptionSet.init() here because it consults
-        // EditorSettingsExternalizable on first access which may require UI/EDT
-        // initialization. The file editor providers call this method from background
-        // threads during provider discovery, and any slow or blocking initialization
-        // can lead to timeouts when the IDE checks providers.
-        // Access the current option directly to keep provider checks fast and non-blocking.
-        return this.myOptions.EDITOR_PRIO;
+        return getState().EDITOR_PRIO;
     }
 
     public void setEditorPrio(EditorPrio editorPrio) {
@@ -209,7 +190,7 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
     }
 
     public boolean showTableEditorInfoPanel() {
-        return this.myOptions.SHOW_TABLE_EDITOR_INFO_PANEL;
+        return getState().SHOW_TABLE_EDITOR_INFO_PANEL;
     }
 
     public void showTableEditorInfoPanel(boolean showInfoPanel) {
@@ -217,7 +198,8 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
     }
 
     public int getTableEditorRowHeight() {
-        return this.myOptions.TABLE_EDITOR_ROW_HEIGHT;
+        int rowHeight = getState().TABLE_EDITOR_ROW_HEIGHT;
+        return rowHeight > TABLE_EDITOR_ROW_HEIGHT_MAX || rowHeight < TABLE_EDITOR_ROW_HEIGHT_MIN ? TABLE_EDITOR_ROW_HEIGHT_DEFAULT : rowHeight;
     }
 
     public void setTableEditorRowHeight(int rowHeight) {
@@ -225,7 +207,7 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
     }
 
     public boolean isQuotingEnforced() {
-        return this.myOptions.QUOTING_ENFORCED;
+        return getState().QUOTING_ENFORCED;
     }
 
     public void setQuotingEnforced(boolean quotingEnforced) {
@@ -233,7 +215,7 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
     }
 
     public boolean isZeroBasedColumnNumbering() {
-        return this.myOptions.ZERO_BASED_COLUMN_NUMBERING;
+        return getState().ZERO_BASED_COLUMN_NUMBERING;
     }
 
     public void setZeroBasedColumnNumbering(boolean zeroBasedColumnNumbering) {
@@ -241,7 +223,7 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
     }
 
     public int getTableAutoMaxColumnWidth() {
-        return this.myOptions.TABLE_AUTO_MAX_COLUMN_WIDTH;
+        return getState().TABLE_AUTO_MAX_COLUMN_WIDTH;
     }
 
     public void setTableAutoMaxColumnWidth(int tableAutoMaxColumnWidth) {
@@ -249,7 +231,7 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
     }
 
     public int getTableDefaultColumnWidth() {
-        return this.myOptions.TABLE_DEFAULT_COLUMN_WIDTH;
+        return getState().TABLE_DEFAULT_COLUMN_WIDTH;
     }
 
     public void setTableDefaultColumnWidth(int tableDefaultColumnWidth) {
@@ -265,7 +247,7 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
     }
 
     public CsvEscapeCharacter getDefaultEscapeCharacter() {
-        CsvEscapeCharacter csvValueSeparator = this.myOptions.DEFAULT_ESCAPE_CHARACTER;
+        CsvEscapeCharacter csvValueSeparator = getState().DEFAULT_ESCAPE_CHARACTER;
         return csvValueSeparator == null ? ESCAPE_CHARACTER_DEFAULT : csvValueSeparator;
     }
 
@@ -278,7 +260,7 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
     }
 
     public CsvValueSeparator getDefaultValueSeparator() {
-        CsvValueSeparator csvValueSeparator = this.myOptions.DEFAULT_VALUE_SEPARATOR;
+        CsvValueSeparator csvValueSeparator = getState().DEFAULT_VALUE_SEPARATOR;
         return csvValueSeparator == null ? VALUE_SEPARATOR_DEFAULT : csvValueSeparator;
     }
 
@@ -287,7 +269,7 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
     }
 
     public boolean getKeepTrailingSpaces() {
-        return this.myOptions.KEEP_TRAILING_SPACES;
+        return getState().KEEP_TRAILING_SPACES;
     }
 
     public void setCommentIndicator(String commentIndicator) {
@@ -299,11 +281,11 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
     }
 
     public String getCommentIndicator() {
-        return this.myOptions.COMMENT_INDICATOR;
+        return getState().COMMENT_INDICATOR;
     }
 
     public ValueColoring getValueColoring() {
-        return this.myOptions.VALUE_COLORING;
+        return getState().VALUE_COLORING;
     }
 
     public void setValueColoring(ValueColoring valueColoring) {
@@ -315,7 +297,7 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
     }
 
     public boolean isAutoDetectValueSeparator() {
-        return this.myOptions.AUTO_DETECT_VALUE_SEPARATOR;
+        return getState().AUTO_DETECT_VALUE_SEPARATOR;
     }
 
     public void setAutoDetectValueSeparator(boolean autoDetectValueSeparator) {
