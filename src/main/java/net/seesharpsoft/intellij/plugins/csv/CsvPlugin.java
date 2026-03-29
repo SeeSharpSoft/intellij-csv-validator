@@ -23,14 +23,15 @@ public class CsvPlugin implements ProjectActivity, DumbAware {
     private static void openLink(Project project, String link) {
         if (project.isDisposed()) return;
 
-        ApplicationManager.getApplication().invokeLater(() ->
-        {
-            if (link.startsWith("#")) {
-                ShowSettingsUtil.getInstance().showSettingsDialog(project, link.substring(1));
-            } else {
-                BrowserUtil.browse(link, project);
-            }
-        });
+        if (link.startsWith("#")) {
+            ApplicationManager.getApplication().executeOnPooledThread(() ->
+                    ShowSettingsUtil.getInstance().showSettingsDialog(project, link.substring(1))
+            );
+        } else {
+            ApplicationManager.getApplication().invokeLater(() ->
+                    BrowserUtil.browse(link, project)
+            );
+        }
     }
 
     public static void doAsyncProjectMaintenance(@NotNull Project project) {

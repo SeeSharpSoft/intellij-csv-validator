@@ -160,9 +160,9 @@ public class CsvGithubIssueSubmitter extends ErrorReportSubmitter {
                 Collections.emptyList());
     }
 
-    protected String searchExistingIssues(GithubApiRequestExecutor githubExecutor, String title, ProgressIndicator progressIndicator) throws IOException {
+    protected String searchExistingIssuesNeedle(String title) {
         // Create a search needle from the title but ensure it is never null/empty to avoid GitHub 422 (Validation Failed)
-        String needle = title.replaceAll("\\s*(\\[.*?]|\\(.*?\\)|\\{.*?})\\s*", "");
+        String needle = title == null ? "" : title.replaceAll("\\s*(\\[.*?]|\\(.*?\\)|\\{.*?})\\s*", "");
 
         // If the sanitized title becomes empty (e.g., only brackets present), fall back to the raw title
         if (Strings.isEmptyOrSpaces(needle)) {
@@ -182,6 +182,12 @@ public class CsvGithubIssueSubmitter extends ErrorReportSubmitter {
         if (Strings.isEmptyOrSpaces(needle)) {
             needle = "crash";
         }
+        return needle;
+    }
+
+    protected String searchExistingIssues(GithubApiRequestExecutor githubExecutor, String title, ProgressIndicator progressIndicator) throws IOException {
+        String needle = searchExistingIssuesNeedle(title);
+
         GithubApiRequest<GithubResponsePage<GithubSearchedIssue>> existingIssueRequest =
                 GithubApiRequests.Search.Issues.get(
                         GithubServerPath.DEFAULT_SERVER,
