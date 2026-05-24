@@ -3,6 +3,7 @@ package net.seesharpsoft.intellij.plugins.csv.intention;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiFile;
 import com.intellij.util.IncorrectOperationException;
 import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfo;
 import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfoMap;
@@ -18,7 +19,14 @@ public class CsvShiftColumnLeftIntentionAction extends CsvShiftColumnIntentionAc
 
     @Override
     public void invoke(@NotNull Project project, Editor editor, @NotNull final PsiElement psiElement) throws IncorrectOperationException {
-        CsvFile csvFile = (CsvFile) psiElement.getContainingFile();
+        PsiFile containingFile = psiElement.getContainingFile();
+        if (!(containingFile instanceof CsvFile)) {
+            return;
+        }
+        CsvFile csvFile = (CsvFile) containingFile;
+        if (!csvFile.isValid()) {
+            return;
+        }
 
         PsiElement element = CsvHelper.getParentFieldElement(psiElement);
 

@@ -120,6 +120,7 @@ public class CsvValidationInspection extends LocalInspectionTool {
         @Override
         public void applyFix(@NotNull Project project, @NotNull ProblemDescriptor descriptor) {
             PsiElement element = descriptor.getPsiElement();
+            if (element == null || !element.isValid()) return;
             Document document = PsiDocumentManager.getInstance(project).getDocument(element.getContainingFile());
             if (document == null) return;
 
@@ -147,6 +148,7 @@ public class CsvValidationInspection extends LocalInspectionTool {
         public void applyFix(@NotNull Project project, @NotNull ProblemDescriptor descriptor) {
             try {
                 PsiElement element = descriptor.getPsiElement();
+                if (element == null || !element.isValid()) return;
                 Document document = PsiDocumentManager.getInstance(project).getDocument(element.getContainingFile());
                 if (document == null) return;
 
@@ -168,6 +170,7 @@ public class CsvValidationInspection extends LocalInspectionTool {
         public void applyFix(@NotNull Project project, @NotNull ProblemDescriptor descriptor) {
             try {
                 PsiElement element = descriptor.getPsiElement();
+                if (element == null || !element.isValid()) return;
                 Document document = PsiDocumentManager.getInstance(project).getDocument(element.getContainingFile());
                 if (document == null) return;
 
