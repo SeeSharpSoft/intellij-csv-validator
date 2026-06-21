@@ -47,13 +47,17 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
         TEXT_ONLY("settings.editor.prio.text_only");
 
         private final String resourceKey;
+        private String display;
 
         private EditorPrio(String resourceKey) {
             this.resourceKey = resourceKey;
         }
 
         public String getDisplay() {
-            return getLocalizedText(resourceKey);
+            if (display == null) {
+                display = getLocalizedText(resourceKey);
+            }
+            return display;
         }
     }
 
@@ -62,13 +66,17 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
         SIMPLE("settings.editor.coloring.simple");
 
         private final String resourceKey;
+        private String display;
 
         ValueColoring(String resourceKey) {
             this.resourceKey = resourceKey;
         }
 
         public String getDisplay() {
-            return getLocalizedText(this.resourceKey);
+            if (display == null) {
+                display = getLocalizedText(this.resourceKey);
+            }
+            return display;
         }
     }
 
