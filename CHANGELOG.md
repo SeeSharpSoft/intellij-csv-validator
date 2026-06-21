@@ -10,6 +10,12 @@
 
 ### Fixed
 
+## 4.2.3 - Jun 21, 2026
+
+### Fixed
+
+- branch code for retrieving plugin info for legacy vs EAP version
+
 ## 4.2.2 - Jun 21, 2026
 
 ### Changed
