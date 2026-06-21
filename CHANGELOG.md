@@ -10,6 +10,13 @@
 
 ### Fixed
 
+## 4.2.2 - Jun 21, 2026
+
+### Changed
+
+- replaced deprecated function ReadAction.compute(ThrowableComputable)
+- replaced internal function PluginManagerCore.getPlugin(PluginId)
+
 ## 4.2.1 - May 24, 2026
 
 ### Fixed
