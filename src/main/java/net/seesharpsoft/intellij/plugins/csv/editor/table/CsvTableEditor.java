@@ -227,14 +227,14 @@ public abstract class CsvTableEditor implements FileEditor, PsiFileHolder {
                 }
             } else {
                 // Off EDT it is safe to resolve PSI
-                this.psiFile = ReadAction.compute(() -> {
+                this.psiFile = ReadAction.nonBlocking(() -> {
                     if (this.document == null) {
                         this.document = FileDocumentManager.getInstance().getDocument(this.file);
                     }
                     if (this.document == null) return null;
                     PsiDocumentManager documentManager = PsiDocumentManager.getInstance(project);
                     return documentManager.getPsiFile(this.document);
-                });
+                }).executeSynchronously();
             }
 
             if (this.psiFile != null) {

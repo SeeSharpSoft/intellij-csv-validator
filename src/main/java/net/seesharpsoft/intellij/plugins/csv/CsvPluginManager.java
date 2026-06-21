@@ -2,7 +2,7 @@ package net.seesharpsoft.intellij.plugins.csv;
 
 import com.intellij.DynamicBundle;
 import com.intellij.ide.plugins.IdeaPluginDescriptor;
-import com.intellij.ide.plugins.PluginManagerCore;
+import com.intellij.ide.plugins.PluginManager;
 import com.intellij.openapi.extensions.PluginId;
 
 import java.util.ResourceBundle;
@@ -22,7 +22,7 @@ public final class CsvPluginManager {
     }
 
     public static IdeaPluginDescriptor getPluginDescriptor() {
-        return PluginManagerCore.getPlugin(PluginId.getId("net.seesharpsoft.intellij.plugins.csv"));
+        return PluginManager.getInstance().findEnabledPlugin(PluginId.getId("net.seesharpsoft.intellij.plugins.csv"));
     }
 
     public static String getVersion() {

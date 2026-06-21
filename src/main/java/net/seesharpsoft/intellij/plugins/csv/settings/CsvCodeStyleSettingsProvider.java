@@ -97,7 +97,7 @@ public class CsvCodeStyleSettingsProvider extends CodeStyleSettingsProvider {
                 // Defensive: PSI might be invalidated by the time the settings UI triggers reformat.
                 // Guard against invalid files and run inside a read action to avoid race conditions.
                 try {
-                    return com.intellij.openapi.application.ReadAction.compute(() -> {
+                    return com.intellij.openapi.application.ReadAction.nonBlocking(() -> {
                         if (!psiFile.isValid()) {
                             return psiFile;
                         }
@@ -110,7 +110,9 @@ public class CsvCodeStyleSettingsProvider extends CodeStyleSettingsProvider {
                         }
                         CodeStyleManager.getInstance(project).reformatText(psiFile, 0, endOffset);
                         return psiFile;
-                    });
+                    }).executeSynchronously();
+                } catch (com.intellij.openapi.progress.ProcessCanceledException e) {
+                    throw e;
                 } catch (Throwable ignored) {
                     // As a last resort, do nothing to avoid PluginException surfacing to users.
                     return psiFile;
