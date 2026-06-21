@@ -10,23 +10,19 @@
 
 ### Fixed
 
-## 4.2.3 - Jun 21, 2026
-
-### Fixed
-
-- branch code for retrieving plugin info for legacy vs EAP version
-
-## 4.2.2 - Jun 21, 2026
+## 4.3.0 - Jun 21, 2026
 
 ### Changed
 
 - replaced deprecated function ReadAction.compute(ThrowableComputable)
 - replaced internal function PluginManagerCore.getPlugin(PluginId)
-
-## 4.2.1 - May 24, 2026
+- branch code for retrieving plugin info for legacy vs EAP version
 
 ### Fixed
 
+- Fixed `NoClassDefFoundError` in `CsvEditorSettings`
+- Fixed `java.lang.Throwable: ... Class initialization must not depend on services` by removing service access from class initializers and constructors
+- Fixed a `PluginException` (caused by `java.lang.IllegalArgumentException`) that occurred during early plugin initialization
 - PluginException: Invalid PSI Element CsvFile when file is invalidated during annotation, intention actions, or inspection fixes #964
 - IncorrectOperationException: parent CsvTableEditorSwing already disposed when async PsiTreeChangeListener registration completes #962
 - Modified `CsvPlugin.openLink` to use `executeOnPooledThread` for setting dialogs #953
