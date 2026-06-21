@@ -30,11 +30,13 @@ public final class CsvPluginManager {
     }
 
     public static String getVersion() {
-        return getPluginDescriptor().getVersion();
+        IdeaPluginDescriptor descriptor = getPluginDescriptor();
+        return descriptor == null ? "" : descriptor.getVersion();
     }
 
     public static String getChangeNotes() {
-        return getPluginDescriptor().getChangeNotes();
+        IdeaPluginDescriptor descriptor = getPluginDescriptor();
+        return descriptor == null ? "" : descriptor.getChangeNotes();
     }
 
     private CsvPluginManager() {
