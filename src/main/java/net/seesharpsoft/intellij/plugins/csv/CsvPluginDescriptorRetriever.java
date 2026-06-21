@@ -14,9 +14,15 @@ public final class CsvPluginDescriptorRetriever {
     private static final PluginId PLUGIN_ID = PluginId.getId("net.seesharpsoft.intellij.plugins.csv");
 
     public static IdeaPluginDescriptor getPluginDescriptor() {
-        BuildNumber buildNumber = ApplicationInfo.getInstance().getBuild();
+        BuildNumber buildNumber = null;
+        try {
+            buildNumber = ApplicationInfo.getInstance().getBuild();
+        } catch (Exception e) {
+            LOG.debug("Failed to retrieve build number", e);
+        }
+
         // PluginDetailsService is available from 2026.2, which roughly corresponds to build 262
-        if (buildNumber.getBaselineVersion() >= 262) {
+        if (buildNumber != null && buildNumber.getBaselineVersion() >= 262) {
             try {
                 Class<?> serviceClass = Class.forName("com.intellij.ide.plugins.PluginDetailsService");
                 Method getInstanceMethod = serviceClass.getMethod("getInstance");

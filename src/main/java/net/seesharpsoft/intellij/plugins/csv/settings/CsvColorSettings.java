@@ -48,7 +48,7 @@ public class CsvColorSettings implements ColorSettingsPage {
     @NotNull
     @Override
     public AttributesDescriptor[] getAttributeDescriptors() {
-        return CsvTextAttributeKeys.DESCRIPTORS;
+        return CsvTextAttributeKeys.getDescriptors();
     }
 
     @NotNull

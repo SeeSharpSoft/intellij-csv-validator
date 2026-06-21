@@ -21,4 +21,13 @@ public class CsvEditorSettingsTest extends CsvBasePlatformTestCase {
 
         assertEquals(CsvEditorSettings.ESCAPE_CHARACTER_DEFAULT, CsvHelper.getEscapeCharacter(myFixture.getFile()));
     }
+
+    public void testGetDisplayDoesNotThrow() {
+        for (CsvEditorSettings.EditorPrio prio : CsvEditorSettings.EditorPrio.values()) {
+            assertNotNull(prio.getDisplay());
+        }
+        for (CsvEditorSettings.ValueColoring coloring : CsvEditorSettings.ValueColoring.values()) {
+            assertNotNull(coloring.getDisplay());
+        }
+    }
 }

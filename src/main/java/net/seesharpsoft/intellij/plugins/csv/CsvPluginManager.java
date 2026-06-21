@@ -11,7 +11,12 @@ public final class CsvPluginManager {
 
     public static ResourceBundle getResourceBundle() {
         if (_resourceBundle == null) {
-            _resourceBundle = DynamicBundle.getPluginBundle(getPluginDescriptor());
+            IdeaPluginDescriptor descriptor = getPluginDescriptor();
+            if (descriptor != null) {
+                _resourceBundle = DynamicBundle.getPluginBundle(descriptor);
+            } else {
+                return ResourceBundle.getBundle("localization.CsvEditorResources");
+            }
         }
         return _resourceBundle;
     }
