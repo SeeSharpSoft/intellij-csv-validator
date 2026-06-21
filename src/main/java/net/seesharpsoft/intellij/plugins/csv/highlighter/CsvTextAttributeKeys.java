@@ -34,26 +34,36 @@ public final class CsvTextAttributeKeys {
             createTextAttributesKey("CSV_BAD_CHARACTER", HighlighterColors.BAD_CHARACTER);
 
     public static final Integer MAX_COLUMN_COLORING_COLORS = 10;
-    public static final AttributesDescriptor[] DESCRIPTORS;
+    private static AttributesDescriptor[] DESCRIPTORS = null;
+
+    public static AttributesDescriptor[] getDescriptors() {
+        if (DESCRIPTORS == null) {
+            List<AttributesDescriptor> attributesDescriptors = new ArrayList<>();
+            ResourceBundle bundle = getResourceBundle();
+            attributesDescriptors.add(new AttributesDescriptor(bundle.getString("color.attribute.separator"), CsvTextAttributeKeys.COMMA));
+            attributesDescriptors.add(new AttributesDescriptor(bundle.getString("color.attribute.quote"), CsvTextAttributeKeys.QUOTE));
+            attributesDescriptors.add(new AttributesDescriptor(bundle.getString("color.attribute.text"), CsvTextAttributeKeys.TEXT));
+            attributesDescriptors.add(new AttributesDescriptor(bundle.getString("color.attribute.text.escaped"), CsvTextAttributeKeys.ESCAPED_TEXT));
+            attributesDescriptors.add(new AttributesDescriptor(bundle.getString("color.attribute.comment"), CsvTextAttributeKeys.COMMENT));
+
+            for (int i = 0; i < MAX_COLUMN_COLORING_COLORS; ++i) {
+                TextAttributesKey textAttributesKey = COLUMN_COLORING_ATTRIBUTES.get(i);
+                attributesDescriptors.add(new AttributesDescriptor(String.format(bundle.getString("color.attribute.column.nr"), i + 1), textAttributesKey));
+            }
+            DESCRIPTORS = attributesDescriptors.toArray(new AttributesDescriptor[0]);
+        }
+        return DESCRIPTORS;
+    }
+
     private static final List<TextAttributesKey> COLUMN_COLORING_ATTRIBUTES;
     private static final Key<List<TextAttributes>> COLUMN_COLORING_TEXT_ATTRIBUTES = Key.create("CSV_PLUGIN_COLUMN_COLORING_ATTRIBUTES");
 
     static {
-        List<AttributesDescriptor> attributesDescriptors = new ArrayList<>();
-        ResourceBundle bundle = getResourceBundle();
-        attributesDescriptors.add(new AttributesDescriptor(bundle.getString("color.attribute.separator"), CsvTextAttributeKeys.COMMA));
-        attributesDescriptors.add(new AttributesDescriptor(bundle.getString("color.attribute.quote"), CsvTextAttributeKeys.QUOTE));
-        attributesDescriptors.add(new AttributesDescriptor(bundle.getString("color.attribute.text"), CsvTextAttributeKeys.TEXT));
-        attributesDescriptors.add(new AttributesDescriptor(bundle.getString("color.attribute.text.escaped"), CsvTextAttributeKeys.ESCAPED_TEXT));
-        attributesDescriptors.add(new AttributesDescriptor(bundle.getString("color.attribute.comment"), CsvTextAttributeKeys.COMMENT));
-
         COLUMN_COLORING_ATTRIBUTES = new ArrayList<>();
         for (int i = 0; i < MAX_COLUMN_COLORING_COLORS; ++i) {
             TextAttributesKey textAttributesKey = createTextAttributesKey(String.format("CSV_PLUGIN_COLUMN_COLORING_ATTRIBUTE_%d", i), CsvTextAttributeKeys.TEXT);
             COLUMN_COLORING_ATTRIBUTES.add(textAttributesKey);
-            attributesDescriptors.add(new AttributesDescriptor(String.format(bundle.getString("color.attribute.column.nr"), i + 1), textAttributesKey));
         }
-        DESCRIPTORS = attributesDescriptors.toArray(new AttributesDescriptor[0]);
     }
 
     public static TextAttributesKey getTextAttributesKeys(int columnIndex) {

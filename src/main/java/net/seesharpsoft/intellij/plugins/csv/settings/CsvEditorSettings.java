@@ -42,33 +42,33 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
     private static final CsvEditorSettings STATIC_TEST_INSTANCE = new CsvEditorSettings();
 
     public enum EditorPrio {
-        TEXT_FIRST(getLocalizedText("settings.editor.prio.text_first")),
-        TABLE_FIRST(getLocalizedText("settings.editor.prio.table_first")),
-        TEXT_ONLY(getLocalizedText("settings.editor.prio.text_only"));
+        TEXT_FIRST("settings.editor.prio.text_first"),
+        TABLE_FIRST("settings.editor.prio.table_first"),
+        TEXT_ONLY("settings.editor.prio.text_only");
 
-        private final String label;
-        
-        private EditorPrio(String label) {
-            this.label = label;
+        private final String resourceKey;
+
+        private EditorPrio(String resourceKey) {
+            this.resourceKey = resourceKey;
         }
 
         public String getDisplay() {
-            return label;
+            return getLocalizedText(resourceKey);
         }
     }
 
     public enum ValueColoring {
-        RAINBOW(getLocalizedText("settings.editor.coloring.rainbow")),
-        SIMPLE(getLocalizedText("settings.editor.coloring.simple"));
+        RAINBOW("settings.editor.coloring.rainbow"),
+        SIMPLE("settings.editor.coloring.simple");
 
-        private final String display;
+        private final String resourceKey;
 
-        ValueColoring(String displayArg) {
-            this.display = displayArg;
+        ValueColoring(String resourceKey) {
+            this.resourceKey = resourceKey;
         }
 
         public String getDisplay() {
-            return this.display;
+            return getLocalizedText(this.resourceKey);
         }
     }
 
