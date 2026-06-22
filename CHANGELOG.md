@@ -20,6 +20,7 @@
 
 ### Fixed
 
+- Fixed `NullPointerException` when plugin descriptor is not available during startup
 - Fixed `NoClassDefFoundError` in `CsvEditorSettings`
 - Fixed `java.lang.Throwable: ... Class initialization must not depend on services` by removing service access from class initializers and constructors
 - Fixed a `PluginException` (caused by `java.lang.IllegalArgumentException`) that occurred during early plugin initialization

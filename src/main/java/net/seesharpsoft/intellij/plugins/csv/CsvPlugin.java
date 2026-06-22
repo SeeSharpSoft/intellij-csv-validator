@@ -64,12 +64,13 @@ public class CsvPlugin implements ProjectActivity, DumbAware {
         doAsyncProjectMaintenance(project);
         
         NotificationGroup notificationGroup = NotificationGroupManager.getInstance().getNotificationGroup("net.seesharpsoft.intellij.plugins.csv");
-        if (notificationGroup == null || CsvEditorSettings.getInstance().checkCurrentPluginVersion(CsvPluginManager.getVersion())) {
+        String version = CsvPluginManager.getVersion();
+        if (version.isEmpty() || notificationGroup == null || CsvEditorSettings.getInstance().checkCurrentPluginVersion(version)) {
             return continuation;
         }
 
         Notification notification = notificationGroup.createNotification(
-                "CSV Editor " + CsvPluginManager.getVersion() + " - Change Notes",
+                "CSV Editor " + version + " - Change Notes",
                 CsvPluginManager.getChangeNotes() +
                         "<p>You can always <b>customize plugin settings</b> to your likings (shortcuts below)!</p>" +
                         "<br>" +
