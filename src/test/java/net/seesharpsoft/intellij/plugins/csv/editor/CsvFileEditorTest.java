@@ -7,6 +7,7 @@ import com.intellij.openapi.fileEditor.*;
 import com.intellij.openapi.fileEditor.ex.FileEditorProviderManager;
 import com.intellij.openapi.fileEditor.impl.text.TextEditorState;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.testFramework.LightVirtualFile;
 import net.seesharpsoft.intellij.plugins.csv.CsvBasePlatformTestCase;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
@@ -109,6 +110,18 @@ public class CsvFileEditorTest extends CsvBasePlatformTestCase {
         public DiffRequestProcessor createProcessor(@NotNull Project project) {
             return null;
         }
+    }
+
+    public void testAccept() {
+        CsvFileEditorProvider fileEditorProvider = new CsvFileEditorProvider();
+        CsvEditorSettings csvEditorSettings = CsvEditorSettings.getInstance();
+        VirtualFile csvFile = myFixture.getFile().getVirtualFile();
+
+        csvEditorSettings.setEditorPrio(CsvEditorSettings.EditorPrio.TEXT_FIRST);
+        assertTrue(fileEditorProvider.accept(myFixture.getProject(), csvFile));
+
+        csvEditorSettings.setEditorPrio(CsvEditorSettings.EditorPrio.TEXT_ONLY);
+        assertTrue(fileEditorProvider.accept(myFixture.getProject(), csvFile));
     }
 
     public void testAcceptCsvFile() {

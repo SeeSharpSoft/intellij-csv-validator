@@ -238,8 +238,24 @@ public abstract class CsvTableEditor implements FileEditor, PsiFileHolder {
             }
 
             if (this.psiFile != null) {
-                this.currentSeparator = CsvHelper.getValueSeparator(this.psiFile);
-                this.currentEscapeCharacter = CsvHelper.getEscapeCharacter(this.psiFile);
+                if (ApplicationManager.getApplication().isDispatchThread()) {
+                    // On EDT, we try to avoid initializing services that might block (see #940)
+                    ReadAction.nonBlocking(() -> {
+                                this.currentSeparator = CsvHelper.getValueSeparator(this.psiFile);
+                                this.currentEscapeCharacter = CsvHelper.getEscapeCharacter(this.psiFile);
+                                return null;
+                            })
+                            .finishOnUiThread(com.intellij.openapi.application.ModalityState.any(), unused -> {
+                                CsvTableModel tableModel = getTableModel();
+                                if (tableModel != null) {
+                                    tableModel.notifyUpdate();
+                                }
+                            })
+                            .submit(com.intellij.util.concurrency.AppExecutorUtil.getAppExecutorService());
+                } else {
+                    this.currentSeparator = CsvHelper.getValueSeparator(this.psiFile);
+                    this.currentEscapeCharacter = CsvHelper.getEscapeCharacter(this.psiFile);
+                }
             }
         }
         return this.psiFile instanceof CsvFile ? (CsvFile) psiFile : null;
