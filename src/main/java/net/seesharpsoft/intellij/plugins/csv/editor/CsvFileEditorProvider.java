@@ -49,18 +49,8 @@ public class CsvFileEditorProvider implements AsyncFileEditorProvider, DumbAware
     @Override
     public boolean accept(@NotNull Project project, @NotNull VirtualFile file) {
         // Guard against cases where the platform TextEditor can't be created for the given file
-        // (e.g., special virtual files used by Structure View or diff). In such cases, delegating
-        // to TextEditorProvider would lead to NPEs inside platform code.
-        if (!CsvFileEditorProvider.acceptCsvFile(project, file)) {
-            return false;
-        }
-        try {
-            TextEditorProvider textEditorProvider = TextEditorProvider.getInstance();
-            return textEditorProvider != null && textEditorProvider.accept(project, file);
-        } catch (Throwable t) {
-            // Be conservative on any unexpected error and do not accept the file to avoid IDE crashes.
-            return false;
-        }
+        // (e.g., special virtual files used by Structure View or diff).
+        return CsvFileEditorProvider.acceptCsvFile(project, file);
     }
 
     protected void applySettings(EditorSettings editorSettings, CsvEditorSettings csvEditorSettings) {

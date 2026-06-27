@@ -10,6 +10,14 @@
 
 ### Fixed
 
+## 4.3.1 - Jun 26, 2026
+
+### Fixed
+
+- Fixed `java.lang.IllegalStateException: This method is forbidden on EDT because it does not pump the event queue` when opening the table editor #1050
+- Fixed `RuntimeExceptionWithAttachments: Access is allowed from Event Dispatch Thread (EDT) only` in `CsvPlugin.openLink` #1008
+- Optimized `CsvFileEditorProvider.accept` to avoid `TimeoutCancellationException` by removing redundant service access. #1033
+
 ## 4.3.0 - Jun 21, 2026
 
 ### Changed

@@ -21,10 +21,10 @@ import org.jetbrains.annotations.Nullable;
 public class CsvPlugin implements ProjectActivity, DumbAware {
 
     private static void openLink(Project project, String link) {
-        if (project.isDisposed()) return;
+        if (project == null || project.isDisposed()) return;
 
         if (link.startsWith("#")) {
-            ApplicationManager.getApplication().executeOnPooledThread(() ->
+            ApplicationManager.getApplication().invokeLater(() ->
                     ShowSettingsUtil.getInstance().showSettingsDialog(project, link.substring(1))
             );
         } else {
@@ -62,40 +62,42 @@ public class CsvPlugin implements ProjectActivity, DumbAware {
     @Override
     public @Nullable Object execute(@NotNull Project project, @NotNull Continuation<? super Unit> continuation) {
         doAsyncProjectMaintenance(project);
-        
-        NotificationGroup notificationGroup = NotificationGroupManager.getInstance().getNotificationGroup("net.seesharpsoft.intellij.plugins.csv");
-        String version = CsvPluginManager.getVersion();
-        if (version.isEmpty() || notificationGroup == null || CsvEditorSettings.getInstance().checkCurrentPluginVersion(version)) {
-            return continuation;
-        }
 
-        Notification notification = notificationGroup.createNotification(
-                "CSV Editor " + version + " - Change Notes",
-                CsvPluginManager.getChangeNotes() +
-                        "<p>You can always <b>customize plugin settings</b> to your likings (shortcuts below)!</p>" +
-                        "<br>" +
-                        "<p>Visit the <b>CSV Editor homepage</b> to read more about the available features & settings, " +
-                        "submit issues & feature request, " +
-                        "or show your support by rating this plugin. <b>Thanks!</b></p>"
-                ,
-                NotificationType.INFORMATION
-        );
+        ApplicationManager.getApplication().invokeLater(() -> {
+            NotificationGroup notificationGroup = NotificationGroupManager.getInstance().getNotificationGroup("net.seesharpsoft.intellij.plugins.csv");
+            String version = CsvPluginManager.getVersion();
+            if (version.isEmpty() || notificationGroup == null || CsvEditorSettings.getInstance().checkCurrentPluginVersion(version)) {
+                return;
+            }
 
-        notification.addAction(NotificationAction.create("General settings", (anActionEvent, notification1) -> {
-            openLink(project, "#" + CsvEditorSettingsProvider.CSV_EDITOR_SETTINGS_ID);
-        }));
-        notification.addAction(NotificationAction.create("Color scheme", (anActionEvent, notification1) -> {
-            openLink(project, "#reference.settingsdialog.IDE.editor.colors.CSV/TSV/PSV");
-        }));
-        notification.addAction(NotificationAction.create("Formatting", (anActionEvent, notification1) -> {
-            openLink(project, "#preferences.sourceCode.CSV/TSV/PSV");
-        }));
-        notification.addAction(NotificationAction.create("Open CSV Editor homepage", (anActionEvent, notification1) -> {
-            openLink(project, "https://github.com/SeeSharpSoft/intellij-csv-validator");
-        }));
+            Notification notification = notificationGroup.createNotification(
+                    "CSV Editor " + version + " - Change Notes",
+                    CsvPluginManager.getChangeNotes() +
+                            "<p>You can always <b>customize plugin settings</b> to your likings (shortcuts below)!</p>" +
+                            "<br>" +
+                            "<p>Visit the <b>CSV Editor homepage</b> to read more about the available features & settings, " +
+                            "submit issues & feature request, " +
+                            "or show your support by rating this plugin. <b>Thanks!</b></p>"
+                    ,
+                    NotificationType.INFORMATION
+            );
 
-        Notifications.Bus.notify(notification);
-        
+            notification.addAction(NotificationAction.create("General settings", (anActionEvent, notification1) -> {
+                openLink(project, "#" + CsvEditorSettingsProvider.CSV_EDITOR_SETTINGS_ID);
+            }));
+            notification.addAction(NotificationAction.create("Color scheme", (anActionEvent, notification1) -> {
+                openLink(project, "#reference.settingsdialog.IDE.editor.colors.CSV/TSV/PSV");
+            }));
+            notification.addAction(NotificationAction.create("Formatting", (anActionEvent, notification1) -> {
+                openLink(project, "#preferences.sourceCode.CSV/TSV/PSV");
+            }));
+            notification.addAction(NotificationAction.create("Open CSV Editor homepage", (anActionEvent, notification1) -> {
+                openLink(project, "https://github.com/SeeSharpSoft/intellij-csv-validator");
+            }));
+
+            Notifications.Bus.notify(notification);
+        });
+
         return continuation;
     }
 }
