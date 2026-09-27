@@ -79,16 +79,20 @@ public class CsvValidationInspection extends LocalInspectionTool {
                 }
 
                 IElementType elementType = PsiHelper.getElementType(element);
-                PsiElement firstChild = element.getFirstChild();
-                PsiElement nextSibling = element.getNextSibling();
-                if (elementType == TokenType.ERROR_ELEMENT && firstChild != null && element.getText().equals(firstChild.getText())) {
+                if (elementType == TokenType.ERROR_ELEMENT) {
+                    PsiElement firstChild = element.getFirstChild();
+                    if (firstChild == null || !element.getText().equals(firstChild.getText())) {
+                        return;
+                    }
                     CsvValidationInspection.this.registerError(holder, element, UNESCAPED_SEQUENCE, fixUnescapedSequence);
                     if (!"\"".equals(firstChild.getText())) {
                         CsvValidationInspection.this.registerError(holder, element, SEPARATOR_MISSING, fixSeparatorMissing);
                     }
-                } else if ((elementType == CsvTypes.TEXT || elementType == CsvTypes.ESCAPED_TEXT) &&
-                        PsiHelper.getElementType(nextSibling) == TokenType.ERROR_ELEMENT &&
-                        nextSibling.getFirstChild() == null) {
+                } else if (elementType == CsvTypes.TEXT || elementType == CsvTypes.ESCAPED_TEXT) {
+                    PsiElement nextSibling = element.getNextSibling();
+                    if (PsiHelper.getElementType(nextSibling) != TokenType.ERROR_ELEMENT || nextSibling.getFirstChild() != null) {
+                        return;
+                    }
                     CsvValidationInspection.this.registerError(holder, element, CLOSING_QUOTE_MISSING, fixClosingQuoteMissing);
                 }
             }

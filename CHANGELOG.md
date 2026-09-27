@@ -15,6 +15,7 @@
 ### Fixed
 
 - Prevented stale CSV PSI instances from being retained or applied after a table editor is disposed or its file provider changes (#1063, #1064)
+- Fixed `java.lang.Throwable: Cannot find element among its parent' children` in `CsvValidationInspection` when multiple CSV files are present in a directory (#999, #1066)
 
 ## 4.3.1 - Jun 26, 2026
 
