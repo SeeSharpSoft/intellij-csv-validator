@@ -10,6 +10,12 @@
 
 ### Fixed
 
+## 4.3.2 - Unreleased
+
+### Fixed
+
+- Prevented stale CSV PSI instances from being retained or applied after a table editor is disposed or its file provider changes (#1063, #1064)
+
 ## 4.3.1 - Jun 26, 2026
 
 ### Fixed
