@@ -3,6 +3,7 @@ package net.seesharpsoft.intellij.plugins.csv.editor;
 import com.intellij.diff.editor.DiffVirtualFile;
 import com.intellij.diff.impl.DiffRequestProcessor;
 import com.intellij.openapi.editor.EditorSettings;
+import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.fileEditor.*;
 import com.intellij.openapi.fileEditor.ex.FileEditorProviderManager;
 import com.intellij.openapi.fileEditor.impl.text.TextEditorState;
@@ -133,6 +134,13 @@ public class CsvFileEditorTest extends CsvBasePlatformTestCase {
     public void testAcceptCsvFile() {
         assertTrue(CsvFileEditorProvider.acceptCsvFile(myFixture.getProject(), new LightVirtualFile(myFixture.getFile().getName())));
         assertFalse(CsvFileEditorProvider.acceptCsvFile(myFixture.getProject(), new DiffVirtualFileDummy(myFixture.getFile().getName())));
+    }
+
+    public void testAcceptCsvFileInsideReadAction() {
+        VirtualFile csvFile = myFixture.getFile().getVirtualFile();
+
+        assertTrue(ReadAction.compute(() ->
+                CsvFileEditorProvider.acceptCsvFile(myFixture.getProject(), csvFile)));
     }
 
     public void testAcceptCsvFileDoesNotProbeRemoteFileSize() {
