@@ -4,6 +4,7 @@ import com.intellij.openapi.editor.Document;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.codeStyle.CodeStyleSettingsManager;
+import com.intellij.testFramework.EdtTestUtil;
 import com.intellij.testFramework.PsiTestUtil;
 import net.seesharpsoft.intellij.plugins.csv.CsvBasePlatformTestCase;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvEscapeCharacter;
@@ -105,6 +106,16 @@ public class CsvTableModelBaseTest extends CsvBasePlatformTestCase implements Ps
 
     public void testRowCount() {
         manualCheck(csvTableModel -> assertEquals(9, csvTableModel.getRowCount()));
+    }
+
+    public void testNotifyUpdateFromEdt() throws Exception {
+        myFixture.configureByFiles("Original.csv");
+        CsvTableModel model = new CsvTableModelBase(this);
+        try {
+            EdtTestUtil.runInEdtAndWait(model::notifyUpdate);
+        } finally {
+            model.dispose();
+        }
     }
 
     public void testIsCommentRow() {
