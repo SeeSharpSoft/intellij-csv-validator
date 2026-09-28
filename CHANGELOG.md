@@ -18,6 +18,7 @@
 - Fixed `java.lang.Throwable: Cannot find element among its parent' children` in `CsvValidationInspection` when multiple CSV files are present in a directory (#999, #1066)
 - Fixed read access violations when the table editor refreshes its model on the EDT (#1067)
 - Fixed read access violations when the table editor paints comment rows and reads cell values on the EDT (#1060)
+- Avoided file-size probing for non-local CSV files during editor-provider acceptance checks (#1076)
 
 ## 4.3.1 - Jun 26, 2026
 

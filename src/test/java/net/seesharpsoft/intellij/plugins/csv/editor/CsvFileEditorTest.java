@@ -10,11 +10,17 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.testFramework.LightVirtualFile;
 import net.seesharpsoft.intellij.plugins.csv.CsvBasePlatformTestCase;
+import net.seesharpsoft.intellij.plugins.csv.CsvFileType;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class CsvFileEditorTest extends CsvBasePlatformTestCase {
 
@@ -127,5 +133,15 @@ public class CsvFileEditorTest extends CsvBasePlatformTestCase {
     public void testAcceptCsvFile() {
         assertTrue(CsvFileEditorProvider.acceptCsvFile(myFixture.getProject(), new LightVirtualFile(myFixture.getFile().getName())));
         assertFalse(CsvFileEditorProvider.acceptCsvFile(myFixture.getProject(), new DiffVirtualFileDummy(myFixture.getFile().getName())));
+    }
+
+    public void testAcceptCsvFileDoesNotProbeRemoteFileSize() {
+        Project project = mock(Project.class);
+        VirtualFile file = mock(VirtualFile.class);
+        when(file.getFileType()).thenReturn(CsvFileType.INSTANCE);
+        when(file.isInLocalFileSystem()).thenReturn(false);
+
+        assertTrue(CsvFileEditorProvider.acceptCsvFile(project, file));
+        verify(file, never()).getLength();
     }
 }
