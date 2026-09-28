@@ -19,6 +19,7 @@
 - Fixed read access violations when the table editor refreshes its model on the EDT (#1067)
 - Fixed read access violations when the table editor paints comment rows and reads cell values on the EDT (#1060)
 - Avoided file-size probing for non-local CSV files during editor-provider acceptance checks (#1076)
+- Avoided eager CSV file attribute state initialization during project startup (#958)
 
 ## 4.3.1 - Jun 26, 2026
 

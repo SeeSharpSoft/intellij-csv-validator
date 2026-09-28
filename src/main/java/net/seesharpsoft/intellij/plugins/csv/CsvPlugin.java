@@ -37,26 +37,29 @@ public class CsvPlugin implements ProjectActivity, DumbAware {
     public static void doAsyncProjectMaintenance(@NotNull Project project) {
         ProgressManager.getInstance().run(new Task.Backgroundable(project, "CSV Editor validation") {
             public void run(@NotNull ProgressIndicator progressIndicator) {
-                // initialize progress indication
-                progressIndicator.setIndeterminate(false);
-
-                // Set the progress bar percentage and text
-                progressIndicator.setFraction(0.50);
-                progressIndicator.setText("Validating CSV file attributes");
-
-                // start process
-                try {
-                    CsvFileAttributes csvFileAttributes = CsvFileAttributes.getInstance(getProject());
-                    csvFileAttributes.cleanupAttributeMap(project);
-                } catch (Exception exception) {
-                    // repeated unresolved bug-reports when retrieving the component
-                    // while this cleanup is an optional and non-critical task
-                }
-                // finished
-                progressIndicator.setFraction(1.0);
-                progressIndicator.setText("Finished");
+                cleanupProjectAttributes(project, progressIndicator);
             }
         });
+    }
+
+    static void cleanupProjectAttributes(@NotNull Project project, @NotNull ProgressIndicator progressIndicator) {
+        progressIndicator.setIndeterminate(false);
+        progressIndicator.setFraction(0.50);
+        progressIndicator.setText("Validating CSV file attributes");
+
+        try {
+            // This maintenance is optional. Do not initialize the persistent service here:
+            // loading its state can fail before the project is usable (see #958).
+            CsvFileAttributes csvFileAttributes = project.getServiceIfCreated(CsvFileAttributes.class);
+            if (csvFileAttributes != null) {
+                csvFileAttributes.cleanupAttributeMap(project);
+            }
+        } catch (Exception exception) {
+            // Cleanup is optional and must not prevent project startup.
+        }
+
+        progressIndicator.setFraction(1.0);
+        progressIndicator.setText("Finished");
     }
 
     @Override
