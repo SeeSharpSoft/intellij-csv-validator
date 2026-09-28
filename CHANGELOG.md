@@ -20,6 +20,7 @@
 - Fixed read access violations when the table editor paints comment rows and reads cell values on the EDT (#1060)
 - Avoided file-size probing for non-local CSV files during editor-provider acceptance checks (#1076)
 - Avoided eager CSV file attribute state initialization during project startup (#958)
+- Opened CSV settings links through configurable predicates to avoid premature searchable-options lookup (#983)
 
 ## 4.3.1 - Jun 26, 2026
 

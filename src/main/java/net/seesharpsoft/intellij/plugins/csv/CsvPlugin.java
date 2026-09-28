@@ -3,6 +3,8 @@ package net.seesharpsoft.intellij.plugins.csv;
 import com.intellij.ide.BrowserUtil;
 import com.intellij.notification.*;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.options.Configurable;
+import com.intellij.openapi.options.SearchableConfigurable;
 import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
@@ -24,9 +26,11 @@ public class CsvPlugin implements ProjectActivity, DumbAware {
         if (project == null || project.isDisposed()) return;
 
         if (link.startsWith("#")) {
-            ApplicationManager.getApplication().invokeLater(() ->
-                    ShowSettingsUtil.getInstance().showSettingsDialog(project, link.substring(1))
-            );
+            ApplicationManager.getApplication().executeOnPooledThread(() -> {
+                ApplicationManager.getApplication().invokeLater(() ->
+                        showSettingsLink(project, link.substring(1))
+                );
+            });
         } else {
             ApplicationManager.getApplication().invokeLater(() ->
                     BrowserUtil.browse(link, project)
@@ -40,6 +44,16 @@ public class CsvPlugin implements ProjectActivity, DumbAware {
                 cleanupProjectAttributes(project, progressIndicator);
             }
         });
+    }
+
+    private static void showSettingsLink(@NotNull Project project, @NotNull String settingsId) {
+        ShowSettingsUtil.getInstance().showSettingsDialog(project, configurable ->
+                matchesSettingsId(configurable, settingsId), null);
+    }
+
+    static boolean matchesSettingsId(@NotNull Configurable configurable, @NotNull String settingsId) {
+        return configurable instanceof SearchableConfigurable searchableConfigurable &&
+                settingsId.equals(searchableConfigurable.getId());
     }
 
     static void cleanupProjectAttributes(@NotNull Project project, @NotNull ProgressIndicator progressIndicator) {
