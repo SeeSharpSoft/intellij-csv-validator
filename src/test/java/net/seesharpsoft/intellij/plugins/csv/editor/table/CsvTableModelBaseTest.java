@@ -1,13 +1,17 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table;
 
 import com.intellij.openapi.editor.Document;
+import com.intellij.openapi.application.ReadAction;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.codeStyle.CodeStyleSettingsManager;
+import com.intellij.openapi.util.ThrowableComputable;
+import com.intellij.util.ThrowableRunnable;
 import com.intellij.testFramework.EdtTestUtil;
 import com.intellij.testFramework.PsiTestUtil;
 import net.seesharpsoft.intellij.plugins.csv.CsvBasePlatformTestCase;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvEscapeCharacter;
+import net.seesharpsoft.intellij.plugins.csv.psi.CsvRecord;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvCodeStyleSettings;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import net.seesharpsoft.intellij.psi.PsiFileHolder;
@@ -18,6 +22,11 @@ import java.util.Arrays;
 import java.util.function.Consumer;
 
 import static net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings.COMMENT_INDICATOR_DEFAULT;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
+import org.mockito.MockedStatic;
 
 public class CsvTableModelBaseTest extends CsvBasePlatformTestCase implements PsiFileHolder {
 
@@ -112,7 +121,45 @@ public class CsvTableModelBaseTest extends CsvBasePlatformTestCase implements Ps
         myFixture.configureByFiles("Original.csv");
         CsvTableModel model = new CsvTableModelBase(this);
         try {
-            EdtTestUtil.runInEdtAndWait(model::notifyUpdate);
+            EdtTestUtil.runInEdtAndWait(() -> {
+                assertFalse(model.isCommentRow(0));
+                assertEquals("Header 1", model.getValue(0, 0));
+            });
+        } finally {
+            model.dispose();
+        }
+    }
+
+    public void testNotifyUpdateRequiresReadAction() throws Exception {
+        PsiFileHolder holder = mock(PsiFileHolder.class);
+        when(holder.getPsiFile()).thenReturn(mock(PsiFile.class));
+        CsvTableModel model = new CsvTableModelBase(holder);
+        try (MockedStatic<ReadAction> readAction = mockStatic(ReadAction.class)) {
+            readAction.when(() -> ReadAction.run(any(ThrowableRunnable.class)))
+                    .thenAnswer(invocation -> {
+                        invocation.<ThrowableRunnable<?>>getArgument(0).run();
+                        return null;
+                    });
+            model.notifyUpdate();
+            readAction.verify(() -> ReadAction.run(any(ThrowableRunnable.class)));
+        } finally {
+            model.dispose();
+        }
+    }
+
+    public void testReadOperationsRequireReadAction() throws Exception {
+        PsiFileHolder holder = mock(PsiFileHolder.class);
+        PsiFile file = mock(PsiFile.class);
+        CsvRecord record = mock(CsvRecord.class);
+        when(holder.getPsiFile()).thenReturn(file);
+        when(file.getFirstChild()).thenReturn(record);
+        when(record.getFirstChild()).thenReturn(null);
+        CsvTableModel model = new CsvTableModelBase(holder);
+        try (MockedStatic<ReadAction> readAction = mockStatic(ReadAction.class)) {
+            readAction.when(() -> ReadAction.compute(any(ThrowableComputable.class)))
+                    .thenAnswer(invocation -> ((ThrowableComputable<?, ?>) invocation.getArgument(0)).compute());
+            assertFalse(model.isCommentRow(0));
+            readAction.verify(() -> ReadAction.compute(any(ThrowableComputable.class)));
         } finally {
             model.dispose();
         }
