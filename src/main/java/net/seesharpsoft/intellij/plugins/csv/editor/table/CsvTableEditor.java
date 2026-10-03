@@ -7,6 +7,7 @@ import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.editor.colors.EditorFontType;
 import com.intellij.openapi.fileEditor.*;
+import com.intellij.openapi.fileEditor.impl.text.TextEditorProvider;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.UserDataHolder;
@@ -195,7 +196,7 @@ public abstract class CsvTableEditor implements FileEditor, PsiFileHolder {
 
     @Nullable
     public StructureViewBuilder getStructureViewBuilder() {
-        return isValid() ? StructureViewBuilder.getProvider().getStructureViewBuilder(file.getFileType(), file, this.project) : null;
+        return isValid() ? TextEditorProvider.getInstance().getStructureViewBuilder(this.project, file) : null;
     }
 
     @Nullable

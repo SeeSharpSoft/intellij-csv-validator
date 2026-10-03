@@ -12,6 +12,10 @@
 
 ## 4.3.2 - Unreleased
 
+### Changed
+
+- Replaced internal `StructureViewBuilder.getProvider()` usage with the public `TextEditorProvider.getStructureViewBuilder(...)` API
+
 ### Fixed
 
 - Isolated GitHub request progress indicators from the report task to prevent nested progress lifecycle errors (#1080)
