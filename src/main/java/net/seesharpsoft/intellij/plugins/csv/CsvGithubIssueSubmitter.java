@@ -169,6 +169,10 @@ public class CsvGithubIssueSubmitter extends ErrorReportSubmitter {
             needle = title == null ? "" : title.trim();
         }
 
+        // Titles are search text, not GitHub query syntax. Remove characters that could
+        // terminate or escape the quoted phrase, and normalize whitespace before truncating.
+        needle = needle.replace('"', ' ').replace('\\', ' ').replaceAll("\\s+", " ").trim();
+
         // Apply length cap with word boundary if possible
         if (needle.length() > 250) {
             int endIndex = needle.substring(0, 250).lastIndexOf(" ");
@@ -182,7 +186,7 @@ public class CsvGithubIssueSubmitter extends ErrorReportSubmitter {
         if (Strings.isEmptyOrSpaces(needle)) {
             needle = "crash";
         }
-        return needle;
+        return "\"" + needle + "\"";
     }
 
     protected String searchExistingIssues(GithubApiRequestExecutor githubExecutor, String title, ProgressIndicator progressIndicator) throws IOException {
