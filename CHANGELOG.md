@@ -10,6 +10,26 @@
 
 ### Fixed
 
+## 4.4.0 - Oct 03, 2026
+
+### Changed
+
+- Replaced internal `StructureViewBuilder.getProvider()` usage with the public `TextEditorProvider.getStructureViewBuilder(...)` API
+
+### Fixed
+
+- Isolated GitHub request progress indicators from the report task to prevent nested progress lifecycle errors (#1080)
+- Batched table column additions and deletions into a single document edit to avoid UI freezes from repeated change notifications (#1079)
+- Quoted automated report titles in GitHub duplicate searches to prevent invalid query syntax (#1078)
+- Prevented stale CSV PSI instances from being retained or applied after a table editor is disposed or its file provider changes (#1063, #1064)
+- Fixed `java.lang.Throwable: Cannot find element among its parent' children` in `CsvValidationInspection` when multiple CSV files are present in a directory (#999, #1066)
+- Fixed read access violations when the table editor refreshes its model on the EDT (#1067)
+- Fixed read access violations when the table editor paints comment rows and reads cell values on the EDT (#1060)
+- Avoided file-size probing for non-local CSV files during editor-provider acceptance checks (#1076)
+- Avoided eager CSV file attribute state initialization during project startup (#958)
+- Opened CSV settings links through configurable predicates to avoid premature searchable-options lookup (#983)
+- Fixed focused editable cells in the table editor to use the table's foreground and background colors
+
 ## 4.3.1 - Jun 26, 2026
 
 ### Fixed

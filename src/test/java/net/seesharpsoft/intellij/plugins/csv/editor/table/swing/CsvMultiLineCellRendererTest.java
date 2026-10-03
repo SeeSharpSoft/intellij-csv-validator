@@ -4,6 +4,7 @@ import javax.swing.*;
 import javax.swing.event.CellEditorListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.table.TableCellRenderer;
+import java.awt.Color;
 
 public class CsvMultiLineCellRendererTest extends CsvTableEditorSwingTestBase {
 
@@ -23,6 +24,21 @@ public class CsvMultiLineCellRendererTest extends CsvTableEditorSwingTestBase {
         CsvMultiLineCellRenderer cellRenderer = (CsvMultiLineCellRenderer) fileEditor.getTable().getCellRenderer(0, 0);
 
         assertEquals(cellRenderer, cellRenderer.getTableCellEditorComponent(fileEditor.getTable(), "Test", true, 0, 0));
+    }
+
+    public void testFocusedEditableCellUsesTableColors() {
+        JTable table = fileEditor.getTable();
+        Color foreground = Color.MAGENTA;
+        Color background = Color.ORANGE;
+        table.setForeground(foreground);
+        table.setBackground(background);
+
+        CsvMultiLineCellRenderer renderer = (CsvMultiLineCellRenderer) table.getCellRenderer(0, 0);
+        renderer.getTableCellRendererComponent(table, "Test", false, true, 0, 0);
+        JTextArea textArea = (JTextArea) renderer.getViewport().getView();
+
+        assertEquals(foreground, textArea.getForeground());
+        assertEquals(background, textArea.getBackground());
     }
 
     public void testCellEditing() {

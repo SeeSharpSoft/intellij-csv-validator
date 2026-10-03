@@ -1,7 +1,5 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
-import com.intellij.openapi.editor.colors.EditorColorsManager;
-import com.intellij.openapi.editor.colors.EditorColorsScheme;
 import com.intellij.openapi.editor.markup.TextAttributes;
 import com.intellij.openapi.util.UserDataHolder;
 import com.intellij.ui.components.JBScrollPane;
@@ -64,8 +62,6 @@ public class CsvMultiLineCellRenderer extends JBScrollPane implements TableCellR
 
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-        EditorColorsScheme editorColorsScheme = EditorColorsManager.getInstance().getGlobalScheme();
-
         if (isSelected) {
             myTextArea.setForeground(table.getSelectionForeground());
             myTextArea.setBackground(table.getSelectionBackground());
@@ -76,8 +72,8 @@ public class CsvMultiLineCellRenderer extends JBScrollPane implements TableCellR
         if (hasFocus) {
             myTextArea.setBorder(UIManager.getBorder("Table.focusCellHighlightBorder"));
             if (table.isCellEditable(row, column)) {
-                myTextArea.setForeground(UIManager.getColor(editorColorsScheme.getDefaultForeground()));
-                myTextArea.setBackground(UIManager.getColor(editorColorsScheme.getDefaultBackground()));
+                myTextArea.setForeground(table.getForeground());
+                myTextArea.setBackground(table.getBackground());
             }
         } else {
             myTextArea.setBorder(JBUI.Borders.empty(1, 2));

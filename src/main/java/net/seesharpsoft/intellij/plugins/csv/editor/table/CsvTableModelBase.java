@@ -101,9 +101,11 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
     }
 
     private void resetPointer() {
-        PsiFile psiFile = getPsiFile();
-        myPointedRecord = psiFile == null ? null : PsiHelper.getFirstChildOfType(psiFile, CsvRecord.class);
-        myPointedRow = 0;
+        ReadAction.run(() -> {
+            PsiFile psiFile = getPsiFile();
+            myPointedRecord = psiFile == null ? null : PsiHelper.getFirstChildOfType(psiFile, CsvRecord.class);
+            myPointedRow = 0;
+        });
     }
 
     protected CsvPsiTreeUpdater getPsiTreeUpdater() {
@@ -119,28 +121,30 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
 
     @Override
     public PsiElement getFieldAt(int row, int column) {
-        int diffToCurrent = Math.abs(myPointedRow - row);
-        if (diffToCurrent > row || myPointedRecord == null) {
-            resetPointer();
-            diffToCurrent = row;
-        }
-        if (myPointedRecord == null) return null;
+        return ReadAction.compute(() -> {
+            int diffToCurrent = Math.abs(myPointedRow - row);
+            if (diffToCurrent > row || myPointedRecord == null) {
+                resetPointer();
+                diffToCurrent = row;
+            }
+            if (myPointedRecord == null) return null;
 
-        CsvRecord record = PsiHelper.getNthSiblingOfType(myPointedRecord, diffToCurrent, CsvRecord.class, myPointedRow > row);
-        if (record == null) return null;
+            CsvRecord record = PsiHelper.getNthSiblingOfType(myPointedRecord, diffToCurrent, CsvRecord.class, myPointedRow > row);
+            if (record == null) return null;
 
-        myPointedRecord = record;
-        myPointedRow = row;
+            myPointedRecord = record;
+            myPointedRow = row;
 
-        if (PsiHelper.getElementType(record.getFirstChild()) == CsvTypes.COMMENT) return record.getFirstChild();
+            if (PsiHelper.getElementType(record.getFirstChild()) == CsvTypes.COMMENT) return record.getFirstChild();
 
-        return PsiHelper.getNthChildOfType(record, column, CsvField.class);
+            return PsiHelper.getNthChildOfType(record, column, CsvField.class);
+        });
     }
 
     @Override
     public boolean hasErrors() {
         if (myCachedHasErrors == null) {
-            myCachedHasErrors = CsvTableModel.super.hasErrors();
+            myCachedHasErrors = ReadAction.compute(CsvTableModel.super::hasErrors);
         }
         return myCachedHasErrors;
     }
@@ -148,7 +152,7 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
     @Override
     public int getRowCount() {
         if (myCachedRowCount == -1) {
-            myCachedRowCount = CsvTableModel.super.getRowCount();
+            myCachedRowCount = ReadAction.compute(CsvTableModel.super::getRowCount);
         }
         return myCachedRowCount;
     }
@@ -156,7 +160,7 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
     @Override
     public int getColumnCount() {
         if (myCachedColumnCount == -1) {
-            myCachedColumnCount = CsvTableModel.super.getColumnCount();
+            myCachedColumnCount = ReadAction.compute(CsvTableModel.super::getColumnCount);
         }
         return myCachedColumnCount;
     }
@@ -199,8 +203,10 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
 
     @Override
     public @NotNull String getValue(int rowIndex, int columnIndex) {
-        PsiElement field = getFieldAt(rowIndex, columnIndex);
-        return CsvHelper.getFieldValue(field, getEscapeCharacter());
+        return ReadAction.compute(() -> {
+            PsiElement field = getFieldAt(rowIndex, columnIndex);
+            return CsvHelper.getFieldValue(field, getEscapeCharacter());
+        });
     }
 
     @Override

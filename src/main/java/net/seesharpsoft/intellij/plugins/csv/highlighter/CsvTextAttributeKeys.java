@@ -34,6 +34,9 @@ public final class CsvTextAttributeKeys {
             createTextAttributesKey("CSV_BAD_CHARACTER", HighlighterColors.BAD_CHARACTER);
 
     public static final Integer MAX_COLUMN_COLORING_COLORS = 10;
+
+    private static final List<TextAttributesKey> COLUMN_COLORING_ATTRIBUTES;
+    private static final Key<List<TextAttributes>> COLUMN_COLORING_TEXT_ATTRIBUTES = Key.create("CSV_PLUGIN_COLUMN_COLORING_ATTRIBUTES");
     private static AttributesDescriptor[] DESCRIPTORS = null;
 
     public static AttributesDescriptor[] getDescriptors() {
@@ -54,9 +57,6 @@ public final class CsvTextAttributeKeys {
         }
         return DESCRIPTORS;
     }
-
-    private static final List<TextAttributesKey> COLUMN_COLORING_ATTRIBUTES;
-    private static final Key<List<TextAttributes>> COLUMN_COLORING_TEXT_ATTRIBUTES = Key.create("CSV_PLUGIN_COLUMN_COLORING_ATTRIBUTES");
 
     static {
         COLUMN_COLORING_ATTRIBUTES = new ArrayList<>();
