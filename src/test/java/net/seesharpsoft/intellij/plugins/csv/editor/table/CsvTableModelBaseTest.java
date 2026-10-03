@@ -1,6 +1,8 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table;
 
 import com.intellij.openapi.editor.Document;
+import com.intellij.openapi.editor.event.DocumentEvent;
+import com.intellij.openapi.editor.event.DocumentListener;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiFile;
@@ -10,6 +12,7 @@ import com.intellij.util.ThrowableRunnable;
 import com.intellij.testFramework.EdtTestUtil;
 import com.intellij.testFramework.PsiTestUtil;
 import net.seesharpsoft.intellij.plugins.csv.CsvBasePlatformTestCase;
+import net.seesharpsoft.intellij.plugins.csv.CsvFileType;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvEscapeCharacter;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvRecord;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvCodeStyleSettings;
@@ -19,6 +22,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 import static net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings.COMMENT_INDICATOR_DEFAULT;
@@ -293,6 +297,49 @@ public class CsvTableModelBaseTest extends CsvBasePlatformTestCase implements Ps
 
     public void testDeleteMultipleColumns() {
         autoCheck((csvTableModel -> csvTableModel.removeColumns(Arrays.asList(csvTableModel.getColumnCount() - 1, 0, 5))));
+    }
+
+    public void testDeleteColumnsUsesSingleDocumentChange() {
+        String separator = CsvEditorSettings.getInstance().getDefaultValueSeparator().getCharacter();
+        String comment = CsvEditorSettings.getInstance().getCommentIndicator() + "keep this comment\n";
+        String row = String.join(separator, "first", "second", "third", "fourth", "") + "\n";
+        String expectedRow = String.join(separator, "first", "third", "") + "\n";
+        checkSingleDocumentChange(comment + row.repeat(1000) + "short\n",
+                comment + expectedRow.repeat(1000) + "short\n",
+                model -> model.removeColumns(Arrays.asList(3, 1, 1)));
+    }
+
+    public void testAddColumnUsesSingleDocumentChange() {
+        String separator = CsvEditorSettings.getInstance().getDefaultValueSeparator().getCharacter();
+        String comment = CsvEditorSettings.getInstance().getCommentIndicator() + "keep this comment\n";
+        String row = String.join(separator, "first", "second", "third") + "\n";
+        String expectedRow = String.join(separator, "first", "", "second", "third") + "\n";
+        checkSingleDocumentChange(comment + row.repeat(1000), comment + expectedRow.repeat(1000) + separator,
+                model -> model.addColumn(1, true));
+    }
+
+    private void checkSingleDocumentChange(String original, String expected, Consumer<CsvTableModel> operation) {
+        myFixture.configureByText(CsvFileType.INSTANCE, original);
+        Document document = myFixture.getDocument(getPsiFile());
+        AtomicInteger changes = new AtomicInteger();
+        DocumentListener listener = new DocumentListener() {
+            @Override
+            public void documentChanged(@NotNull DocumentEvent event) {
+                changes.incrementAndGet();
+            }
+        };
+        CsvTableModel model = new CsvTableModelBase(this);
+        document.addDocumentListener(listener);
+        try {
+            operation.accept(model);
+            assertEquals(expected, document.getText());
+            assertEquals(expected, getPsiFile().getText());
+            assertEquals("Column operations must notify document listeners only once", 1, changes.get());
+            PsiTestUtil.checkFileStructure(getPsiFile());
+        } finally {
+            document.removeDocumentListener(listener);
+            model.dispose();
+        }
     }
 
     public void testDeleteMultipleRows() {

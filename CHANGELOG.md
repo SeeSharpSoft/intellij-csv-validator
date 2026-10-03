@@ -14,6 +14,7 @@
 
 ### Fixed
 
+- Batched table column additions and deletions into a single document edit to avoid UI freezes from repeated change notifications (#1079)
 - Quoted automated report titles in GitHub duplicate searches to prevent invalid query syntax (#1078)
 - Prevented stale CSV PSI instances from being retained or applied after a table editor is disposed or its file provider changes (#1063, #1064)
 - Fixed `java.lang.Throwable: Cannot find element among its parent' children` in `CsvValidationInspection` when multiple CSV files are present in a directory (#999, #1066)
