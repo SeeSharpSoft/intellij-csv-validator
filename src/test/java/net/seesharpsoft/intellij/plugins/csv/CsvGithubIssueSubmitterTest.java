@@ -1,6 +1,7 @@
 package net.seesharpsoft.intellij.plugins.csv;
 
 import com.intellij.openapi.diagnostic.IdeaLoggingEvent;
+import com.intellij.openapi.progress.EmptyProgressIndicator;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.testFramework.UsefulTestCase;
 import org.jetbrains.plugins.github.api.GithubApiRequest;
@@ -15,7 +16,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -74,8 +74,8 @@ public class CsvGithubIssueSubmitterTest extends UsefulTestCase {
         when(duplicateIssue.getTitle()).thenReturn(title);
         when(duplicateIssue.getNumber()).thenReturn(1078L);
         GithubApiRequestExecutor executor = mock(GithubApiRequestExecutor.WithTokenAuth.class);
-        ProgressIndicator indicator = mock(ProgressIndicator.class);
-        when(executor.execute(same(indicator), any())).thenAnswer(invocation -> {
+        ProgressIndicator indicator = new EmptyProgressIndicator();
+        when(executor.execute(any(), any())).thenAnswer(invocation -> {
             GithubApiRequest<?> request = invocation.getArgument(1);
             String url = URLDecoder.decode(request.getUrl(), StandardCharsets.UTF_8);
             assertTrue(url.contains("repo:SeeSharpSoft/intellij-csv-validator"));
@@ -94,7 +94,7 @@ public class CsvGithubIssueSubmitterTest extends UsefulTestCase {
         when(executor.execute(any(), any())).thenAnswer(invocation ->
                 new GithubResponsePage<>(List.of(otherIssue), null, null, null, null));
 
-        assertNull(classUnderTest.searchExistingIssues(executor, "[Automated Report] Unexpected \"token\"", mock(ProgressIndicator.class)));
+        assertNull(classUnderTest.searchExistingIssues(executor, "[Automated Report] Unexpected \"token\"", new EmptyProgressIndicator()));
     }
 
     public void testGetIssueTitle() {
