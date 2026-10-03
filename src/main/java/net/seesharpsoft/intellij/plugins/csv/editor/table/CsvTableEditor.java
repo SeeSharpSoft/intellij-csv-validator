@@ -105,6 +105,7 @@ public abstract class CsvTableEditor implements FileEditor, PsiFileHolder {
         return EDITOR_NAME;
     }
 
+    @SuppressWarnings("unchecked")
     public <T extends CsvTableEditorState> T getTableEditorState() {
         if (storedState == null) {
             storedState = new CsvTableEditorState();
@@ -199,7 +200,7 @@ public abstract class CsvTableEditor implements FileEditor, PsiFileHolder {
         return isValid() ? TextEditorProvider.getInstance().getStructureViewBuilder(this.project, file) : null;
     }
 
-    @Nullable
+    @NotNull
     public VirtualFile getFile() {
         return this.file;
     }
@@ -230,10 +231,8 @@ public abstract class CsvTableEditor implements FileEditor, PsiFileHolder {
             this.document = FileDocumentManager.getInstance().getDocument(this.file);
         }
 
-        if (this.psiFile == null || !this.psiFile.isValid()) {
-            if (!refreshPsiFile()) {
-                return null;
-            }
+        if ((this.psiFile == null || !this.psiFile.isValid()) && !refreshPsiFile()) {
+            return null;
         }
         return this.psiFile instanceof CsvFile ? (CsvFile) psiFile : null;
     }
