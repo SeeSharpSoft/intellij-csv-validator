@@ -231,54 +231,65 @@ public abstract class CsvTableEditor implements FileEditor, PsiFileHolder {
         }
 
         if (this.psiFile == null || !this.psiFile.isValid()) {
-            long resolutionGeneration = this.psiResolutionGeneration.incrementAndGet();
-            this.psiFile = null;
-            this.currentSeparator = null;
-            this.currentEscapeCharacter = null;
-            // On EDT, avoid potentially slow PSI/index operations – use cached PSI only
-            if (ApplicationManager.getApplication().isDispatchThread()) {
-                if (this.document != null) {
-                    this.psiFile = PsiDocumentManager.getInstance(project).getCachedPsiFile(this.document);
-                }
-            } else {
-                // Off EDT it is safe to resolve PSI
-                this.psiFile = ReadAction.nonBlocking(this::resolvePsiFile).executeSynchronously();
-            }
-
-            if (!isCurrentPsiFile(this.psiFile) || resolutionGeneration != this.psiResolutionGeneration.get()) {
-                this.psiFile = null;
+            if (!refreshPsiFile()) {
                 return null;
-            }
-
-            final PsiFile resolvedPsiFile = this.psiFile;
-            if (resolvedPsiFile != null) {
-                if (ApplicationManager.getApplication().isDispatchThread()) {
-                    // On EDT, we try to avoid initializing services that might block (see #940)
-                    ReadAction.nonBlocking(() -> {
-                                if (!isCurrentPsiFile(resolvedPsiFile) || resolutionGeneration != this.psiResolutionGeneration.get()) {
-                                    return null;
-                                }
-                                CsvFile csvFile = (CsvFile) resolvedPsiFile;
-                                this.currentSeparator = CsvHelper.getValueSeparator(csvFile);
-                                this.currentEscapeCharacter = CsvHelper.getEscapeCharacter(csvFile);
-                                return null;
-                            })
-                            .finishOnUiThread(com.intellij.openapi.application.ModalityState.any(), unused -> {
-                                CsvTableModel tableModel = getTableModel();
-                                if (tableModel != null && isCurrentPsiFile(resolvedPsiFile) &&
-                                        resolutionGeneration == this.psiResolutionGeneration.get()) {
-                                    tableModel.notifyUpdate();
-                                }
-                            })
-                            .submit(com.intellij.util.concurrency.AppExecutorUtil.getAppExecutorService());
-                } else {
-                    CsvFile csvFile = (CsvFile) resolvedPsiFile;
-                    this.currentSeparator = CsvHelper.getValueSeparator(csvFile);
-                    this.currentEscapeCharacter = CsvHelper.getEscapeCharacter(csvFile);
-                }
             }
         }
         return this.psiFile instanceof CsvFile ? (CsvFile) psiFile : null;
+    }
+
+    private boolean refreshPsiFile() {
+        long resolutionGeneration = this.psiResolutionGeneration.incrementAndGet();
+        this.psiFile = null;
+        this.currentSeparator = null;
+        this.currentEscapeCharacter = null;
+        // On EDT, avoid potentially slow PSI/index operations – use cached PSI only
+        if (ApplicationManager.getApplication().isDispatchThread()) {
+            if (this.document != null) {
+                this.psiFile = PsiDocumentManager.getInstance(project).getCachedPsiFile(this.document);
+            }
+        } else {
+            // Off EDT it is safe to resolve PSI
+            this.psiFile = ReadAction.nonBlocking(this::resolvePsiFile).executeSynchronously();
+        }
+
+        if (!isCurrentPsiFile(this.psiFile) || resolutionGeneration != this.psiResolutionGeneration.get()) {
+            this.psiFile = null;
+            return false;
+        }
+
+        final PsiFile resolvedPsiFile = this.psiFile;
+        if (resolvedPsiFile != null) {
+            updateFileAttributes(resolvedPsiFile, resolutionGeneration);
+        }
+        return true;
+    }
+
+    private void updateFileAttributes(@NotNull PsiFile resolvedPsiFile, long resolutionGeneration) {
+        if (ApplicationManager.getApplication().isDispatchThread()) {
+            // On EDT, we try to avoid initializing services that might block (see #940)
+            ReadAction.nonBlocking(() -> {
+                        if (!isCurrentPsiFile(resolvedPsiFile) || resolutionGeneration != this.psiResolutionGeneration.get()) {
+                            return null;
+                        }
+                        CsvFile csvFile = (CsvFile) resolvedPsiFile;
+                        this.currentSeparator = CsvHelper.getValueSeparator(csvFile);
+                        this.currentEscapeCharacter = CsvHelper.getEscapeCharacter(csvFile);
+                        return null;
+                    })
+                    .finishOnUiThread(com.intellij.openapi.application.ModalityState.any(), unused -> {
+                        CsvTableModel tableModel = getTableModel();
+                        if (tableModel != null && isCurrentPsiFile(resolvedPsiFile) &&
+                                resolutionGeneration == this.psiResolutionGeneration.get()) {
+                            tableModel.notifyUpdate();
+                        }
+                    })
+                    .submit(com.intellij.util.concurrency.AppExecutorUtil.getAppExecutorService());
+        } else {
+            CsvFile csvFile = (CsvFile) resolvedPsiFile;
+            this.currentSeparator = CsvHelper.getValueSeparator(csvFile);
+            this.currentEscapeCharacter = CsvHelper.getEscapeCharacter(csvFile);
+        }
     }
 
     protected PsiFile resolvePsiFile() {
