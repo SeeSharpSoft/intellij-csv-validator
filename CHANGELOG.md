@@ -10,7 +10,7 @@
 
 ### Fixed
 
-## 4.3.2 - Unreleased
+## 4.4.0 - Oct 03, 2026
 
 ### Changed
 
