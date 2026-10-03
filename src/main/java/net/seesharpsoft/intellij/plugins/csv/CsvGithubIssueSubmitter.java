@@ -9,6 +9,7 @@ import com.intellij.openapi.diagnostic.ErrorReportSubmitter;
 import com.intellij.openapi.diagnostic.IdeaLoggingEvent;
 import com.intellij.openapi.diagnostic.SubmittedReportInfo;
 import com.intellij.openapi.progress.*;
+import com.intellij.openapi.progress.util.ProgressWrapper;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.text.Strings;
 import com.intellij.util.Consumer;
@@ -111,7 +112,7 @@ public class CsvGithubIssueSubmitter extends ErrorReportSubmitter {
         return true;
     }
 
-    private void submitToGithub(IdeaLoggingEvent event,
+    protected void submitToGithub(IdeaLoggingEvent event,
                                 String additionalInfo,
                                 GithubApiRequestExecutor githubExecutor,
                                 Consumer<? super SubmittedReportInfo> consumer,
@@ -124,11 +125,11 @@ public class CsvGithubIssueSubmitter extends ErrorReportSubmitter {
             String foundIssueId = searchExistingIssues(githubExecutor, issueTitle, progressIndicator);
 
             if (foundIssueId == null) {
-                githubExecutor.execute(progressIndicator, createNewIssue(issueTitle, issueDetails));
+                executeRequest(githubExecutor, progressIndicator, createNewIssue(issueTitle, issueDetails));
                 status = SubmittedReportInfo.SubmissionStatus.NEW_ISSUE;
             } else {
                 if (!Strings.isEmpty(additionalInfo)) {
-                    githubExecutor.execute(progressIndicator, updateExistingIssue(foundIssueId, issueDetails));
+                    executeRequest(githubExecutor, progressIndicator, updateExistingIssue(foundIssueId, issueDetails));
                 }
                 status = SubmittedReportInfo.SubmissionStatus.DUPLICATE;
             }
@@ -136,6 +137,12 @@ public class CsvGithubIssueSubmitter extends ErrorReportSubmitter {
         } catch (IOException exc) {
             throw new CsvGithubSubmitException(exc);
         }
+    }
+
+    private <T> T executeRequest(GithubApiRequestExecutor githubExecutor, ProgressIndicator progressIndicator, GithubApiRequest<T> request) throws IOException {
+        // The executor may start/stop its indicator in a nested runProcess. Keep the task's
+        // indicator running while forwarding progress updates and cancellation to each request.
+        return githubExecutor.execute(ProgressWrapper.wrap(progressIndicator), request);
     }
 
     protected GithubApiRequest<?> updateExistingIssue(String issueId, String content) throws IOException {
@@ -169,6 +176,10 @@ public class CsvGithubIssueSubmitter extends ErrorReportSubmitter {
             needle = title == null ? "" : title.trim();
         }
 
+        // Titles are search text, not GitHub query syntax. Remove characters that could
+        // terminate or escape the quoted phrase, and normalize whitespace before truncating.
+        needle = needle.replace('"', ' ').replace('\\', ' ').replaceAll("\\s+", " ").trim();
+
         // Apply length cap with word boundary if possible
         if (needle.length() > 250) {
             int endIndex = needle.substring(0, 250).lastIndexOf(" ");
@@ -182,7 +193,7 @@ public class CsvGithubIssueSubmitter extends ErrorReportSubmitter {
         if (Strings.isEmptyOrSpaces(needle)) {
             needle = "crash";
         }
-        return needle;
+        return "\"" + needle + "\"";
     }
 
     protected String searchExistingIssues(GithubApiRequestExecutor githubExecutor, String title, ProgressIndicator progressIndicator) throws IOException {
@@ -198,7 +209,7 @@ public class CsvGithubIssueSubmitter extends ErrorReportSubmitter {
                         new GithubRequestPagination(1, 5)
                 );
 
-        GithubResponsePage<GithubSearchedIssue> foundIssuesPage = githubExecutor.execute(progressIndicator, existingIssueRequest);
+        GithubResponsePage<GithubSearchedIssue> foundIssuesPage = executeRequest(githubExecutor, progressIndicator, existingIssueRequest);
         if (foundIssuesPage != null && !foundIssuesPage.getItems().isEmpty()) {
             for (GithubSearchedIssue foundIssue : foundIssuesPage.getItems()) {
                 if (foundIssue.getTitle().equals(title)) {

@@ -19,10 +19,12 @@ public class CsvFileEditorProvider implements AsyncFileEditorProvider, DumbAware
 
     public static boolean acceptCsvFile(@NotNull Project project, @NotNull VirtualFile file) {
         try {
-            return !SingleRootFileViewProvider.isTooLargeForContentLoading(file)
-                    && !SingleRootFileViewProvider.isTooLargeForIntelligence(file)
-                    && !(file instanceof DiffViewerVirtualFile)
-                    && CsvHelper.isCsvFile(file);
+            if (file instanceof DiffViewerVirtualFile || !CsvHelper.isCsvFile(file)) {
+                return false;
+            }
+            return !file.isInLocalFileSystem()
+                    || (!SingleRootFileViewProvider.isTooLargeForContentLoading(file)
+                    && !SingleRootFileViewProvider.isTooLargeForIntelligence(file));
         } catch(Exception exc) {
             return false;
         }

@@ -420,6 +420,14 @@ If another plugin for CSV files like [Rainbow CSV](https://plugins.jetbrains.com
 
 Therefore, please ensure in the settings the proper mapping of corresponding files types (_File > Settings > Editor > File Types_).
 
+#### Code insight is not available for large files
+
+The IntelliJ platform disables code insight features for files larger than its configured limit. To change this limit, open _Help > Edit Custom Properties_ and add or update the following property, using a value in bytes:
+
+`idea.max.intellisense.filesize=<maximum-file-size-in-bytes>`
+
+Restart the IDE after changing the property.
+
 ## Contribution
 
 Contributions are welcome. Please check [CONTRIBUTING.md](./CONTRIBUTING.md) for more information.

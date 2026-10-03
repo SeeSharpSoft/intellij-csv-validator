@@ -3,6 +3,8 @@ package net.seesharpsoft.intellij.plugins.csv;
 import com.intellij.ide.BrowserUtil;
 import com.intellij.notification.*;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.options.Configurable;
+import com.intellij.openapi.options.SearchableConfigurable;
 import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
@@ -24,9 +26,11 @@ public class CsvPlugin implements ProjectActivity, DumbAware {
         if (project == null || project.isDisposed()) return;
 
         if (link.startsWith("#")) {
-            ApplicationManager.getApplication().invokeLater(() ->
-                    ShowSettingsUtil.getInstance().showSettingsDialog(project, link.substring(1))
-            );
+            ApplicationManager.getApplication().executeOnPooledThread(() -> {
+                ApplicationManager.getApplication().invokeLater(() ->
+                        showSettingsLink(project, link.substring(1))
+                );
+            });
         } else {
             ApplicationManager.getApplication().invokeLater(() ->
                     BrowserUtil.browse(link, project)
@@ -37,26 +41,39 @@ public class CsvPlugin implements ProjectActivity, DumbAware {
     public static void doAsyncProjectMaintenance(@NotNull Project project) {
         ProgressManager.getInstance().run(new Task.Backgroundable(project, "CSV Editor validation") {
             public void run(@NotNull ProgressIndicator progressIndicator) {
-                // initialize progress indication
-                progressIndicator.setIndeterminate(false);
-
-                // Set the progress bar percentage and text
-                progressIndicator.setFraction(0.50);
-                progressIndicator.setText("Validating CSV file attributes");
-
-                // start process
-                try {
-                    CsvFileAttributes csvFileAttributes = CsvFileAttributes.getInstance(getProject());
-                    csvFileAttributes.cleanupAttributeMap(project);
-                } catch (Exception exception) {
-                    // repeated unresolved bug-reports when retrieving the component
-                    // while this cleanup is an optional and non-critical task
-                }
-                // finished
-                progressIndicator.setFraction(1.0);
-                progressIndicator.setText("Finished");
+                cleanupProjectAttributes(project, progressIndicator);
             }
         });
+    }
+
+    private static void showSettingsLink(@NotNull Project project, @NotNull String settingsId) {
+        ShowSettingsUtil.getInstance().showSettingsDialog(project, configurable ->
+                matchesSettingsId(configurable, settingsId), null);
+    }
+
+    static boolean matchesSettingsId(@NotNull Configurable configurable, @NotNull String settingsId) {
+        return configurable instanceof SearchableConfigurable searchableConfigurable &&
+                settingsId.equals(searchableConfigurable.getId());
+    }
+
+    static void cleanupProjectAttributes(@NotNull Project project, @NotNull ProgressIndicator progressIndicator) {
+        progressIndicator.setIndeterminate(false);
+        progressIndicator.setFraction(0.50);
+        progressIndicator.setText("Validating CSV file attributes");
+
+        try {
+            // This maintenance is optional. Do not initialize the persistent service here:
+            // loading its state can fail before the project is usable (see #958).
+            CsvFileAttributes csvFileAttributes = project.getServiceIfCreated(CsvFileAttributes.class);
+            if (csvFileAttributes != null) {
+                csvFileAttributes.cleanupAttributeMap(project);
+            }
+        } catch (Exception exception) {
+            // Cleanup is optional and must not prevent project startup.
+        }
+
+        progressIndicator.setFraction(1.0);
+        progressIndicator.setText("Finished");
     }
 
     @Override

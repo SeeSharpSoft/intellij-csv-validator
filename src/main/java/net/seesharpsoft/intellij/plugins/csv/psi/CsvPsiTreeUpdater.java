@@ -525,13 +525,20 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
 
                 manager.doPostponedOperationsAndUnblockDocument(document);
 
-                int offset = 0;
+                // Build the changed span first so listeners receive a single document event,
+                // even when a column operation affects thousands of records.
+                CharSequence original = document.getImmutableCharSequence();
+                int startOffset = myReplacements.getFirst().getFirst().getStartOffset();
+                int endOffset = myReplacements.getLast().getFirst().getEndOffset();
+                StringBuilder updated = new StringBuilder(endOffset - startOffset);
+                int offset = startOffset;
                 for (Pair<TextRange, String> replacement : myReplacements) {
-                    TextRange textRange = replacement.getFirst().shiftRight(offset);
-                    String text = replacement.getSecond();
-                    document.replaceString(textRange.getStartOffset(), textRange.getEndOffset(), text);
-                    offset += text.length() - textRange.getLength();
+                    TextRange textRange = replacement.getFirst();
+                    updated.append(original, offset, textRange.getStartOffset());
+                    updated.append(replacement.getSecond());
+                    offset = textRange.getEndOffset();
                 }
+                document.replaceString(startOffset, endOffset, updated);
 
                 manager.commitDocument(document);
             });

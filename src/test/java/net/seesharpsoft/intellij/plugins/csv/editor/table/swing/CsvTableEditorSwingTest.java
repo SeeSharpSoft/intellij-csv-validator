@@ -1,13 +1,22 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
 import com.intellij.openapi.fileEditor.FileEditorStateLevel;
+import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.util.Key;
+import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.psi.PsiFile;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditor;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditorState;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableModel;
+import org.jetbrains.annotations.NotNull;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
 
@@ -76,5 +85,85 @@ public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
         assertEquals("  and one more value  ", tableModel.getValue(2, 1));
         assertEquals("", tableModel.getValue(3, 0));
         assertEquals("", tableModel.getValue(3, 1));
+    }
+
+    public void testDisposedEditorDoesNotExposePsiFile() {
+        assertNotNull(fileEditor.getPsiFile());
+
+        fileEditor.dispose();
+
+        assertNull(fileEditor.getPsiFile());
+    }
+
+    public void testDisposedEditorIgnoresPendingPsiResolution() throws Exception {
+        BlockingCsvTableEditor editor = new BlockingCsvTableEditor(getProject(), myFixture.getFile().getVirtualFile());
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        try {
+            editor.invalidateCachedPsiFile();
+            editor.blockNextResolution();
+            Future<PsiFile> resolution = executor.submit(editor::getPsiFile);
+
+            assertTrue(editor.resolutionStarted.await(5, TimeUnit.SECONDS));
+            editor.dispose();
+            editor.releaseResolution.countDown();
+
+            assertNull(resolution.get(5, TimeUnit.SECONDS));
+        } finally {
+            editor.releaseResolution.countDown();
+            if (!editor.isDisposed()) {
+                editor.dispose();
+            }
+            executor.shutdownNow();
+        }
+    }
+
+    public void testInvalidatedFileDoesNotReuseCachedPsiFile() throws Exception {
+        assertNotNull(fileEditor.getPsiFile());
+        VirtualFile virtualFile = fileEditor.getFile();
+
+        WriteAction.run(() -> {
+            try {
+                virtualFile.delete(this);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        assertFalse(fileEditor.isValid());
+        assertNull(fileEditor.getPsiFile());
+    }
+
+    private static final class BlockingCsvTableEditor extends CsvTableEditorSwing {
+        private final CountDownLatch resolutionStarted = new CountDownLatch(1);
+        private final CountDownLatch releaseResolution = new CountDownLatch(1);
+        private volatile boolean blockResolution;
+
+        private BlockingCsvTableEditor(@NotNull com.intellij.openapi.project.Project project,
+                                       @NotNull VirtualFile file) {
+            super(project, file);
+        }
+
+        private void blockNextResolution() {
+            blockResolution = true;
+        }
+
+        private void invalidateCachedPsiFile() {
+            psiFile = null;
+        }
+
+        @Override
+        protected PsiFile resolvePsiFile() {
+            if (blockResolution) {
+                resolutionStarted.countDown();
+                try {
+                    releaseResolution.await(5, TimeUnit.SECONDS);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    return null;
+                }
+                blockResolution = false;
+            }
+            return super.resolvePsiFile();
+        }
     }
 }
