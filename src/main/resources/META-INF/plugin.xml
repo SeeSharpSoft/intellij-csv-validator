@@ -217,7 +217,6 @@
         <group id="net.seesharpsoft.intellij.plugins.csv.actions.CsvChangeSeparatorActionGroup"
                class="net.seesharpsoft.intellij.plugins.csv.actions.CsvChangeSeparatorActionGroup"
                popup="true"
-               keep-content="true"
                icon="/media/icons/csv-icon.png"
         >
             <add-to-group group-id="EditorPopupMenu" anchor="last"/>
@@ -228,7 +227,6 @@
         <group id="net.seesharpsoft.intellij.plugins.csv.actions.CsvChangeEscapeCharacterActionGroup"
                class="net.seesharpsoft.intellij.plugins.csv.actions.CsvChangeEscapeCharacterActionGroup"
                popup="true"
-               keep-content="true"
                icon="/media/icons/csv-icon.png"
         >
             <add-to-group group-id="EditorPopupMenu" anchor="last"/>
