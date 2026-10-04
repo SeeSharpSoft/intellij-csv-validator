@@ -10,6 +10,12 @@
 
 ### Fixed
 
+## 4.4.1 - Oct 04, 2026
+
+### Fixed
+
+- Fixed a `PluginException` during action registration on newer IntelliJ Platform versions by removing invalid `keep-content` attributes from the CSV action groups (#1084, #1085)
+
 ## 4.4.0 - Oct 03, 2026
 
 ### Changed
