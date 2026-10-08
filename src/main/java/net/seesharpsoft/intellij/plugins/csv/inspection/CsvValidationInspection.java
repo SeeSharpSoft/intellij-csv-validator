@@ -10,6 +10,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
+import com.intellij.psi.PsiFile;
 import com.intellij.psi.TokenType;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.util.IncorrectOperationException;
@@ -125,7 +126,8 @@ public class CsvValidationInspection extends LocalInspectionTool {
         public void applyFix(@NotNull Project project, @NotNull ProblemDescriptor descriptor) {
             PsiElement element = descriptor.getPsiElement();
             if (element == null || !element.isValid()) return;
-            Document document = PsiDocumentManager.getInstance(project).getDocument(element.getContainingFile());
+            PsiFile psiFile = element.getContainingFile();
+            Document document = PsiDocumentManager.getInstance(project).getDocument(psiFile);
             if (document == null) return;
 
             List<Integer> quotePositions = new ArrayList<>();
@@ -139,7 +141,7 @@ public class CsvValidationInspection extends LocalInspectionTool {
             } else {
                 quotePositions.add(endSeparatorElement.getTextOffset());
             }
-            CsvIntentionHelper.addQuotes(document, quotePositions);
+            CsvIntentionHelper.addQuotes(psiFile, quotePositions);
         }
     }
 

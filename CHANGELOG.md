@@ -10,13 +10,16 @@
 
 ### Fixed
 
-- Fixed read access violations when the table editor paints comment rows by caching comment-row information (#1092)
-
-## 4.4.2 - Oct 07, 2026
+## 4.5.0 - Oct 07, 2026
 
 ### Fixed
 
 - Fixed read access violations when editing a table cell on the EDT (#1087, #1090, #1093, #1095)
+- Fixed read access violations when the table editor paints comment rows by caching comment-row information (#1092)
+
+### Changed
+
+- Improved intentions and inspection fixes to apply all edits as a single document change
 
 ## 4.4.1 - Oct 04, 2026
 

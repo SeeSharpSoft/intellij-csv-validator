@@ -5,8 +5,6 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.util.IncorrectOperationException;
-import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfo;
-import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfoMap;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvFile;
 import org.jetbrains.annotations.NotNull;
@@ -30,16 +28,6 @@ public class CsvShiftColumnLeftIntentionAction extends CsvShiftColumnIntentionAc
 
         PsiElement element = CsvHelper.getParentFieldElement(psiElement);
 
-        CsvColumnInfoMap<PsiElement> columnInfoMap = CsvHelper.createColumnInfoMap(csvFile);
-        CsvColumnInfo<PsiElement> rightColumnInfo = columnInfoMap.getColumnInfo(element);
-
-        // column must be at least index 1 to be shifted left
-        if (rightColumnInfo == null || rightColumnInfo.getColumnIndex() < 1) {
-            return;
-        }
-
-        CsvColumnInfo<PsiElement> leftColumnInfo = columnInfoMap.getColumnInfo(rightColumnInfo.getColumnIndex() - 1);
-
-        changeLeftAndRightColumnOrder(project, csvFile, leftColumnInfo, rightColumnInfo);
+        changeColumnOrder(project, csvFile, element, true);
     }
 }

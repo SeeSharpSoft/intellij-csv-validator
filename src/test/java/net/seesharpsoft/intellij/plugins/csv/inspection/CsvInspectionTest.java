@@ -3,10 +3,16 @@ package net.seesharpsoft.intellij.plugins.csv.inspection;
 import com.intellij.codeInsight.intention.IntentionAction;
 import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.lang.FileASTNode;
+import com.intellij.openapi.editor.Document;
+import com.intellij.openapi.editor.event.DocumentEvent;
+import com.intellij.openapi.editor.event.DocumentListener;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.TokenType;
 import net.seesharpsoft.intellij.plugins.csv.CsvBasePlatformTestCase;
 import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -31,8 +37,22 @@ public class CsvInspectionTest extends CsvBasePlatformTestCase {
                 .filter(intentionAction -> intentionAction.getText().equals(hint))
                 .findFirst().get();
 
-        myFixture.launchAction(action);
+        Document document = myFixture.getDocument(myFixture.getFile());
+        AtomicInteger documentChanges = new AtomicInteger();
+        DocumentListener listener = new DocumentListener() {
+            @Override
+            public void documentChanged(@NotNull DocumentEvent event) {
+                documentChanges.incrementAndGet();
+            }
+        };
+        document.addDocumentListener(listener);
+        try {
+            myFixture.launchAction(action);
+        } finally {
+            document.removeDocumentListener(listener);
+        }
         myFixture.checkResultByFile(testName + "/after.csv");
+        assertEquals("Each inspection fix must produce one document change", 1, documentChanges.get());
     }
 
     public void testAddClosingQuote() throws Throwable {
