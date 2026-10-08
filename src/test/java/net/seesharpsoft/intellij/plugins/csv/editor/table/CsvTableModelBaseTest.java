@@ -10,6 +10,7 @@ import com.intellij.psi.codeStyle.CodeStyleSettingsManager;
 import com.intellij.openapi.util.ThrowableComputable;
 import com.intellij.util.ThrowableRunnable;
 import com.intellij.testFramework.EdtTestUtil;
+import com.intellij.testFramework.LoggedErrorProcessor;
 import com.intellij.testFramework.PsiTestUtil;
 import net.seesharpsoft.intellij.plugins.csv.CsvBasePlatformTestCase;
 import net.seesharpsoft.intellij.plugins.csv.CsvFileType;
@@ -22,6 +23,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
@@ -216,6 +218,25 @@ public class CsvTableModelBaseTest extends CsvBasePlatformTestCase implements Ps
             assertEquals("", csvTableModel.getValue(8, 3));
             assertEquals(";:|\\\tvalue 2", csvTableModel.getValue(8, 5));
         });
+    }
+
+    public void testSetQuotedValueFromEdt() throws Exception {
+        myFixture.configureByFiles("Original.csv");
+        CsvTableModel model = new CsvTableModelBase<>(this);
+        try {
+            LoggedErrorProcessor.executeWith(new LoggedErrorProcessor() {
+                @Override
+                public @NotNull Set<Action> processError(@NotNull String category,
+                                                          @NotNull String message,
+                                                          String @NotNull [] details,
+                                                          @Nullable Throwable t) {
+                    return Set.of(Action.RETHROW);
+                }
+            }, () -> EdtTestUtil.runInEdtAndWait(() -> model.setValue("New Header, 5", 0, 4)));
+            assertEquals("New Header, 5", model.getValue(0, 4));
+        } finally {
+            model.dispose();
+        }
     }
 
     public void testAddColumnAfterLast() {

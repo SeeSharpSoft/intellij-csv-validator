@@ -10,6 +10,12 @@
 
 ### Fixed
 
+## 4.4.2 - Oct 07, 2026
+
+### Fixed
+
+- Fixed read access violations when editing a table cell on the EDT (#1087, #1090, #1093, #1095)
+
 ## 4.4.1 - Oct 04, 2026
 
 ### Fixed

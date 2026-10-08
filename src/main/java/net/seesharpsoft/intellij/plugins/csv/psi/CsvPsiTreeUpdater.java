@@ -1,6 +1,7 @@
 package net.seesharpsoft.intellij.plugins.csv.psi;
 
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.command.CommandProcessor;
 import com.intellij.openapi.editor.Document;
@@ -39,6 +40,19 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
         myPsiFileHolder = psiFileHolder;
     }
 
+    public CsvPsiTreeUpdater(@NotNull PsiFile psiFile) {
+        this(new PsiFileHolder() {
+            @Override
+            public PsiFile getPsiFile() {
+                return psiFile;
+            }
+
+            @Override
+            public void dispose() {
+            }
+        });
+    }
+
     private FileType getFileType() {
         PsiFile psiFile = getPsiFile();
         if (psiFile == null) return null;
@@ -64,7 +78,8 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
 
     private PsiFile createFile(@NotNull String text) {
         PsiFileFactory fileFactory = getFileFactory();
-        return fileFactory == null ? null : getFileFactory().createFileFromText("a.csv", getFileType(), text);
+        FileType fileType = getFileType();
+        return fileFactory == null || fileType == null ? null : fileFactory.createFileFromText("a.csv", fileType, text);
     }
 
     private boolean isIndicatingComment(@NotNull String text) {
@@ -114,6 +129,14 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
 
     public void doAction(PsiAction action) {
         if (myUncommittedActions != null) myUncommittedActions.add(action);
+    }
+
+    /**
+     * Queues document replacements that are applied as one document change when committed.
+     */
+    public void replaceTexts(@NotNull List<Pair<TextRange, String>> replacements) {
+        if (replacements.isEmpty()) return;
+        doAction(new DocumentPsiAction(getPsiFile(), replacements));
     }
 
     public void appendEmptyFields(@NotNull PsiElement anchor, int no) {
@@ -178,6 +201,7 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
                 int currentNoOfColumn = PsiTreeUtil.countChildrenOfType(record, CsvField.class);
                 field = PsiHelper.getNthChildOfType(record, currentNoOfColumn - 1, CsvField.class);
 
+                assert field != null;
                 startOffset = field.getTextRange().getEndOffset();
                 value = valueSeparator.repeat(columnIndex - currentNoOfColumn + 1);
             } else {
@@ -186,16 +210,14 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
             replacements.add(Pair.create(TextRange.create(startOffset, startOffset), value));
         }
 
-        if (replacements.size() > 0) {
-            doAction(new DocumentPsiAction(psiFile, replacements));
-        }
+        replaceTexts(replacements);
     }
 
     /**
      * This can be a heavy operation on PsiFile, so it will be executed on the document itself.
      */
     public void deleteColumns(Collection<Integer> indices) {
-        if (indices.size() == 0) return;
+        if (indices.isEmpty()) return;
 
         PsiFile psiFile = getPsiFile();
         int columnCount = CsvTableModel.getColumnCount(psiFile);
@@ -207,9 +229,7 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
         }
 
         List<Pair<TextRange, String>> replacements = collectRangesToDelete(distinctIndices);
-        if (replacements.size() > 0) {
-            doAction(new DocumentPsiAction(psiFile, replacements));
-        }
+        replaceTexts(replacements);
     }
 
     private List<Pair<TextRange, String>> collectRangesToDelete(List<Integer> indices) {
@@ -245,7 +265,7 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
         while (record != null && !(record instanceof CsvRecord)) {
             record = record.getParent();
         }
-        assert record instanceof CsvRecord;
+        assert record != null;
         doAction(new AddSiblingPsiAction(record, createRecord(), before));
         doAddLineBreak(record, before);
     }
@@ -288,14 +308,14 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
                 doAction(new ReplacePsiAction(row, createRecord()));
             }
         }
-        delete(toDelete.toArray(new PsiElement[toDelete.size()]));
+        delete(toDelete.toArray(new PsiElement[0]));
     }
 
     public void replaceComment(@NotNull PsiElement toReplace, @Nullable String textArg) {
         assert PsiHelper.getElementType(toReplace) == CsvTypes.COMMENT;
         String text = textArg == null ? "" : textArg;
         // do not replace if not necessary
-        if (toReplace.getText().equals(text)) return;
+        if (ReadAction.compute(() -> toReplace.getText().equals(text))) return;
 
         doAction(new ReplacePsiAction(toReplace, createComment(text)));
     }
@@ -304,7 +324,7 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
         assert toReplace instanceof CsvField;
         String text = textArg == null ? "" : textArg;
         // do not replace if not necessary
-        if (toReplace.getText().equals(text)) return;
+        if (ReadAction.compute(() -> toReplace.getText().equals(text))) return;
 
         doAction(new ReplacePsiAction(toReplace, createField(text, enquoteCommentIndicator)));
     }
@@ -334,12 +354,12 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
         doAction(new AddSiblingPsiAction(anchor, createLineBreak(), before));
     }
 
-    private void doAddField(@NotNull PsiElement anchor, @Nullable String text, boolean enquoteCommentIndicator, boolean before) {
+    private void doAddField(@NotNull PsiElement anchor, @NotNull String text, boolean enquoteCommentIndicator, boolean before) {
         doAction(new AddSiblingPsiAction(anchor, createField(text, enquoteCommentIndicator), before));
     }
 
     public synchronized void commit() {
-        if (isSuspended() || myUncommittedActions == null || myUncommittedActions.size() == 0) return;
+        if (isSuspended() || myUncommittedActions == null || myUncommittedActions.isEmpty()) return;
 
         List<PsiAction> actionsToCommit = new ArrayList<>(myUncommittedActions);
         myUncommittedActions.clear();
@@ -362,7 +382,7 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
                 CommandProcessor.getInstance().executeCommand(
                         getPsiFile().getProject(),
                         () -> DocumentUtil.executeInBulk(document, runnable),
-                        "CSV Editor changes",
+                        "CSV Editor Changes",
                         null,
                         document);
             } finally {
@@ -526,7 +546,7 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
                 manager.doPostponedOperationsAndUnblockDocument(document);
 
                 // Build the changed span first so listeners receive a single document event,
-                // even when a column operation affects thousands of records.
+                // even when a batched operation affects thousands of records.
                 CharSequence original = document.getImmutableCharSequence();
                 int startOffset = myReplacements.getFirst().getFirst().getStartOffset();
                 int endOffset = myReplacements.getLast().getFirst().getEndOffset();
