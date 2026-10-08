@@ -10,6 +10,8 @@
 
 ### Fixed
 
+- Fixed read access violations when the table editor paints comment rows by caching comment-row information (#1092)
+
 ## 4.4.2 - Oct 07, 2026
 
 ### Fixed

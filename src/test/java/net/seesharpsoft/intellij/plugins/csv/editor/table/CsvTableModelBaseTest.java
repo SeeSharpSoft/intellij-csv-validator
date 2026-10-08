@@ -146,6 +146,8 @@ public class CsvTableModelBaseTest extends CsvBasePlatformTestCase implements Ps
                         invocation.<ThrowableRunnable<?>>getArgument(0).run();
                         return null;
                     });
+            readAction.when(() -> ReadAction.compute(any(ThrowableComputable.class)))
+                    .thenAnswer(invocation -> ((ThrowableComputable<?, ?>) invocation.getArgument(0)).compute());
             model.notifyUpdate();
             readAction.verify(() -> ReadAction.run(any(ThrowableRunnable.class)));
         } finally {
@@ -165,6 +167,7 @@ public class CsvTableModelBaseTest extends CsvBasePlatformTestCase implements Ps
             readAction.when(() -> ReadAction.compute(any(ThrowableComputable.class)))
                     .thenAnswer(invocation -> ((ThrowableComputable<?, ?>) invocation.getArgument(0)).compute());
             assertFalse(model.isCommentRow(0));
+            model.getFieldAt(0, 0);
             readAction.verify(() -> ReadAction.compute(any(ThrowableComputable.class)));
         } finally {
             model.dispose();
