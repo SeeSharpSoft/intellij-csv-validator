@@ -16,6 +16,7 @@
 
 - Fixed read access violations when editing a table cell on the EDT (#1087, #1090, #1093, #1095)
 - Fixed read access violations when the table editor paints comment rows by caching comment-row information (#1092)
+- Prevented concurrent CSV spell-checking calls from triggering Grazie initialization races (#1094)
 
 ### Changed
 
