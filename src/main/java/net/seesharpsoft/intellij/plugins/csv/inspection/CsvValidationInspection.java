@@ -74,8 +74,8 @@ public class CsvValidationInspection extends LocalInspectionTool {
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
         return new PsiElementVisitor() {
             @Override
-            public void visitElement(PsiElement element) {
-                if (element == null || !holder.getFile().getLanguage().isKindOf(CsvLanguage.INSTANCE)) {
+            public void visitElement(@NotNull PsiElement element) {
+                if (!holder.getFile().getLanguage().isKindOf(CsvLanguage.INSTANCE)) {
                     return;
                 }
 
@@ -100,13 +100,12 @@ public class CsvValidationInspection extends LocalInspectionTool {
         };
     }
 
-    private boolean registerError(@NotNull final ProblemsHolder holder, @NotNull PsiElement element, @NotNull String descriptionTemplate, @Nullable LocalQuickFix fix) {
-        if (element != null && this.isSuppressedFor(element)) {
-            return false;
+    private void registerError(@NotNull final ProblemsHolder holder, @NotNull PsiElement element, @NotNull String descriptionTemplate, @Nullable LocalQuickFix fix) {
+        if (this.isSuppressedFor(element)) {
+            return;
         }
 
         holder.registerProblem(element, descriptionTemplate, fix);
-        return true;
     }
 
     private abstract static class CsvLocalQuickFix implements LocalQuickFix {

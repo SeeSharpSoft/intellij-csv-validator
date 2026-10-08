@@ -18,10 +18,9 @@ public class CsvShiftColumnLeftIntentionAction extends CsvShiftColumnIntentionAc
     @Override
     public void invoke(@NotNull Project project, Editor editor, @NotNull final PsiElement psiElement) throws IncorrectOperationException {
         PsiFile containingFile = psiElement.getContainingFile();
-        if (!(containingFile instanceof CsvFile)) {
+        if (!(containingFile instanceof CsvFile csvFile)) {
             return;
         }
-        CsvFile csvFile = (CsvFile) containingFile;
         if (!csvFile.isValid()) {
             return;
         }

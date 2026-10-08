@@ -1,6 +1,5 @@
 package net.seesharpsoft.intellij.plugins.csv.intention;
 
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
@@ -41,7 +40,7 @@ public final class CsvIntentionHelper {
         return elements;
     }
 
-    public static void quoteAll(@NotNull Project project, @NotNull PsiFile psiFile) {
+    public static void quoteAll(@NotNull PsiFile psiFile) {
         applyReplacements(psiFile, collectQuoteAllReplacements(psiFile));
     }
 
@@ -59,7 +58,7 @@ public final class CsvIntentionHelper {
         return replacements;
     }
 
-    public static void quoteValue(@NotNull Project project, @NotNull final PsiElement field) {
+    public static void quoteValue(@NotNull final PsiElement field) {
         List<Pair<TextRange, String>> replacements = new ArrayList<>();
         if (PsiHelper.getElementType(field.getFirstChild()) != CsvTypes.QUOTE) {
             replacements.add(Pair.create(TextRange.create(field.getTextRange().getStartOffset(), field.getTextRange().getStartOffset()), "\""));
@@ -70,7 +69,7 @@ public final class CsvIntentionHelper {
         applyReplacements(field.getContainingFile(), replacements);
     }
 
-    public static void unquoteAll(@NotNull Project project, @NotNull PsiFile psiFile) {
+    public static void unquoteAll(@NotNull PsiFile psiFile) {
         applyReplacements(psiFile, collectUnquoteAllReplacements(psiFile));
     }
 
@@ -90,7 +89,7 @@ public final class CsvIntentionHelper {
         return replacements;
     }
 
-    public static void unquoteValue(@NotNull Project project, @NotNull final PsiElement field) {
+    public static void unquoteValue(@NotNull final PsiElement field) {
         removeQuotes(field.getContainingFile(), getQuoteElements(field));
     }
 
