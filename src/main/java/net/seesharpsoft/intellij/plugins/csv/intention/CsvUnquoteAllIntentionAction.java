@@ -29,7 +29,7 @@ public class CsvUnquoteAllIntentionAction extends CsvIntentionAction {
 
     @Override
     public void invoke(@NotNull Project project, Editor editor, PsiElement element) throws IncorrectOperationException {
-        CsvIntentionHelper.unquoteAll(project, element.getContainingFile());
+        CsvIntentionHelper.unquoteAll(element.getContainingFile());
     }
 
 }

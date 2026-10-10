@@ -29,7 +29,7 @@ public class CsvQuoteAllIntentionAction extends CsvIntentionAction {
 
     @Override
     public void invoke(@NotNull Project project, Editor editor, PsiElement element) throws IncorrectOperationException {
-        CsvIntentionHelper.quoteAll(project, element.getContainingFile());
+        CsvIntentionHelper.quoteAll(element.getContainingFile());
     }
 
 }

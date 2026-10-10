@@ -10,6 +10,7 @@ import com.intellij.psi.codeStyle.CodeStyleSettingsManager;
 import com.intellij.openapi.util.ThrowableComputable;
 import com.intellij.util.ThrowableRunnable;
 import com.intellij.testFramework.EdtTestUtil;
+import com.intellij.testFramework.LoggedErrorProcessor;
 import com.intellij.testFramework.PsiTestUtil;
 import net.seesharpsoft.intellij.plugins.csv.CsvBasePlatformTestCase;
 import net.seesharpsoft.intellij.plugins.csv.CsvFileType;
@@ -22,6 +23,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
@@ -74,12 +77,10 @@ public class CsvTableModelBaseTest extends CsvBasePlatformTestCase implements Ps
 
         myFixture.configureByFiles(relativeTargetPath + "/Original.csv");
 
-        CsvTableModel model = new CsvTableModelBase(this);
+        CsvTableModel model = new CsvTableModelBase<>(this);
         runnable.accept(model);
         model.dispose();
 
-        Document doc = this.myFixture.getDocument(getPsiFile());
-//        PsiDocumentManager.getInstance(getProject()).doPostponedOperationsAndUnblockDocument(doc);
         PsiTestUtil.checkFileStructure(getPsiFile());
 
         myFixture.checkResultByFile(relativeTargetPath + String.format("/%s.csv", testName));
@@ -100,7 +101,7 @@ public class CsvTableModelBaseTest extends CsvBasePlatformTestCase implements Ps
 
         myFixture.configureByFiles(relativeTargetPath + "/Original.csv");
 
-        CsvTableModel model = new CsvTableModelBase(this);
+        CsvTableModel model = new CsvTableModelBase<>(this);
 
         if (runnable != null) runnable.accept(model);
 
@@ -123,7 +124,7 @@ public class CsvTableModelBaseTest extends CsvBasePlatformTestCase implements Ps
 
     public void testNotifyUpdateFromEdt() throws Exception {
         myFixture.configureByFiles("Original.csv");
-        CsvTableModel model = new CsvTableModelBase(this);
+        CsvTableModel model = new CsvTableModelBase<>(this);
         try {
             EdtTestUtil.runInEdtAndWait(() -> {
                 assertFalse(model.isCommentRow(0));
@@ -137,13 +138,15 @@ public class CsvTableModelBaseTest extends CsvBasePlatformTestCase implements Ps
     public void testNotifyUpdateRequiresReadAction() throws Exception {
         PsiFileHolder holder = mock(PsiFileHolder.class);
         when(holder.getPsiFile()).thenReturn(mock(PsiFile.class));
-        CsvTableModel model = new CsvTableModelBase(holder);
+        CsvTableModel model = new CsvTableModelBase<>(holder);
         try (MockedStatic<ReadAction> readAction = mockStatic(ReadAction.class)) {
             readAction.when(() -> ReadAction.run(any(ThrowableRunnable.class)))
                     .thenAnswer(invocation -> {
                         invocation.<ThrowableRunnable<?>>getArgument(0).run();
                         return null;
                     });
+            readAction.when(() -> ReadAction.compute(any(ThrowableComputable.class)))
+                    .thenAnswer(invocation -> ((ThrowableComputable<?, ?>) invocation.getArgument(0)).compute());
             model.notifyUpdate();
             readAction.verify(() -> ReadAction.run(any(ThrowableRunnable.class)));
         } finally {
@@ -158,11 +161,12 @@ public class CsvTableModelBaseTest extends CsvBasePlatformTestCase implements Ps
         when(holder.getPsiFile()).thenReturn(file);
         when(file.getFirstChild()).thenReturn(record);
         when(record.getFirstChild()).thenReturn(null);
-        CsvTableModel model = new CsvTableModelBase(holder);
+        CsvTableModel model = new CsvTableModelBase<>(holder);
         try (MockedStatic<ReadAction> readAction = mockStatic(ReadAction.class)) {
             readAction.when(() -> ReadAction.compute(any(ThrowableComputable.class)))
                     .thenAnswer(invocation -> ((ThrowableComputable<?, ?>) invocation.getArgument(0)).compute());
             assertFalse(model.isCommentRow(0));
+            model.getFieldAt(0, 0);
             readAction.verify(() -> ReadAction.compute(any(ThrowableComputable.class)));
         } finally {
             model.dispose();
@@ -171,8 +175,8 @@ public class CsvTableModelBaseTest extends CsvBasePlatformTestCase implements Ps
 
     public void testIsCommentRow() {
         manualCheck(csvTableModel -> {
-            assertEquals(true, csvTableModel.isCommentRow(5));
-            assertEquals(false, csvTableModel.isCommentRow(4));
+            assertTrue(csvTableModel.isCommentRow(5));
+            assertFalse(csvTableModel.isCommentRow(4));
         });
     }
 
@@ -216,6 +220,128 @@ public class CsvTableModelBaseTest extends CsvBasePlatformTestCase implements Ps
             assertEquals("", csvTableModel.getValue(8, 3));
             assertEquals(";:|\\\tvalue 2", csvTableModel.getValue(8, 5));
         });
+    }
+
+    public void testSetQuotedValueFromEdt() throws Exception {
+        myFixture.configureByFiles("Original.csv");
+        CsvTableModel model = new CsvTableModelBase<>(this);
+        try {
+            runOnEdt(model, tableModel -> tableModel.setValue("New Header, 5", 0, 4));
+            assertEquals("New Header, 5", model.getValue(0, 4));
+        } finally {
+            model.dispose();
+        }
+    }
+
+    public void testSetValueExtendingRowFromEdt() throws Exception {
+        myFixture.configureByText(CsvFileType.INSTANCE, "one,two\n");
+        CsvTableModel model = new CsvTableModelBase<>(this);
+        try {
+            runOnEdt(model, tableModel -> tableModel.setValue("five", 0, 4));
+            assertEquals("five", model.getValue(0, 4));
+        } finally {
+            model.dispose();
+        }
+    }
+
+    public void testSetCommentValueFromEdt() throws Exception {
+        myFixture.configureByText(CsvFileType.INSTANCE, "#comment\nvalue\n");
+        CsvTableModel model = new CsvTableModelBase<>(this);
+        try {
+            runOnEdt(model, tableModel -> tableModel.setValue("changed", 0, 0));
+            assertEquals("changed", model.getValue(0, 0));
+        } finally {
+            model.dispose();
+        }
+    }
+
+    public void testAddRowFromEdt() throws Exception {
+        myFixture.configureByFiles("Original.csv");
+        CsvTableModel model = new CsvTableModelBase<>(this);
+        try {
+            runOnEdt(model, tableModel -> tableModel.addRow(0, false));
+            assertEquals(10, model.getRowCount());
+        } finally {
+            model.dispose();
+        }
+    }
+
+    public void testRemoveRowsFromEdt() throws Exception {
+        myFixture.configureByFiles("Original.csv");
+        CsvTableModel model = new CsvTableModelBase<>(this);
+        try {
+            runOnEdt(model, tableModel -> tableModel.removeRows(Collections.singletonList(1)));
+            assertEquals(8, model.getRowCount());
+        } finally {
+            model.dispose();
+        }
+    }
+
+    public void testRemoveLastRowFromEdt() throws Exception {
+        myFixture.configureByText(CsvFileType.INSTANCE, "only row\n");
+        CsvTableModel model = new CsvTableModelBase<>(this);
+        try {
+            runOnEdt(model, tableModel -> tableModel.removeRows(Collections.singletonList(0)));
+            assertEquals(1, model.getRowCount());
+        } finally {
+            model.dispose();
+        }
+    }
+
+    public void testAddColumnFromEdt() throws Exception {
+        myFixture.configureByFiles("Original.csv");
+        CsvTableModel model = new CsvTableModelBase<>(this);
+        try {
+            runOnEdt(model, tableModel -> tableModel.addColumn(1, true));
+            assertEquals(10, model.getColumnCount());
+        } finally {
+            model.dispose();
+        }
+    }
+
+    public void testRemoveColumnsFromEdt() throws Exception {
+        myFixture.configureByFiles("Original.csv");
+        CsvTableModel model = new CsvTableModelBase<>(this);
+        try {
+            runOnEdt(model, tableModel -> tableModel.removeColumns(Collections.singletonList(1)));
+            assertEquals(8, model.getColumnCount());
+        } finally {
+            model.dispose();
+        }
+    }
+
+    public void testRemoveAllColumnsFromEdt() throws Exception {
+        myFixture.configureByText(CsvFileType.INSTANCE, "one,two\nthree,four\n");
+        CsvTableModel model = new CsvTableModelBase<>(this);
+        try {
+            runOnEdt(model, tableModel -> tableModel.removeColumns(Arrays.asList(0, 1)));
+            assertEquals(1, model.getColumnCount());
+        } finally {
+            model.dispose();
+        }
+    }
+
+    public void testClearCellsFromEdt() throws Exception {
+        myFixture.configureByFiles("Original.csv");
+        CsvTableModel model = new CsvTableModelBase<>(this);
+        try {
+            runOnEdt(model, tableModel -> tableModel.clearCells(Collections.singletonList(0), Collections.singletonList(0)));
+            assertEquals("", model.getValue(0, 0));
+        } finally {
+            model.dispose();
+        }
+    }
+
+    private void runOnEdt(CsvTableModel model, Consumer<CsvTableModel> operation) throws Exception {
+        LoggedErrorProcessor.executeWith(new LoggedErrorProcessor() {
+            @Override
+            public @NotNull Set<Action> processError(@NotNull String category,
+                                                      @NotNull String message,
+                                                      String @NotNull [] details,
+                                                      @Nullable Throwable t) {
+                return Set.of(Action.RETHROW);
+            }
+        }, () -> EdtTestUtil.runInEdtAndWait(() -> operation.accept(model)));
     }
 
     public void testAddColumnAfterLast() {
@@ -328,7 +454,7 @@ public class CsvTableModelBaseTest extends CsvBasePlatformTestCase implements Ps
                 changes.incrementAndGet();
             }
         };
-        CsvTableModel model = new CsvTableModelBase(this);
+        CsvTableModel model = new CsvTableModelBase<>(this);
         document.addDocumentListener(listener);
         try {
             operation.accept(model);

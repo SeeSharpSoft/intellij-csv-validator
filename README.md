@@ -76,6 +76,8 @@ All functionality that is available for plain CSV files (table editor, inspectio
 
 The plugin provides editing of CSV files via a table editor since version 2.0.0. This editor is NOT related to the _Edit as table..._ functionality of [IntelliJ IDEA Ultimate/PhpStorm/DataGrip/etc.](https://www.jetbrains.com/help/phpstorm/editing-csv-and-tsv-files.html) and does not share any implementation or settings. It is an alternative to the CSV text editor and not meant to replace or mirror the capabilities of the Jetbrains _"Data"_ tab.
 
+To switch between the text editor and the table editor, open a CSV/TSV/PSV file and select the **Text Editor** or **Table Editor** tab at the bottom of the editor area. Their order can be changed via _File > Settings > Editor > General > CSV/TSV Editor > Editor Usage_. If the **Table Editor** tab is not shown, check that the file is syntactically valid and that _Text Editor only_ is not selected.
+
 **!!! IMPORTANT !!!**
 
 The table editor requires a syntactically correct formatted CSV file. If the file can't be parsed, the table editor will be not available. The file needs to be fixed first via a text editor before it can be viewed and edited in the table editor.
