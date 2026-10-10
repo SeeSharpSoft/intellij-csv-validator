@@ -1,9 +1,15 @@
 package net.seesharpsoft.intellij.plugins.csv.intention;
 
 import com.intellij.codeInsight.intention.IntentionAction;
+import com.intellij.openapi.editor.Document;
+import com.intellij.openapi.editor.event.DocumentEvent;
+import com.intellij.openapi.editor.event.DocumentListener;
 import net.seesharpsoft.intellij.plugins.csv.CsvBasePlatformTestCase;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvEscapeCharacter;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class CsvIntentionTest extends CsvBasePlatformTestCase {
 
@@ -31,8 +37,22 @@ public class CsvIntentionTest extends CsvBasePlatformTestCase {
             assertTrue("action not found -> this was expected: " + expectError, expectError);
         } else {
             assertFalse("action was found -> this was expected: " + !expectError, expectError);
-            myFixture.launchAction(action);
+            Document document = myFixture.getDocument(myFixture.getFile());
+            AtomicInteger documentChanges = new AtomicInteger();
+            DocumentListener listener = new DocumentListener() {
+                @Override
+                public void documentChanged(@NotNull DocumentEvent event) {
+                    documentChanges.incrementAndGet();
+                }
+            };
+            document.addDocumentListener(listener);
+            try {
+                myFixture.launchAction(action);
+            } finally {
+                document.removeDocumentListener(listener);
+            }
             myFixture.checkResultByFile(testName + "/after.csv");
+            assertTrue("Each intention action must produce not more than one document change", documentChanges.get() < 2);
         }
     }
 

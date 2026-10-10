@@ -17,6 +17,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel {
     private final T myPsiFileHolder;
@@ -28,6 +31,7 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
     private Boolean myCachedHasErrors = null;
     private int myPointedRow = -1;
     private PsiElement myPointedRecord = null;
+    private volatile Set<Integer> myCachedCommentRows = Collections.emptySet();
     private final CsvPsiTreeUpdater myPsiTreeUpdater;
 
     private final PsiTreeChangeListener myPsiTreeChangeListener = new PsiTreeAnyChangeAbstractAdapter() {
@@ -42,6 +46,8 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
         myPsiTreeUpdater = new CsvPsiTreeUpdater(psiFileHolder);
         myPsiTreeUpdater.addCommitListener(() -> onPsiTreeChanged(getPsiFile()));
         addPsiTreeChangeListener();
+        resetPointer();
+        getRowCount();
     }
 
     public T getPsiFileHolder() {
@@ -88,9 +94,15 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
     }
 
     @Override
+    public boolean isCommentRow(int rowIndex) {
+        return myCachedCommentRows.contains(rowIndex);
+    }
+
+    @Override
     public void notifyUpdate() {
         this.resetCachedValues();
         this.resetPointer();
+        this.getRowCount();
     }
 
     private void resetCachedValues() {
@@ -98,6 +110,7 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
         myCachedColumnCount = -1;
         myCachedHasErrors = null;
         myCachedEscapeCharacter = null;
+        myCachedCommentRows = Collections.emptySet();
     }
 
     private void resetPointer() {
@@ -152,7 +165,25 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
     @Override
     public int getRowCount() {
         if (myCachedRowCount == -1) {
-            myCachedRowCount = ReadAction.compute(CsvTableModel.super::getRowCount);
+            myCachedRowCount = ReadAction.compute(() -> {
+                PsiFile psiFile = getPsiFile();
+                Set<Integer> commentRows = new HashSet<>();
+                int rowCount = 0;
+                if (psiFile != null) {
+                    for (PsiElement child = psiFile.getFirstChild();
+                         child != null && !(child instanceof PsiErrorElement);
+                         child = child.getNextSibling()) {
+                        if (child instanceof CsvRecord) {
+                            if (PsiHelper.getElementType(child.getFirstChild()) == CsvTypes.COMMENT) {
+                                commentRows.add(rowCount);
+                            }
+                            rowCount++;
+                        }
+                    }
+                }
+                myCachedCommentRows = commentRows;
+                return rowCount;
+            });
         }
         return myCachedRowCount;
     }
@@ -182,6 +213,11 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
     }
 
     public void setValueAt(String value, int rowIndex, int columnIndex, boolean commitImmediately) {
+        ReadAction.run(() -> prepareSetValueAt(value, rowIndex, columnIndex));
+        if (commitImmediately) getPsiTreeUpdater().commit();
+    }
+
+    private void prepareSetValueAt(String value, int rowIndex, int columnIndex) {
         PsiElement field = getFieldAt(rowIndex, columnIndex);
         CsvPsiTreeUpdater updater = getPsiTreeUpdater();
         if (field == null) {
@@ -198,7 +234,6 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
                 updater.replaceField(field, value, columnIndex == 0);
             }
         }
-        if (commitImmediately) updater.commit();
     }
 
     @Override
@@ -211,9 +246,11 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
 
     @Override
     public void addRow(int anchorRowIndex, boolean before) {
-        CsvRecord row = PsiHelper.getNthChildOfType(getPsiFile(), anchorRowIndex, CsvRecord.class);
-        if (row == null) return;
-        getPsiTreeUpdater().addRow(row, before);
+        ReadAction.run(() -> {
+            CsvRecord row = PsiHelper.getNthChildOfType(getPsiFile(), anchorRowIndex, CsvRecord.class);
+            if (row == null) return;
+            getPsiTreeUpdater().addRow(row, before);
+        });
         getPsiTreeUpdater().commit();
     }
 
@@ -227,7 +264,7 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
     @Override
     public void addColumn(int anchorColumnIndex, boolean before) {
         CsvPsiTreeUpdater updater = getPsiTreeUpdater();
-        getPsiTreeUpdater().addColumn(anchorColumnIndex, before);
+        updater.addColumn(anchorColumnIndex, before);
         updater.commit();
     }
 
@@ -240,11 +277,13 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
 
     @Override
     public void clearCells(Collection<Integer> rows, Collection<Integer> columns) {
-        for (int currentColumn : columns) {
-            for (int currentRow : rows) {
-                setValueAt("", currentRow, currentColumn, false);
+        ReadAction.run(() -> {
+            for (int currentColumn : columns) {
+                for (int currentRow : rows) {
+                    prepareSetValueAt("", currentRow, currentColumn);
+                }
             }
-        }
+        });
         getPsiTreeUpdater().commit();
     }
 }

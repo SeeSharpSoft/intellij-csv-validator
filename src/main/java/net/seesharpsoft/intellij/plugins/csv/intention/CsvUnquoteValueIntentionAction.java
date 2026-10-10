@@ -5,7 +5,6 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import com.intellij.util.IncorrectOperationException;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
-import net.seesharpsoft.intellij.plugins.csv.psi.CsvField;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
 import net.seesharpsoft.intellij.psi.PsiHelper;
 import org.jetbrains.annotations.NonNls;
@@ -26,7 +25,7 @@ public class CsvUnquoteValueIntentionAction extends CsvIntentionAction {
         }
 
         PsiElement element = psiElement == null ? null : CsvHelper.getParentFieldElement(psiElement);
-        return element instanceof CsvField &&
+        return element != null &&
                 element.getFirstChild() != null &&
                 (PsiHelper.getElementType(element.getFirstChild()) == CsvTypes.QUOTE ||
                         PsiHelper.getElementType(element.getLastChild()) == CsvTypes.QUOTE) &&
@@ -35,7 +34,7 @@ public class CsvUnquoteValueIntentionAction extends CsvIntentionAction {
 
     @Override
     public void invoke(@NotNull Project project, Editor editor, @NotNull PsiElement element) throws IncorrectOperationException {
-        CsvIntentionHelper.unquoteValue(project, CsvHelper.getParentFieldElement(element));
+        CsvIntentionHelper.unquoteValue(CsvHelper.getParentFieldElement(element));
     }
 
 }
