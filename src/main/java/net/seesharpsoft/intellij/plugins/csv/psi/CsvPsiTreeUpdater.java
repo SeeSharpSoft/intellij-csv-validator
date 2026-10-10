@@ -49,6 +49,7 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
 
             @Override
             public void dispose() {
+                // Intentionally left empty
             }
         });
     }
