@@ -213,6 +213,11 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
     }
 
     public void setValueAt(String value, int rowIndex, int columnIndex, boolean commitImmediately) {
+        ReadAction.run(() -> prepareSetValueAt(value, rowIndex, columnIndex));
+        if (commitImmediately) getPsiTreeUpdater().commit();
+    }
+
+    private void prepareSetValueAt(String value, int rowIndex, int columnIndex) {
         PsiElement field = getFieldAt(rowIndex, columnIndex);
         CsvPsiTreeUpdater updater = getPsiTreeUpdater();
         if (field == null) {
@@ -229,7 +234,6 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
                 updater.replaceField(field, value, columnIndex == 0);
             }
         }
-        if (commitImmediately) updater.commit();
     }
 
     @Override
@@ -242,9 +246,11 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
 
     @Override
     public void addRow(int anchorRowIndex, boolean before) {
-        CsvRecord row = PsiHelper.getNthChildOfType(getPsiFile(), anchorRowIndex, CsvRecord.class);
-        if (row == null) return;
-        getPsiTreeUpdater().addRow(row, before);
+        ReadAction.run(() -> {
+            CsvRecord row = PsiHelper.getNthChildOfType(getPsiFile(), anchorRowIndex, CsvRecord.class);
+            if (row == null) return;
+            getPsiTreeUpdater().addRow(row, before);
+        });
         getPsiTreeUpdater().commit();
     }
 
@@ -258,7 +264,7 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
     @Override
     public void addColumn(int anchorColumnIndex, boolean before) {
         CsvPsiTreeUpdater updater = getPsiTreeUpdater();
-        getPsiTreeUpdater().addColumn(anchorColumnIndex, before);
+        updater.addColumn(anchorColumnIndex, before);
         updater.commit();
     }
 
@@ -271,11 +277,13 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
 
     @Override
     public void clearCells(Collection<Integer> rows, Collection<Integer> columns) {
-        for (int currentColumn : columns) {
-            for (int currentRow : rows) {
-                setValueAt("", currentRow, currentColumn, false);
+        ReadAction.run(() -> {
+            for (int currentColumn : columns) {
+                for (int currentRow : rows) {
+                    prepareSetValueAt("", currentRow, currentColumn);
+                }
             }
-        }
+        });
         getPsiTreeUpdater().commit();
     }
 }

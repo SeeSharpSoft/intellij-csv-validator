@@ -1,5 +1,6 @@
 package net.seesharpsoft.intellij.plugins.csv.intention;
 
+import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
@@ -41,7 +42,7 @@ public final class CsvIntentionHelper {
     }
 
     public static void quoteAll(@NotNull PsiFile psiFile) {
-        applyReplacements(psiFile, collectQuoteAllReplacements(psiFile));
+        applyReplacements(psiFile, ReadAction.compute(() -> collectQuoteAllReplacements(psiFile)));
     }
 
     private static List<Pair<TextRange, String>> collectQuoteAllReplacements(@NotNull PsiFile psiFile) {
@@ -59,18 +60,21 @@ public final class CsvIntentionHelper {
     }
 
     public static void quoteValue(@NotNull final PsiElement field) {
-        List<Pair<TextRange, String>> replacements = new ArrayList<>();
-        if (PsiHelper.getElementType(field.getFirstChild()) != CsvTypes.QUOTE) {
-            replacements.add(Pair.create(TextRange.create(field.getTextRange().getStartOffset(), field.getTextRange().getStartOffset()), "\""));
-        }
-        if (PsiHelper.getElementType(field.getLastChild()) != CsvTypes.QUOTE) {
-            replacements.add(Pair.create(TextRange.create(field.getTextRange().getEndOffset(), field.getTextRange().getEndOffset()), "\""));
-        }
-        applyReplacements(field.getContainingFile(), replacements);
+        Pair<PsiFile, List<Pair<TextRange, String>>> fileAndReplacements = ReadAction.compute(() -> {
+            List<Pair<TextRange, String>> result = new ArrayList<>();
+            if (PsiHelper.getElementType(field.getFirstChild()) != CsvTypes.QUOTE) {
+                result.add(Pair.create(TextRange.create(field.getTextRange().getStartOffset(), field.getTextRange().getStartOffset()), "\""));
+            }
+            if (PsiHelper.getElementType(field.getLastChild()) != CsvTypes.QUOTE) {
+                result.add(Pair.create(TextRange.create(field.getTextRange().getEndOffset(), field.getTextRange().getEndOffset()), "\""));
+            }
+            return Pair.create(field.getContainingFile(), result);
+        });
+        applyReplacements(fileAndReplacements.getFirst(), fileAndReplacements.getSecond());
     }
 
     public static void unquoteAll(@NotNull PsiFile psiFile) {
-        applyReplacements(psiFile, collectUnquoteAllReplacements(psiFile));
+        applyReplacements(psiFile, ReadAction.compute(() -> collectUnquoteAllReplacements(psiFile)));
     }
 
     private static List<Pair<TextRange, String>> collectUnquoteAllReplacements(@NotNull PsiFile psiFile) {
@@ -90,7 +94,9 @@ public final class CsvIntentionHelper {
     }
 
     public static void unquoteValue(@NotNull final PsiElement field) {
-        removeQuotes(field.getContainingFile(), getQuoteElements(field));
+        Pair<PsiFile, List<PsiElement>> fileAndQuotes = ReadAction.compute(() ->
+                Pair.create(field.getContainingFile(), getQuoteElements(field)));
+        removeQuotes(fileAndQuotes.getFirst(), fileAndQuotes.getSecond());
     }
 
     private static List<PsiElement> getQuoteElements(@NotNull PsiElement field) {
@@ -130,10 +136,13 @@ public final class CsvIntentionHelper {
     }
 
     public static void removeQuotes(@NotNull PsiFile psiFile, List<PsiElement> quoteElements) {
-        List<Pair<TextRange, String>> replacements = new ArrayList<>();
-        for (PsiElement element : quoteElements) {
-            replacements.add(Pair.create(element.getTextRange(), ""));
-        }
+        List<Pair<TextRange, String>> replacements = ReadAction.compute(() -> {
+            List<Pair<TextRange, String>> result = new ArrayList<>();
+            for (PsiElement element : quoteElements) {
+                result.add(Pair.create(element.getTextRange(), ""));
+            }
+            return result;
+        });
         applyReplacements(psiFile, replacements);
     }
 

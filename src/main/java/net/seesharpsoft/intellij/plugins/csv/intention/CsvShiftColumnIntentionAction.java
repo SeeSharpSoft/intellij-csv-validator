@@ -1,12 +1,12 @@
 package net.seesharpsoft.intellij.plugins.csv.intention;
 
+import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiFile;
 import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfo;
 import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfoMap;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
@@ -27,28 +27,28 @@ public abstract class CsvShiftColumnIntentionAction extends CsvIntentionAction {
                                                   @NotNull CsvFile csvFile,
                                                   @NotNull PsiElement element,
                                                   boolean shiftLeft) {
-        if (!element.isValid()) return;
-        PsiFile psiFile = element.getContainingFile();
-        Document document = PsiDocumentManager.getInstance(project).getDocument(psiFile);
-        if (document == null) return;
+        List<Pair<TextRange, String>> replacements = ReadAction.compute(() -> {
+            if (!element.isValid()) return null;
+            Document document = PsiDocumentManager.getInstance(project).getDocument(csvFile);
+            if (document == null) return null;
 
-        CsvColumnInfoMap<PsiElement> columnInfoMap = CsvHelper.createColumnInfoMap(csvFile);
-        CsvColumnInfo<PsiElement> currentColumn = columnInfoMap.getColumnInfo(element);
-        if (currentColumn == null) return;
+            CsvColumnInfoMap<PsiElement> columnInfoMap = CsvHelper.createColumnInfoMap(csvFile);
+            CsvColumnInfo<PsiElement> currentColumn = columnInfoMap.getColumnInfo(element);
+            if (currentColumn == null) return null;
 
-        int adjacentColumnIndex = currentColumn.getColumnIndex() + (shiftLeft ? -1 : 1);
-        CsvColumnInfo<PsiElement> adjacentColumn = columnInfoMap.getColumnInfo(adjacentColumnIndex);
-        if (adjacentColumn == null) return;
+            int adjacentColumnIndex = currentColumn.getColumnIndex() + (shiftLeft ? -1 : 1);
+            CsvColumnInfo<PsiElement> adjacentColumn = columnInfoMap.getColumnInfo(adjacentColumnIndex);
+            if (adjacentColumn == null) return null;
 
-        CsvColumnInfo<PsiElement> leftColumn = shiftLeft ? adjacentColumn : currentColumn;
-        CsvColumnInfo<PsiElement> rightColumn = shiftLeft ? currentColumn : adjacentColumn;
-        String newText = changeLeftAndRightColumnOrder(
-                document.getText(), CsvHelper.getValueSeparator(csvFile), leftColumn, rightColumn);
-        if (document.getText().equals(newText)) return;
+            CsvColumnInfo<PsiElement> leftColumn = shiftLeft ? adjacentColumn : currentColumn;
+            CsvColumnInfo<PsiElement> rightColumn = shiftLeft ? currentColumn : adjacentColumn;
+            String newText = changeLeftAndRightColumnOrder(
+                    document.getText(), CsvHelper.getValueSeparator(csvFile), leftColumn, rightColumn);
+            if (document.getText().equals(newText)) return null;
 
-        List<Pair<TextRange, String>> replacements = Collections.singletonList(
-                Pair.create(TextRange.create(0, document.getTextLength()), newText));
-        CsvIntentionHelper.applyReplacements(psiFile, replacements);
+            return Collections.singletonList(Pair.create(TextRange.create(0, document.getTextLength()), newText));
+        });
+        if (replacements != null) CsvIntentionHelper.applyReplacements(csvFile, replacements);
     }
 
     @NotNull
