@@ -111,7 +111,7 @@ public class CsvPsiTreeUpdaterTest extends CsvBasePlatformTestCase {
         }
     }
 
-    private void runOnEdt(@NotNull Runnable operation) throws Exception {
+    private void runOnEdt(@NotNull Runnable operation)  {
         LoggedErrorProcessor.executeWith(new LoggedErrorProcessor() {
             @Override
             public @NotNull Set<Action> processError(@NotNull String category,
@@ -120,6 +120,6 @@ public class CsvPsiTreeUpdaterTest extends CsvBasePlatformTestCase {
                                                       Throwable t) {
                 return Set.of(Action.RETHROW);
             }
-        }, () -> EdtTestUtil.runInEdtAndWait(() -> operation.run()));
+        }, () -> EdtTestUtil.runInEdtAndWait(operation::run));
     }
 }

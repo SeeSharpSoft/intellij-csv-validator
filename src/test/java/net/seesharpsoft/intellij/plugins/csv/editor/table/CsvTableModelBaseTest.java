@@ -77,12 +77,10 @@ public class CsvTableModelBaseTest extends CsvBasePlatformTestCase implements Ps
 
         myFixture.configureByFiles(relativeTargetPath + "/Original.csv");
 
-        CsvTableModel model = new CsvTableModelBase(this);
+        CsvTableModel model = new CsvTableModelBase<>(this);
         runnable.accept(model);
         model.dispose();
 
-        Document doc = this.myFixture.getDocument(getPsiFile());
-//        PsiDocumentManager.getInstance(getProject()).doPostponedOperationsAndUnblockDocument(doc);
         PsiTestUtil.checkFileStructure(getPsiFile());
 
         myFixture.checkResultByFile(relativeTargetPath + String.format("/%s.csv", testName));
@@ -103,7 +101,7 @@ public class CsvTableModelBaseTest extends CsvBasePlatformTestCase implements Ps
 
         myFixture.configureByFiles(relativeTargetPath + "/Original.csv");
 
-        CsvTableModel model = new CsvTableModelBase(this);
+        CsvTableModel model = new CsvTableModelBase<>(this);
 
         if (runnable != null) runnable.accept(model);
 
@@ -126,7 +124,7 @@ public class CsvTableModelBaseTest extends CsvBasePlatformTestCase implements Ps
 
     public void testNotifyUpdateFromEdt() throws Exception {
         myFixture.configureByFiles("Original.csv");
-        CsvTableModel model = new CsvTableModelBase(this);
+        CsvTableModel model = new CsvTableModelBase<>(this);
         try {
             EdtTestUtil.runInEdtAndWait(() -> {
                 assertFalse(model.isCommentRow(0));
@@ -140,7 +138,7 @@ public class CsvTableModelBaseTest extends CsvBasePlatformTestCase implements Ps
     public void testNotifyUpdateRequiresReadAction() throws Exception {
         PsiFileHolder holder = mock(PsiFileHolder.class);
         when(holder.getPsiFile()).thenReturn(mock(PsiFile.class));
-        CsvTableModel model = new CsvTableModelBase(holder);
+        CsvTableModel model = new CsvTableModelBase<>(holder);
         try (MockedStatic<ReadAction> readAction = mockStatic(ReadAction.class)) {
             readAction.when(() -> ReadAction.run(any(ThrowableRunnable.class)))
                     .thenAnswer(invocation -> {
@@ -163,7 +161,7 @@ public class CsvTableModelBaseTest extends CsvBasePlatformTestCase implements Ps
         when(holder.getPsiFile()).thenReturn(file);
         when(file.getFirstChild()).thenReturn(record);
         when(record.getFirstChild()).thenReturn(null);
-        CsvTableModel model = new CsvTableModelBase(holder);
+        CsvTableModel model = new CsvTableModelBase<>(holder);
         try (MockedStatic<ReadAction> readAction = mockStatic(ReadAction.class)) {
             readAction.when(() -> ReadAction.compute(any(ThrowableComputable.class)))
                     .thenAnswer(invocation -> ((ThrowableComputable<?, ?>) invocation.getArgument(0)).compute());
@@ -177,8 +175,8 @@ public class CsvTableModelBaseTest extends CsvBasePlatformTestCase implements Ps
 
     public void testIsCommentRow() {
         manualCheck(csvTableModel -> {
-            assertEquals(true, csvTableModel.isCommentRow(5));
-            assertEquals(false, csvTableModel.isCommentRow(4));
+            assertTrue(csvTableModel.isCommentRow(5));
+            assertFalse(csvTableModel.isCommentRow(4));
         });
     }
 
@@ -456,7 +454,7 @@ public class CsvTableModelBaseTest extends CsvBasePlatformTestCase implements Ps
                 changes.incrementAndGet();
             }
         };
-        CsvTableModel model = new CsvTableModelBase(this);
+        CsvTableModel model = new CsvTableModelBase<>(this);
         document.addDocumentListener(listener);
         try {
             operation.accept(model);

@@ -34,7 +34,7 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
 
     private CsvPsiParserFileType myFileType;
 
-    private List<PsiAction> myUncommittedActions = new ArrayList<>();
+    private final List<PsiAction> myUncommittedActions = new ArrayList<>();
 
     public CsvPsiTreeUpdater(@NotNull PsiFileHolder psiFileHolder) {
         myPsiFileHolder = psiFileHolder;
@@ -152,7 +152,7 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
     }
 
     public void doAction(PsiAction action) {
-        if (myUncommittedActions != null) myUncommittedActions.add(action);
+        myUncommittedActions.add(action);
     }
 
     /**
@@ -238,7 +238,7 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
             PsiElement field = record.getFirstChild();
             if (CsvHelper.isCommentElement(field)) continue;
 
-            int startOffset = 0;
+            int startOffset;
             String value = valueSeparator;
             field = PsiHelper.getNextNthSiblingOfType(field, columnIndex, CsvField.class);
             if (field == null) {
@@ -435,7 +435,7 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
     }
 
     public synchronized void commit() {
-        if (isSuspended() || myUncommittedActions == null || myUncommittedActions.isEmpty()) return;
+        if (isSuspended() || myUncommittedActions.isEmpty()) return;
 
         List<PsiAction> actionsToCommit = new ArrayList<>(myUncommittedActions);
         myUncommittedActions.clear();
