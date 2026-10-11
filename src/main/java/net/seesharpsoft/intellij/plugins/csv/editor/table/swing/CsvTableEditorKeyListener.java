@@ -63,36 +63,41 @@ public class CsvTableEditorKeyListener extends CsvTableEditorUtilBase implements
 
     @Override
     public void keyPressed(KeyEvent e) {
-        // on key pressing
+        switch (e.getKeyCode()) {
+            case KeyEvent.VK_LEFT:
+                if (e.isControlDown() && e.isShiftDown()) {
+                    performTableAction(() -> csvTableEditor.tableEditorActions.addColumnBefore.actionPerformed(null), e);
+                }
+                break;
+            case KeyEvent.VK_RIGHT:
+                if (e.isControlDown() && e.isShiftDown()) {
+                    performTableAction(() -> csvTableEditor.tableEditorActions.addColumnAfter.actionPerformed(null), e);
+                }
+                break;
+            case KeyEvent.VK_UP:
+                if (e.isControlDown() && !e.isShiftDown()) {
+                    performTableAction(() -> csvTableEditor.tableEditorActions.addRowBefore.actionPerformed(null), e);
+                }
+                break;
+            case KeyEvent.VK_DOWN:
+                if (e.isControlDown() && !e.isShiftDown()) {
+                    performTableAction(() -> csvTableEditor.tableEditorActions.addRowAfter.actionPerformed(null), e);
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void performTableAction(Runnable action, KeyEvent event) {
+        stopEditing();
+        action.run();
+        event.consume();
     }
 
     @Override
     public void keyReleased(KeyEvent e) {
         switch (e.getKeyCode()) {
-            case KeyEvent.VK_LEFT:
-                if (e.isControlDown() && e.isShiftDown()) {
-                    stopEditing();
-                    csvTableEditor.tableEditorActions.addColumnBefore.actionPerformed(null);
-                }
-                break;
-            case KeyEvent.VK_RIGHT:
-                if (e.isControlDown() && e.isShiftDown()) {
-                    stopEditing();
-                    csvTableEditor.tableEditorActions.addColumnAfter.actionPerformed(null);
-                }
-                break;
-            case KeyEvent.VK_UP:
-                if (e.isControlDown() && !e.isShiftDown()) {
-                    stopEditing();
-                    csvTableEditor.tableEditorActions.addRowBefore.actionPerformed(null);
-                }
-                break;
-            case KeyEvent.VK_DOWN:
-                if (e.isControlDown() && !e.isShiftDown()) {
-                    stopEditing();
-                    csvTableEditor.tableEditorActions.addRowAfter.actionPerformed(null);
-                }
-                break;
             case KeyEvent.VK_ENTER:
                 if (csvTableEditor.isInCellEditMode()) {
                     if (!e.isControlDown() || e.isShiftDown()) {

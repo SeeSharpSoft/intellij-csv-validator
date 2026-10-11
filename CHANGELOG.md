@@ -10,6 +10,12 @@
 
 ### Fixed
 
+## 4.5.1 - Oct 13, 2026
+
+### Fixed
+
+- Fixed table-editor row and column insertion shortcuts placing new entries at the first or last position instead of the current selection
+
 ## 4.5.0 - Oct 10, 2026
 
 ### Fixed
