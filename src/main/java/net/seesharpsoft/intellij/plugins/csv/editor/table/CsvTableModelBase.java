@@ -2,9 +2,14 @@ package net.seesharpsoft.intellij.plugins.csv.editor.table;
 
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.application.ReadAction;
-import com.intellij.util.concurrency.AppExecutorUtil;
-import com.intellij.psi.*;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiErrorElement;
+import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiManager;
+import com.intellij.psi.PsiTreeAnyChangeAbstractAdapter;
+import com.intellij.psi.PsiTreeChangeListener;
 import com.intellij.psi.util.PsiTreeUtil;
+import com.intellij.util.concurrency.AppExecutorUtil;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvEscapeCharacter;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvField;
@@ -20,7 +25,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel {
     private final T myPsiFileHolder;
@@ -35,10 +39,10 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
     private volatile Set<Integer> myCachedCommentRows = Collections.emptySet();
     private final CsvPsiTreeUpdater myPsiTreeUpdater;
     private volatile PsiFile myObservedPsiFile;
-    private volatile PsiManager myPsiManager;
-    private final AtomicBoolean myPsiListenerRegistrationPending = new AtomicBoolean();
+    private PsiManager myPsiManager;
+    private boolean myPsiResolutionPending;
     private final Object myPsiListenerLock = new Object();
-    private volatile boolean myConstructionComplete;
+    private volatile boolean myInitialized;
 
     private final PsiTreeChangeListener myPsiTreeChangeListener = new PsiTreeAnyChangeAbstractAdapter() {
         @Override
@@ -50,68 +54,94 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
     public CsvTableModelBase(@NotNull T psiFileHolder) {
         myPsiFileHolder = psiFileHolder;
         myPsiTreeUpdater = new CsvPsiTreeUpdater(psiFileHolder);
-        myPsiTreeUpdater.addCommitListener(() -> onPsiTreeChanged(getPsiFile()));
+        myPsiTreeUpdater.addCommitListener(this::onUpdaterCommitted);
         getPsiFile();
         resetPointer();
         getRowCount();
-        myConstructionComplete = true;
+        myInitialized = true;
     }
 
     public T getPsiFileHolder() {
         return myPsiFileHolder;
     }
 
-    private boolean syncPsiFileState(@Nullable PsiFile psiFile, boolean resolveWhenMissing) {
+    /**
+     * Records the current PSI file, invalidates derived state when it changes, and keeps the
+     * listener attached to the manager that owns the current file.
+     */
+    private boolean observePsiFile(@Nullable PsiFile psiFile) {
         if (myDisposed) return false;
 
-        boolean psiFileChanged = psiFile != myObservedPsiFile;
-        if (psiFile != myObservedPsiFile) {
+        boolean changed = psiFile != myObservedPsiFile;
+        if (changed) {
             myObservedPsiFile = psiFile;
-            resetCachedValues();
-            myPointedRecord = null;
-            myPointedRow = 0;
+            invalidateModelState();
+        }
+        updatePsiListener(psiFile);
+        return changed;
+    }
+
+    private void updatePsiListener(@Nullable PsiFile psiFile) {
+        if (psiFile == null) {
+            synchronized (myPsiListenerLock) {
+                detachPsiListener();
+            }
+            return;
         }
 
-        if (psiFile == null) {
-            if (!resolveWhenMissing || !myPsiListenerRegistrationPending.compareAndSet(false, true)) return psiFileChanged;
-            // Resolve PSI off-EDT and register the listener when available to avoid slow operations on EDT
-            ReadAction
-                .nonBlocking(myPsiFileHolder::getPsiFile)
-                .coalesceBy(this)
-                .finishOnUiThread(ModalityState.any(), pf -> {
-                    myPsiListenerRegistrationPending.set(false);
-                    boolean changed = syncPsiFileState(pf, false);
-                    if (changed && myConstructionComplete) notifyUpdate();
-                })
-                .submit(AppExecutorUtil.getAppExecutorService());
-            return psiFileChanged;
-        }
+        attachPsiListener(psiFile);
+    }
+
+    private void attachPsiListener(@Nullable PsiFile psiFile) {
+        if (psiFile == null) return;
 
         PsiManager manager = psiFile.getManager();
-        if (manager == null) return psiFileChanged;
+        if (manager == null) return;
 
         synchronized (myPsiListenerLock) {
-            if (myDisposed || myPsiManager == manager) return psiFileChanged;
-            if (myPsiManager != null) {
-                myPsiManager.removePsiTreeChangeListener(myPsiTreeChangeListener);
-            }
-            // PsiManager listeners are manager-scoped. Rebinding is needed only when the
-            // replacement PSI file belongs to a different manager; identity changes still
-            // invalidate the model state above.
+            if (myDisposed || myPsiManager == manager) return;
+            detachPsiListener();
             manager.addPsiTreeChangeListener(myPsiTreeChangeListener, myPsiFileHolder);
             myPsiManager = manager;
         }
-        return psiFileChanged;
+    }
+
+    private void detachPsiListener() {
+        if (myPsiManager == null) return;
+        myPsiManager.removePsiTreeChangeListener(myPsiTreeChangeListener);
+        myPsiManager = null;
+    }
+
+    private void resolvePsiFileLater() {
+        synchronized (myPsiListenerLock) {
+            if (!myInitialized || myDisposed || myPsiResolutionPending) return;
+            myPsiResolutionPending = true;
+        }
+
+        // Resolve PSI off-EDT and register the listener when available to avoid slow operations on EDT.
+        ReadAction
+                .nonBlocking(myPsiFileHolder::getPsiFile)
+                .coalesceBy(this)
+                .finishOnUiThread(ModalityState.any(), this::onPsiFileResolved)
+                .submit(AppExecutorUtil.getAppExecutorService());
+    }
+
+    private void onPsiFileResolved(@Nullable PsiFile psiFile) {
+        synchronized (myPsiListenerLock) {
+            myPsiResolutionPending = false;
+            if (myDisposed) return;
+        }
+
+        if (observePsiFile(psiFile) && myInitialized) {
+            notifyUpdate();
+        }
     }
 
     @Override
     public void dispose() {
         myDisposed = true;
         synchronized (myPsiListenerLock) {
-            if (myPsiManager != null) {
-                myPsiManager.removePsiTreeChangeListener(myPsiTreeChangeListener);
-                myPsiManager = null;
-            }
+            detachPsiListener();
         }
         CsvTableModel.super.dispose();
         myPsiTreeUpdater.dispose();
@@ -120,11 +150,26 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
     private void onPsiTreeChanged(@Nullable PsiFile file) {
         if (myDisposed) return;
         PsiFile currentPsiFile = myPsiFileHolder.getPsiFile();
-        boolean psiFileChanged = syncPsiFileState(currentPsiFile, true);
-        if ((psiFileChanged || isSameVirtualFile(file, currentPsiFile)) &&
-                !myPsiTreeUpdater.isSuspended() && !isSuspended()) {
+        boolean psiFileChanged = observePsiFile(currentPsiFile);
+        if (currentPsiFile == null) resolvePsiFileLater();
+        if (isRelevantPsiChange(file, currentPsiFile, psiFileChanged) && canNotifyUpdates()) {
             notifyUpdate();
         }
+    }
+
+    private boolean isRelevantPsiChange(
+            @Nullable PsiFile changedFile,
+            @Nullable PsiFile currentPsiFile,
+            boolean psiFileChanged) {
+        return psiFileChanged || isSameVirtualFile(changedFile, currentPsiFile);
+    }
+
+    private boolean canNotifyUpdates() {
+        return !myDisposed && !myPsiTreeUpdater.isSuspended() && !isSuspended();
+    }
+
+    private void onUpdaterCommitted() {
+        if (canNotifyUpdates()) notifyUpdate();
     }
 
     private static boolean isSameVirtualFile(@Nullable PsiFile first, @Nullable PsiFile second) {
@@ -136,9 +181,9 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
     @Override
     public PsiFile getPsiFile() {
         PsiFile psiFile = myPsiFileHolder.getPsiFile();
-        if (syncPsiFileState(psiFile, true) && myConstructionComplete) {
-            notifyUpdate();
-        }
+        boolean changed = observePsiFile(psiFile);
+        if (psiFile == null) resolvePsiFileLater();
+        if (changed && myInitialized) notifyUpdate();
         return psiFile;
     }
 
@@ -150,17 +195,19 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
 
     @Override
     public void notifyUpdate() {
-        this.resetCachedValues();
-        this.resetPointer();
-        this.getRowCount();
+        invalidateModelState();
+        resetPointer();
+        getRowCount();
     }
 
-    private void resetCachedValues() {
+    private void invalidateModelState() {
         myCachedRowCount = -1;
         myCachedColumnCount = -1;
         myCachedHasErrors = null;
         myCachedEscapeCharacter = null;
         myCachedCommentRows = Collections.emptySet();
+        myPointedRecord = null;
+        myPointedRow = 0;
     }
 
     private void resetPointer() {
