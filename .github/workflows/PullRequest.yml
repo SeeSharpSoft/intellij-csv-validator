@@ -36,3 +36,14 @@ jobs:
         IDEA_PLATFORM: ${{ matrix.ideaPlatform }}
         IDEA_SOURCES: false
       run: xvfb-run ./gradlew test
+    - name: Set up Snyk CLI
+      if: matrix.ideaPlatform == 'IC'
+      uses: snyk/actions/setup@master
+    - name: Run Snyk to check for vulnerabilities
+      if: matrix.ideaPlatform == 'IC'
+      env:
+        IDEA_VERSION: ${{ matrix.ideaVersion }}
+        IDEA_PLATFORM: ${{ matrix.ideaPlatform }}
+        IDEA_SOURCES: false
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      run: snyk test --configuration-matching="^runtimeClasspath$" -- --no-configuration-cache
