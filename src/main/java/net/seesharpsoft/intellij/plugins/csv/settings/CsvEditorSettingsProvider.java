@@ -4,6 +4,7 @@ import com.intellij.application.options.editor.EditorOptionsProvider;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.ConfigurationException;
+import com.intellij.openapi.options.SearchableConfigurable;
 import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.ui.CheckBoxWithColorChooser;
@@ -24,7 +25,7 @@ import java.util.stream.Collectors;
 
 import static net.seesharpsoft.intellij.plugins.csv.CsvPluginManager.getLocalizedText;
 
-public class CsvEditorSettingsProvider implements EditorOptionsProvider {
+public class CsvEditorSettingsProvider implements EditorOptionsProvider, SearchableConfigurable {
 
     public static final String CSV_EDITOR_SETTINGS_ID = "Csv.Editor.Settings";
 

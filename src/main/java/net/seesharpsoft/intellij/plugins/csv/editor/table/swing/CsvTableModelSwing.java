@@ -3,6 +3,7 @@ package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.util.Computable;
 import com.intellij.psi.PsiElement;
+import com.intellij.util.Alarm;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditor;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableModelBase;
@@ -12,49 +13,41 @@ import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import net.seesharpsoft.intellij.psi.PsiHelper;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.*;
 import javax.swing.event.EventListenerList;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 
 public class CsvTableModelSwing extends CsvTableModelBase<CsvTableEditor> implements TableModel {
 
-    /**
-     * List of listeners
-     */
-    protected EventListenerList listenerList = new EventListenerList();
+    private final EventListenerList listenerList = new EventListenerList();
+    private final Alarm myUpdateAlarm;
 
-    protected ScheduledFuture<?> delayedUpdate;
-
-    protected ScheduledExecutorService executorService;
+    private static final int UPDATE_DELAY_MILLIS = 50;
 
     public CsvTableModelSwing(@NotNull CsvTableEditor psiFileHolder) {
         super(psiFileHolder);
-        executorService = Executors.newSingleThreadScheduledExecutor();
+        myUpdateAlarm = new Alarm(Alarm.ThreadToUse.SWING_THREAD, psiFileHolder);
     }
 
     @Override
     public void notifyUpdate() {
+        if (isDisposed()) return;
+
         if (ApplicationManager.getApplication().isUnitTestMode()) {
-            doNotifyUpdate();
+            updateTableImmediately();
             return;
         }
 
-        if (delayedUpdate != null && !delayedUpdate.isDone()) {
-            delayedUpdate.cancel(true);
-        }
-
-        delayedUpdate = executorService.schedule(() -> SwingUtilities.invokeLater(this::doNotifyUpdate), 50, TimeUnit.MILLISECONDS);
+        myUpdateAlarm.cancelAllRequests();
+        myUpdateAlarm.addRequest(this::updateTableImmediately, UPDATE_DELAY_MILLIS);
     }
 
-    private void doNotifyUpdate() {
+    private void updateTableImmediately() {
+        if (isDisposed()) return;
+
         getPsiFileHolder().beforeTableModelUpdate();
         try {
             super.notifyUpdate();
@@ -65,14 +58,8 @@ public class CsvTableModelSwing extends CsvTableModelBase<CsvTableEditor> implem
     }
 
     protected void fireTableChanged(TableModelEvent e) {
-        // Guaranteed to return a non-null array
-        Object[] listeners = listenerList.getListenerList();
-        // Process the listeners last to first, notifying
-        // those that are interested in this event
-        for (int i = listeners.length - 2; i >= 0; i -= 2) {
-            if (listeners[i] == TableModelListener.class) {
-                ((TableModelListener) listeners[i + 1]).tableChanged(e);
-            }
+        for (TableModelListener listener : listenerList.getListeners(TableModelListener.class)) {
+            listener.tableChanged(e);
         }
     }
 
@@ -103,16 +90,29 @@ public class CsvTableModelSwing extends CsvTableModelBase<CsvTableEditor> implem
     @Override
     public String getColumnName(int column) {
         return ApplicationManager.getApplication().runReadAction((Computable<String>) () -> {
-            PsiElement headerField = PsiHelper.findFirst(getPsiFile(), CsvTypes.FIELD);
-            if (headerField != null) {
-                headerField = PsiHelper.getNextNthSiblingOfType(headerField, column, CsvField.class);
-            }
-            String headerText = headerField == null ? "" : CsvHelper.unquoteCsvValue(headerField.getText(), getEscapeCharacter()).trim();
-            Map<String, Object> params = new HashMap<>();
-            params.put("header", headerText);
-            params.put("index", CsvEditorSettings.getInstance().isZeroBasedColumnNumbering() ? column : column + 1);
-            return CsvHelper.formatString("${header} (${index})", params);
+            return formatColumnName(column, getHeaderText(column));
         });
+    }
+
+    private String getHeaderText(int column) {
+        PsiElement headerField = PsiHelper.findFirst(getPsiFile(), CsvTypes.FIELD);
+        if (headerField == null) return "";
+
+        PsiElement columnField = PsiHelper.getNextNthSiblingOfType(headerField, column, CsvField.class);
+        return columnField == null
+                ? ""
+                : CsvHelper.unquoteCsvValue(columnField.getText(), getEscapeCharacter()).trim();
+    }
+
+    private String formatColumnName(int column, String headerText) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("header", headerText);
+        params.put("index", getDisplayedColumnNumber(column));
+        return CsvHelper.formatString("${header} (${index})", params);
+    }
+
+    private int getDisplayedColumnNumber(int column) {
+        return CsvEditorSettings.getInstance().isZeroBasedColumnNumbering() ? column : column + 1;
     }
 
     @Override

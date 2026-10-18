@@ -7,13 +7,34 @@ import java.awt.event.KeyEvent;
 
 public class CsvTableEditorKeyListenerTest extends CsvTableEditorSwingTestBase {
 
+    public void testInsertionShortcutUsesCurrentSelectionBeforeTableNavigation() {
+        int initialRowCount = myInitialRowCount;
+        fileEditor.getTable().setRowSelectionInterval(1, 1);
+        fileEditor.getTable().setColumnSelectionInterval(1, 1);
+
+        KeyEvent keyPressed = new KeyEvent(fileEditor.getTable(), KeyEvent.KEY_PRESSED, JComponent.WHEN_FOCUSED,
+                KeyEvent.CTRL_DOWN_MASK, KeyEvent.VK_DOWN, KeyEvent.CHAR_UNDEFINED);
+        fileEditor.tableEditorKeyListener.keyPressed(keyPressed);
+
+        assertTrue("insertion shortcut must prevent JTable navigation", keyPressed.isConsumed());
+        assertEquals(initialRowCount + 1, getTableModel().getRowCount());
+        assertEquals("", getTableModel().getValue(2, 0));
+        assertEquals(2, fileEditor.getTable().getSelectedRow());
+
+        KeyEvent keyReleased = new KeyEvent(fileEditor.getTable(), KeyEvent.KEY_RELEASED, JComponent.WHEN_FOCUSED,
+                KeyEvent.CTRL_DOWN_MASK, KeyEvent.VK_DOWN, KeyEvent.CHAR_UNDEFINED);
+        fileEditor.tableEditorKeyListener.keyReleased(keyReleased);
+
+        assertEquals("the key release must not insert another row", initialRowCount + 1, getTableModel().getRowCount());
+    }
+
     public void testAddRowBeforeAction() {
-        KeyEvent keyEvent = new KeyEvent(fileEditor.getTable(), KeyEvent.KEY_RELEASED, JComponent.WHEN_FOCUSED,
+        KeyEvent keyEvent = new KeyEvent(fileEditor.getTable(), KeyEvent.KEY_PRESSED, JComponent.WHEN_FOCUSED,
                 KeyEvent.CTRL_DOWN_MASK, KeyEvent.VK_UP, KeyEvent.CHAR_UNDEFINED);
 
         fileEditor.getTable().setRowSelectionInterval(1, 1);
         fileEditor.getTable().setColumnSelectionInterval(1, 1);
-        fileEditor.tableEditorKeyListener.keyReleased(keyEvent);
+        fileEditor.tableEditorKeyListener.keyPressed(keyEvent);
         CsvTableModel tableModel = getTableModel();
         assertEquals(myInitialRowCount + 1, tableModel.getRowCount());
         assertEquals("", tableModel.getValue(1, 0));
@@ -23,12 +44,12 @@ public class CsvTableEditorKeyListenerTest extends CsvTableEditorSwingTestBase {
     }
 
     public void testAddRowAfterAction() {
-        KeyEvent keyEvent = new KeyEvent(fileEditor.getTable(), KeyEvent.KEY_RELEASED, JComponent.WHEN_FOCUSED,
+        KeyEvent keyEvent = new KeyEvent(fileEditor.getTable(), KeyEvent.KEY_PRESSED, JComponent.WHEN_FOCUSED,
                 KeyEvent.CTRL_DOWN_MASK, KeyEvent.VK_DOWN, KeyEvent.CHAR_UNDEFINED);
 
         fileEditor.getTable().setRowSelectionInterval(1, 1);
         fileEditor.getTable().setColumnSelectionInterval(1, 1);
-        fileEditor.tableEditorKeyListener.keyReleased(keyEvent);
+        fileEditor.tableEditorKeyListener.keyPressed(keyEvent);
         CsvTableModel tableModel = getTableModel();
         assertEquals(myInitialRowCount + 1, tableModel.getRowCount());
         assertEquals("", tableModel.getValue(2, 0));
@@ -38,12 +59,12 @@ public class CsvTableEditorKeyListenerTest extends CsvTableEditorSwingTestBase {
     }
 
     public void testAddColumnBeforeAction() {
-        KeyEvent keyEvent = new KeyEvent(fileEditor.getTable(), KeyEvent.KEY_RELEASED, JComponent.WHEN_FOCUSED,
+        KeyEvent keyEvent = new KeyEvent(fileEditor.getTable(), KeyEvent.KEY_PRESSED, JComponent.WHEN_FOCUSED,
                 KeyEvent.CTRL_DOWN_MASK | KeyEvent.SHIFT_DOWN_MASK, KeyEvent.VK_LEFT, KeyEvent.CHAR_UNDEFINED);
 
         fileEditor.getTable().setRowSelectionInterval(1, 1);
         fileEditor.getTable().setColumnSelectionInterval(1, 1);
-        fileEditor.tableEditorKeyListener.keyReleased(keyEvent);
+        fileEditor.tableEditorKeyListener.keyPressed(keyEvent);
         CsvTableModel tableModel = getTableModel();
         assertEquals(myInitialColumnCount + 1, tableModel.getColumnCount());
         assertEquals("", tableModel.getValue(0, 1));
@@ -53,12 +74,12 @@ public class CsvTableEditorKeyListenerTest extends CsvTableEditorSwingTestBase {
     }
 
     public void testAddColumnAfterAction() {
-        KeyEvent keyEvent = new KeyEvent(fileEditor.getTable(), KeyEvent.KEY_RELEASED, JComponent.WHEN_FOCUSED,
+        KeyEvent keyEvent = new KeyEvent(fileEditor.getTable(), KeyEvent.KEY_PRESSED, JComponent.WHEN_FOCUSED,
                 KeyEvent.CTRL_DOWN_MASK | KeyEvent.SHIFT_DOWN_MASK, KeyEvent.VK_RIGHT, KeyEvent.CHAR_UNDEFINED);
 
         fileEditor.getTable().setRowSelectionInterval(1, 1);
         fileEditor.getTable().setColumnSelectionInterval(1, 1);
-        fileEditor.tableEditorKeyListener.keyReleased(keyEvent);
+        fileEditor.tableEditorKeyListener.keyPressed(keyEvent);
         CsvTableModel tableModel = getTableModel();
         assertEquals(myInitialColumnCount + 1, tableModel.getColumnCount());
         assertEquals("", tableModel.getValue(0, 2));

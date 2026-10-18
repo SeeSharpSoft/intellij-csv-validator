@@ -10,6 +10,20 @@
 
 ### Fixed
 
+## 4.6.0 - Oct 18, 2026
+
+### Fixed
+
+- Fixed table-editor row and column insertion shortcuts placing new entries at the first or last position instead of the current selection
+- Fixed queued table-editor row and column changes applying column edits at stale document offsets
+- Fixed CSV settings notification links failing to resolve the matching settings page on newer IntelliJ Platform versions (#1102)
+
+### Changed
+
+- Streamlined `CsvTableModelBase` by removing redundant asynchronous PSI resolution, eliminating side effects during table model reads, and ignoring unrelated project PSI tree changes
+- Optimized `CsvTableModelSwing` update coalescing using IntelliJ's `Alarm` on the EDT, eliminating background thread hopping and duplicate table changed event firings
+- Refactored `CsvPsiTreeUpdater` to avoid nested read/write actions, eliminated Swing dependencies from core PSI utilities, and improved thread safety and batching during table edits
+
 ## 4.5.0 - Oct 10, 2026
 
 ### Fixed

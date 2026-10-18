@@ -1,9 +1,12 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table;
 
-import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.application.ReadAction;
-import com.intellij.util.concurrency.AppExecutorUtil;
-import com.intellij.psi.*;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiErrorElement;
+import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiManager;
+import com.intellij.psi.PsiTreeAnyChangeAbstractAdapter;
+import com.intellij.psi.PsiTreeChangeListener;
 import com.intellij.psi.util.PsiTreeUtil;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvEscapeCharacter;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
@@ -33,6 +36,8 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
     private PsiElement myPointedRecord = null;
     private volatile Set<Integer> myCachedCommentRows = Collections.emptySet();
     private final CsvPsiTreeUpdater myPsiTreeUpdater;
+    private volatile PsiFile myObservedPsiFile;
+    private PsiManager myPsiManager;
 
     private final PsiTreeChangeListener myPsiTreeChangeListener = new PsiTreeAnyChangeAbstractAdapter() {
         @Override
@@ -44,8 +49,8 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
     public CsvTableModelBase(@NotNull T psiFileHolder) {
         myPsiFileHolder = psiFileHolder;
         myPsiTreeUpdater = new CsvPsiTreeUpdater(psiFileHolder);
-        myPsiTreeUpdater.addCommitListener(() -> onPsiTreeChanged(getPsiFile()));
-        addPsiTreeChangeListener();
+        myPsiTreeUpdater.addCommitListener(this::onUpdaterCommitted);
+        updatePsiFile(getPsiFile());
         resetPointer();
         getRowCount();
     }
@@ -54,63 +59,99 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
         return myPsiFileHolder;
     }
 
-    protected void addPsiTreeChangeListener() {
-        PsiFile psiFile = getPsiFile();
-        if (psiFile == null) {
-            // Resolve PSI off-EDT and register the listener when available to avoid slow operations on EDT
-            ReadAction
-                .nonBlocking(this::getPsiFile)
-                .coalesceBy(this)
-                .finishOnUiThread(ModalityState.any(), pf -> {
-                    if (pf == null || myDisposed) return;
-                    PsiManager mgr = pf.getManager();
-                    if (mgr == null) return;
-                    mgr.addPsiTreeChangeListener(myPsiTreeChangeListener, myPsiFileHolder);
-                })
-                .submit(AppExecutorUtil.getAppExecutorService());
-            return;
+    public boolean isDisposed() {
+        return myDisposed;
+    }
+
+    private void updatePsiFile(@Nullable PsiFile psiFile) {
+        myObservedPsiFile = psiFile;
+        invalidateModelState();
+        updatePsiListener(psiFile);
+    }
+
+    private void updatePsiListener(@Nullable PsiFile psiFile) {
+        PsiManager newManager = psiFile == null ? null : psiFile.getManager();
+        if (newManager == myPsiManager) return;
+
+        detachPsiListener();
+        if (newManager != null && !myDisposed) {
+            newManager.addPsiTreeChangeListener(myPsiTreeChangeListener, myPsiFileHolder);
+            myPsiManager = newManager;
         }
-        PsiManager manager = psiFile.getManager();
-        if (manager == null) return;
-        manager.addPsiTreeChangeListener(myPsiTreeChangeListener, myPsiFileHolder);
+    }
+
+    private void detachPsiListener() {
+        if (myPsiManager != null) {
+            myPsiManager.removePsiTreeChangeListener(myPsiTreeChangeListener);
+            myPsiManager = null;
+        }
     }
 
     @Override
     public void dispose() {
         myDisposed = true;
+        detachPsiListener();
+        myObservedPsiFile = null;
+        invalidateModelState();
         CsvTableModel.super.dispose();
         myPsiTreeUpdater.dispose();
     }
 
     private void onPsiTreeChanged(@Nullable PsiFile file) {
-        if (file == getPsiFile() && !myPsiTreeUpdater.isSuspended() && !isSuspended()) {
-            notifyUpdate();
+        if (myDisposed || !canNotifyUpdates()) return;
+
+        PsiFile currentPsiFile = getPsiFile();
+        if (file != null && !isSameVirtualFile(file, currentPsiFile)) {
+            return;
         }
+
+        notifyUpdate();
+    }
+
+    private boolean canNotifyUpdates() {
+        return !myDisposed && !myPsiTreeUpdater.isSuspended() && !isSuspended();
+    }
+
+    private void onUpdaterCommitted() {
+        if (canNotifyUpdates()) notifyUpdate();
+    }
+
+    private static boolean isSameVirtualFile(@Nullable PsiFile first, @Nullable PsiFile second) {
+        if (first == second) return true;
+        if (first == null || second == null) return false;
+        return first.getVirtualFile() != null && first.getVirtualFile().equals(second.getVirtualFile());
     }
 
     @Override
     public PsiFile getPsiFile() {
-        return myPsiFileHolder.getPsiFile();
+        PsiFile psiFile = myPsiFileHolder.getPsiFile();
+        if (psiFile != myObservedPsiFile) {
+            updatePsiFile(psiFile);
+        }
+        return psiFile;
     }
 
     @Override
     public boolean isCommentRow(int rowIndex) {
+        getRowCount();
         return myCachedCommentRows.contains(rowIndex);
     }
 
     @Override
     public void notifyUpdate() {
-        this.resetCachedValues();
-        this.resetPointer();
-        this.getRowCount();
+        invalidateModelState();
+        resetPointer();
+        getRowCount();
     }
 
-    private void resetCachedValues() {
+    private void invalidateModelState() {
         myCachedRowCount = -1;
         myCachedColumnCount = -1;
         myCachedHasErrors = null;
         myCachedEscapeCharacter = null;
         myCachedCommentRows = Collections.emptySet();
+        myPointedRecord = null;
+        myPointedRow = 0;
     }
 
     private void resetPointer() {
@@ -135,9 +176,13 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
     @Override
     public PsiElement getFieldAt(int row, int column) {
         return ReadAction.compute(() -> {
+            PsiFile psiFile = getPsiFile();
+            if (psiFile == null) return null;
+
             int diffToCurrent = Math.abs(myPointedRow - row);
             if (diffToCurrent > row || myPointedRecord == null) {
-                resetPointer();
+                myPointedRecord = PsiHelper.getFirstChildOfType(psiFile, CsvRecord.class);
+                myPointedRow = 0;
                 diffToCurrent = row;
             }
             if (myPointedRecord == null) return null;
@@ -156,14 +201,19 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
 
     @Override
     public boolean hasErrors() {
+        getPsiFile();
         if (myCachedHasErrors == null) {
-            myCachedHasErrors = ReadAction.compute(CsvTableModel.super::hasErrors);
+            myCachedHasErrors = ReadAction.compute(() -> {
+                PsiFile psiFile = getPsiFile();
+                return psiFile != null && PsiTreeUtil.hasErrorElements(psiFile);
+            });
         }
         return myCachedHasErrors;
     }
 
     @Override
     public int getRowCount() {
+        getPsiFile();
         if (myCachedRowCount == -1) {
             myCachedRowCount = ReadAction.compute(() -> {
                 PsiFile psiFile = getPsiFile();
@@ -190,8 +240,9 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
 
     @Override
     public int getColumnCount() {
+        getPsiFile();
         if (myCachedColumnCount == -1) {
-            myCachedColumnCount = ReadAction.compute(CsvTableModel.super::getColumnCount);
+            myCachedColumnCount = ReadAction.compute(() -> CsvTableModel.getColumnCount(getPsiFile()));
         }
         return myCachedColumnCount;
     }
