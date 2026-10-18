@@ -22,6 +22,7 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.event.EventListenerList;
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
@@ -231,31 +232,33 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
     }
 
     private void addColumnImpl(int columnIndex, boolean before) {
-        List<Pair<TextRange, String>> replacements = new ArrayList<>();
         PsiFile psiFile = getPsiFile();
+        doAction(new DocumentPsiAction(
+                psiFile,
+                () -> collectColumnReplacements(psiFile, columnIndex, before)));
+    }
+
+    private List<Pair<TextRange, String>> collectColumnReplacements(
+            @NotNull PsiFile psiFile,
+            int columnIndex,
+            boolean before) {
+        List<Pair<TextRange, String>> replacements = new ArrayList<>();
         String valueSeparator = CsvHelper.getValueSeparator(psiFile).getCharacter();
         for (PsiElement record = psiFile.getFirstChild(); record != null; record = record.getNextSibling()) {
             if (!(record instanceof CsvRecord)) continue;
+            // The grammar exposes the record after a terminal line break as an empty PSI record.
+            // It is not a user row and must not receive a field when a column is inserted.
+            if (record.getTextLength() == 0 && record.getNextSibling() == null) continue;
             PsiElement field = record.getFirstChild();
             if (CsvHelper.isCommentElement(field)) continue;
 
-            int startOffset;
-            String value = valueSeparator;
             field = PsiHelper.getNextNthSiblingOfType(field, columnIndex, CsvField.class);
-            if (field == null) {
-                int currentNoOfColumn = PsiTreeUtil.countChildrenOfType(record, CsvField.class);
-                field = PsiHelper.getNthChildOfType(record, currentNoOfColumn - 1, CsvField.class);
+            if (field == null) continue;
 
-                assert field != null;
-                startOffset = field.getTextRange().getEndOffset();
-                value = valueSeparator.repeat(columnIndex - currentNoOfColumn + 1);
-            } else {
-                startOffset = (before ? field.getTextRange().getStartOffset() : field.getTextRange().getEndOffset());
-            }
-            replacements.add(Pair.create(TextRange.create(startOffset, startOffset), value));
+            int startOffset = before ? field.getTextRange().getStartOffset() : field.getTextRange().getEndOffset();
+            replacements.add(Pair.create(TextRange.create(startOffset, startOffset), valueSeparator));
         }
-
-        replaceTextsImpl(replacements);
+        return replacements;
     }
 
     /**
@@ -438,37 +441,43 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
     public synchronized void commit() {
         if (isSuspended() || myUncommittedActions.isEmpty()) return;
 
-        List<PsiAction> actionsToCommit = new ArrayList<>(myUncommittedActions);
-        myUncommittedActions.clear();
-
-        doCommit(() -> actionsToCommit.forEach(PsiAction::execute));
-    }
-
-    private boolean doCommit(@NotNull Runnable runnable) {
         PsiFile psiFile = getPsiFile();
         Document document = getDocument();
 
-        if (psiFile == null || !psiFile.isWritable() || document == null || !document.isWritable() || document.isInBulkUpdate())
-        {
-            return false;
+        if (psiFile == null ||
+                !psiFile.isWritable() ||
+                document == null ||
+                !document.isWritable() ||
+                document.isInBulkUpdate()) {
+            return; // Keep actions queued for a later commit.
         }
 
-        suspend();
-        ApplicationManager.getApplication().runWriteAction(() -> {
-            try {
-                CommandProcessor.getInstance().executeCommand(
-                        getPsiFile().getProject(),
-                        () -> DocumentUtil.executeInBulk(document, runnable),
-                        "CSV Editor Changes",
-                        null,
-                        document);
-            } finally {
-                resume();
-                fireCommitted();
-            }
-        });
+        List<PsiAction> actionsToCommit = new ArrayList<>(myUncommittedActions);
+        myUncommittedActions.clear();
 
-        return true;
+        suspend();
+        try {
+            ApplicationManager.getApplication().runWriteAction(() ->
+                    doCommit(
+                            psiFile,
+                            document,
+                            () -> actionsToCommit.forEach(PsiAction::execute)));
+        } finally {
+            resume();
+            fireCommitted();
+        }
+    }
+
+    private void doCommit(
+            @NotNull PsiFile psiFile,
+            @NotNull Document document,
+            @NotNull Runnable runnable) {
+        CommandProcessor.getInstance().executeCommand(
+                psiFile.getProject(),
+                () -> DocumentUtil.executeInBulk(document, runnable),
+                "CSV Editor Changes",
+                null,
+                document);
     }
 
     public void addCommitListener(CommitListener l) {
@@ -602,13 +611,18 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
 
     private static class DocumentPsiAction extends PsiAction {
 
-        private final List<Pair<TextRange, String>> myReplacements;
+        private final Supplier<List<Pair<TextRange, String>>> myReplacementsSupplier;
 
         DocumentPsiAction(@NotNull PsiElement psiFile, List<Pair<TextRange, String>> replacements) {
+            this(psiFile, () -> replacements);
+        }
+
+        DocumentPsiAction(
+                @NotNull PsiElement psiFile,
+                @NotNull Supplier<List<Pair<TextRange, String>>> replacementsSupplier) {
             super(psiFile);
             assert psiFile instanceof PsiFile;
-            myReplacements = replacements;
-            myReplacements.sort(Comparator.comparingInt(replacement -> replacement.getFirst().getStartOffset()));
+            myReplacementsSupplier = replacementsSupplier;
         }
 
         @Override
@@ -622,14 +636,18 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
 
                 manager.doPostponedOperationsAndUnblockDocument(document);
 
+                List<Pair<TextRange, String>> replacements = myReplacementsSupplier.get();
+                if (replacements.isEmpty()) return;
+                replacements.sort(Comparator.comparingInt(replacement -> replacement.getFirst().getStartOffset()));
+
                 // Build the changed span first so listeners receive a single document event,
                 // even when a batched operation affects thousands of records.
                 CharSequence original = document.getImmutableCharSequence();
-                int startOffset = myReplacements.getFirst().getFirst().getStartOffset();
-                int endOffset = myReplacements.getLast().getFirst().getEndOffset();
+                int startOffset = replacements.getFirst().getFirst().getStartOffset();
+                int endOffset = replacements.getLast().getFirst().getEndOffset();
                 StringBuilder updated = new StringBuilder(endOffset - startOffset);
                 int offset = startOffset;
-                for (Pair<TextRange, String> replacement : myReplacements) {
+                for (Pair<TextRange, String> replacement : replacements) {
                     TextRange textRange = replacement.getFirst();
                     updated.append(original, offset, textRange.getStartOffset());
                     updated.append(replacement.getSecond());

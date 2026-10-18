@@ -15,6 +15,7 @@
 ### Fixed
 
 - Fixed table-editor row and column insertion shortcuts placing new entries at the first or last position instead of the current selection
+- Fixed queued table-editor row and column changes applying column edits at stale document offsets
 
 ## 4.5.0 - Oct 10, 2026
 
