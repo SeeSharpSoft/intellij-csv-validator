@@ -10,14 +10,13 @@
 
 ### Fixed
 
-- Fixed CSV settings notification links failing to resolve the matching settings page on newer IntelliJ Platform versions (#1102)
-
 ## 4.5.1 - Oct 13, 2026
 
 ### Fixed
 
 - Fixed table-editor row and column insertion shortcuts placing new entries at the first or last position instead of the current selection
 - Fixed queued table-editor row and column changes applying column edits at stale document offsets
+- Fixed CSV settings notification links failing to resolve the matching settings page on newer IntelliJ Platform versions (#1102)
 
 ## 4.5.0 - Oct 10, 2026
 
