@@ -3,7 +3,7 @@ package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.util.Computable;
 import com.intellij.psi.PsiElement;
-import com.intellij.util.concurrency.AppExecutorUtil;
+import com.intellij.util.Alarm;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditor;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableModelBase;
@@ -13,77 +13,40 @@ import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import net.seesharpsoft.intellij.psi.PsiHelper;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.*;
 import javax.swing.event.EventListenerList;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 
 public class CsvTableModelSwing extends CsvTableModelBase<CsvTableEditor> implements TableModel {
 
     private final EventListenerList listenerList = new EventListenerList();
+    private final Alarm myUpdateAlarm;
 
-    private final Object updateLock = new Object();
-    private ScheduledFuture<?> pendingUpdate;
-    private long updateGeneration;
-    private boolean myDisposed;
-
-    private static final long UPDATE_DELAY_MILLIS = 50;
+    private static final int UPDATE_DELAY_MILLIS = 50;
 
     public CsvTableModelSwing(@NotNull CsvTableEditor psiFileHolder) {
         super(psiFileHolder);
+        myUpdateAlarm = new Alarm(Alarm.ThreadToUse.SWING_THREAD, psiFileHolder);
     }
 
     @Override
     public void notifyUpdate() {
+        if (isDisposed()) return;
+
         if (ApplicationManager.getApplication().isUnitTestMode()) {
             updateTableImmediately();
             return;
         }
 
-        scheduleTableUpdate();
-    }
-
-    private void scheduleTableUpdate() {
-        final long generation;
-        synchronized (updateLock) {
-            if (myDisposed) return;
-
-            generation = ++updateGeneration;
-            cancelPendingUpdate();
-            pendingUpdate = AppExecutorUtil.getAppScheduledExecutorService().schedule(
-                    () -> dispatchTableUpdate(generation),
-                    UPDATE_DELAY_MILLIS,
-                    TimeUnit.MILLISECONDS);
-        }
-    }
-
-    private void cancelPendingUpdate() {
-        if (pendingUpdate == null) return;
-        pendingUpdate.cancel(false);
-        pendingUpdate = null;
-    }
-
-    private void dispatchTableUpdate(long generation) {
-        SwingUtilities.invokeLater(() -> updateTableIfCurrent(generation));
-    }
-
-    private void updateTableIfCurrent(long generation) {
-        synchronized (updateLock) {
-            if (myDisposed || generation != updateGeneration) return;
-            pendingUpdate = null;
-        }
-        updateTableImmediately();
+        myUpdateAlarm.cancelAllRequests();
+        myUpdateAlarm.addRequest(this::updateTableImmediately, UPDATE_DELAY_MILLIS);
     }
 
     private void updateTableImmediately() {
-        synchronized (updateLock) {
-            if (myDisposed) return;
-        }
+        if (isDisposed()) return;
 
         getPsiFileHolder().beforeTableModelUpdate();
         try {
@@ -92,16 +55,6 @@ public class CsvTableModelSwing extends CsvTableModelBase<CsvTableEditor> implem
         } finally {
             getPsiFileHolder().afterTableModelUpdate();
         }
-    }
-
-    @Override
-    public void dispose() {
-        synchronized (updateLock) {
-            myDisposed = true;
-            updateGeneration++;
-            cancelPendingUpdate();
-        }
-        super.dispose();
     }
 
     protected void fireTableChanged(TableModelEvent e) {

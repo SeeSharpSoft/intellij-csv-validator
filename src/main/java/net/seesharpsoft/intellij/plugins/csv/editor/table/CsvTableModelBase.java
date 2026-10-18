@@ -1,6 +1,5 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table;
 
-import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiErrorElement;
@@ -9,7 +8,6 @@ import com.intellij.psi.PsiManager;
 import com.intellij.psi.PsiTreeAnyChangeAbstractAdapter;
 import com.intellij.psi.PsiTreeChangeListener;
 import com.intellij.psi.util.PsiTreeUtil;
-import com.intellij.util.concurrency.AppExecutorUtil;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvEscapeCharacter;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvField;
@@ -40,9 +38,6 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
     private final CsvPsiTreeUpdater myPsiTreeUpdater;
     private volatile PsiFile myObservedPsiFile;
     private PsiManager myPsiManager;
-    private boolean myPsiResolutionPending;
-    private final Object myPsiListenerLock = new Object();
-    private volatile boolean myInitialized;
 
     private final PsiTreeChangeListener myPsiTreeChangeListener = new PsiTreeAnyChangeAbstractAdapter() {
         @Override
@@ -55,113 +50,62 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
         myPsiFileHolder = psiFileHolder;
         myPsiTreeUpdater = new CsvPsiTreeUpdater(psiFileHolder);
         myPsiTreeUpdater.addCommitListener(this::onUpdaterCommitted);
-        getPsiFile();
+        updatePsiFile(getPsiFile());
         resetPointer();
         getRowCount();
-        myInitialized = true;
     }
 
     public T getPsiFileHolder() {
         return myPsiFileHolder;
     }
 
-    /**
-     * Records the current PSI file, invalidates derived state when it changes, and keeps the
-     * listener attached to the manager that owns the current file.
-     */
-    private boolean observePsiFile(@Nullable PsiFile psiFile) {
-        if (myDisposed) return false;
+    public boolean isDisposed() {
+        return myDisposed;
+    }
 
-        boolean changed = psiFile != myObservedPsiFile;
-        if (changed) {
-            myObservedPsiFile = psiFile;
-            invalidateModelState();
-        }
+    private void updatePsiFile(@Nullable PsiFile psiFile) {
+        myObservedPsiFile = psiFile;
+        invalidateModelState();
         updatePsiListener(psiFile);
-        return changed;
     }
 
     private void updatePsiListener(@Nullable PsiFile psiFile) {
-        if (psiFile == null) {
-            synchronized (myPsiListenerLock) {
-                detachPsiListener();
-            }
-            return;
-        }
+        PsiManager newManager = psiFile == null ? null : psiFile.getManager();
+        if (newManager == myPsiManager) return;
 
-        attachPsiListener(psiFile);
-    }
-
-    private void attachPsiListener(@Nullable PsiFile psiFile) {
-        if (psiFile == null) return;
-
-        PsiManager manager = psiFile.getManager();
-        if (manager == null) return;
-
-        synchronized (myPsiListenerLock) {
-            if (myDisposed || myPsiManager == manager) return;
-            detachPsiListener();
-            manager.addPsiTreeChangeListener(myPsiTreeChangeListener, myPsiFileHolder);
-            myPsiManager = manager;
+        detachPsiListener();
+        if (newManager != null && !myDisposed) {
+            newManager.addPsiTreeChangeListener(myPsiTreeChangeListener, myPsiFileHolder);
+            myPsiManager = newManager;
         }
     }
 
     private void detachPsiListener() {
-        if (myPsiManager == null) return;
-        myPsiManager.removePsiTreeChangeListener(myPsiTreeChangeListener);
-        myPsiManager = null;
-    }
-
-    private void resolvePsiFileLater() {
-        synchronized (myPsiListenerLock) {
-            if (!myInitialized || myDisposed || myPsiResolutionPending) return;
-            myPsiResolutionPending = true;
-        }
-
-        // Resolve PSI off-EDT and register the listener when available to avoid slow operations on EDT.
-        ReadAction
-                .nonBlocking(myPsiFileHolder::getPsiFile)
-                .coalesceBy(this)
-                .finishOnUiThread(ModalityState.any(), this::onPsiFileResolved)
-                .submit(AppExecutorUtil.getAppExecutorService());
-    }
-
-    private void onPsiFileResolved(@Nullable PsiFile psiFile) {
-        synchronized (myPsiListenerLock) {
-            myPsiResolutionPending = false;
-            if (myDisposed) return;
-        }
-
-        if (observePsiFile(psiFile) && myInitialized) {
-            notifyUpdate();
+        if (myPsiManager != null) {
+            myPsiManager.removePsiTreeChangeListener(myPsiTreeChangeListener);
+            myPsiManager = null;
         }
     }
 
     @Override
     public void dispose() {
         myDisposed = true;
-        synchronized (myPsiListenerLock) {
-            detachPsiListener();
-        }
+        detachPsiListener();
+        myObservedPsiFile = null;
+        invalidateModelState();
         CsvTableModel.super.dispose();
         myPsiTreeUpdater.dispose();
     }
 
     private void onPsiTreeChanged(@Nullable PsiFile file) {
-        if (myDisposed) return;
-        PsiFile currentPsiFile = myPsiFileHolder.getPsiFile();
-        boolean psiFileChanged = observePsiFile(currentPsiFile);
-        if (currentPsiFile == null) resolvePsiFileLater();
-        if (isRelevantPsiChange(file, currentPsiFile, psiFileChanged) && canNotifyUpdates()) {
-            notifyUpdate();
-        }
-    }
+        if (myDisposed || !canNotifyUpdates()) return;
 
-    private boolean isRelevantPsiChange(
-            @Nullable PsiFile changedFile,
-            @Nullable PsiFile currentPsiFile,
-            boolean psiFileChanged) {
-        return psiFileChanged || isSameVirtualFile(changedFile, currentPsiFile);
+        PsiFile currentPsiFile = getPsiFile();
+        if (file != null && !isSameVirtualFile(file, currentPsiFile)) {
+            return;
+        }
+
+        notifyUpdate();
     }
 
     private boolean canNotifyUpdates() {
@@ -181,9 +125,9 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
     @Override
     public PsiFile getPsiFile() {
         PsiFile psiFile = myPsiFileHolder.getPsiFile();
-        boolean changed = observePsiFile(psiFile);
-        if (psiFile == null) resolvePsiFileLater();
-        if (changed && myInitialized) notifyUpdate();
+        if (psiFile != myObservedPsiFile) {
+            updatePsiFile(psiFile);
+        }
         return psiFile;
     }
 
@@ -232,10 +176,13 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
     @Override
     public PsiElement getFieldAt(int row, int column) {
         return ReadAction.compute(() -> {
-            getPsiFile();
+            PsiFile psiFile = getPsiFile();
+            if (psiFile == null) return null;
+
             int diffToCurrent = Math.abs(myPointedRow - row);
             if (diffToCurrent > row || myPointedRecord == null) {
-                resetPointer();
+                myPointedRecord = PsiHelper.getFirstChildOfType(psiFile, CsvRecord.class);
+                myPointedRow = 0;
                 diffToCurrent = row;
             }
             if (myPointedRecord == null) return null;
@@ -256,7 +203,10 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
     public boolean hasErrors() {
         getPsiFile();
         if (myCachedHasErrors == null) {
-            myCachedHasErrors = ReadAction.compute(CsvTableModel.super::hasErrors);
+            myCachedHasErrors = ReadAction.compute(() -> {
+                PsiFile psiFile = getPsiFile();
+                return psiFile != null && PsiTreeUtil.hasErrorElements(psiFile);
+            });
         }
         return myCachedHasErrors;
     }
@@ -292,7 +242,7 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
     public int getColumnCount() {
         getPsiFile();
         if (myCachedColumnCount == -1) {
-            myCachedColumnCount = ReadAction.compute(CsvTableModel.super::getColumnCount);
+            myCachedColumnCount = ReadAction.compute(() -> CsvTableModel.getColumnCount(getPsiFile()));
         }
         return myCachedColumnCount;
     }
