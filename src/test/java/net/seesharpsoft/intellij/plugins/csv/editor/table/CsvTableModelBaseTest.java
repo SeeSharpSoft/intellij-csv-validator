@@ -6,6 +6,8 @@ import com.intellij.openapi.editor.event.DocumentListener;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiFileFactory;
+import com.intellij.psi.PsiManager;
 import com.intellij.psi.codeStyle.CodeStyleSettingsManager;
 import com.intellij.openapi.util.ThrowableComputable;
 import com.intellij.util.ThrowableRunnable;
@@ -32,7 +34,9 @@ import static net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings.C
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.same;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
 import org.mockito.MockedStatic;
 
 public class CsvTableModelBaseTest extends CsvBasePlatformTestCase implements PsiFileHolder {
@@ -120,6 +124,63 @@ public class CsvTableModelBaseTest extends CsvBasePlatformTestCase implements Ps
 
     public void testRowCount() {
         manualCheck(csvTableModel -> assertEquals(9, csvTableModel.getRowCount()));
+    }
+
+    public void testPsiFileReplacementInvalidatesModelState() {
+        PsiFile firstPsiFile = PsiFileFactory.getInstance(getProject()).createFileFromText(
+                "first.csv", CsvFileType.INSTANCE, "first");
+        PsiFile replacementPsiFile = PsiFileFactory.getInstance(getProject()).createFileFromText(
+                "replacement.csv", CsvFileType.INSTANCE, "replacement\nsecond");
+        SwitchingPsiFileHolder holder = new SwitchingPsiFileHolder(firstPsiFile);
+        CsvTableModel model = new CsvTableModelBase<>(holder);
+        try {
+            assertEquals(1, model.getRowCount());
+
+            holder.setPsiFile(replacementPsiFile);
+
+            assertEquals(2, model.getRowCount());
+            assertEquals("replacement", model.getValue(0, 0));
+        } finally {
+            model.dispose();
+        }
+    }
+
+    public void testPsiFileReplacementResetsPointedPsiElement() {
+        PsiFile firstPsiFile = PsiFileFactory.getInstance(getProject()).createFileFromText(
+                "first.csv", CsvFileType.INSTANCE, "first");
+        PsiFile replacementPsiFile = PsiFileFactory.getInstance(getProject()).createFileFromText(
+                "replacement.csv", CsvFileType.INSTANCE, "replacement");
+        SwitchingPsiFileHolder holder = new SwitchingPsiFileHolder(firstPsiFile);
+        CsvTableModel model = new CsvTableModelBase<>(holder);
+        try {
+            assertEquals("first", model.getValue(0, 0));
+
+            holder.setPsiFile(replacementPsiFile);
+
+            assertEquals("replacement", model.getValue(0, 0));
+        } finally {
+            model.dispose();
+        }
+    }
+
+    public void testPsiFileManagerReplacementRebindsPsiListener() {
+        PsiFile firstPsiFile = mock(PsiFile.class);
+        PsiFile replacementPsiFile = mock(PsiFile.class);
+        PsiManager firstPsiManager = mock(PsiManager.class);
+        PsiManager replacementPsiManager = mock(PsiManager.class);
+        when(firstPsiFile.getManager()).thenReturn(firstPsiManager);
+        when(replacementPsiFile.getManager()).thenReturn(replacementPsiManager);
+        SwitchingPsiFileHolder holder = new SwitchingPsiFileHolder(firstPsiFile);
+        CsvTableModel model = new CsvTableModelBase<>(holder);
+        try {
+            holder.setPsiFile(replacementPsiFile);
+            model.getRowCount();
+
+            verify(firstPsiManager).removePsiTreeChangeListener(any());
+            verify(replacementPsiManager).addPsiTreeChangeListener(any(), same(holder));
+        } finally {
+            model.dispose();
+        }
     }
 
     public void testNotifyUpdateFromEdt() throws Exception {
@@ -356,6 +417,22 @@ public class CsvTableModelBaseTest extends CsvBasePlatformTestCase implements Ps
         autoCheck((csvTableModel -> csvTableModel.addColumn(0, true)));
     }
 
+    public void testNewRowNewColumnRegression() {
+        String testDataPath = "/edgecases/";
+        myFixture.configureByFiles(testDataPath + "NewRowNewColumnRegression.csv");
+
+        CsvTableModel model = new CsvTableModelBase<>(this);
+        try {
+            model.addRow(1, true);
+            myFixture.checkResultByFile(testDataPath + "NewRowNewColumnRegressionAfterRow.csv");
+
+            model.addColumn(0, false);
+            myFixture.checkResultByFile(testDataPath + "NewRowNewColumnRegressionAfterColumn.csv");
+        } finally {
+            model.dispose();
+        }
+    }
+
     public void testAddRowAfterComment() {
         autoCheck((csvTableModel -> csvTableModel.addRow(5, false)));
     }
@@ -440,7 +517,7 @@ public class CsvTableModelBaseTest extends CsvBasePlatformTestCase implements Ps
         String comment = CsvEditorSettings.getInstance().getCommentIndicator() + "keep this comment\n";
         String row = String.join(separator, "first", "second", "third") + "\n";
         String expectedRow = String.join(separator, "first", "", "second", "third") + "\n";
-        checkSingleDocumentChange(comment + row.repeat(1000), comment + expectedRow.repeat(1000) + separator,
+        checkSingleDocumentChange(comment + row.repeat(1000), comment + expectedRow.repeat(1000),
                 model -> model.addColumn(1, true));
     }
 
@@ -480,5 +557,26 @@ public class CsvTableModelBaseTest extends CsvBasePlatformTestCase implements Ps
     @Override
     public void dispose() {
 
+    }
+
+    private static final class SwitchingPsiFileHolder implements PsiFileHolder {
+        private PsiFile psiFile;
+
+        private SwitchingPsiFileHolder(PsiFile psiFile) {
+            this.psiFile = psiFile;
+        }
+
+        @Override
+        public PsiFile getPsiFile() {
+            return psiFile;
+        }
+
+        private void setPsiFile(PsiFile psiFile) {
+            this.psiFile = psiFile;
+        }
+
+        @Override
+        public void dispose() {
+        }
     }
 }
