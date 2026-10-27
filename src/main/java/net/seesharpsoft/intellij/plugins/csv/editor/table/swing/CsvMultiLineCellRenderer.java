@@ -71,13 +71,14 @@ public class CsvMultiLineCellRenderer extends JBScrollPane implements TableCellR
         }
         if (hasFocus) {
             myTextArea.setBorder(UIManager.getBorder("Table.focusCellHighlightBorder"));
-            if (table.isCellEditable(row, column)) {
+            if (!isSelected && table.isCellEditable(row, column)) {
                 myTextArea.setForeground(table.getForeground());
                 myTextArea.setBackground(table.getBackground());
             }
         } else {
             myTextArea.setBorder(JBUI.Borders.empty(1, 2));
         }
+        getViewport().setBackground(myTextArea.getBackground());
 
         this.setFont(table.getFont());
         this.setText(value == null ? "" : value.toString());
@@ -109,7 +110,7 @@ public class CsvMultiLineCellRenderer extends JBScrollPane implements TableCellR
 
     @Override
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
-        return getTableCellRendererComponent(table, value, isSelected, true, row, column);
+        return getTableCellRendererComponent(table, value, false, true, row, column);
     }
 
     @Override

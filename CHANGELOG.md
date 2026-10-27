@@ -16,6 +16,7 @@
 
 - Added a FlatLaf-based table editor with padded cells, a flat header, and rounded scrollbars that follow the IDE's light or dark appearance
 - Added a setting to choose between the FlatLaf table editor (the default) and the existing Swing implementation
+- Added Find/Replace in both table editors, with IDE shortcuts, match navigation, case/word/regex options, and Replace All (#430)
 
 ### Changed
 

@@ -45,7 +45,6 @@ final class CsvFlatCellRenderer extends CsvMultiLineCellRenderer {
                 ? BorderFactory.createCompoundBorder(
                         BorderFactory.createLineBorder(table.getSelectionBackground()), JBUI.Borders.empty(2, 7))
                 : JBUI.Borders.empty(3, 8));
-        getViewport().setBackground(textArea.getBackground());
         return this;
     }
 }

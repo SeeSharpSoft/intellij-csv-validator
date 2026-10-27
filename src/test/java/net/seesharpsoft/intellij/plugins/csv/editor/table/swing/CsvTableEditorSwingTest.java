@@ -10,6 +10,7 @@ import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditorState;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableModel;
 import org.jetbrains.annotations.NotNull;
 
+import javax.swing.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.concurrent.CountDownLatch;
@@ -19,6 +20,22 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
+
+    public void testSelectedCellColorsRemainVisibleOutsideEditMode() {
+        JTable table = fileEditor.getTable();
+        CsvMultiLineCellRenderer renderer = (CsvMultiLineCellRenderer) table.getCellRenderer(0, 0);
+        JTextArea area = (JTextArea) renderer.getViewport().getView();
+        for (boolean focused : new boolean[]{false, true}) {
+            renderer.getTableCellRendererComponent(table, "Selected", true, focused, 0, 0);
+            assertEquals(table.getSelectionBackground(), area.getBackground());
+            assertEquals(table.getSelectionForeground(), area.getForeground());
+            assertEquals(area.getBackground(), renderer.getViewport().getBackground());
+            assertNull("Normal cell selection must not select text inside the cell", area.getSelectedText());
+        }
+        renderer.getTableCellEditorComponent(table, "Editing", true, 0, 0);
+        assertEquals(table.getBackground(), area.getBackground());
+        assertEquals(table.getForeground(), area.getForeground());
+    }
 
     public void testBasics() {
         assertEquals(CsvTableEditor.EDITOR_NAME, fileEditor.getName());

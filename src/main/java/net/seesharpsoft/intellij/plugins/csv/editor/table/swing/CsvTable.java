@@ -18,6 +18,9 @@ public class CsvTable extends JBTable {
     }
 
     private int paintCounter;
+    private TableCellRenderer searchMatchRenderer;
+    private int searchMatchRow;
+    private int searchMatchColumn;
 
     public CsvTable(TableModel model) {
         super(model);
@@ -86,10 +89,27 @@ public class CsvTable extends JBTable {
 
     @Override
     public TableCellRenderer getCellRenderer(int row, int column) {
+        if (searchMatchRenderer != null && row == searchMatchRow && column == searchMatchColumn) {
+            return searchMatchRenderer;
+        }
         if (isCommentRow(row)) {
             return getDefaultRenderer(CommentColumn.class);
         }
         return super.getCellRenderer(row, column);
+    }
+
+    void setSearchMatchRenderer(int row, int column, TableCellRenderer renderer) {
+        clearSearchMatchRenderer();
+        searchMatchRow = row;
+        searchMatchColumn = column;
+        searchMatchRenderer = renderer;
+        repaint(getCellRect(row, column, true));
+    }
+
+    void clearSearchMatchRenderer() {
+        if (searchMatchRenderer == null) return;
+        searchMatchRenderer = null;
+        repaint(getCellRect(searchMatchRow, searchMatchColumn, true));
     }
 
     @Override

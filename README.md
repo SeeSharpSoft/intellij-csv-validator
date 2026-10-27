@@ -76,6 +76,12 @@ The table editor works best with a syntactically valid CSV file. If the file con
 
 ![Table editor](./docs/tableeditor.png)
 
+#### Find and Replace
+
+Use the IDE's **Find** and **Replace** shortcuts in either table editor (Ctrl+F and Ctrl+R in the default Windows/Linux keymap). The search bar supports case-sensitive, whole-word, and regular-expression searches. Matches select and scroll to the corresponding cell; use the previous/next buttons to navigate, including multiple matches within a cell. **Replace** changes the current occurrence, and **Replace All** changes every occurrence in the table as one undoable edit. Press Escape in the search bar to close it and return to the selected cell.
+
+Search starts in the background as you type, keeping the table responsive. The bar shows **Searching...** while scanning, then the current match and total count. Changing the query or closing the bar cancels the previous search.
+
 #### Context menu
 
 A right-click within the table opens a context menu for adding or removing rows. Right-click the table header to add or remove columns.

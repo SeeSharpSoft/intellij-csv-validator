@@ -2,6 +2,9 @@ package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
 import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.editor.colors.EditorColorsScheme;
+import com.intellij.openapi.actionSystem.ActionManager;
+import com.intellij.openapi.actionSystem.IdeActions;
+import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.components.labels.LinkLabel;
@@ -31,6 +34,8 @@ public class CsvTableEditorSwing extends CsvTableEditor {
     private JScrollPane tableScrollPane;
     private JPanel panelTop;
     private JTable rowHeadersTable;
+    private final JPanel editorComponent;
+    private CsvTableSearchSession searchSession;
 
     private int baseFontHeight;
 
@@ -56,6 +61,32 @@ public class CsvTableEditorSwing extends CsvTableEditor {
         this.tableEditorMouseWheelListener = new CsvTableEditorMouseWheelListener(this);
 
         initializedUIComponents();
+        editorComponent = new JPanel(new BorderLayout());
+        editorComponent.add(panelMain, BorderLayout.CENTER);
+        registerSearchShortcut(IdeActions.ACTION_FIND, false);
+        registerSearchShortcut(IdeActions.ACTION_REPLACE, true);
+    }
+
+    private void registerSearchShortcut(String actionId, boolean replace) {
+        DumbAwareAction.create(event -> showSearch(replace)).registerCustomShortcutSet(
+                ActionManager.getInstance().getAction(actionId).getShortcutSet(), editorComponent, this);
+    }
+
+    public void showSearch(boolean replace) {
+        if (tblEditor.isEditing() && !tblEditor.getCellEditor().stopCellEditing()) return;
+        if (searchSession == null) {
+            searchSession = new CsvTableSearchSession(this);
+            editorComponent.add(searchSession.getComponent(), BorderLayout.NORTH);
+        }
+        searchSession.show(replace);
+        editorComponent.revalidate();
+        editorComponent.repaint();
+    }
+
+    @Override
+    public void dispose() {
+        if (searchSession != null) searchSession.dispose();
+        super.dispose();
     }
 
     protected void createUIComponents() {
@@ -191,6 +222,7 @@ public class CsvTableEditorSwing extends CsvTableEditor {
         } finally {
             applyTableChangeListener();
         }
+        if (searchSession != null) searchSession.tableChanged();
     }
 
     @Override
@@ -208,8 +240,8 @@ public class CsvTableEditorSwing extends CsvTableEditor {
         tblEditor.getTableHeader().setReorderingAllowed(false);
     }
 
-    protected JTable getTable() {
-        return this.tblEditor;
+    protected CsvTable getTable() {
+        return (CsvTable) this.tblEditor;
     }
 
     protected JScrollPane getTableScrollPane() {
@@ -241,7 +273,7 @@ public class CsvTableEditorSwing extends CsvTableEditor {
     @NotNull
     @Override
     public JComponent getComponent() {
-        return this.panelMain;
+        return this.editorComponent;
     }
 
     @Nullable
