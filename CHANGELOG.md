@@ -10,6 +10,17 @@
 
 ### Fixed
 
+## 4.7.0 - Oct 26, 2026
+
+### Added
+
+- Added a FlatLaf-based table editor with padded cells, a flat header, and rounded scrollbars that follow the IDE's light or dark appearance
+- Added a setting to choose between the FlatLaf table editor (the default) and the existing Swing implementation
+
+### Changed
+
+- Improved automatic column sizing in the FlatLaf table editor to account for rendered cell padding and column headers
+
 ## 4.6.0 - Oct 18, 2026
 
 ### Fixed

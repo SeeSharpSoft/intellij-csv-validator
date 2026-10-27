@@ -187,6 +187,10 @@ If enabled, trailing whitespace is always preserved when editing CSV, TSV, and P
 
 #### Table Editor
 
+##### Table editor implementation
+
+**FlatLaf** is the default, providing a modern table with padded cells, a flat header, and rounded scrollbars. You can also choose **Swing**. Both editors support the same CSV editing actions and shortcuts. Close and reopen a file after changing this setting to use the selected implementation. FlatLaf follows the IDE's light or dark appearance without changing the IDE theme.
+
 ##### Default row height
 
 The default and initial height of each table row in pixels.

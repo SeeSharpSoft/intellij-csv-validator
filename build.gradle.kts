@@ -61,6 +61,7 @@ val platformVersion = environment("IDEA_VERSION", properties("platformVersion"))
 
 dependencies {
     implementation("net.seesharpsoft.sharping:sharping-commons:0.21.0")
+    implementation("com.formdev:flatlaf:3.7.2")
 
     intellijPlatform {
         create(platform, platformVersion)

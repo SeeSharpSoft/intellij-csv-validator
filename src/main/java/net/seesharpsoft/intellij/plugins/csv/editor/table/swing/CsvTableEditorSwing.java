@@ -21,7 +21,7 @@ import java.awt.*;
 
 public class CsvTableEditorSwing extends CsvTableEditor {
 
-    private static final int COLUMN_WIDTH_MAX_TEXT_SAMPLE_SIZE = 10;
+    protected static final int COLUMN_WIDTH_MAX_TEXT_SAMPLE_SIZE = 10;
     private static final int TOTAL_CELL_WIDTH_SPACING = 16;
 
     private JTable tblEditor;
@@ -59,9 +59,18 @@ public class CsvTableEditorSwing extends CsvTableEditor {
     }
 
     protected void createUIComponents() {
-        tblEditor = new CsvTable(new CsvTableModelSwing(this));
+        tblEditor = createTable(new CsvTableModelSwing(this));
         tblEditor.setRowSorter(null);
         lnkTextEditor = new LinkLabel<>("Open.file.in.text.editor", null);
+    }
+
+    protected CsvTable createTable(CsvTableModelSwing model) {
+        return new CsvTable(model);
+    }
+
+    protected CsvMultiLineCellRenderer createCellRenderer(boolean comment) {
+        return comment ? new CsvMultiLineCellRenderer.Comment(this.tableEditorKeyListener, this)
+                : new CsvMultiLineCellRenderer(this.tableEditorKeyListener, this);
     }
 
     private void initializedUIComponents() {
@@ -75,14 +84,14 @@ public class CsvTableEditorSwing extends CsvTableEditor {
         tblEditor.setForeground(editorColorsScheme.getDefaultForeground());
         tblEditor.getColumnModel().addColumnModelListener(tableEditorListener);
 
-        CsvMultiLineCellRenderer cellRenderer = new CsvMultiLineCellRenderer(this.tableEditorKeyListener, this);
-        CsvMultiLineCellRenderer cellEditor = new CsvMultiLineCellRenderer(this.tableEditorKeyListener, this);
+        CsvMultiLineCellRenderer cellRenderer = createCellRenderer(false);
+        CsvMultiLineCellRenderer cellEditor = createCellRenderer(false);
         tblEditor.setDefaultRenderer(String.class, cellRenderer);
         tblEditor.setDefaultRenderer(Object.class, cellRenderer);
-        tblEditor.setDefaultRenderer(CsvTable.CommentColumn.class, new CsvMultiLineCellRenderer.Comment(this.tableEditorKeyListener, this));
+        tblEditor.setDefaultRenderer(CsvTable.CommentColumn.class, createCellRenderer(true));
         tblEditor.setDefaultEditor(String.class, cellEditor);
         tblEditor.setDefaultEditor(Object.class, cellEditor);
-        tblEditor.setDefaultEditor(CsvTable.CommentColumn.class, new CsvMultiLineCellRenderer.Comment(this.tableEditorKeyListener, this));
+        tblEditor.setDefaultEditor(CsvTable.CommentColumn.class, createCellRenderer(true));
         tblEditor.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         tblEditor.setRowHeight(1);
 
@@ -146,7 +155,7 @@ public class CsvTableEditorSwing extends CsvTableEditor {
         storeCurrentTableLayout();
     }
 
-    private float getZoomFactor() {
+    protected float getZoomFactor() {
         float fontHeight = getFontHeight();
         return fontHeight / baseFontHeight;
     }
@@ -246,7 +255,7 @@ public class CsvTableEditorSwing extends CsvTableEditor {
         int[] widths = getCurrentColumnsWidths();
         float zoomFactor = getZoomFactor();
         for (int i = 0; i < widths.length; i++) {
-            widths[i] /= zoomFactor;
+            widths[i] = (int) (widths[i] / zoomFactor);
         }
         getTableEditorState().setColumnWidths(widths);
         getTableEditorState().setRowHeight(tblEditor.getRowHeight());
@@ -289,7 +298,7 @@ public class CsvTableEditorSwing extends CsvTableEditor {
 
     @Override
     protected int getStringWidth(String text) {
-        if (text == null || text.length() == 0) {
+        if (text == null || text.isEmpty()) {
             return 0;
         }
         JTable table = getTable();

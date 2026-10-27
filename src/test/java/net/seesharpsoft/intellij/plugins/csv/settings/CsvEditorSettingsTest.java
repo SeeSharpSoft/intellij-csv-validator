@@ -1,7 +1,10 @@
 package net.seesharpsoft.intellij.plugins.csv.settings;
 
+import com.intellij.util.xmlb.XmlSerializer;
 import net.seesharpsoft.intellij.plugins.csv.CsvBasePlatformTestCase;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
+
+import java.util.Objects;
 
 public class CsvEditorSettingsTest extends CsvBasePlatformTestCase {
 
@@ -29,5 +32,26 @@ public class CsvEditorSettingsTest extends CsvBasePlatformTestCase {
         for (CsvEditorSettings.ValueColoring coloring : CsvEditorSettings.ValueColoring.values()) {
             assertNotNull(coloring.getDisplay());
         }
+        for (CsvEditorSettings.TableEditorType type : CsvEditorSettings.TableEditorType.values()) {
+            assertNotNull(type.getDisplay());
+        }
+    }
+
+    public void testTableEditorTypePersists() {
+        CsvEditorSettings settings = new CsvEditorSettings();
+        assertEquals(CsvEditorSettings.TableEditorType.FLATLAF, settings.getTableEditorType());
+        settings.setTableEditorType(CsvEditorSettings.TableEditorType.SWING);
+
+        CsvEditorSettings restored = new CsvEditorSettings();
+        restored.loadState(XmlSerializer.deserialize(XmlSerializer.serialize(Objects.requireNonNull(settings.getState())), CsvEditorSettings.OptionSet.class));
+        assertEquals(CsvEditorSettings.TableEditorType.SWING, restored.getTableEditorType());
+    }
+
+    public void testNullTableEditorTypeFallsBackToFlatLaf() {
+        CsvEditorSettings settings = new CsvEditorSettings();
+        Objects.requireNonNull(settings.getState()).TABLE_EDITOR_TYPE = null;
+        assertEquals(CsvEditorSettings.TableEditorType.FLATLAF, settings.getTableEditorType());
+        settings.setTableEditorType(null);
+        assertEquals(CsvEditorSettings.TableEditorType.FLATLAF, settings.getState().TABLE_EDITOR_TYPE);
     }
 }

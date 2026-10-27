@@ -26,7 +26,7 @@ public abstract class CsvTableEditorSwingTestBase extends CsvBasePlatformTestCas
         initializeEditorSettings(CsvEditorSettings.getInstance());
         myFixture.configureByFiles(getTestFile());
 
-        fileEditor = new CsvTableEditorSwing(this.getProject(), myFixture.getFile().getVirtualFile());
+        fileEditor = createEditor();
         fileEditor.selectNotify();
 
         myInitialRowCount = getTableModel().getRowCount();
@@ -42,6 +42,10 @@ public abstract class CsvTableEditorSwingTestBase extends CsvBasePlatformTestCas
 
     protected CsvTableModel getTableModel() {
         return fileEditor.getTableModel();
+    }
+
+    protected CsvTableEditorSwing createEditor() {
+        return new CsvTableEditorSwing(getProject(), myFixture.getFile().getVirtualFile());
     }
 
     protected void initializeEditorSettings(CsvEditorSettings instance) {

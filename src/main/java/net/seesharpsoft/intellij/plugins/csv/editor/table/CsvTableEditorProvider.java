@@ -8,6 +8,7 @@ import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import net.seesharpsoft.intellij.plugins.csv.editor.CsvFileEditorProvider;
+import net.seesharpsoft.intellij.plugins.csv.editor.table.flatlaf.CsvTableEditorFlatLaf;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.swing.CsvTableEditorSwing;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import org.jdom.Element;
@@ -23,16 +24,13 @@ public class CsvTableEditorProvider implements AsyncFileEditorProvider, DumbAwar
     }
 
     @Override
-    public FileEditorPolicy getPolicy() {
-        switch (CsvEditorSettings.getInstance().getEditorPrio()) {
-            case TEXT_FIRST:
-            case TEXT_ONLY:
-                return FileEditorPolicy.PLACE_AFTER_DEFAULT_EDITOR;
-            case TABLE_FIRST:
-                return FileEditorPolicy.HIDE_DEFAULT_EDITOR;
-            default:
-                throw new IllegalArgumentException("unhandled EditorPrio: " + CsvEditorSettings.getInstance().getEditorPrio());
-        }
+    public @NotNull FileEditorPolicy getPolicy() {
+        return switch (CsvEditorSettings.getInstance().getEditorPrio()) {
+            case TEXT_FIRST, TEXT_ONLY -> FileEditorPolicy.PLACE_AFTER_DEFAULT_EDITOR;
+            case TABLE_FIRST -> FileEditorPolicy.HIDE_DEFAULT_EDITOR;
+            default ->
+                    throw new IllegalArgumentException("unhandled EditorPrio: " + CsvEditorSettings.getInstance().getEditorPrio());
+        };
     }
 
     @Override
@@ -66,7 +64,10 @@ public class CsvTableEditorProvider implements AsyncFileEditorProvider, DumbAwar
         return new Builder() {
             @Override
             public @NotNull FileEditor build() {
-                return new CsvTableEditorSwing(project, virtualFile);
+                return switch (CsvEditorSettings.getInstance().getTableEditorType()) {
+                    case SWING -> new CsvTableEditorSwing(project, virtualFile);
+                    case FLATLAF -> new CsvTableEditorFlatLaf(project, virtualFile);
+                };
             }
         };
     }

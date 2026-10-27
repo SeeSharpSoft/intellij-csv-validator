@@ -2,6 +2,7 @@ package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
 import com.intellij.ui.table.JBTable;
 import net.seesharpsoft.intellij.ui.EditableCellFocusAction;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import javax.swing.plaf.TableUI;
@@ -15,6 +16,8 @@ public class CsvTable extends JBTable {
 
     public static class CommentColumn {
     }
+
+    private int paintCounter;
 
     public CsvTable(TableModel model) {
         super(model);
@@ -30,13 +33,11 @@ public class CsvTable extends JBTable {
 
     @Override
     public void setUI(TableUI ui) {
-        TableUI newUI = ui instanceof MultiSpanCellTableUI ? ui : new MultiSpanCellTableUI();
-        super.setUI(newUI);
+        super.setUI(createTableUI());
     }
 
-    @Override
-    public MultiSpanCellTableUI getUI() {
-        return (MultiSpanCellTableUI) super.getUI();
+    protected TableUI createTableUI() {
+        return new MultiSpanCellTableUI();
     }
 
     @Override
@@ -55,7 +56,7 @@ public class CsvTable extends JBTable {
     }
 
     @Override
-    public Rectangle getCellRect(int row, int column, boolean includeSpacing) {
+    public @NotNull Rectangle getCellRect(int row, int column, boolean includeSpacing) {
         Rectangle rect = super.getCellRect(row, column, includeSpacing);
         if (getColumnCount() > 0 && isCommentRow(row)) {
             if (convertColumnIndexToModel(column) == 0) {
@@ -69,8 +70,8 @@ public class CsvTable extends JBTable {
 
     // TODO this enables proper selection/handling of comment row, but leads to bad drawing issues - don't know why
     @Override
-    public int columnAtPoint(Point point) {
-        if (getUI().isPainting()) {
+    public int columnAtPoint(@NotNull Point point) {
+        if (paintCounter != 0) {
             // the original paint algorithm doesn't handle cell span well
             return super.columnAtPoint(point);
         }
@@ -106,95 +107,71 @@ public class CsvTable extends JBTable {
 
     public class MultiSpanCellTableUI extends BasicTableUI {
 
-        int paintCounter = 0;
-
-        public boolean isPainting() {
-            return paintCounter != 0;
-        }
-
+        @Override
         public void paint(Graphics g, JComponent c) {
-            paintCounter++;
-
-            try {
-                super.paint(g, c);
-
-                Rectangle clip = g.getClipBounds();
-
-                Rectangle bounds = table.getBounds();
-                // account for the fact that the graphics has already been translated
-                // into the table's bounds
-                bounds.x = bounds.y = 0;
-
-                if (table.getRowCount() <= 0 || table.getColumnCount() <= 0 ||
-                        // this check prevents us from painting the entire table
-                        // when the clip doesn't intersect our bounds at all
-                        !bounds.intersects(clip)) {
-                    return;
-                }
-
-                // compute the visible part of table which needs to be painted
-                Rectangle visibleBounds = clip.intersection(bounds);
-                Point upperLeft = visibleBounds.getLocation();
-                Point lowerRight = new Point(visibleBounds.x + visibleBounds.width - 1,
-                        visibleBounds.y + visibleBounds.height - 1);
-
-                int rMin = table.rowAtPoint(upperLeft);
-                int rMax = table.rowAtPoint(lowerRight);
-                // This should never happen (as long as our bounds intersect the clip,
-                // which is why we bail above if that is the case).
-                if (rMin == -1) {
-                    rMin = 0;
-                }
-                // If the table does not have enough rows to fill the view we'll get -1.
-                // (We could also get -1 if our bounds don't intersect the clip,
-                // which is why we bail above if that is the case).
-                // Replace this with the index of the last row.
-                if (rMax == -1) {
-                    rMax = table.getRowCount() - 1;
-                }
-
-                for (int row = rMin; row <= rMax; row++) {
-                    if (isCommentRow(row)) {
-                        paintCommentRow(g, row);
-                    }
-                }
-            } finally {
-                paintCounter--;
-            }
+            paintTable(g, rendererPane, () -> super.paint(g, c));
         }
+    }
 
-        private void paintCommentRow(Graphics g, int row) {
-            Rectangle cellRect = table.getCellRect(row, 0, true);
-            cellRect.width = table.getWidth();
-            paintCell(g, cellRect, row, 0);
-        }
-
-        private void paintCell(Graphics g, Rectangle cellRect, int row, int column) {
-            int spacingHeight = table.getRowMargin();
-            int spacingWidth = table.getColumnModel().getColumnMargin();
-
-            Color c = g.getColor();
-            g.setColor(table.getGridColor());
-            g.drawRect(cellRect.x, cellRect.y, cellRect.width - 1, cellRect.height - 1);
-            g.setColor(c);
-
-            cellRect.setBounds(cellRect.x + spacingWidth / 2, cellRect.y + spacingHeight / 2,
-                    cellRect.width - spacingWidth, cellRect.height - spacingHeight);
-
-            if (table.isEditing() && table.getEditingRow() == row &&
-                    table.getEditingColumn() == column) {
-                Component component = table.getEditorComponent();
-                component.setBounds(cellRect);
-                // Avoid triggering validation/layout during painting to prevent EDT freezes
-            } else {
-                TableCellRenderer renderer = table.getCellRenderer(row, column);
-                Component component = table.prepareRenderer(renderer, row, column);
-                if (component.getParent() == null) {
-                    rendererPane.add(component);
-                }
-                rendererPane.paintComponent(g, component, table, cellRect.x, cellRect.y,
-                        cellRect.width, cellRect.height, true);
+    // Both UI delegates need the same spanning behavior for comment rows.
+    protected void paintTable(Graphics g, CellRendererPane rendererPane, Runnable paintCells) {
+        paintCounter++;
+        try {
+            paintCells.run();
+            Rectangle bounds = new Rectangle(0, 0, getWidth(), getHeight());
+            Rectangle clip = g.getClipBounds();
+            if (getRowCount() <= 0 || getColumnCount() <= 0 || (clip != null && !bounds.intersects(clip))) {
+                return;
             }
+
+            Rectangle visibleBounds = clip == null ? bounds : clip.intersection(bounds);
+            int firstRow = rowAtPoint(visibleBounds.getLocation());
+            int lastRow = rowAtPoint(new Point(visibleBounds.x + visibleBounds.width - 1,
+                    visibleBounds.y + visibleBounds.height - 1));
+            if (firstRow == -1) firstRow = 0;
+            if (lastRow == -1) lastRow = getRowCount() - 1;
+
+            for (int row = firstRow; row <= lastRow; row++) {
+                if (isCommentRow(row)) {
+                    paintCommentRow(g, rendererPane, row);
+                }
+            }
+        } finally {
+            paintCounter--;
+        }
+    }
+
+    private void paintCommentRow(Graphics g, CellRendererPane rendererPane, int row) {
+        Rectangle cellRect = getCellRect(row, 0, true);
+        cellRect.width = getWidth();
+        int spacingHeight = getRowMargin();
+        int spacingWidth = getColumnModel().getColumnMargin();
+
+        Color color = g.getColor();
+        g.setColor(getGridColor());
+        if (getShowHorizontalLines()) {
+            g.drawLine(cellRect.x, cellRect.y, cellRect.x + cellRect.width - 1, cellRect.y);
+            g.drawLine(cellRect.x, cellRect.y + cellRect.height - 1,
+                    cellRect.x + cellRect.width - 1, cellRect.y + cellRect.height - 1);
+        }
+        if (getShowVerticalLines()) {
+            g.drawLine(cellRect.x, cellRect.y, cellRect.x, cellRect.y + cellRect.height - 1);
+            g.drawLine(cellRect.x + cellRect.width - 1, cellRect.y,
+                    cellRect.x + cellRect.width - 1, cellRect.y + cellRect.height - 1);
+        }
+        g.setColor(color);
+        cellRect.setBounds(cellRect.x + spacingWidth / 2, cellRect.y + spacingHeight / 2,
+                cellRect.width - spacingWidth, cellRect.height - spacingHeight);
+
+        if (isEditing() && getEditingRow() == row && getEditingColumn() == 0) {
+            getEditorComponent().setBounds(cellRect);
+        } else {
+            Component component = prepareRenderer(getCellRenderer(row, 0), row, 0);
+            if (component.getParent() == null) {
+                rendererPane.add(component);
+            }
+            rendererPane.paintComponent(g, component, this, cellRect.x, cellRect.y,
+                    cellRect.width, cellRect.height, true);
         }
     }
 

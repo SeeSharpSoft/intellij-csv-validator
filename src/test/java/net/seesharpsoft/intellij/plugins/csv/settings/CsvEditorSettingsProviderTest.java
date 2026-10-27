@@ -62,7 +62,7 @@ public class CsvEditorSettingsProviderTest extends CsvBasePlatformTestCase {
         }
     }
 
-    public void testResetAndModified() throws ConfigurationException {
+    public void testResetAndModified() {
         CsvEditorSettingsProvider editorSettingsPanel = new CsvEditorSettingsProvider();
         try {
             CsvEditorSettings csvEditorSettings = CsvEditorSettings.getInstance();
@@ -82,24 +82,24 @@ public class CsvEditorSettingsProviderTest extends CsvBasePlatformTestCase {
             csvEditorSettings.setCommentIndicator("//");
             csvEditorSettings.setValueColoring(CsvEditorSettings.ValueColoring.SIMPLE);
 
-            assertEquals(true, editorSettingsPanel.isModified());
+            assertTrue(editorSettingsPanel.isModified());
 
             editorSettingsPanel.reset();
 
-            assertEquals(false, editorSettingsPanel.isModified());
+            assertFalse(editorSettingsPanel.isModified());
 
-            assertEquals(false, csvEditorSettings.isCaretRowShown());
-            assertEquals(true, csvEditorSettings.isUseSoftWraps());
-            assertEquals(false, csvEditorSettings.isHighlightTabSeparator());
-            assertEquals(false, csvEditorSettings.isShowInfoBalloon());
+            assertFalse(csvEditorSettings.isCaretRowShown());
+            assertTrue(csvEditorSettings.isUseSoftWraps());
+            assertFalse(csvEditorSettings.isHighlightTabSeparator());
+            assertFalse(csvEditorSettings.isShowInfoBalloon());
             assertEquals(Color.BLACK, csvEditorSettings.getTabHighlightColor());
-            assertEquals(true, csvEditorSettings.isQuotingEnforced());
-            assertEquals(true, csvEditorSettings.isZeroBasedColumnNumbering());
+            assertTrue(csvEditorSettings.isQuotingEnforced());
+            assertTrue(csvEditorSettings.isZeroBasedColumnNumbering());
             assertEquals(500, csvEditorSettings.getTableDefaultColumnWidth());
             assertEquals(1000, csvEditorSettings.getTableAutoMaxColumnWidth());
             assertEquals(CsvEscapeCharacter.BACKSLASH, csvEditorSettings.getDefaultEscapeCharacter());
             assertEquals(CsvValueSeparator.PIPE, csvEditorSettings.getDefaultValueSeparator());
-            assertEquals(true, csvEditorSettings.getKeepTrailingSpaces());
+            assertTrue(csvEditorSettings.getKeepTrailingSpaces());
             assertEquals("//", csvEditorSettings.getCommentIndicator());
             assertEquals(CsvEditorSettings.ValueColoring.SIMPLE, csvEditorSettings.getValueColoring());
         } finally {
@@ -114,15 +114,15 @@ public class CsvEditorSettingsProviderTest extends CsvBasePlatformTestCase {
             csvEditorSettings.loadState(new CsvEditorSettings.OptionSet());
             editorSettingsPanel.reset();
 
-            assertEquals(false, editorSettingsPanel.isModified());
+            assertFalse(editorSettingsPanel.isModified());
 
             // 1. Change settings and verify isModified() becomes true
             csvEditorSettings.setCaretRowShown(!csvEditorSettings.isCaretRowShown());
-            assertEquals(true, editorSettingsPanel.isModified());
+            assertTrue(editorSettingsPanel.isModified());
 
             // 2. Reset and verify isModified() becomes false and settings are back to UI state
             csvEditorSettings.setCaretRowShown(!csvEditorSettings.isCaretRowShown());
-            assertEquals(false, editorSettingsPanel.isModified());
+            assertFalse(editorSettingsPanel.isModified());
             
             // Re-initialize for a clean start
             csvEditorSettings.loadState(new CsvEditorSettings.OptionSet());
@@ -132,16 +132,34 @@ public class CsvEditorSettingsProviderTest extends CsvBasePlatformTestCase {
             boolean originalValue = csvEditorSettings.isCaretRowShown();
             csvEditorSettings.setCaretRowShown(!originalValue);
             
-            assertEquals(true, editorSettingsPanel.isModified());
+            assertTrue(editorSettingsPanel.isModified());
             
             // apply() should write the UI state (originalValue) back to csvEditorSettings
             editorSettingsPanel.apply();
             
-            assertEquals(false, editorSettingsPanel.isModified());
+            assertFalse(editorSettingsPanel.isModified());
             assertEquals(originalValue, csvEditorSettings.isCaretRowShown());
 
         } finally {
             editorSettingsPanel.disposeUIResources();
+        }
+    }
+
+    public void testTableEditorTypeResetAndApply() throws ConfigurationException {
+        CsvEditorSettingsProvider provider = new CsvEditorSettingsProvider();
+        try {
+            CsvEditorSettings settings = CsvEditorSettings.getInstance();
+            settings.setTableEditorType(CsvEditorSettings.TableEditorType.FLATLAF);
+            provider.reset();
+            assertFalse(provider.isModified());
+
+            settings.setTableEditorType(CsvEditorSettings.TableEditorType.SWING);
+            assertTrue(provider.isModified());
+            provider.apply();
+            assertEquals(CsvEditorSettings.TableEditorType.FLATLAF, settings.getTableEditorType());
+            assertFalse(provider.isModified());
+        } finally {
+            provider.disposeUIResources();
         }
     }
 
