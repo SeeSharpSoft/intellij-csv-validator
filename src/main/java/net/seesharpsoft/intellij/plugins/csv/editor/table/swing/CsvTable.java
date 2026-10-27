@@ -1,6 +1,8 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
+import com.intellij.ui.JBColor;
 import com.intellij.ui.table.JBTable;
+import com.intellij.util.ui.JBUI;
 import net.seesharpsoft.intellij.ui.EditableCellFocusAction;
 import org.jetbrains.annotations.NotNull;
 
@@ -9,10 +11,14 @@ import javax.swing.plaf.TableUI;
 import javax.swing.plaf.basic.BasicTableUI;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.table.JTableHeader;
 import javax.swing.table.TableModel;
 import java.awt.*;
+import java.util.function.Consumer;
 
 public class CsvTable extends JBTable {
+
+    private static final Color FROZEN_COLUMN_SEPARATOR_COLOR = new JBColor(0x8C9199, 0x737882);
 
     public static class CommentColumn {
     }
@@ -21,6 +27,7 @@ public class CsvTable extends JBTable {
     private TableCellRenderer searchMatchRenderer;
     private int searchMatchRow;
     private int searchMatchColumn;
+    private int frozenColumnCount;
 
     public CsvTable(TableModel model) {
         super(model);
@@ -41,6 +48,110 @@ public class CsvTable extends JBTable {
 
     protected TableUI createTableUI() {
         return new MultiSpanCellTableUI();
+    }
+
+    @Override
+    protected @NotNull JTableHeader createDefaultTableHeader() {
+        return new CsvTableHeader(columnModel);
+    }
+
+    public int getFrozenColumnCount() {
+        return Math.min(frozenColumnCount, getColumnCount());
+    }
+
+    public void setFrozenColumnCount(int count) {
+        if (count < 0) {
+            throw new IllegalArgumentException("Frozen column count must not be negative");
+        }
+        frozenColumnCount = count;
+        int scrollMode = count > 0 ? JViewport.SIMPLE_SCROLL_MODE : JViewport.BLIT_SCROLL_MODE;
+        if (getParent() instanceof JViewport viewport) {
+            viewport.setScrollMode(scrollMode);
+        }
+        if (getTableHeader().getParent() instanceof JViewport viewport) {
+            viewport.setScrollMode(scrollMode);
+        }
+        updateFrozenColumnLayout();
+    }
+
+    int getFrozenColumnOffset() {
+        return getFrozenColumnCount() == 0 ? 0 : getVisibleRect().x;
+    }
+
+    int getFrozenColumnWidth() {
+        int width = 0;
+        for (int column = 0; column < getFrozenColumnCount(); column++) {
+            width += getColumnModel().getColumn(column).getWidth();
+        }
+        return width;
+    }
+
+    void paintFrozenColumnSeparator(Graphics g, int height) {
+        if (getFrozenColumnCount() == 0) return;
+        int width = JBUI.scale(2);
+        int boundary = getFrozenColumnOffset() + getFrozenColumnWidth();
+        Color color = g.getColor();
+        g.setColor(FROZEN_COLUMN_SEPARATOR_COLOR);
+        g.fillRect(boundary - width, 0, width, height);
+        g.setColor(color);
+    }
+
+    @Override
+    public void paint(Graphics g) {
+        super.paint(g);
+        // Paint above spanning comment rows and cell editors as well as ordinary cells.
+        paintFrozenColumnSeparator(g, getHeight());
+    }
+
+    void updateFrozenColumnLayout() {
+        positionCellEditor();
+        repaint();
+        getTableHeader().repaint();
+    }
+
+    private void positionCellEditor() {
+        if (isEditing()) {
+            Rectangle rect = getCellRect(getEditingRow(), getEditingColumn(), false);
+            if (isCommentRow(getEditingRow())) {
+                rect.width -= getColumnModel().getColumnMargin();
+            }
+            getEditorComponent().setBounds(rect);
+        }
+    }
+
+    @Override
+    public void changeSelection(int row, int column, boolean toggle, boolean extend) {
+        if (getFrozenColumnCount() == 0) {
+            super.changeSelection(row, column, toggle, extend);
+            return;
+        }
+        boolean autoscrolls = getAutoscrolls();
+        setAutoscrolls(false);
+        try {
+            super.changeSelection(row, column, toggle, extend);
+        } finally {
+            setAutoscrolls(autoscrolls);
+        }
+        if (autoscrolls) scrollCellToVisible(row, column);
+    }
+
+    public void scrollCellToVisible(int row, int column) {
+        Rectangle rect = getCellRect(row, column, true);
+        if (getFrozenColumnCount() > 0) {
+            Rectangle visible = getVisibleRect();
+            int x = visible.x;
+            if (column >= getFrozenColumnCount() && !isCommentRow(row)) {
+                int frozenWidth = getFrozenColumnWidth();
+                if (rect.x < visible.x + frozenWidth || rect.width > visible.width - frozenWidth) {
+                    x = Math.max(0, rect.x - frozenWidth);
+                } else if (rect.x + rect.width > visible.x + visible.width) {
+                    x = rect.x + rect.width - visible.width;
+                }
+            }
+            rect.x = x;
+            rect.width = visible.width;
+        }
+        super.scrollRectToVisible(rect);
     }
 
     @Override
@@ -68,6 +179,9 @@ public class CsvTable extends JBTable {
                 return new Rectangle();
             }
         }
+        if (paintCounter == 0 && column >= 0 && column < getFrozenColumnCount()) {
+            rect.x += getFrozenColumnOffset();
+        }
         return rect;
     }
 
@@ -79,7 +193,13 @@ public class CsvTable extends JBTable {
             return super.columnAtPoint(point);
         }
         int rowAtPoint = super.rowAtPoint(point);
-        return isCommentRow(rowAtPoint) ? 0 : super.columnAtPoint(point);
+        if (isCommentRow(rowAtPoint)) return 0;
+        Point location = new Point(point);
+        int offset = getFrozenColumnOffset();
+        if (location.x >= offset && location.x < offset + getFrozenColumnWidth()) {
+            location.x -= offset;
+        }
+        return super.columnAtPoint(location);
     }
 
     @Override
@@ -129,15 +249,28 @@ public class CsvTable extends JBTable {
 
         @Override
         public void paint(Graphics g, JComponent c) {
-            paintTable(g, rendererPane, () -> super.paint(g, c));
+            paintTable(g, rendererPane, graphics -> super.paint(graphics, c));
         }
     }
 
     // Both UI delegates need the same spanning behavior for comment rows.
-    protected void paintTable(Graphics g, CellRendererPane rendererPane, Runnable paintCells) {
+    protected void paintTable(Graphics g, CellRendererPane rendererPane, Consumer<Graphics> paintCells) {
         paintCounter++;
         try {
-            paintCells.run();
+            paintCells.accept(g);
+            if (getFrozenColumnCount() > 0) {
+                // Keep one selection and column model; only the leading columns' painted position changes.
+                Graphics frozen = g.create();
+                try {
+                    frozen.translate(getFrozenColumnOffset(), 0);
+                    frozen.clipRect(0, 0, getFrozenColumnWidth(), getHeight());
+                    frozen.setColor(getBackground());
+                    frozen.fillRect(0, 0, getFrozenColumnWidth(), getHeight());
+                    paintCells.accept(frozen);
+                } finally {
+                    frozen.dispose();
+                }
+            }
             Rectangle bounds = new Rectangle(0, 0, getWidth(), getHeight());
             Rectangle clip = g.getClipBounds();
             if (getRowCount() <= 0 || getColumnCount() <= 0 || (clip != null && !bounds.intersects(clip))) {
@@ -158,11 +291,34 @@ public class CsvTable extends JBTable {
             }
         } finally {
             paintCounter--;
+            positionCellEditor();
+        }
+    }
+
+    @Override
+    protected void paintChildren(Graphics g) {
+        if (isEditing() && getFrozenColumnCount() > 0 && !isCommentRow(getEditingRow())) {
+            Graphics clipped = g.create();
+            try {
+                Rectangle visible = getVisibleRect();
+                int frozenWidth = Math.min(getFrozenColumnWidth(), visible.width);
+                if (getEditingColumn() < getFrozenColumnCount()) {
+                    clipped.clipRect(visible.x, visible.y, frozenWidth, visible.height);
+                } else {
+                    clipped.clipRect(visible.x + frozenWidth, visible.y, visible.width - frozenWidth, visible.height);
+                }
+                super.paintChildren(clipped);
+            } finally {
+                clipped.dispose();
+            }
+        } else {
+            super.paintChildren(g);
         }
     }
 
     private void paintCommentRow(Graphics g, CellRendererPane rendererPane, int row) {
         Rectangle cellRect = getCellRect(row, 0, true);
+        cellRect.x = getFrozenColumnOffset();
         cellRect.width = getWidth();
         int spacingHeight = getRowMargin();
         int spacingWidth = getColumnModel().getColumnMargin();

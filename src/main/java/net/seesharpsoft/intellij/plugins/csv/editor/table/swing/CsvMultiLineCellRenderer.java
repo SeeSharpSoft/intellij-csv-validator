@@ -50,6 +50,16 @@ public class CsvMultiLineCellRenderer extends JBScrollPane implements TableCellR
         return CsvTextAttributeKeys.getTextAttributesOfColumn(column, myUserDataHolder);
     }
 
+    @Override
+    public boolean contains(int x, int y) {
+        if (getParent() instanceof CsvTable table && table.getFrozenColumnCount() > 0 &&
+                table.getEditingColumn() >= table.getFrozenColumnCount() && !table.isCommentRow(table.getEditingRow()) &&
+                getX() + x < table.getVisibleRect().x + table.getFrozenColumnWidth()) {
+            return false;
+        }
+        return super.contains(x, y);
+    }
+
     private Color getColumnForegroundColor(int column, Color fallback) {
         TextAttributes textAttributes = getColumnTextAttributes(column);
         return textAttributes == null || textAttributes.getForegroundColor() == null ? fallback : textAttributes.getForegroundColor();

@@ -15,6 +15,7 @@ public class CsvTableEditorState implements FileEditorState {
 
     private int[] columnWidths;
     private Integer rowHeight;
+    private int frozenColumnCount;
 
     public CsvTableEditorState() {
         columnWidths = new int[0];
@@ -39,6 +40,17 @@ public class CsvTableEditorState implements FileEditorState {
         rowHeight = rowHeightArg;
     }
 
+    public int getFrozenColumnCount() {
+        return frozenColumnCount;
+    }
+
+    public void setFrozenColumnCount(int count) {
+        if (count < 0) {
+            throw new IllegalArgumentException("Frozen column count must not be negative");
+        }
+        frozenColumnCount = count;
+    }
+
     @Override
     public boolean canBeMergedWith(FileEditorState fileEditorState, FileEditorStateLevel fileEditorStateLevel) {
         return false;
@@ -46,6 +58,7 @@ public class CsvTableEditorState implements FileEditorState {
 
     public void write(@NotNull Project project, @NotNull Element element) {
         element.setAttribute("rowHeight", "" + getRowHeight());
+        element.setAttribute("frozenColumnCount", "" + getFrozenColumnCount());
         for (int i = 0; i < columnWidths.length; ++i) {
             Element cwElement = new Element("column");
 
@@ -62,6 +75,7 @@ public class CsvTableEditorState implements FileEditorState {
         state.setRowHeight(
                 StringUtilRt.parseInt(element.getAttributeValue("rowHeight"), CsvEditorSettings.getInstance().getTableEditorRowHeight())
         );
+        state.setFrozenColumnCount(Math.max(0, StringUtilRt.parseInt(element.getAttributeValue("frozenColumnCount"), 0)));
 
         List<Element> columnWidthElements = element.getChildren("column");
         int[] columnWidths = new int[columnWidthElements.size()];

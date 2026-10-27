@@ -9,6 +9,7 @@ import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.swing.CsvTable;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.swing.CsvTableModelSwing;
+import net.seesharpsoft.intellij.plugins.csv.editor.table.swing.CsvTableHeader;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -30,7 +31,7 @@ final class CsvFlatTable extends CsvTable {
 
     @Override
     protected @NotNull JTableHeader createDefaultTableHeader() {
-        return new JTableHeader(columnModel) {
+        return new CsvTableHeader(columnModel) {
             @Override
             public void updateUI() {
                 setUI(new FlatTableHeaderUI());
@@ -79,7 +80,7 @@ final class CsvFlatTable extends CsvTable {
 
         @Override
         public void paint(Graphics g, JComponent c) {
-            paintTable(g, rendererPane, () -> super.paint(g, c));
+            paintTable(g, rendererPane, graphics -> super.paint(graphics, c));
         }
     }
 }

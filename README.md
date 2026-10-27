@@ -88,6 +88,12 @@ A right-click within the table opens a context menu for adding or removing rows.
 
 The actions in these menus apply to the currently selected rows or columns, which may differ from the cell or header where the context menu appears. A right-click does not change the selection by default.
 
+#### Frozen columns
+
+Select a column header, then right-click the header and choose **Freeze Columns Through Selection** to keep that column and all columns to its left visible while scrolling horizontally. If multiple columns are selected, the rightmost selected column determines the frozen area. Choose **Unfreeze Columns** in the same menu to restore normal scrolling.
+
+A distinct divider after the last frozen column marks the frozen area in both the header and table. Frozen columns remain editable and support the same selection, resizing, and Find/Replace controls as other columns. The frozen-column count is saved for each file and works in both table-editor implementations.
+
 #### Key bindings
 
 The table editor provides the following keyboard shortcuts for navigation and editing:

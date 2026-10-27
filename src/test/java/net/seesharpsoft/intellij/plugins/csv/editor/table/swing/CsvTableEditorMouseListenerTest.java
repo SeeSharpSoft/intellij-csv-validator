@@ -113,7 +113,6 @@ public class CsvTableEditorMouseListenerTest extends CsvTableEditorSwingTestBase
 
         assertEquals(-1, spiedTable.getSelectedColumn());
 
-        Mockito.doReturn(0).when(spiedTable).columnAtPoint(Mockito.any());
         spiedMouseListener.mousePressed(mouseEvent);
 
         assertEquals(0, spiedTable.getSelectionModel().getMinSelectionIndex());
@@ -121,7 +120,8 @@ public class CsvTableEditorMouseListenerTest extends CsvTableEditorSwingTestBase
         assertEquals(0, spiedTable.getColumnModel().getSelectionModel().getMinSelectionIndex());
         assertEquals(0, spiedTable.getColumnModel().getSelectionModel().getMaxSelectionIndex());
 
-        Mockito.doReturn(1).when(spiedTable).columnAtPoint(Mockito.any());
+        mouseEvent = new MouseEvent(fileEditor.getTable().getTableHeader(), MouseEvent.MOUSE_PRESSED, JComponent.WHEN_FOCUSED,
+                InputEvent.BUTTON1_MASK, spiedTable.getTableHeader().getHeaderRect(1).x + 1, 0, 1, true);
         spiedMouseListener.mousePressed(mouseEvent);
 
         assertEquals(0, spiedTable.getSelectionModel().getMinSelectionIndex());
@@ -145,7 +145,6 @@ public class CsvTableEditorMouseListenerTest extends CsvTableEditorSwingTestBase
 
         assertEquals(-1, spiedTable.getSelectedColumn());
 
-        Mockito.doReturn(0).when(spiedTable).columnAtPoint(Mockito.any());
         spiedMouseListener.mousePressed(mouseEvent);
 
         assertEquals(0, spiedTable.getSelectionModel().getMinSelectionIndex());
@@ -153,7 +152,8 @@ public class CsvTableEditorMouseListenerTest extends CsvTableEditorSwingTestBase
         assertEquals(0, spiedTable.getColumnModel().getSelectionModel().getMinSelectionIndex());
         assertEquals(0, spiedTable.getColumnModel().getSelectionModel().getMaxSelectionIndex());
 
-        Mockito.doReturn(1).when(spiedTable).columnAtPoint(Mockito.any());
+        mouseEvent = new MouseEvent(fileEditor.getTable().getTableHeader(), MouseEvent.MOUSE_PRESSED, JComponent.WHEN_FOCUSED,
+                InputEvent.BUTTON1_MASK | InputEvent.SHIFT_MASK, spiedTable.getTableHeader().getHeaderRect(1).x + 1, 0, 1, true);
         spiedMouseListener.mousePressed(mouseEvent);
 
         assertEquals(0, spiedTable.getSelectionModel().getMinSelectionIndex());

@@ -161,6 +161,14 @@
         >
             <separator />
         </group>
+        <action class="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$FreezeColumns"
+                id="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$FreezeColumns">
+            <add-to-group group-id="CsvTableEditorColumnContextMenu" />
+        </action>
+        <action class="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$UnfreezeColumns"
+                id="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$UnfreezeColumns">
+            <add-to-group group-id="CsvTableEditorColumnContextMenu" relative-to-action="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$FreezeColumns" anchor="after" />
+        </action>
         <action class="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AddColumnBefore"
                 id="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AddColumnBefore"
                 icon="/media/icons/add-column-before.png"

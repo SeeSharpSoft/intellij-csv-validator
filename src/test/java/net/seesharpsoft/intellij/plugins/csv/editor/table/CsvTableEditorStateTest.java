@@ -24,6 +24,7 @@ public class CsvTableEditorStateTest extends CsvBasePlatformTestCase {
 
         originalTableEditorState.setColumnWidths(new int[]{100, 50, 200, 42});
         originalTableEditorState.setRowHeight(42);
+        originalTableEditorState.setFrozenColumnCount(2);
 
         originalTableEditorState.write(getProject(), domElement);
 
@@ -31,5 +32,19 @@ public class CsvTableEditorStateTest extends CsvBasePlatformTestCase {
 
         assertOrderedEquals(deserializeEditorState.getColumnWidths(), originalTableEditorState.getColumnWidths());
         assertEquals(originalTableEditorState.getRowHeight(), deserializeEditorState.getRowHeight());
+        assertEquals(2, deserializeEditorState.getFrozenColumnCount());
+    }
+
+    public void testOldStateDoesNotFreezeColumns() {
+        CsvTableEditorState state = CsvTableEditorState.create(new Element("state"), getProject(), myFixture.getFile().getVirtualFile());
+        assertEquals(0, state.getFrozenColumnCount());
+    }
+
+    public void testInvalidStoredFrozenColumnCountDoesNotFreezeColumns() {
+        for (String value : new String[]{"-1", "invalid"}) {
+            Element element = new Element("state").setAttribute("frozenColumnCount", value);
+            assertEquals(0, CsvTableEditorState.create(element, getProject(), myFixture.getFile().getVirtualFile()).getFrozenColumnCount());
+        }
+        assertThrows(IllegalArgumentException.class, () -> new CsvTableEditorState().setFrozenColumnCount(-1));
     }
 }

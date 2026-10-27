@@ -310,6 +310,32 @@ public class CsvTableSearchTest extends CsvTableEditorSwingTestBase {
         }
     }
 
+    public void testSearchNavigatesAndReplacesAcrossFrozenBoundary() {
+        configure("id,name,city,age,role,team\n1,Alice,Berlin,30,Developer,Platform\n");
+        fileEditor.getTableEditorState().setColumnWidths(new int[]{100, 100, 100, 100, 100, 100});
+        fileEditor.updateEditorLayout();
+        JPanel root = new JPanel(new BorderLayout());
+        root.add(fileEditor.getComponent());
+        root.setSize(460, 220);
+        layoutRecursively(root);
+        fileEditor.setFrozenColumnCount(2);
+        JViewport viewport = fileEditor.getTableScrollPane().getViewport();
+        viewport.setViewPosition(new Point(230, 0));
+        query("Alice");
+        assertCell(1, 1);
+        assertEquals(230, viewport.getViewPosition().x);
+        replacement("Bob");
+        replaceCurrent();
+        assertEquals("Bob", fileEditor.getTableModel().getValue(1, 1));
+        query("Berlin");
+        assertCell(1, 2);
+        assertEquals(0, viewport.getViewPosition().x);
+        replacement("Paris");
+        replaceCurrent();
+        assertEquals("Paris", fileEditor.getTableModel().getValue(1, 2));
+        assertEquals(2, fileEditor.getFrozenColumnCount());
+    }
+
     public void testFindAndReplaceUseIdeShortcuts() {
         for (String actionId : new String[]{IdeActions.ACTION_FIND, IdeActions.ACTION_REPLACE}) {
             AnAction action = ActionUtil.getActions(fileEditor.getComponent()).stream()

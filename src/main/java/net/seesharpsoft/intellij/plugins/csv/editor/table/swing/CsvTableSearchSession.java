@@ -74,7 +74,7 @@ final class CsvTableSearchSession extends CsvTableSearchSessionBase<CsvTableEdit
         JTable table = editor.getTable();
         if (table.isEditing()) return;
         table.changeSelection(match.row(), match.column(), false, false);
-        table.scrollRectToVisible(table.getCellRect(match.row(), match.column(), true));
+        editor.getTable().scrollCellToVisible(match.row(), match.column());
         boolean comment = editor.getTable().isCommentRow(match.row());
         MatchCellRenderer renderer;
         if (comment) {

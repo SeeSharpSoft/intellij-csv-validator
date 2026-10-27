@@ -130,6 +130,10 @@ public class CsvTableEditorSwing extends CsvTableEditor {
         baseFontHeight = getFontHeight();
 
         rowHeadersTable = CsvTableRowUtilities.addNumberColumn(this, tblEditor, 1);
+        tblEditor.getTableHeader().addMouseListener(tableEditorMouseListener);
+        tableScrollPane.getViewport().addChangeListener(event -> {
+            if (getFrozenColumnCount() > 0) getTable().updateFrozenColumnLayout();
+        });
 
         applyEditorState(getTableEditorState());
     }
@@ -139,7 +143,6 @@ public class CsvTableEditorSwing extends CsvTableEditor {
             listenerApplied = true;
             tblEditor.getModel().addTableModelListener(tableEditorListener);
             tblEditor.addMouseListener(this.tableEditorMouseListener);
-            tblEditor.getTableHeader().addMouseListener(this.tableEditorMouseListener);
             tblEditor.addKeyListener(this.tableEditorKeyListener);
             tblEditor.addMouseWheelListener(tableEditorMouseWheelListener);
         }
@@ -149,7 +152,6 @@ public class CsvTableEditorSwing extends CsvTableEditor {
         if (listenerApplied) {
             tblEditor.getModel().removeTableModelListener(tableEditorListener);
             tblEditor.removeMouseListener(this.tableEditorMouseListener);
-            tblEditor.getTableHeader().removeMouseListener(this.tableEditorMouseListener);
             tblEditor.removeKeyListener(this.tableEditorKeyListener);
             tblEditor.removeMouseWheelListener(tableEditorMouseWheelListener);
             listenerApplied = false;
@@ -162,6 +164,7 @@ public class CsvTableEditorSwing extends CsvTableEditor {
         if (rowHeadersTable != null) {
             rowHeadersTable.setRowHeight(tblEditor.getRowHeight());
         }
+        getTable().setFrozenColumnCount(editorState.getFrozenColumnCount());
     }
 
     @Override
@@ -183,7 +186,26 @@ public class CsvTableEditorSwing extends CsvTableEditor {
             column.setWidth(Math.round(columnWidths[i] * zoomFactor));
         }
 
+        setFrozenColumnCount(Math.min(getTableEditorState().getFrozenColumnCount(), currentColumnCount));
         storeCurrentTableLayout();
+    }
+
+    public int getFrozenColumnCount() {
+        return getTable().getFrozenColumnCount();
+    }
+
+    public void setFrozenColumnCount(int count) {
+        getTable().setFrozenColumnCount(count);
+        getTableEditorState().setFrozenColumnCount(getTable().getFrozenColumnCount());
+    }
+
+    public boolean canFreezeColumns() {
+        return tblEditor.getSelectedColumn() >= 0;
+    }
+
+    public void freezeColumnsThroughSelection() {
+        int column = tblEditor.getColumnModel().getSelectionModel().getMaxSelectionIndex();
+        if (column >= 0) setFrozenColumnCount(column + 1);
     }
 
     protected float getZoomFactor() {
