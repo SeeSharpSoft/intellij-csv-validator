@@ -65,12 +65,14 @@ final class CsvTableSearchSession extends CsvTableSearchSessionBase<CsvTableEdit
 
     @Override
     protected boolean stopEditing() {
+        if (editor.isReordering()) return false;
         JTable table = editor.getTable();
         return !table.isEditing() || table.getCellEditor().stopCellEditing();
     }
 
     @Override
     protected void selectMatch(Match match) {
+        if (editor.isReordering()) return;
         JTable table = editor.getTable();
         if (table.isEditing()) return;
         table.changeSelection(match.row(), match.column(), false, false);

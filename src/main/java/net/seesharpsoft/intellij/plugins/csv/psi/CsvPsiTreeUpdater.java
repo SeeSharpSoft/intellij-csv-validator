@@ -11,7 +11,9 @@ import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.DocumentUtil;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
+import net.seesharpsoft.intellij.plugins.csv.CsvLexerFactory;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableModel;
+import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableReorder;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import net.seesharpsoft.intellij.psi.PsiFileHolder;
 import net.seesharpsoft.intellij.psi.PsiHelper;
@@ -264,6 +266,28 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
     public void deleteColumns(Collection<Integer> indices) {
         if (indices.isEmpty()) return;
         ReadAction.run(() -> deleteColumnsInternal(indices));
+    }
+
+    public void reorderRows(int[] order) {
+        reorder(order, false);
+    }
+
+    public void reorderColumns(int[] order) {
+        reorder(order, true);
+    }
+
+    private void reorder(int[] order, boolean columns) {
+        ReadAction.run(() -> {
+            PsiFile file = getPsiFile();
+            Document document = getDocumentInternal();
+            if (file == null || document == null) return;
+            CsvTableReorder.Change change = CsvTableReorder.prepare(document.getImmutableCharSequence(),
+                    CsvLexerFactory.getInstance().createLexer(file), order, columns, CsvHelper.getValueSeparator(file),
+                    CsvHelper.getEscapeCharacter(file), CsvEditorSettings.getInstance().getCommentIndicator());
+            if (change != null) {
+                replaceTexts(Collections.singletonList(Pair.create(change.range(), change.text())));
+            }
+        });
     }
 
     private void deleteColumnsInternal(Collection<Integer> indices) {

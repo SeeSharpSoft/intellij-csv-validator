@@ -18,12 +18,16 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
 import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class CsvTableModelSwing extends CsvTableModelBase<CsvTableEditor> implements TableModel {
 
     private final EventListenerList listenerList = new EventListenerList();
     private final Alarm myUpdateAlarm;
+    private ModelState preparedState;
+    private List<String> headerTexts;
 
     private static final int UPDATE_DELAY_MILLIS = 50;
 
@@ -34,9 +38,11 @@ public class CsvTableModelSwing extends CsvTableModelBase<CsvTableEditor> implem
 
     @Override
     public void notifyUpdate() {
-        if (isDisposed()) return;
+        if (isDisposed() || isSuspended()) return;
 
-        if (ApplicationManager.getApplication().isUnitTestMode()) {
+        if (ApplicationManager.getApplication().isUnitTestMode() ||
+                (ApplicationManager.getApplication().isDispatchThread() &&
+                        getPsiFileHolder() instanceof CsvTableEditorSwing editor && editor.isReordering())) {
             updateTableImmediately();
             return;
         }
@@ -45,16 +51,28 @@ public class CsvTableModelSwing extends CsvTableModelBase<CsvTableEditor> implem
         myUpdateAlarm.addRequest(this::updateTableImmediately, UPDATE_DELAY_MILLIS);
     }
 
-    private void updateTableImmediately() {
-        if (isDisposed()) return;
+    void updateTableImmediately() {
+        if (isDisposed() || isSuspended()) return;
+        if (myUpdateAlarm != null) myUpdateAlarm.cancelAllRequests();
 
         getPsiFileHolder().beforeTableModelUpdate();
         try {
-            super.notifyUpdate();
+            ModelState state = preparedState;
+            preparedState = null;
+            if (state == null || !applyState(state)) {
+                headerTexts = null;
+                super.notifyUpdate();
+            } else {
+                headerTexts = state.headers();
+            }
             fireTableChanged(new TableModelEvent(this));
         } finally {
             getPsiFileHolder().afterTableModelUpdate();
         }
+    }
+
+    void prepareUpdate(ModelState state) {
+        preparedState = state;
     }
 
     protected void fireTableChanged(TableModelEvent e) {
@@ -95,13 +113,20 @@ public class CsvTableModelSwing extends CsvTableModelBase<CsvTableEditor> implem
     }
 
     private String getHeaderText(int column) {
-        PsiElement headerField = PsiHelper.findFirst(getPsiFile(), CsvTypes.FIELD);
-        if (headerField == null) return "";
+        if (headerTexts == null) {
+            headerTexts = readHeaderTexts(PsiHelper.findFirst(getPsiFile(), CsvTypes.FIELD));
+        }
+        return column < headerTexts.size() ? headerTexts.get(column) : "";
+    }
 
-        PsiElement columnField = PsiHelper.getNextNthSiblingOfType(headerField, column, CsvField.class);
-        return columnField == null
-                ? ""
-                : CsvHelper.unquoteCsvValue(columnField.getText(), getEscapeCharacter()).trim();
+    private List<String> readHeaderTexts(PsiElement field) {
+        List<String> headers = new ArrayList<>();
+        for (; field != null; field = field.getNextSibling()) {
+            if (field instanceof CsvField) {
+                headers.add(CsvHelper.unquoteCsvValue(field.getText(), getEscapeCharacter()).trim());
+            }
+        }
+        return List.copyOf(headers);
     }
 
     private String formatColumnName(int column, String headerText) {

@@ -101,6 +101,13 @@ public class CsvTable extends JBTable {
         super.paint(g);
         // Paint above spanning comment rows and cell editors as well as ordinary cells.
         paintFrozenColumnSeparator(g, getHeight());
+        if (getClientProperty(CsvTableRowDragListener.class) instanceof CsvTableRowDragListener drag) {
+            drag.paintFeedback(g, this);
+        }
+    }
+
+    void cancelRowDragging() {
+        if (getClientProperty(CsvTableRowDragListener.class) instanceof CsvTableRowDragListener drag) drag.cancelDrag();
     }
 
     void updateFrozenColumnLayout() {
@@ -173,7 +180,7 @@ public class CsvTable extends JBTable {
     public @NotNull Rectangle getCellRect(int row, int column, boolean includeSpacing) {
         Rectangle rect = super.getCellRect(row, column, includeSpacing);
         if (getColumnCount() > 0 && isCommentRow(row)) {
-            if (convertColumnIndexToModel(column) == 0) {
+            if (column == 0) {
                 rect.width = this.getWidth();
             } else {
                 return new Rectangle();
@@ -242,7 +249,7 @@ public class CsvTable extends JBTable {
 
     @Override
     public boolean isCellEditable(int row, int column) {
-        return (!isCommentRow(row) || convertColumnIndexToModel(column) == 0) && super.isCellEditable(row, column);
+        return (!isCommentRow(row) || column == 0) && super.isCellEditable(row, column);
     }
 
     public class MultiSpanCellTableUI extends BasicTableUI {

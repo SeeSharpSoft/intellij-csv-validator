@@ -84,9 +84,21 @@ Search starts in the background as you type, keeping the table responsive. The b
 
 #### Context menu
 
-A right-click within the table opens a context menu for adding or removing rows. Right-click the table header to add or remove columns.
+A right-click within the table or on its row numbers opens a context menu for adding or removing rows. Right-click the table header to add or remove columns.
 
 The actions in these menus apply to the currently selected rows or columns, which may differ from the cell or header where the context menu appears. A right-click does not change the selection by default.
+
+#### Moving rows and columns
+
+Drag a column header left or right, or drag a row number up or down, to move that column or row in the file. Drag from the middle of a row number to move it; dragging its bottom edge still resizes rows.
+
+The context menus also provide **Move Selected Rows Up/Down** and **Move Selected Columns Left/Right**. These actions move the selection by one position, keeping the selected items in order. Movement stops at the table boundaries; the empty row representing a final line break is not movable.
+
+Moves change the CSV document, not just its display order, and can be undone or redone using the IDE's usual commands. Column widths follow their columns, and the moved items remain selected. Both table-editor implementations support movement, including when columns are frozen. Files with syntax errors and read-only files cannot be reordered.
+
+Small moves complete immediately. Large moves use IntelliJ's standard cancellable progress dialog while preparing the change and updating the table. The editor waits for completion instead of maintaining a separate optimistic preview; no custom rendering or status bar is used.
+
+Cancel during preparation to leave the file unchanged. If the file or its CSV settings change before the move is applied, the prepared result is discarded rather than overwriting newer edits. Once application begins, the update finishes as one undoable change; use Undo to reverse it. Expensive preparation and model calculations run off the UI thread, while the document mutation uses the IDE's required write thread.
 
 #### Frozen columns
 

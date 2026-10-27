@@ -12,6 +12,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class CsvHighlightingLexer extends DelegateLexer {
 
+    private final CsvEditorSettings mySettings = CsvEditorSettings.getInstance();
     private int myCurrentColumnIndex = 0;
 
     public CsvHighlightingLexer(@NotNull Lexer delegate) {
@@ -52,7 +53,7 @@ public class CsvHighlightingLexer extends DelegateLexer {
             return CsvHighlightingElement.TokenBased.QUOTE;
         }
 
-        return CsvEditorSettings.getInstance().getValueColoring() == CsvEditorSettings.ValueColoring.RAINBOW ?
+        return mySettings.getValueColoring() == CsvEditorSettings.ValueColoring.RAINBOW ?
                 CsvHighlightingElement.ColumnBased.forIndex(myCurrentColumnIndex) :
                 CsvHighlightingElement.TokenBased.TEXT;
     }

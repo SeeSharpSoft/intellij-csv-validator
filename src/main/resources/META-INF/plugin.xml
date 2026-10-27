@@ -214,6 +214,22 @@
             <add-to-group group-id="CsvTableEditorColumnContextMenu" />
             <add-to-group group-id="CsvTableEditorRowContextMenu" />
         </action>
+        <action class="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$MoveRowsUp"
+                id="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$MoveRowsUp">
+            <add-to-group group-id="CsvTableEditorRowContextMenu" relative-to-action="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$DeleteSelectedRows" anchor="after" />
+        </action>
+        <action class="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$MoveRowsDown"
+                id="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$MoveRowsDown">
+            <add-to-group group-id="CsvTableEditorRowContextMenu" relative-to-action="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$MoveRowsUp" anchor="after" />
+        </action>
+        <action class="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$MoveColumnsLeft"
+                id="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$MoveColumnsLeft">
+            <add-to-group group-id="CsvTableEditorColumnContextMenu" relative-to-action="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$DeleteSelectedColumns" anchor="after" />
+        </action>
+        <action class="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$MoveColumnsRight"
+                id="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$MoveColumnsRight">
+            <add-to-group group-id="CsvTableEditorColumnContextMenu" relative-to-action="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$MoveColumnsLeft" anchor="after" />
+        </action>
         <action class="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$ResetColumnWidths"
                 id="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$ResetColumnWidths"
                 icon="/media/icons/reset-column-width.png"

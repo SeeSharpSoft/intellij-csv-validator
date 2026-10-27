@@ -9,6 +9,58 @@ import org.jetbrains.annotations.NotNull;
 
 public abstract class CsvTableEditorActions extends AnAction implements ActionUpdateThreadAware {
 
+    private abstract static class MoveSelection extends CsvTableEditorActions {
+        private final boolean columns;
+        private final boolean backwards;
+
+        protected MoveSelection(boolean columns, boolean backwards) {
+            this.columns = columns;
+            this.backwards = backwards;
+        }
+
+        @Override
+        public void actionPerformed(@NotNull AnActionEvent event) {
+            if (getTableEditor(event) instanceof CsvTableEditorSwing editor) {
+                editor.moveSelection(columns, backwards);
+            }
+        }
+
+        @Override
+        public void update(@NotNull AnActionEvent event) {
+            event.getPresentation().setEnabled(getTableEditor(event) instanceof CsvTableEditorSwing editor &&
+                    editor.canMoveSelection(columns, backwards));
+        }
+
+        @Override
+        public @NotNull ActionUpdateThread getActionUpdateThread() {
+            return ActionUpdateThread.EDT;
+        }
+    }
+
+    public static class MoveRowsUp extends MoveSelection {
+        public MoveRowsUp() {
+            super(false, true);
+        }
+    }
+
+    public static class MoveRowsDown extends MoveSelection {
+        public MoveRowsDown() {
+            super(false, false);
+        }
+    }
+
+    public static class MoveColumnsLeft extends MoveSelection {
+        public MoveColumnsLeft() {
+            super(true, true);
+        }
+    }
+
+    public static class MoveColumnsRight extends MoveSelection {
+        public MoveColumnsRight() {
+            super(true, false);
+        }
+    }
+
     public static class FreezeColumns extends CsvTableEditorActions {
         @Override
         public void actionPerformed(@NotNull AnActionEvent event) {
@@ -38,7 +90,8 @@ public abstract class CsvTableEditorActions extends AnAction implements ActionUp
 
         @Override
         public void update(@NotNull AnActionEvent event) {
-            event.getPresentation().setEnabled(getTableEditor(event) instanceof CsvTableEditorSwing editor && editor.getFrozenColumnCount() > 0);
+            event.getPresentation().setEnabled(getTableEditor(event) instanceof CsvTableEditorSwing editor &&
+                    !editor.isReordering() && editor.getFrozenColumnCount() > 0);
         }
 
         @Override
@@ -133,7 +186,9 @@ public abstract class CsvTableEditorActions extends AnAction implements ActionUp
     @Override
     public void update(@NotNull AnActionEvent event) {
         CsvTableEditor editor = getTableEditor(event);
-        event.getPresentation().setEnabled(editor != null && (!requiresEditableTable() || editor.isEditable()));
+        event.getPresentation().setEnabled(editor != null &&
+                (!(editor instanceof CsvTableEditorSwing swing) || !swing.isReordering()) &&
+                (!requiresEditableTable() || editor.isEditable()));
     }
 
     @Override

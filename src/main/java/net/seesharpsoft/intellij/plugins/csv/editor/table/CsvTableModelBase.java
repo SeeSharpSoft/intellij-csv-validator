@@ -1,6 +1,9 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table;
 
 import com.intellij.openapi.application.ReadAction;
+import com.intellij.openapi.editor.Document;
+import com.intellij.openapi.progress.ProgressManager;
+import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiErrorElement;
 import com.intellij.psi.PsiFile;
@@ -22,9 +25,15 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel {
+    public record ModelState(PsiFile file, long stamp, int rows, int columns, Set<Integer> comments,
+                             List<String> headers, boolean errors) {
+    }
+
     private final T myPsiFileHolder;
     private volatile boolean myDisposed = false;
 
@@ -33,6 +42,7 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
     private CsvEscapeCharacter myCachedEscapeCharacter;
     private Boolean myCachedHasErrors = null;
     private int myPointedRow = -1;
+    private long myPointedStamp = -1;
     private PsiElement myPointedRecord = null;
     private volatile Set<Integer> myCachedCommentRows = Collections.emptySet();
     private final CsvPsiTreeUpdater myPsiTreeUpdater;
@@ -144,6 +154,55 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
         getRowCount();
     }
 
+    /** Captures model metadata under a background read action, without changing the displayed model. */
+    public ModelState captureState() {
+        PsiFile file = myPsiFileHolder.getPsiFile();
+        if (file == null) throw new IllegalStateException("CSV file is no longer available");
+        Document document = PsiDocumentManager.getInstance(file.getProject()).getDocument(file);
+        if (document == null) throw new IllegalStateException("CSV document is no longer available");
+        int rows = 0;
+        int columns = 0;
+        Set<Integer> comments = new HashSet<>();
+        List<String> headers = null;
+        for (PsiElement child = file.getFirstChild(); child != null; child = child.getNextSibling()) {
+            if ((rows & 1023) == 0) ProgressManager.checkCanceled();
+            if (child instanceof PsiErrorElement) break;
+            if (child instanceof CsvRecord record) {
+                boolean comment = CsvHelper.isCommentElement(record.getFirstChild());
+                if (comment) comments.add(rows);
+                if (!comment && headers == null) {
+                    headers = new ArrayList<>();
+                    for (CsvField field : record.getFieldList()) {
+                        headers.add(CsvHelper.unquoteCsvValue(field.getText(), CsvHelper.getEscapeCharacter(file)).trim());
+                    }
+                }
+                columns = Math.max(columns, PsiTreeUtil.countChildrenOfType(record, CsvField.class));
+                rows++;
+            }
+        }
+        int[] visited = {0};
+        boolean errors = !PsiTreeUtil.processElements(file, element -> {
+            if ((visited[0]++ & 1023) == 0) ProgressManager.checkCanceled();
+            return !(element instanceof PsiErrorElement);
+        });
+        return new ModelState(file, document.getModificationStamp(), rows, columns, Set.copyOf(comments),
+                headers == null ? List.of() : List.copyOf(headers), errors);
+    }
+
+    protected boolean applyState(ModelState state) {
+        PsiFile file = getPsiFile();
+        if (file != state.file()) return false;
+        Document document = PsiDocumentManager.getInstance(file.getProject()).getDocument(file);
+        if (document == null || document.getModificationStamp() != state.stamp()) return false;
+        invalidateModelState();
+        myCachedRowCount = state.rows();
+        myCachedColumnCount = state.columns();
+        myCachedCommentRows = state.comments();
+        myCachedHasErrors = state.errors();
+        resetPointer();
+        return true;
+    }
+
     private void invalidateModelState() {
         myCachedRowCount = -1;
         myCachedColumnCount = -1;
@@ -159,6 +218,7 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
             PsiFile psiFile = getPsiFile();
             myPointedRecord = psiFile == null ? null : PsiHelper.getFirstChildOfType(psiFile, CsvRecord.class);
             myPointedRow = 0;
+            myPointedStamp = psiFile == null ? -1 : psiFile.getModificationStamp();
         });
     }
 
@@ -178,9 +238,14 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
         return ReadAction.compute(() -> {
             PsiFile psiFile = getPsiFile();
             if (psiFile == null) return null;
+            long stamp = psiFile.getModificationStamp();
+            if (myPointedStamp != stamp) {
+                myPointedRecord = null;
+                myPointedStamp = stamp;
+            }
 
             int diffToCurrent = Math.abs(myPointedRow - row);
-            if (diffToCurrent > row || myPointedRecord == null) {
+            if (diffToCurrent > row || myPointedRecord == null || !myPointedRecord.isValid()) {
                 myPointedRecord = PsiHelper.getFirstChildOfType(psiFile, CsvRecord.class);
                 myPointedRow = 0;
                 diffToCurrent = row;
@@ -324,6 +389,18 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
         CsvPsiTreeUpdater updater = getPsiTreeUpdater();
         updater.deleteColumns(indices);
         updater.commit();
+    }
+
+    @Override
+    public void reorderRows(int[] order) {
+        getPsiTreeUpdater().reorderRows(order);
+        getPsiTreeUpdater().commit();
+    }
+
+    @Override
+    public void reorderColumns(int[] order) {
+        getPsiTreeUpdater().reorderColumns(order);
+        getPsiTreeUpdater().commit();
     }
 
     @Override
