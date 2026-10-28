@@ -120,6 +120,7 @@ public class CsvMultiLineCellRenderer extends JBScrollPane implements TableCellR
 
     @Override
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
+        myTextArea.setEditable(table.getModel().isCellEditable(row, column));
         return getTableCellRendererComponent(table, value, false, true, row, column);
     }
 

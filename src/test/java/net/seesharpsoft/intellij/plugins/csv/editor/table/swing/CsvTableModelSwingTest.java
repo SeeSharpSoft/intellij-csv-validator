@@ -49,7 +49,7 @@ public class CsvTableModelSwingTest extends CsvBasePlatformTestCase {
     }
 
     public void testSnapshotMatchesOrdinaryRefreshWithOnlyComments() {
-        assertSnapshotParity("# first\n# second", 2, 0, Set.of(0, 1), List.of(), false);
+        assertSnapshotParity("# first\n# second", 2, 1, Set.of(0, 1), List.of(), false);
     }
 
     public void testSnapshotMatchesOrdinaryRefreshWithEmptyFile() {

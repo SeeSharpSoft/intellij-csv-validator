@@ -19,10 +19,12 @@
 - Added Find/Replace in both table editors, with IDE shortcuts, match navigation, case/word/regex options, and Replace All (#430)
 - Added per-file frozen columns in both table editors, with header context-menu actions to freeze through the selection or unfreeze all columns (#195, #319)
 - Added persistent column-header and row-number dragging and context-menu actions for moving selected rows and columns in both table editors (#391, #486)
+- Added CSV and spreadsheet paste in both table editors, starting at the focused cell, overwriting existing values, and adding rows or columns only when needed (#77)
 
 ### Changed
 
 - Improved automatic column sizing in the FlatLaf table editor to account for rendered cell padding and column headers
+- Copying table selections now provides properly quoted CSV using the file's separator and escape settings, while preserving HTML table copying
 
 ## 4.6.0 - Oct 18, 2026
 

@@ -158,6 +158,15 @@ public class CsvTableReorderingTest extends CsvBasePlatformTestCase implements P
         check("a,b\n1,2\n");
     }
 
+    public void testCommentOnlyColumnReorderKeepsTheSpanningColumn() {
+        configure("# first\n# second");
+        assertEquals(1, model.getColumnCount());
+        model.reorderColumns(new int[]{0});
+        check("# first\n# second");
+        assertThrows(IllegalArgumentException.class, () -> model.reorderColumns(new int[]{1, 0}));
+        check("# first\n# second");
+    }
+
     public void testColumnReorderingIsOneDocumentEventAndUndoStep() {
         String original = "a,b,c\n1,2,3\n4,5,6\n";
         configure(original);

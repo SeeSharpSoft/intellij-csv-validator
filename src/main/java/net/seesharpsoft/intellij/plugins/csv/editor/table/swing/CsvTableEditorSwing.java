@@ -92,11 +92,18 @@ public class CsvTableEditorSwing extends CsvTableEditor {
         this.tableEditorActions = new CsvTableEditorActionListeners(this);
         this.tableEditorMouseWheelListener = new CsvTableEditorMouseWheelListener(this);
 
-        initializedUIComponents();
-        editorComponent = new JPanel(new BorderLayout());
-        editorComponent.add(panelMain, BorderLayout.CENTER);
-        registerSearchShortcut(IdeActions.ACTION_FIND, false);
-        registerSearchShortcut(IdeActions.ACTION_REPLACE, true);
+        boolean initialized = false;
+        try {
+            initializedUIComponents();
+            editorComponent = new JPanel(new BorderLayout());
+            editorComponent.add(panelMain, BorderLayout.CENTER);
+            registerSearchShortcut(IdeActions.ACTION_FIND, false);
+            registerSearchShortcut(IdeActions.ACTION_REPLACE, true);
+            initialized = true;
+        } finally {
+            // Cancel queued model refreshes before they can reach an incomplete UI.
+            if (!initialized) super.dispose();
+        }
     }
 
     private void registerSearchShortcut(String actionId, boolean replace) {
@@ -151,6 +158,7 @@ public class CsvTableEditorSwing extends CsvTableEditor {
         tblEditor.setFont(getEditorFont());
         tblEditor.setBackground(editorColorsScheme.getDefaultBackground());
         tblEditor.setForeground(editorColorsScheme.getDefaultForeground());
+        tblEditor.setTransferHandler(new CsvTableTransferHandler(this, tblEditor.getTransferHandler()));
         tblEditor.getColumnModel().addColumnModelListener(tableEditorListener);
 
         CsvMultiLineCellRenderer cellRenderer = createCellRenderer(false);
@@ -182,7 +190,7 @@ public class CsvTableEditorSwing extends CsvTableEditor {
     }
 
     protected void applyTableChangeListener() {
-        if (!listenerApplied && isEditorSelected() && isEditable()) {
+        if (!listenerApplied && isEditorSelected()) {
             listenerApplied = true;
             tblEditor.getModel().addTableModelListener(tableEditorListener);
             tblEditor.addMouseListener(this.tableEditorMouseListener);
@@ -298,7 +306,7 @@ public class CsvTableEditorSwing extends CsvTableEditor {
     }
 
     private void updateEditActionElements(boolean isEditable) {
-        tblEditor.setEnabled(isEditable);
+        tblEditor.setEnabled(!reordering);
         tblEditor.setDragEnabled(false);
         tblEditor.getTableHeader().setReorderingAllowed(isEditable);
         tblEditor.getTableHeader().setResizingAllowed(!reordering);

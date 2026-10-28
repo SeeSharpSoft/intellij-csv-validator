@@ -49,7 +49,7 @@ public final class CsvTableReorder {
             } else if (lexer.getTokenType() == CsvTypes.CRLF) {
                 if (columns) {
                     ends[fieldCount] = lexer.getTokenStart();
-                    maxColumns = Math.max(maxColumns, comment ? 0 : fieldCount + 1);
+                    maxColumns = Math.max(maxColumns, fieldCount + 1);
                     appendColumns(result, text, rowStart, lexer.getTokenStart(), starts, ends, fieldCount + 1,
                             comment, order, separator, escape, commentIndicator);
                     result.append(text, lexer.getTokenStart(), lexer.getTokenEnd());
@@ -67,7 +67,7 @@ public final class CsvTableReorder {
         if (quoted) throw new IllegalArgumentException("Unclosed CSV quote");
         if (columns) {
             ends[fieldCount] = text.length();
-            maxColumns = Math.max(maxColumns, comment ? 0 : fieldCount + 1);
+            maxColumns = Math.max(maxColumns, fieldCount + 1);
             if (rowStart < text.length() || text.isEmpty()) {
                 appendColumns(result, text, rowStart, text.length(), starts, ends, fieldCount + 1,
                         comment, order, separator, escape, commentIndicator);

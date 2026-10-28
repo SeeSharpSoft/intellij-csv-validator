@@ -1,5 +1,6 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
+import com.intellij.openapi.fileEditor.FileEditorState;
 import com.intellij.openapi.fileEditor.FileEditorStateLevel;
 import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.util.Key;
@@ -42,7 +43,7 @@ public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
         assertEquals(null, fileEditor.getCurrentLocation());
         assertInstanceOf(fileEditor.getState(FileEditorStateLevel.FULL), CsvTableEditorState.class);
         assertInstanceOf(fileEditor.getState(FileEditorStateLevel.NAVIGATION), CsvTableEditorState.class);
-        assertInstanceOf(fileEditor.getState(FileEditorStateLevel.UNDO), CsvTableEditorState.class);
+        assertSame(FileEditorState.INSTANCE, fileEditor.getState(FileEditorStateLevel.UNDO));
 
         CsvTableEditorState myState = new CsvTableEditorState();
         fileEditor.setState(myState);
@@ -77,7 +78,7 @@ public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
         fileEditor.getTableEditorState().setColumnWidths(new int[]{80, 200});
         fileEditor.getTableEditorState().setRowHeight(42);
         fileEditor.getTableEditorState().setFrozenColumnCount(1);
-        for (FileEditorStateLevel level : FileEditorStateLevel.values()) {
+        for (FileEditorStateLevel level : new FileEditorStateLevel[]{FileEditorStateLevel.FULL, FileEditorStateLevel.NAVIGATION}) {
             CsvTableEditorState snapshot = (CsvTableEditorState) fileEditor.getState(level);
             assertNotSame(snapshot, fileEditor.getTableEditorState());
             fileEditor.getTableEditorState().getColumnWidths()[0] = 300;
@@ -91,6 +92,20 @@ public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
             assertEquals(42, fileEditor.getTableEditorState().getRowHeight());
             assertEquals(1, fileEditor.getTableEditorState().getFrozenColumnCount());
         }
+    }
+
+    public void testUndoStateDoesNotRestoreTableLayout() {
+        FileEditorState undoState = fileEditor.getState(FileEditorStateLevel.UNDO);
+        fileEditor.getTableEditorState().setColumnWidths(new int[]{80, 200});
+        fileEditor.getTableEditorState().setRowHeight(42);
+        fileEditor.getTableEditorState().setFrozenColumnCount(1);
+
+        assertSame(undoState, fileEditor.getState(FileEditorStateLevel.UNDO));
+        fileEditor.setState(undoState);
+
+        assertOrderedEquals(fileEditor.getTableEditorState().getColumnWidths(), new int[]{80, 200});
+        assertEquals(42, fileEditor.getTableEditorState().getRowHeight());
+        assertEquals(1, fileEditor.getTableEditorState().getFrozenColumnCount());
     }
 
     public void testEditable() {

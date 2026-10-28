@@ -88,7 +88,7 @@ public abstract class CsvTableEditor implements FileEditor, PsiFileHolder {
     }
 
     public boolean isEditable() {
-        return this.tableIsEditable && file.isWritable();
+        return this.tableIsEditable && file.isWritable() && (document == null || document.isWritable());
     }
 
     @NotNull
@@ -116,11 +116,14 @@ public abstract class CsvTableEditor implements FileEditor, PsiFileHolder {
     @Override
     @NotNull
     public FileEditorState getState(@NotNull FileEditorStateLevel level) {
+        // Layout changes must not consume an Undo before the document edit is reverted.
+        if (level == FileEditorStateLevel.UNDO) return FileEditorState.INSTANCE;
         return new CsvTableEditorState(getTableEditorState());
     }
 
     @Override
     public void setState(@NotNull FileEditorState fileEditorState) {
+        if (fileEditorState == FileEditorState.INSTANCE) return;
         this.storedState = fileEditorState instanceof CsvTableEditorState state ? new CsvTableEditorState(state) : new CsvTableEditorState();
         applyEditorState(getTableEditorState());
     }

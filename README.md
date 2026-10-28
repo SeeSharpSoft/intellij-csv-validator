@@ -82,6 +82,16 @@ Use the IDE's **Find** and **Replace** shortcuts in either table editor (Ctrl+F 
 
 Search starts in the background as you type, keeping the table responsive. The bar shows **Searching...** while scanning, then the current match and total count. Changing the query or closing the bar cancels the previous search.
 
+#### Copy and Paste
+
+Use the IDE's **Copy** and **Paste** shortcuts in either table editor. Copying selected cells provides CSV text using the file's separator, escape character, and quoting settings, as well as an HTML table. Selecting a column header selects the whole column for copying. Read-only files and files with syntax errors still allow selecting and copying cells; open a cell to select and copy part of its text without changing it.
+
+Outside a cell's text editor, paste starts at the focused cell, overwrites existing values, and adds rows or columns only when the clipboard extends beyond the table. Clipboard CSV uses the file's separator and escape character; tab-separated spreadsheet data is also supported. Quoted separators, quotes, and multiline values are preserved. A final clipboard line break does not add an extra row. Paste is a single undoable edit.
+
+Comment rows are copied once, with their comment indicator. Pasting comment lines at the first column replaces whole rows and preserves them as comments. Quoted values beginning with the comment indicator remain CSV values. A comment pasted at another column, or multiple CSV values pasted into an existing comment row, is rejected without changing the file.
+
+Inside a cell's text editor, paste inserts text into that cell instead of spreading it across the table. Read-only tables cannot be pasted into. An existing comment row also accepts a single-line value in its first column to replace its text while keeping the comment indicator.
+
 #### Context menu
 
 A right-click within the table or on its row numbers opens a context menu for adding or removing rows. Right-click the table header to add or remove columns.

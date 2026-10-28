@@ -249,7 +249,8 @@ public class CsvTable extends JBTable {
 
     @Override
     public boolean isCellEditable(int row, int column) {
-        return (!isCommentRow(row) || column == 0) && super.isCellEditable(row, column);
+        // Read-only cells open a non-editable text component for selection and copying.
+        return isEnabled() && (!isCommentRow(row) || column == 0);
     }
 
     public class MultiSpanCellTableUI extends BasicTableUI {

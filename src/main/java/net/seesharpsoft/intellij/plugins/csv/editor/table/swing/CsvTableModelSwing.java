@@ -110,6 +110,7 @@ public class CsvTableModelSwing extends CsvTableModelBase<CsvTableEditor> implem
 
     @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+        if (!getPsiFileHolder().isEditable()) return;
         setValue(aValue == null ? "" : aValue.toString(), rowIndex, columnIndex);
     }
 
