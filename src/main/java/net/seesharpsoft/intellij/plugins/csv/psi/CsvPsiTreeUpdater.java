@@ -115,6 +115,10 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
         return ReadAction.compute(() -> createCommentInternal(text));
     }
 
+    public @Nullable PsiElement createCommentFromContent(@NotNull String content) {
+        return createComment(CsvEditorSettings.getInstance().getCommentIndicator() + content);
+    }
+
     private @Nullable PsiElement createCommentInternal(@NotNull String text) {
         String commentText = !isIndicatingComment(text) ? CsvEditorSettings.getInstance().getCommentIndicator() + text : text;
         return PsiHelper.findFirst(createFile(commentText), CsvTypes.COMMENT);

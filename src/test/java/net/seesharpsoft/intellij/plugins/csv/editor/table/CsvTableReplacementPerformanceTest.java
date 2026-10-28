@@ -71,7 +71,7 @@ public class CsvTableReplacementPerformanceTest extends CsvBasePlatformTestCase 
         assertTrue("Cancellation must interrupt source traversal", reads.get() < text.length());
     }
 
-    public void testCommentsPreserveExistingWriterSemantics() throws Exception {
+    public void testCommentsTreatReplacementAsContent() throws Exception {
         myFixture.configureByText(CsvFileType.INSTANCE, "#cat\n");
         CsvTableReplacement.Settings settings = CsvTableReplacement.Settings.capture(myFixture.getFile());
         CsvPsiTreeUpdater writer = new CsvPsiTreeUpdater(myFixture.getFile());
@@ -80,7 +80,7 @@ public class CsvTableReplacementPerformanceTest extends CsvBasePlatformTestCase 
                 FindModel query = new FindModel();
                 query.setStringToFind("cat");
                 query.setStringToReplace(replacement);
-                var comment = writer.createComment(replacement);
+                var comment = writer.createCommentFromContent(replacement);
                 String expected = comment == null ? "#cat\n" : comment.getText() + "\n";
                 CsvTableReplacement.Change change = CsvTableReplacement.prepare("#cat\n",
                         List.of(new Match(0, 0, 0, 3)), null, new int[]{0}, query, FindManager.getInstance(getProject()), settings);

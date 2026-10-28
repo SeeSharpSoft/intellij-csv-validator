@@ -29,6 +29,7 @@ import com.intellij.testFramework.ServiceContainerUtil;
 import com.intellij.testFramework.PlatformTestUtil;
 import com.intellij.util.ui.UIUtil;
 import net.seesharpsoft.intellij.plugins.csv.CsvFileType;
+import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import net.seesharpsoft.intellij.util.ManualUpdateScheduler;
 import org.jetbrains.annotations.NotNull;
 
@@ -697,6 +698,47 @@ public class CsvTableSearchTest extends CsvTableEditorSwingTestBase {
         replacement("dog");
         replaceAll();
         assertEquals("# dog\ndog,dog\n", myFixture.getFile().getText());
+    }
+
+    public void testReplaceCurrentPreservesLeadingCommentIndicatorInContent() {
+        assertReplacementPreservesCommentContent("#", false);
+    }
+
+    public void testReplaceAllPreservesLeadingCommentIndicatorInContent() {
+        assertReplacementPreservesCommentContent("#", true);
+    }
+
+    public void testReplaceCurrentPreservesLeadingCustomCommentIndicatorInContent() {
+        assertReplacementPreservesCommentContent("///", false);
+    }
+
+    public void testReplaceAllPreservesLeadingCustomCommentIndicatorInContent() {
+        assertReplacementPreservesCommentContent("///", true);
+    }
+
+    private void assertReplacementPreservesCommentContent(String indicator, boolean all) {
+        CsvEditorSettings settings = CsvEditorSettings.getInstance();
+        String previousIndicator = settings.getCommentIndicator();
+        settings.setCommentIndicator(indicator);
+        try {
+            for (String replacement : Arrays.asList("dog", indicator + "dog", "cat")) {
+                for (String original : Arrays.asList(indicator + indicator + "cat\n",
+                        indicator + indicator + "cat cat\n" + indicator + " " + indicator + "cat\nuntouched,end\n")) {
+                    configure(original);
+                    query("cat");
+                    assertTrue(search.hasMatches());
+                    replacement(replacement);
+                    if (all) replaceAll();
+                    else replaceCurrent();
+                    int offset = original.indexOf("cat");
+                    String expected = all ? original.replace("cat", replacement)
+                            : original.substring(0, offset) + replacement + original.substring(offset + 3);
+                    assertEquals(expected, myFixture.getFile().getText());
+                }
+            }
+        } finally {
+            settings.setCommentIndicator(previousIndicator);
+        }
     }
 
     public void testFirstColumnReplacementCannotTurnDataIntoComment() {

@@ -579,7 +579,7 @@ public abstract class CsvTableSearchSessionBase<T extends CsvTableEditor>
             } while (index < targets.size() && targets.get(index).row == first.row && targets.get(index).column == first.column);
             result.append(value, offset, value.length());
             PsiElement field = model.getFieldAt(row, column);
-            PsiElement replacement = model.isCommentRow(row) ? updater.createComment(result.toString())
+            PsiElement replacement = model.isCommentRow(row) ? updater.createCommentFromContent(result.toString())
                     : updater.createField(result.toString(), column == 0);
             if (field != null && replacement != null && !field.getText().equals(replacement.getText())) {
                 replacements.add(Pair.create(field.getTextRange(), replacement.getText()));

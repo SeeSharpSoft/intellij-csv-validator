@@ -41,7 +41,7 @@ final class CsvTableReplacement {
 
         private String serialize(String value, boolean isComment, int column) {
             if (isComment) {
-                String text = value.trim().startsWith(comment) ? value : comment + value;
+                String text = comment + value;
                 Lexer lexer = CsvLexerFactory.getInstance().createLexer(separator, escape, comment);
                 lexer.start(text);
                 while (lexer.getTokenType() != null) {

@@ -7,10 +7,12 @@ import com.intellij.testFramework.EdtTestUtil;
 import com.intellij.testFramework.LoggedErrorProcessor;
 import net.seesharpsoft.intellij.plugins.csv.CsvBasePlatformTestCase;
 import net.seesharpsoft.intellij.plugins.csv.CsvFileType;
+import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import net.seesharpsoft.intellij.psi.PsiHelper;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 public class CsvPsiTreeUpdaterTest extends CsvBasePlatformTestCase {
@@ -23,12 +25,39 @@ public class CsvPsiTreeUpdaterTest extends CsvBasePlatformTestCase {
                 assertNotNull(updater.createField("value", false));
                 assertNotNull(updater.createRecord());
                 assertNotNull(updater.createComment("comment"));
+                assertNotNull(updater.createCommentFromContent("#comment"));
                 assertNotNull(updater.createValueSeparator());
                 assertNotNull(updater.createLineBreak());
                 assertNotNull(updater.getDocument());
             });
         } finally {
             updater.dispose();
+        }
+    }
+
+    public void testCommentContentIsDistinctFromCommentSyntax() {
+        CsvEditorSettings settings = CsvEditorSettings.getInstance();
+        String previousIndicator = settings.getCommentIndicator();
+        try {
+            for (String indicator : List.of("#", "///")) {
+                settings.setCommentIndicator(indicator);
+                myFixture.configureByText(CsvFileType.INSTANCE, indicator + "comment\n");
+                CsvPsiTreeUpdater updater = new CsvPsiTreeUpdater(myFixture.getFile());
+                try {
+                    PsiElement comment = updater.createComment(indicator + "comment");
+                    assertNotNull(comment);
+                    assertEquals(indicator + "comment", comment.getText());
+                    for (String content : List.of("", "comment", indicator + "comment", " " + indicator + "comment")) {
+                        comment = updater.createCommentFromContent(content);
+                        assertNotNull(comment);
+                        assertEquals(indicator + content, comment.getText());
+                    }
+                } finally {
+                    updater.dispose();
+                }
+            }
+        } finally {
+            settings.setCommentIndicator(previousIndicator);
         }
     }
 
