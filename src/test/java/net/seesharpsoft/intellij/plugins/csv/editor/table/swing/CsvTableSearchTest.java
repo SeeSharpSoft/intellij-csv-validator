@@ -29,6 +29,7 @@ import com.intellij.testFramework.ServiceContainerUtil;
 import com.intellij.testFramework.PlatformTestUtil;
 import com.intellij.util.ui.UIUtil;
 import net.seesharpsoft.intellij.plugins.csv.CsvFileType;
+import net.seesharpsoft.intellij.util.ManualUpdateScheduler;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -55,6 +56,28 @@ public class CsvTableSearchTest extends CsvTableEditorSwingTestBase {
         SearchReplaceComponent bar = UIUtil.findComponentOfType(fileEditor.getComponent(), SearchReplaceComponent.class);
         assertNotNull(bar);
         search = (CsvTableSearchSession) bar.getData(SearchSession.KEY.getName());
+    }
+
+    private ManualUpdateScheduler configureDelayed(String text) {
+        ManualUpdateScheduler scheduler = new ManualUpdateScheduler();
+        updateScheduler = scheduler;
+        configure(text);
+        scheduler.advanceBy(50);
+        assertEquals(0, scheduler.pendingCount());
+        return scheduler;
+    }
+
+    private AtomicInteger trackTableUpdates() {
+        AtomicInteger updates = new AtomicInteger();
+        fileEditor.getTable().getModel().addTableModelListener(event -> updates.incrementAndGet());
+        return updates;
+    }
+
+    private void commitText(String text) {
+        WriteCommandAction.runWriteCommandAction(getProject(), () -> {
+            myFixture.getEditor().getDocument().setText(text);
+            PsiDocumentManager.getInstance(getProject()).commitAllDocuments();
+        });
     }
 
     private void query(String text) {
@@ -456,6 +479,149 @@ public class CsvTableSearchTest extends CsvTableEditorSwingTestBase {
         assertFalse(search.hasMatches());
     }
 
+    public void testDelayedReplacementAdvancesPastInsertedQueryOnlyAfterDelivery() {
+        ManualUpdateScheduler scheduler = configureDelayed("cat cat,cat\n");
+        query("cat");
+        replacement("catfish");
+        AtomicInteger updates = trackTableUpdates();
+        replaceCurrent();
+        assertEquals("catfish cat,cat\n", myFixture.getFile().getText());
+        assertFalse(search.hasMatches());
+        assertEquals(1, scheduler.pendingCount());
+        scheduler.advanceBy(49);
+        assertEquals(0, updates.get());
+        assertFalse(search.hasMatches());
+        scheduler.advanceBy(1);
+        awaitSearch();
+        assertEquals(1, updates.get());
+        assertEquals(0, scheduler.pendingCount());
+        assertEquals("2 of 3 matches", search.getComponent().getStatusText());
+        assertMatchSelection(0, 0, 8, 11);
+
+        replaceCurrent();
+        assertFalse(search.hasMatches());
+        scheduler.advanceBy(50);
+        awaitSearch();
+        assertEquals("catfish catfish,cat\n", myFixture.getFile().getText());
+        assertEquals(2, updates.get());
+        assertMatchSelection(0, 1, 0, 3);
+    }
+
+    public void testDelayedEmptyReplacementDoesNotSkipAdjacentOccurrence() {
+        ManualUpdateScheduler scheduler = configureDelayed("catcat,end\n");
+        query("cat");
+        replacement("");
+        replaceCurrent();
+        assertFalse(search.hasMatches());
+        scheduler.advanceBy(50);
+        awaitSearch();
+        assertMatchSelection(0, 0, 0, 3);
+        replaceCurrent();
+        scheduler.advanceBy(50);
+        awaitSearch();
+        assertEquals(",end\n", myFixture.getFile().getText());
+        assertFalse(search.hasMatches());
+        assertEquals("No matches", search.getComponent().getStatusText());
+    }
+
+    public void testInterveningCommittedEditPreservesReplacementAnchor() {
+        ManualUpdateScheduler scheduler = configureDelayed("cat cat,cat\n");
+        query("cat");
+        replacement("catfish");
+        AtomicInteger updates = trackTableUpdates();
+        replaceCurrent();
+        scheduler.advanceBy(25);
+        String latest = "catfish cat,cat,cat\ncat,new,end\n";
+        commitText(latest);
+        assertEquals(1, scheduler.pendingCount());
+        assertFalse(search.hasMatches());
+        scheduler.advanceBy(25);
+        assertEquals(0, updates.get());
+        scheduler.advanceBy(24);
+        assertEquals(0, updates.get());
+        scheduler.advanceBy(1);
+        awaitSearch();
+        assertEquals(1, updates.get());
+        assertEquals(latest, myFixture.getFile().getText());
+        assertEquals(3, getTableModel().getRowCount());
+        assertEquals(3, getTableModel().getColumnCount());
+        assertEquals("2 of 5 matches", search.getComponent().getStatusText());
+        assertMatchSelection(0, 0, 8, 11);
+    }
+
+    public void testDelayedReplaceAllAndUndoRefreshCommittedValues() {
+        String original = "cat cat,cat\ncat,end\n";
+        ManualUpdateScheduler scheduler = configureDelayed(original);
+        query("cat");
+        replacement("a,\"b\"\nc");
+        AtomicInteger updates = trackTableUpdates();
+        replaceAll();
+        assertEquals(1, scheduler.pendingCount());
+        assertFalse(search.hasMatches());
+        scheduler.advanceBy(49);
+        assertEquals(0, updates.get());
+        scheduler.advanceBy(1);
+        awaitSearch();
+        assertEquals(1, updates.get());
+        assertEquals("a,\"b\"\nc a,\"b\"\nc", getTableModel().getValue(0, 0));
+        assertEquals("a,\"b\"\nc", getTableModel().getValue(1, 0));
+        assertFalse(getTableModel().hasErrors());
+        assertFalse(search.hasMatches());
+
+        TextEditor textEditor = TextEditorProvider.getInstance().getTextEditor(myFixture.getEditor());
+        UndoManager.getInstance(getProject()).undo(textEditor);
+        PsiDocumentManager.getInstance(getProject()).commitAllDocuments();
+        assertEquals(original, myFixture.getFile().getText());
+        assertEquals(1, scheduler.pendingCount());
+        assertEquals(1, updates.get());
+        scheduler.advanceBy(50);
+        awaitSearch();
+        assertEquals(2, updates.get());
+        assertEquals(0, scheduler.pendingCount());
+        assertEquals("cat cat", getTableModel().getValue(0, 0));
+        assertEquals("1 of 4 matches", search.getComponent().getStatusText());
+        assertMatchSelection(0, 0, 0, 3);
+    }
+
+    public void testDisposingEditorCancelsDelayedReplacementRefresh() {
+        FindManager manager = spyFindManager();
+        ManualUpdateScheduler scheduler = configureDelayed("cat cat,cat\n");
+        query("cat");
+        replacement("catfish");
+        AtomicInteger updates = trackTableUpdates();
+        replaceCurrent();
+        Runnable queued = scheduler.pendingUpdate();
+        clearInvocations(manager);
+        fileEditor.dispose();
+        assertEquals(0, scheduler.pendingCount());
+        scheduler.advanceBy(50);
+        queued.run(); // A callback already dispatched before disposal must also be harmless.
+        UIUtil.dispatchAllInvocationEvents();
+        assertEquals(0, updates.get());
+        assertFalse(search.isSearchInProgress());
+        assertFalse(search.hasMatches());
+        assertEquals("catfish cat,cat\n", myFixture.getFile().getText());
+        verify(manager, never()).findString(any(CharSequence.class), anyInt(), any(FindModel.class));
+    }
+
+    public void testClosingSearchBeforeDelayedRefreshDoesNotRestartIt() {
+        FindManager manager = spyFindManager();
+        ManualUpdateScheduler scheduler = configureDelayed("cat,end\n");
+        query("cat");
+        commitText("dog,cat\n");
+        search.close();
+        clearInvocations(manager);
+        scheduler.advanceBy(50);
+        awaitSearch();
+        assertFalse(search.getComponent().isVisible());
+        assertFalse(search.isSearchInProgress());
+        verify(manager, never()).findString(any(CharSequence.class), anyInt(), any(FindModel.class));
+        fileEditor.showSearch(false);
+        awaitSearch();
+        assertMatchSelection(0, 1, 0, 3);
+        assertEquals("1 of 1 matches", search.getComponent().getStatusText());
+    }
+
     public void testReplaceAllQuotesSeparatorsQuotesAndNewlinesAndIsOneUndoStep() {
         String original = "cat cat,cat\ncat,end\n";
         configure(original);
@@ -569,9 +735,37 @@ public class CsvTableSearchTest extends CsvTableEditorSwingTestBase {
         assertEquals("1 of 1 matches", search.getComponent().getStatusText());
     }
 
+    public void testCommittedEditsCoalesceUntilTheLatestRefreshDeadline() {
+        ManualUpdateScheduler scheduler = configureDelayed("cat,end\n");
+        query("cat");
+        AtomicInteger updates = trackTableUpdates();
+        commitText("dog,cat\n");
+        scheduler.advanceBy(25);
+        String latest = "one,two,three\nfour,five,cat\nsix,seven,cat\n";
+        commitText(latest);
+        assertEquals(1, scheduler.pendingCount());
+        assertFalse(search.hasMatches());
+        scheduler.advanceBy(25);
+        assertEquals(0, updates.get());
+        scheduler.advanceBy(24);
+        assertEquals(0, updates.get());
+        assertEquals(2, getTableModel().getRowCount());
+        assertEquals(2, getTableModel().getColumnCount());
+        scheduler.advanceBy(1);
+        awaitSearch();
+        assertEquals(1, updates.get());
+        assertEquals(0, scheduler.pendingCount());
+        assertEquals(4, getTableModel().getRowCount());
+        assertEquals(3, getTableModel().getColumnCount());
+        assertEquals("three", getTableModel().getValue(0, 2));
+        assertMatchSelection(1, 2, 0, 3);
+        assertEquals("1 of 2 matches", search.getComponent().getStatusText());
+    }
+
     public void testOpeningSearchCommitsActiveCellAndCloseKeepsResultSelected() {
-        configure("cat,end\n");
+        ManualUpdateScheduler scheduler = configureDelayed("cat,end\n");
         search.close();
+        AtomicInteger updates = trackTableUpdates();
         JTable table = fileEditor.getTable();
         assertTrue(table.editCellAt(0, 1));
         JTextArea area = UIUtil.findComponentOfType((JComponent) table.getEditorComponent(), JTextArea.class);
@@ -579,7 +773,12 @@ public class CsvTableSearchTest extends CsvTableEditorSwingTestBase {
         area.setText("dog");
         fileEditor.showSearch(false);
         assertFalse(table.isEditing());
+        assertEquals("cat,dog\n", myFixture.getFile().getText());
+        assertEquals(1, scheduler.pendingCount());
+        assertEquals(0, updates.get());
+        scheduler.advanceBy(50);
         query("dog");
+        assertEquals(1, updates.get());
         assertCell(0, 1);
         search.close();
         assertFalse(search.getComponent().isVisible());

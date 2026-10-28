@@ -119,9 +119,13 @@ public class CsvTableEditorSwing extends CsvTableEditor {
     }
 
     protected void createUIComponents() {
-        tblEditor = createTable(new CsvTableModelSwing(this));
+        tblEditor = createTable(createTableModel());
         tblEditor.setRowSorter(null);
         lnkTextEditor = new LinkLabel<>("Open.file.in.text.editor", null);
+    }
+
+    protected CsvTableModelSwing createTableModel() {
+        return new CsvTableModelSwing(this);
     }
 
     protected CsvTable createTable(CsvTableModelSwing model) {

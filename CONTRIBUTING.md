@@ -42,3 +42,9 @@ gradle runIdea
 ```
  
 All of the gradle tasks can be connected to the IntelliJ debugger.
+
+Swing table refresh timing tests inject `net.seesharpsoft.intellij.util.ManualUpdateScheduler`
+from the test sources through the table model factory.
+Advance its virtual clock to exercise the production 50-ms delay and cancellation/coalescing logic
+without sleeps; the scheduler queues every request, so coalescing remains the model's responsibility.
+The default scheduler still refreshes immediately in other unit tests.

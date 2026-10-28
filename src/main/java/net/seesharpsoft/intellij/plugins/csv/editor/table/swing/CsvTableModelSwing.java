@@ -7,6 +7,7 @@ import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditor;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableModelBase;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
+import net.seesharpsoft.intellij.util.UpdateScheduler;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.event.EventListenerList;
@@ -20,35 +21,61 @@ import java.util.Map;
 public class CsvTableModelSwing extends CsvTableModelBase<CsvTableEditor> implements TableModel {
 
     private final EventListenerList listenerList = new EventListenerList();
-    private final Alarm myUpdateAlarm;
+    private final UpdateScheduler updateScheduler;
     private ModelState preparedState;
     private List<String> headerTexts;
 
     private static final int UPDATE_DELAY_MILLIS = 50;
 
     public CsvTableModelSwing(@NotNull CsvTableEditor psiFileHolder) {
+        this(psiFileHolder, createUpdateScheduler(psiFileHolder));
+    }
+
+    CsvTableModelSwing(@NotNull CsvTableEditor psiFileHolder, @NotNull UpdateScheduler updateScheduler) {
         super(psiFileHolder);
-        myUpdateAlarm = new Alarm(Alarm.ThreadToUse.SWING_THREAD, psiFileHolder);
+        this.updateScheduler = updateScheduler;
+    }
+
+    private static UpdateScheduler createUpdateScheduler(CsvTableEditor editor) {
+        Alarm alarm = new Alarm(Alarm.ThreadToUse.SWING_THREAD, editor);
+        return new UpdateScheduler() {
+            @Override
+            public void cancel() {
+                alarm.cancelAllRequests();
+            }
+
+            @Override
+            public void schedule(Runnable update, int delayMillis) {
+                if (ApplicationManager.getApplication().isUnitTestMode()) update.run();
+                else alarm.addRequest(update, delayMillis);
+            }
+        };
+    }
+
+    @Override
+    public void dispose() {
+        super.dispose();
+        updateScheduler.cancel();
+        preparedState = null;
     }
 
     @Override
     public void notifyUpdate() {
         if (isDisposed() || isSuspended()) return;
 
-        if (ApplicationManager.getApplication().isUnitTestMode() ||
-                (ApplicationManager.getApplication().isDispatchThread() &&
-                        getPsiFileHolder() instanceof CsvTableEditorSwing editor && editor.isReordering())) {
+        if (ApplicationManager.getApplication().isDispatchThread() &&
+                getPsiFileHolder() instanceof CsvTableEditorSwing editor && editor.isReordering()) {
             updateTableImmediately();
             return;
         }
 
-        myUpdateAlarm.cancelAllRequests();
-        myUpdateAlarm.addRequest(this::updateTableImmediately, UPDATE_DELAY_MILLIS);
+        updateScheduler.cancel();
+        updateScheduler.schedule(this::updateTableImmediately, UPDATE_DELAY_MILLIS);
     }
 
     void updateTableImmediately() {
         if (isDisposed() || isSuspended()) return;
-        if (myUpdateAlarm != null) myUpdateAlarm.cancelAllRequests();
+        if (updateScheduler != null) updateScheduler.cancel();
 
         getPsiFileHolder().beforeTableModelUpdate();
         try {

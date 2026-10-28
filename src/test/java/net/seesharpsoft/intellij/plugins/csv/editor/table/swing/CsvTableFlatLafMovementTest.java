@@ -5,6 +5,14 @@ import net.seesharpsoft.intellij.plugins.csv.editor.table.flatlaf.CsvTableEditor
 public class CsvTableFlatLafMovementTest extends CsvTableMovementTest {
     @Override
     protected CsvTableEditorSwing createEditor() {
-        return new CsvTableEditorFlatLaf(getProject(), myFixture.getFile().getVirtualFile());
+        if (updateScheduler == null) {
+            return new CsvTableEditorFlatLaf(getProject(), myFixture.getFile().getVirtualFile());
+        }
+        return new CsvTableEditorFlatLaf(getProject(), myFixture.getFile().getVirtualFile()) {
+            @Override
+            protected CsvTableModelSwing createTableModel() {
+                return createTableModelForTest(this);
+            }
+        };
     }
 }

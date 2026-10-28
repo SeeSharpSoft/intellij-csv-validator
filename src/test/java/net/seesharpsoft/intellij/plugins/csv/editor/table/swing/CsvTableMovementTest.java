@@ -2,12 +2,14 @@ package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.application.WriteAction;
+import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.command.undo.UndoManager;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.util.ui.ImageUtil;
 import com.intellij.util.ui.JBUI;
 import net.seesharpsoft.intellij.plugins.csv.CsvFileType;
 import net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions;
+import net.seesharpsoft.intellij.util.ManualUpdateScheduler;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -19,6 +21,7 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class CsvTableMovementTest extends CsvTableEditorSwingTestBase {
     private static final String ORIGINAL = "a,b,c,d\n1,2,3,4\n5,6,7,8\n9,10,11,12\n";
@@ -221,6 +224,137 @@ public class CsvTableMovementTest extends CsvTableEditorSwingTestBase {
         assertEquals(4, fileEditor.getTable().getSelectedColumnCount());
         dragRow(3, 1);
         assertEquals(ORIGINAL, myFixture.getFile().getText());
+    }
+
+    public void testDelayedRefreshCancelsPressedAndDraggingRowsWithoutMovingThem() {
+        for (boolean dragging : new boolean[]{false, true}) {
+            ManualUpdateScheduler scheduler = configureDelayed();
+            CsvTable table = fileEditor.getTable();
+            JTable headers = rowHeaders();
+            int fromY = headers.getCellRect(1, 0, true).y + headers.getRowHeight() / 2;
+            int toY = headers.getCellRect(3, 0, true).y + headers.getRowHeight() / 2;
+            headers.dispatchEvent(mouse(headers, MouseEvent.MOUSE_PRESSED, 5, fromY, MouseEvent.BUTTON1));
+            if (dragging) {
+                headers.dispatchEvent(mouse(headers, MouseEvent.MOUSE_DRAGGED, 5, toY, MouseEvent.NOBUTTON));
+                assertEquals("Moving row 2", headers.getAccessibleContext().getAccessibleDescription());
+                assertTrue(table.getSelectionModel().getValueIsAdjusting());
+            }
+            String latest = ORIGINAL.replace("1,2,3,4", "edited,2,3,4");
+            WriteCommandAction.runWriteCommandAction(getProject(), () -> {
+                myFixture.getEditor().getDocument().setText(latest);
+                PsiDocumentManager.getInstance(getProject()).commitAllDocuments();
+            });
+            assertEquals(1, scheduler.pendingCount());
+            scheduler.advanceBy(49);
+            assertTrue(headers.getActionMap().get("csv.cancel.row.drag").isEnabled());
+            scheduler.advanceBy(1);
+            assertFalse(headers.getActionMap().get("csv.cancel.row.drag").isEnabled());
+            assertNull(headers.getAccessibleContext().getAccessibleDescription());
+            assertFalse(table.getSelectionModel().getValueIsAdjusting());
+            headers.dispatchEvent(mouse(headers, MouseEvent.MOUSE_RELEASED, 5, toY, MouseEvent.BUTTON1));
+            assertEquals(latest, myFixture.getFile().getText());
+            assertEquals("edited", getTableModel().getValue(1, 0));
+        }
+    }
+
+    public void testDisposingEditorCancelsDragAndPendingRefresh() {
+        ManualUpdateScheduler scheduler = configureDelayed();
+        CsvTable table = fileEditor.getTable();
+        JTable headers = rowHeaders();
+        int fromY = headers.getCellRect(1, 0, true).y + headers.getRowHeight() / 2;
+        int toY = headers.getCellRect(3, 0, true).y + headers.getRowHeight() / 2;
+        headers.dispatchEvent(mouse(headers, MouseEvent.MOUSE_PRESSED, 5, fromY, MouseEvent.BUTTON1));
+        headers.dispatchEvent(mouse(headers, MouseEvent.MOUSE_DRAGGED, 5, toY, MouseEvent.NOBUTTON));
+        assertTrue(table.getSelectionModel().getValueIsAdjusting());
+        AtomicInteger updates = new AtomicInteger();
+        table.getModel().addTableModelListener(event -> updates.incrementAndGet());
+        table.getModel().notifyUpdate();
+        Runnable queued = scheduler.pendingUpdate();
+        fileEditor.dispose();
+        assertEquals(0, scheduler.pendingCount());
+        scheduler.advanceBy(50);
+        queued.run();
+        assertEquals(0, updates.get());
+        assertFalse(headers.getActionMap().get("csv.cancel.row.drag").isEnabled());
+        assertFalse(table.getSelectionModel().getValueIsAdjusting());
+        assertNull(headers.getAccessibleContext().getAccessibleDescription());
+        headers.dispatchEvent(mouse(headers, MouseEvent.MOUSE_RELEASED, 5, toY, MouseEvent.BUTTON1));
+        assertEquals(ORIGINAL, myFixture.getFile().getText());
+    }
+
+    public void testImmediateRefreshCancelsPendingDelayedDelivery() {
+        ManualUpdateScheduler scheduler = configureDelayed();
+        CsvTableModelSwing model = fileEditor.getTable().getModel();
+        AtomicInteger updates = new AtomicInteger();
+        model.addTableModelListener(event -> updates.incrementAndGet());
+        model.notifyUpdate();
+        assertEquals(1, scheduler.pendingCount());
+        model.updateTableImmediately();
+        assertEquals(1, updates.get());
+        assertEquals(0, scheduler.pendingCount());
+        scheduler.advanceBy(50);
+        assertEquals(1, updates.get());
+    }
+
+    public void testSuspendedEditorIgnoresDeliveryAndRefreshesWhenSelectedAgain() {
+        ManualUpdateScheduler scheduler = configureDelayed();
+        CsvTableModelSwing model = fileEditor.getTable().getModel();
+        AtomicInteger updates = new AtomicInteger();
+        model.addTableModelListener(event -> updates.incrementAndGet());
+        model.notifyUpdate();
+        fileEditor.deselectNotify();
+        scheduler.advanceBy(50);
+        assertEquals(0, updates.get());
+        assertEquals(0, scheduler.pendingCount());
+        fileEditor.selectNotify();
+        assertEquals(1, scheduler.pendingCount());
+        scheduler.advanceBy(50);
+        assertEquals(1, updates.get());
+        assertEquals(0, scheduler.pendingCount());
+    }
+
+    public void testRowDragBelowThresholdDoesNotMoveOnReleaseAfterRefreshWasScheduled() {
+        ManualUpdateScheduler scheduler = configureDelayed();
+        JTable headers = rowHeaders();
+        int fromY = headers.getCellRect(1, 0, true).y + headers.getRowHeight() / 2;
+        int toY = headers.getCellRect(3, 0, true).y + headers.getRowHeight() / 2;
+        fileEditor.getTableModel().notifyUpdate();
+        headers.dispatchEvent(mouse(headers, MouseEvent.MOUSE_PRESSED, 5, fromY, MouseEvent.BUTTON1));
+        headers.dispatchEvent(mouse(headers, MouseEvent.MOUSE_DRAGGED, 5, fromY, MouseEvent.NOBUTTON));
+        assertNull(headers.getAccessibleContext().getAccessibleDescription());
+        headers.dispatchEvent(mouse(headers, MouseEvent.MOUSE_RELEASED, 5, toY, MouseEvent.BUTTON1));
+        scheduler.advanceBy(50);
+        assertEquals(ORIGINAL, myFixture.getFile().getText());
+        assertFalse(headers.getActionMap().get("csv.cancel.row.drag").isEnabled());
+    }
+
+    public void testRowDragCancelsWhenReadOnlyBeforeDelayedRefresh() {
+        ManualUpdateScheduler scheduler = configureDelayed();
+        CsvTable table = fileEditor.getTable();
+        JTable headers = rowHeaders();
+        int fromY = headers.getCellRect(1, 0, true).y + headers.getRowHeight() / 2;
+        int toY = headers.getCellRect(3, 0, true).y + headers.getRowHeight() / 2;
+        headers.dispatchEvent(mouse(headers, MouseEvent.MOUSE_PRESSED, 5, fromY, MouseEvent.BUTTON1));
+        headers.dispatchEvent(mouse(headers, MouseEvent.MOUSE_DRAGGED, 5, toY, MouseEvent.NOBUTTON));
+        assertTrue(table.getSelectionModel().getValueIsAdjusting());
+        table.getModel().notifyUpdate();
+        fileEditor.setEditable(false);
+        headers.dispatchEvent(mouse(headers, MouseEvent.MOUSE_DRAGGED, 5, toY, MouseEvent.NOBUTTON));
+        assertFalse(table.getSelectionModel().getValueIsAdjusting());
+        assertNull(headers.getAccessibleContext().getAccessibleDescription());
+        assertFalse(headers.getActionMap().get("csv.cancel.row.drag").isEnabled());
+        headers.dispatchEvent(mouse(headers, MouseEvent.MOUSE_RELEASED, 5, toY, MouseEvent.BUTTON1));
+        scheduler.advanceBy(50);
+        assertEquals(ORIGINAL, myFixture.getFile().getText());
+    }
+
+    private ManualUpdateScheduler configureDelayed() {
+        ManualUpdateScheduler scheduler = new ManualUpdateScheduler();
+        updateScheduler = scheduler;
+        configure(ORIGINAL);
+        scheduler.advanceBy(50);
+        assertEquals(0, scheduler.pendingCount());
+        return scheduler;
     }
 
     public void testRowDragPreviewShowsSourceCellsAndFadesAt400Pixels() {
