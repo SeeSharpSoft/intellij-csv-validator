@@ -34,6 +34,9 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
                              List<String> headers, boolean errors) {
     }
 
+    private record RowMetadata(int rows, int columns, Set<Integer> comments) {
+    }
+
     private final T myPsiFileHolder;
     private volatile boolean myDisposed = false;
 
@@ -160,33 +163,46 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
         if (file == null) throw new IllegalStateException("CSV file is no longer available");
         Document document = PsiDocumentManager.getInstance(file.getProject()).getDocument(file);
         if (document == null) throw new IllegalStateException("CSV document is no longer available");
-        int rows = 0;
-        int columns = 0;
-        Set<Integer> comments = new HashSet<>();
-        List<String> headers = null;
-        for (PsiElement child = file.getFirstChild(); child != null; child = child.getNextSibling()) {
-            if ((rows & 1023) == 0) ProgressManager.checkCanceled();
-            if (child instanceof PsiErrorElement) break;
-            if (child instanceof CsvRecord record) {
-                boolean comment = CsvHelper.isCommentElement(record.getFirstChild());
-                if (comment) comments.add(rows);
-                if (!comment && headers == null) {
-                    headers = new ArrayList<>();
-                    for (CsvField field : record.getFieldList()) {
-                        headers.add(CsvHelper.unquoteCsvValue(field.getText(), CsvHelper.getEscapeCharacter(file)).trim());
-                    }
-                }
-                columns = Math.max(columns, PsiTreeUtil.countChildrenOfType(record, CsvField.class));
-                rows++;
-            }
-        }
+        RowMetadata metadata = readRowMetadata(file);
         int[] visited = {0};
         boolean errors = !PsiTreeUtil.processElements(file, element -> {
             if ((visited[0]++ & 1023) == 0) ProgressManager.checkCanceled();
             return !(element instanceof PsiErrorElement);
         });
-        return new ModelState(file, document.getModificationStamp(), rows, columns, Set.copyOf(comments),
-                headers == null ? List.of() : List.copyOf(headers), errors);
+        return new ModelState(file, document.getModificationStamp(), metadata.rows(), metadata.columns(),
+                metadata.comments(), readHeaderTexts(file), errors);
+    }
+
+    /** Reads metadata for the records that can be displayed, stopping at a top-level parse error. */
+    private static RowMetadata readRowMetadata(@Nullable PsiFile file) {
+        int rows = 0;
+        int columns = 0;
+        Set<Integer> comments = new HashSet<>();
+        for (PsiElement child = file == null ? null : file.getFirstChild();
+             child != null; child = child.getNextSibling()) {
+            if ((rows & 1023) == 0) ProgressManager.checkCanceled();
+            if (child instanceof PsiErrorElement) break;
+            if (child instanceof CsvRecord record) {
+                if (CsvHelper.isCommentElement(record.getFirstChild())) comments.add(rows);
+                columns = Math.max(columns, PsiTreeUtil.countChildrenOfType(record, CsvField.class));
+                rows++;
+            }
+        }
+        return new RowMetadata(rows, columns, Set.copyOf(comments));
+    }
+
+    /** Decodes the first non-comment record's headers; the caller must hold a read action. */
+    protected static List<String> readHeaderTexts(@Nullable PsiFile file) {
+        PsiElement field = PsiHelper.findFirst(file, CsvTypes.FIELD);
+        if (field == null) return List.of();
+        CsvEscapeCharacter escapeCharacter = CsvHelper.getEscapeCharacter(file);
+        List<String> headers = new ArrayList<>();
+        for (; field != null; field = field.getNextSibling()) {
+            if (field instanceof CsvField) {
+                headers.add(CsvHelper.unquoteCsvValue(field.getText(), escapeCharacter).trim());
+            }
+        }
+        return List.copyOf(headers);
     }
 
     protected boolean applyState(ModelState state) {
@@ -281,23 +297,10 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
         getPsiFile();
         if (myCachedRowCount == -1) {
             myCachedRowCount = ReadAction.compute(() -> {
-                PsiFile psiFile = getPsiFile();
-                Set<Integer> commentRows = new HashSet<>();
-                int rowCount = 0;
-                if (psiFile != null) {
-                    for (PsiElement child = psiFile.getFirstChild();
-                         child != null && !(child instanceof PsiErrorElement);
-                         child = child.getNextSibling()) {
-                        if (child instanceof CsvRecord) {
-                            if (PsiHelper.getElementType(child.getFirstChild()) == CsvTypes.COMMENT) {
-                                commentRows.add(rowCount);
-                            }
-                            rowCount++;
-                        }
-                    }
-                }
-                myCachedCommentRows = commentRows;
-                return rowCount;
+                RowMetadata metadata = readRowMetadata(getPsiFile());
+                myCachedColumnCount = metadata.columns();
+                myCachedCommentRows = metadata.comments();
+                return metadata.rows();
             });
         }
         return myCachedRowCount;
@@ -305,10 +308,7 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
 
     @Override
     public int getColumnCount() {
-        getPsiFile();
-        if (myCachedColumnCount == -1) {
-            myCachedColumnCount = ReadAction.compute(() -> CsvTableModel.getColumnCount(getPsiFile()));
-        }
+        getRowCount();
         return myCachedColumnCount;
     }
 

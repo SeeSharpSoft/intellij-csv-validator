@@ -2,15 +2,11 @@ package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.util.Computable;
-import com.intellij.psi.PsiElement;
 import com.intellij.util.Alarm;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditor;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableModelBase;
-import net.seesharpsoft.intellij.plugins.csv.psi.CsvField;
-import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
-import net.seesharpsoft.intellij.psi.PsiHelper;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.event.EventListenerList;
@@ -18,7 +14,6 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
 import java.util.HashMap;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -114,19 +109,9 @@ public class CsvTableModelSwing extends CsvTableModelBase<CsvTableEditor> implem
 
     private String getHeaderText(int column) {
         if (headerTexts == null) {
-            headerTexts = readHeaderTexts(PsiHelper.findFirst(getPsiFile(), CsvTypes.FIELD));
+            headerTexts = readHeaderTexts(getPsiFile());
         }
         return column < headerTexts.size() ? headerTexts.get(column) : "";
-    }
-
-    private List<String> readHeaderTexts(PsiElement field) {
-        List<String> headers = new ArrayList<>();
-        for (; field != null; field = field.getNextSibling()) {
-            if (field instanceof CsvField) {
-                headers.add(CsvHelper.unquoteCsvValue(field.getText(), getEscapeCharacter()).trim());
-            }
-        }
-        return List.copyOf(headers);
     }
 
     private String formatColumnName(int column, String headerText) {
