@@ -436,8 +436,8 @@ public class CsvTableSearchSessionBaseTest extends CsvBasePlatformTestCase {
         }
 
         @Override
-        protected int convertColumnIndexToView(int column) {
-            return viewColumns == null ? column : viewColumns[column];
+        protected int[] getViewColumnIndices() {
+            return viewColumns == null ? super.getViewColumnIndices() : viewColumns.clone();
         }
 
         @Override

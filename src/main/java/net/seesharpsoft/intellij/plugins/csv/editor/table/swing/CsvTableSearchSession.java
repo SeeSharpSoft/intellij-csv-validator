@@ -10,10 +10,12 @@ import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableSearchSessionB
 import javax.swing.*;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumnModel;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultCaret;
 import java.awt.*;
 import java.beans.PropertyChangeListener;
+import java.util.Arrays;
 
 final class CsvTableSearchSession extends CsvTableSearchSessionBase<CsvTableEditorSwing> {
     private MatchCellRenderer cellMatchRenderer;
@@ -49,8 +51,15 @@ final class CsvTableSearchSession extends CsvTableSearchSessionBase<CsvTableEdit
     }
 
     @Override
-    protected int convertColumnIndexToView(int column) {
-        return editor.getTable().convertColumnIndexToView(column);
+    protected int[] getViewColumnIndices() {
+        JTable table = editor.getTable();
+        int[] columns = new int[table.getModel().getColumnCount()];
+        Arrays.fill(columns, -1);
+        TableColumnModel columnModel = table.getColumnModel();
+        for (int view = 0; view < columnModel.getColumnCount(); view++) {
+            columns[columnModel.getColumn(view).getModelIndex()] = view;
+        }
+        return columns;
     }
 
     @Override

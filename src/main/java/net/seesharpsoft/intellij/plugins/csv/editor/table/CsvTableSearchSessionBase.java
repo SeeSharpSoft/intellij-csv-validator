@@ -130,9 +130,11 @@ public abstract class CsvTableSearchSessionBase<T extends CsvTableEditor>
         return null;
     }
 
-    /** Returns the view index of a model column, or a negative index for a hidden column. */
-    protected int convertColumnIndexToView(int column) {
-        return column;
+    /** Snapshots model-to-view column indices on the EDT; negative indices denote hidden columns. */
+    protected int[] getViewColumnIndices() {
+        int[] columns = new int[editor.getTableModel().getColumnCount()];
+        for (int column = 0; column < columns.length; column++) columns[column] = column;
+        return columns;
     }
 
     protected int convertRowIndexToModel(int row) {
@@ -329,12 +331,6 @@ public abstract class CsvTableSearchSessionBase<T extends CsvTableEditor>
                 .coalesceBy(this)
                 .finishOnUiThread(ModalityState.any(), result -> publishResults(result, anchor, generation, stamp))
                 .submit(AppExecutorUtil.getAppExecutorService());
-    }
-
-    private int[] getViewColumnIndices() {
-        int[] columns = new int[editor.getTableModel().getColumnCount()];
-        for (int column = 0; column < columns.length; column++) columns[column] = convertColumnIndexToView(column);
-        return columns;
     }
 
     private void publishResults(SearchResult result, Match anchor, long generation, long stamp) {

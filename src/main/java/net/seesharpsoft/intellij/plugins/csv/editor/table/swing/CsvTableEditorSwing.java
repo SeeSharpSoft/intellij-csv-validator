@@ -361,7 +361,7 @@ public class CsvTableEditorSwing extends CsvTableEditor {
             int[] rows = tblEditor.getSelectedRows();
             int[] columns = tblEditor.getSelectedColumns();
             // Normalize Swing's view mapping before changing the underlying document.
-            normalizeColumns();
+            normalizeColumns(order);
             storeCurrentTableLayout();
             if (isEditable() && !getTableModel().hasErrors() && stopCellEditing()) {
                 applyOrder(true, order, rows, columns);
@@ -454,10 +454,17 @@ public class CsvTableEditorSwing extends CsvTableEditor {
                 operation, CsvPluginManager.getLocalizedText("table.reorder.progress"), true, project);
     }
 
-    private void normalizeColumns() {
-        for (int column = 0; column < tblEditor.getColumnCount(); column++) {
-            int current = tblEditor.convertColumnIndexToView(column);
-            if (current != column) tblEditor.getColumnModel().moveColumn(current, column);
+    private void normalizeColumns(int[] order) {
+        TableColumnModel columnModel = tblEditor.getColumnModel();
+        int[] viewIndices = new int[order.length];
+        for (int view = 0; view < order.length; view++) viewIndices[order[view]] = view;
+        for (int column = 0; column < order.length; column++) {
+            int current = viewIndices[column];
+            if (current == column) continue;
+            columnModel.moveColumn(current, column);
+            for (int view = column; view <= current; view++) {
+                viewIndices[columnModel.getColumn(view).getModelIndex()] = view;
+            }
         }
     }
 
