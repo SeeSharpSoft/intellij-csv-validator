@@ -1,7 +1,6 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.util.Computable;
 import com.intellij.util.Alarm;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditor;
@@ -126,13 +125,11 @@ public class CsvTableModelSwing extends CsvTableModelBase<CsvTableEditor> implem
 
     /**
      * Gets header name for a given column, with index formatting.
-     * PSI access is wrapped in a read action for thread safety.
+     * Reuses existing read access or acquires it when necessary.
      */
     @Override
     public String getColumnName(int column) {
-        return ApplicationManager.getApplication().runReadAction((Computable<String>) () -> {
-            return formatColumnName(column, getHeaderText(column));
-        });
+        return computeWithReadAccess(() -> formatColumnName(column, getHeaderText(column)));
     }
 
     private String getHeaderText(int column) {

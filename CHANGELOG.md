@@ -26,6 +26,10 @@
 - Improved automatic column sizing in the FlatLaf table editor to account for rendered cell padding and column headers
 - Copying table selections now provides properly quoted CSV using the file's separator and escape settings, while preserving HTML table copying
 
+### Fixed
+
+- Avoid prohibited IDE read-action entry during table/header painting by reusing existing read access or deferring unlocked paints without caching CSV data (#1116)
+
 ## 4.6.0 - Oct 18, 2026
 
 ### Fixed

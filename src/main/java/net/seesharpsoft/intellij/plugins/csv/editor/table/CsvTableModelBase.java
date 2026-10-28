@@ -1,8 +1,10 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.progress.ProgressManager;
+import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiDocumentManager;
@@ -252,9 +254,15 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
         return myCachedEscapeCharacter;
     }
 
+    protected static <V> V computeWithReadAccess(Computable<V> computation) {
+        // Even a redundant read-action entry is prohibited during painting.
+        return ApplicationManager.getApplication().isReadAccessAllowed()
+                ? computation.compute() : ReadAction.compute(computation::compute);
+    }
+
     @Override
     public PsiElement getFieldAt(int row, int column) {
-        return ReadAction.compute(() -> {
+        return computeWithReadAccess(() -> {
             PsiFile psiFile = getPsiFile();
             if (psiFile == null) return null;
             long stamp = psiFile.getModificationStamp();
@@ -287,7 +295,7 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
     public boolean hasErrors() {
         getPsiFile();
         if (myCachedHasErrors == null) {
-            myCachedHasErrors = ReadAction.compute(() -> {
+            myCachedHasErrors = computeWithReadAccess(() -> {
                 PsiFile psiFile = getPsiFile();
                 return psiFile != null && PsiTreeUtil.hasErrorElements(psiFile);
             });
@@ -299,7 +307,7 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
     public int getRowCount() {
         getPsiFile();
         if (myCachedRowCount == -1) {
-            myCachedRowCount = ReadAction.compute(() -> {
+            myCachedRowCount = computeWithReadAccess(() -> {
                 RowMetadata metadata = readRowMetadata(getPsiFile());
                 myCachedColumnCount = metadata.columns();
                 myCachedCommentRows = metadata.comments();
@@ -432,7 +440,7 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
 
     @Override
     public @NotNull String getValue(int rowIndex, int columnIndex) {
-        return ReadAction.compute(() -> {
+        return computeWithReadAccess(() -> {
             PsiElement field = getFieldAt(rowIndex, columnIndex);
             return CsvHelper.getFieldValue(field, getEscapeCharacter());
         });

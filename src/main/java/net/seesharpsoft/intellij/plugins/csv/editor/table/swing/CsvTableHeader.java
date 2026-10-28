@@ -80,6 +80,12 @@ public class CsvTableHeader extends JTableHeader {
     }
 
     @Override
+    public void paint(Graphics g) {
+        if (getTable() instanceof CsvTable csvTable && csvTable.deferPaintWithoutReadAccess()) return;
+        super.paint(g);
+    }
+
+    @Override
     protected void paintComponent(Graphics g) {
         painting = true;
         try {

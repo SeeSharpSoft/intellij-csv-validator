@@ -1,5 +1,8 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
+import com.intellij.openapi.application.Application;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ModalityState;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.table.JBTable;
 import com.intellij.util.ui.JBUI;
@@ -28,6 +31,7 @@ public class CsvTable extends JBTable {
     private int searchMatchRow;
     private int searchMatchColumn;
     private int frozenColumnCount;
+    private boolean deferredPaintPending;
 
     public CsvTable(TableModel model) {
         super(model);
@@ -97,13 +101,33 @@ public class CsvTable extends JBTable {
     }
 
     @Override
-    public void paint(Graphics g) {
+    public void paint(@NotNull Graphics g) {
+        if (deferPaintWithoutReadAccess()) return;
         super.paint(g);
         // Paint above spanning comment rows and cell editors as well as ordinary cells.
         paintFrozenColumnSeparator(g, getHeight());
         if (getClientProperty(CsvTableRowDragListener.class) instanceof CsvTableRowDragListener drag) {
             drag.paintFeedback(g, this);
         }
+    }
+
+    boolean deferPaintWithoutReadAccess() {
+        Application application = ApplicationManager.getApplication();
+        if (application.isReadAccessAllowed()) return false;
+        if (!deferredPaintPending) {
+            deferredPaintPending = true;
+            var editor = getModel().getPsiFileHolder();
+            var project = editor.getProject();
+            application.invokeLater(() -> {
+                deferredPaintPending = false;
+                if (SwingUtilities.getAncestorOfClass(JScrollPane.class, this) instanceof JScrollPane scrollPane &&
+                        scrollPane.isShowing()) {
+                    // repaint() would lose the callback's read access before rendering.
+                    scrollPane.paintImmediately(scrollPane.getVisibleRect());
+                }
+            }, ModalityState.stateForComponent(this), ignored -> editor.isDisposed() || (project != null && project.isDisposed()));
+        }
+        return true;
     }
 
     void cancelRowDragging() {
