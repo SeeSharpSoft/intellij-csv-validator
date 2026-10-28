@@ -11,6 +11,8 @@ import com.intellij.find.editorHeaderActions.PrevOccurrenceAction;
 import com.intellij.find.editorHeaderActions.ToggleMatchCase;
 import com.intellij.find.editorHeaderActions.ToggleRegex;
 import com.intellij.find.editorHeaderActions.ToggleWholeWordsOnlyAction;
+import com.intellij.notification.NotificationGroupManager;
+import com.intellij.notification.NotificationType;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
@@ -22,17 +24,21 @@ import com.intellij.openapi.actionSystem.impl.ActionToolbarImpl;
 import com.intellij.openapi.application.ApplicationBundle;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.application.ReadAction;
+import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.ui.Splitter;
 import com.intellij.openapi.util.Pair;
+import com.intellij.openapi.util.Ref;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.util.text.StringUtil;
+import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiErrorElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.ui.OnePixelSplitter;
+import com.intellij.util.DocumentUtil;
 import com.intellij.util.concurrency.AppExecutorUtil;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
@@ -43,6 +49,7 @@ import net.seesharpsoft.intellij.plugins.csv.psi.CsvField;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvPsiTreeUpdater;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvRecord;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.concurrency.CancellablePromise;
 
 import javax.swing.*;
@@ -213,7 +220,7 @@ public abstract class CsvTableSearchSessionBase<T extends CsvTableEditor>
 
     @Override
     public boolean hasMatches() {
-        return !searching && pendingAnchor == null && resultsStamp == document.getModificationStamp() && !matches.isEmpty();
+        return !searching && !replacing && pendingAnchor == null && resultsStamp == document.getModificationStamp() && !matches.isEmpty();
     }
 
     @Override
@@ -313,8 +320,7 @@ public abstract class CsvTableSearchSessionBase<T extends CsvTableEditor>
         // Snapshot view indices on the EDT. Background work never reads the table model or its PSI cursor.
         int rowCount = editor.getTableModel().getRowCount();
         int[] rows = getViewRowIndices();
-        int[] columns = new int[editor.getTableModel().getColumnCount()];
-        for (int column = 0; column < columns.length; column++) columns[column] = convertColumnIndexToView(column);
+        int[] columns = getViewColumnIndices();
         long stamp = document.getModificationStamp();
         searchTask = ReadAction.nonBlocking(() -> collectMatches(query, rowCount, rows, columns))
                 .withDocumentsCommitted(Objects.requireNonNull(editor.getProject()))
@@ -323,6 +329,12 @@ public abstract class CsvTableSearchSessionBase<T extends CsvTableEditor>
                 .coalesceBy(this)
                 .finishOnUiThread(ModalityState.any(), result -> publishResults(result, anchor, generation, stamp))
                 .submit(AppExecutorUtil.getAppExecutorService());
+    }
+
+    private int[] getViewColumnIndices() {
+        int[] columns = new int[editor.getTableModel().getColumnCount()];
+        for (int column = 0; column < columns.length; column++) columns[column] = convertColumnIndexToView(column);
+        return columns;
     }
 
     private void publishResults(SearchResult result, Match anchor, long generation, long stamp) {
@@ -428,23 +440,18 @@ public abstract class CsvTableSearchSessionBase<T extends CsvTableEditor>
         statusLabel.setForeground(component.getStatusColor());
     }
 
-    public void replaceCurrent() {
-        replace(false);
-    }
-
-    public void replaceAll() {
-        replace(true);
-    }
-
-    private void replace(boolean all) {
-        if (pendingAnchor != null || !editor.isEditable() || editor.getTableModel().hasErrors() || !stopEditing()) return;
+    private @Nullable Match getMatchAnchor() {
+        if (disposed || replacing || pendingAnchor != null || !editor.isEditable() || editor.getTableModel().hasErrors() || !stopEditing()) return null;
         // Read the fields directly: their document-change notifications are delivered asynchronously.
         searchFieldDocumentChanged();
         replaceFieldDocumentChanged();
-        if (!hasMatches()) return;
-        Match anchor = currentMatch();
+        return hasMatches() ? currentMatch() : null;
+    }
+
+    public void replaceCurrent() {
+        Match anchor = getMatchAnchor();
         if (anchor == null) return;
-        List<Match> targets = all ? new ArrayList<>(matches) : List.of(anchor);
+        List<Match> targets = List.of(anchor);
         CsvPsiTreeUpdater updater = new CsvPsiTreeUpdater(editor);
         PreparedReplacements prepared;
         try {
@@ -463,9 +470,94 @@ public abstract class CsvTableSearchSessionBase<T extends CsvTableEditor>
         component.addTextToRecent(component.getSearchTextComponent());
         component.addTextToRecent(component.getReplaceTextComponent());
         // Skip the inserted text so replacing with a value containing the query still moves forward.
-        pendingAnchor = all ? anchor : new Match(anchor.row, anchor.column, prepared.nextOffset, 0);
+        pendingAnchor = new Match(anchor.row, anchor.column, prepared.nextOffset, 0);
         // Rebuild matches after the table model has invalidated its cached PSI, including delayed UI updates.
         editor.getTableModel().notifyUpdate();
+    }
+
+    public void replaceAll() {
+        Match anchor = getMatchAnchor();
+        if (anchor == null) return;
+        PsiFile file = editor.getPsiFile();
+        if (file == null || !document.isWritable()) return;
+        CharSequence snapshot = document.getImmutableCharSequence();
+        long stamp = document.getModificationStamp();
+        long generation = searchGeneration.get();
+        FindModel query = findModel.clone();
+        List<Match> targets = matches;
+        int[] rows = getViewRowIndices();
+        int[] columns = getViewColumnIndices();
+        CsvTableReplacement.Settings settings = CsvTableReplacement.Settings.capture(file);
+        Ref<CsvTableReplacement.Change> change = Ref.create();
+        Ref<FindManager.MalformedReplacementStringException> error = Ref.create();
+        Ref<CsvTableModel> suspendedModel = Ref.create();
+        Ref<Boolean> applied = Ref.create(false);
+        replacing = true;
+        component.updateActions();
+        try {
+            if (!runReplaceAllWithProgress(() -> {
+                try {
+                    change.set(CsvTableReplacement.prepare(snapshot, targets, rows, columns, query, findManager, settings));
+                } catch (FindManager.MalformedReplacementStringException exception) {
+                    error.set(exception);
+                }
+                ProgressManager.checkCanceled();
+            })) return;
+            if (!error.isNull()) {
+                component.setNotFoundBackground();
+                setStatusText(error.get().getMessage());
+                return;
+            }
+            if (disposed || editor.isDisposed() || !component.isVisible()) return;
+            CsvTableReplacement.Change prepared = change.get();
+            WriteCommandAction.runWriteCommandAction(editor.getProject(), "CSV Editor Changes", null, () -> {
+                if (!canApplyReplacement(file, stamp, generation, query, settings)) return;
+                if (prepared != null) {
+                    CsvTableModel model = editor.getTableModel();
+                    model.suspend();
+                    suspendedModel.set(model);
+                    DocumentUtil.executeInBulk(document, () -> {
+                        document.replaceString(prepared.range().getStartOffset(), prepared.range().getEndOffset(), prepared.text());
+                        PsiDocumentManager.getInstance(Objects.requireNonNull(editor.getProject())).commitDocument(document);
+                    });
+                }
+                applied.set(true);
+            });
+            if (!applied.get()) {
+                NotificationGroupManager.getInstance().getNotificationGroup("net.seesharpsoft.intellij.plugins.csv")
+                        .createNotification(CsvPluginManager.getLocalizedText("table.search.replace.changed"),
+                                NotificationType.WARNING).notify(editor.getProject());
+                return;
+            }
+            component.addTextToRecent(component.getSearchTextComponent());
+            component.addTextToRecent(component.getReplaceTextComponent());
+            pendingAnchor = anchor;
+        } finally {
+            replacing = false;
+            if (!suspendedModel.isNull() && !editor.isDisposed()) suspendedModel.get().resume();
+            if (!disposed && !editor.isDisposed() && component.isVisible()) {
+                if (suspendedModel.isNull()) {
+                    if (pendingAnchor != null) editor.getTableModel().notifyUpdate();
+                    else if (resultsStamp != document.getModificationStamp() || generation != searchGeneration.get()) refresh(anchor);
+                }
+                component.updateActions();
+            }
+        }
+    }
+
+    private boolean canApplyReplacement(PsiFile file, long stamp, long generation, FindModel query,
+                                        CsvTableReplacement.Settings settings) {
+        return !disposed && !editor.isDisposed() && component.isVisible()
+                && document.getModificationStamp() == stamp && generation == searchGeneration.get()
+                && document.isWritable() && editor.isEditable() && file.isWritable()
+                && editor.getPsiFile() == file && file.isValid() && settings.isCurrent(file)
+                && query.getStringToFind().equals(component.getSearchTextComponent().getText())
+                && query.getStringToReplace().equals(component.getReplaceTextComponent().getText());
+    }
+
+    protected boolean runReplaceAllWithProgress(Runnable operation) {
+        return ProgressManager.getInstance().runProcessWithProgressSynchronously(
+                operation, CsvPluginManager.getLocalizedText("table.search.replace.progress"), true, editor.getProject());
     }
 
     private PreparedReplacements prepareReplacements(List<Match> targets, CsvPsiTreeUpdater updater)
@@ -536,22 +628,22 @@ public abstract class CsvTableSearchSessionBase<T extends CsvTableEditor>
     }
 
     private final class ReplaceAction extends DumbAwareAction implements CustomComponentAction {
-        private final boolean all;
+        private final Runnable operation;
 
         private ReplaceAction(boolean all) {
             super(ApplicationBundle.message(all ? "editorsearch.replace.all.action.text" : "editorsearch.replace.action.text"));
-            this.all = all;
+            operation = all ? CsvTableSearchSessionBase.this::replaceAll : CsvTableSearchSessionBase.this::replaceCurrent;
         }
 
         @Override
         public void actionPerformed(@NotNull AnActionEvent event) {
-            replace(all);
+            operation.run();
         }
 
         @Override
         public @NotNull JComponent createCustomComponent(@NotNull Presentation presentation, @NotNull String place) {
             JButton button = new JButton(presentation.getText());
-            button.addActionListener(event -> replace(all));
+            button.addActionListener(event -> operation.run());
             return button;
         }
 
