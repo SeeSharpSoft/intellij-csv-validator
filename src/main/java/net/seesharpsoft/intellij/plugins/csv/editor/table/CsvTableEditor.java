@@ -116,12 +116,12 @@ public abstract class CsvTableEditor implements FileEditor, PsiFileHolder {
     @Override
     @NotNull
     public FileEditorState getState(@NotNull FileEditorStateLevel level) {
-        return getTableEditorState();
+        return new CsvTableEditorState(getTableEditorState());
     }
 
     @Override
     public void setState(@NotNull FileEditorState fileEditorState) {
-        this.storedState = fileEditorState instanceof CsvTableEditorState ? (CsvTableEditorState) fileEditorState : new CsvTableEditorState();
+        this.storedState = fileEditorState instanceof CsvTableEditorState state ? new CsvTableEditorState(state) : new CsvTableEditorState();
         applyEditorState(getTableEditorState());
     }
 

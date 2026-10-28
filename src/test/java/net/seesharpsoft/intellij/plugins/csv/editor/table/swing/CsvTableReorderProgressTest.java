@@ -84,6 +84,8 @@ public class CsvTableReorderProgressTest extends CsvTableEditorSwingTestBase {
 
     public void testLargeMoveIsOneDocumentEventAndUndoStep() {
         configure(ORIGINAL + PADDING);
+        fileEditor.getTableEditorState().setColumnWidths(new int[]{80, 200, 160, 240});
+        fileEditor.updateEditorLayout();
         AtomicBoolean uiRan = new AtomicBoolean();
         beforeOperation = () -> onUi(() -> {
             assertTrue(fileEditor.isReordering());
@@ -105,14 +107,21 @@ public class CsvTableReorderProgressTest extends CsvTableEditorSwingTestBase {
         assertEquals("b,a,c,d\n2,1,3,4\n6,5,7,8\n10,9,11,12\n" + PADDING, myFixture.getFile().getText());
         assertEquals("b (1)", fileEditor.getTable().getColumnModel().getColumn(0).getHeaderValue());
         assertEquals(0, fileEditor.getTable().getSelectedColumn());
+        assertOrderedEquals(fileEditor.getTableEditorState().getColumnWidths(), new int[]{200, 80, 160, 240});
         assertReady();
         UndoManager undo = UndoManager.getInstance(getProject());
         undo.undo(fileEditor);
         PsiDocumentManager.getInstance(getProject()).commitAllDocuments();
         assertEquals(ORIGINAL + PADDING, myFixture.getFile().getText());
+        assertOrderedEquals(fileEditor.getTableEditorState().getColumnWidths(), new int[]{80, 200, 160, 240});
+        assertEquals(1, fileEditor.getTable().getSelectedRow());
+        assertEquals(1, fileEditor.getTable().getSelectedColumn());
         undo.redo(fileEditor);
         PsiDocumentManager.getInstance(getProject()).commitAllDocuments();
         assertEquals("b", fileEditor.getTableModel().getValue(0, 0));
+        assertOrderedEquals(fileEditor.getTableEditorState().getColumnWidths(), new int[]{200, 80, 160, 240});
+        assertEquals(1, fileEditor.getTable().getSelectedRow());
+        assertEquals(0, fileEditor.getTable().getSelectedColumn());
     }
 
     public void testCancelDuringPreparationLeavesFileUnchanged() {

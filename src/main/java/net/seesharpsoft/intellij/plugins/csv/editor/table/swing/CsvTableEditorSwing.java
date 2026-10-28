@@ -11,6 +11,8 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.command.WriteCommandAction;
+import com.intellij.openapi.command.undo.BasicUndoableAction;
+import com.intellij.openapi.command.undo.UndoManager;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.util.Ref;
 import com.intellij.psi.PsiDocumentManager;
@@ -71,6 +73,9 @@ public class CsvTableEditorSwing extends CsvTableEditor {
     private static final int BACKGROUND_REORDER_THRESHOLD = 128 * 1024;
 
     private record Selection(int[] rows, int[] columns) {
+    }
+
+    private record ReorderState(CsvTableEditorState layout, Selection selection) {
     }
 
     // temporary stored values when table data is updated
@@ -377,22 +382,42 @@ public class CsvTableEditorSwing extends CsvTableEditor {
 
     private void applyOrder(boolean columns, int[] order, int[] selectedRows, int[] selectedColumns) {
         CsvTableModelSwing model = getTable().getModel();
-        int[] widths = getTableEditorState().getColumnWidths().clone();
+        ReorderState before = new ReorderState(new CsvTableEditorState(getTableEditorState()),
+                new Selection(tblEditor.getSelectedRows(), tblEditor.getSelectedColumns()));
+        CsvTableEditorState layoutAfter = new CsvTableEditorState(before.layout());
+        if (columns) layoutAfter.setColumnWidths(Arrays.stream(order).map(index -> before.layout().getColumnWidths()[index]).toArray());
+        ReorderState after = new ReorderState(layoutAfter, new Selection(selectedRows.clone(), selectedColumns.clone()));
+        Runnable finishReorder = () -> {
+            if (columns) setAllColumnWidths(after.layout().getColumnWidths().clone());
+            selectionAfterReorder = after.selection();
+            UndoManager.getInstance(project).undoableActionPerformed(new BasicUndoableAction(getDocument()) {
+                @Override
+                public void undo() {
+                    restoreReorderState(before);
+                }
+
+                @Override
+                public void redo() {
+                    restoreReorderState(after);
+                }
+            });
+        };
         AtomicBoolean suspended = new AtomicBoolean();
         reordering = true;
         try {
             updateInteractionElements();
             removeTableChangeListener();
             if (getDocument().getTextLength() >= BACKGROUND_REORDER_THRESHOLD || tblEditor.getRowCount() >= 10_000) {
-                if (!applyLargeReorder(columns, order, model, suspended) || isDisposed()) return;
+                if (!applyLargeReorder(columns, order, model, suspended, finishReorder) || isDisposed()) return;
             } else {
                 model.suspend();
                 suspended.set(true);
-                if (columns) model.reorderColumns(order);
-                else model.reorderRows(order);
+                WriteCommandAction.runWriteCommandAction(project, "CSV Editor Changes", null, () -> {
+                    if (columns) model.reorderColumns(order);
+                    else model.reorderRows(order);
+                    finishReorder.run();
+                });
             }
-            if (columns) setAllColumnWidths(Arrays.stream(order).map(index -> widths[index]).toArray());
-            selectionAfterReorder = new Selection(selectedRows, selectedColumns);
         } finally {
             try {
                 if (suspended.get() && !isDisposed()) model.resume();
@@ -407,7 +432,15 @@ public class CsvTableEditorSwing extends CsvTableEditor {
         }
     }
 
-    private boolean applyLargeReorder(boolean columns, int[] order, CsvTableModelSwing model, AtomicBoolean suspended) {
+    private void restoreReorderState(ReorderState state) {
+        if (isDisposed()) return;
+        setState(state.layout());
+        updateEditorLayout();
+        restoreSelection(state.selection().rows(), state.selection().columns());
+    }
+
+    private boolean applyLargeReorder(boolean columns, int[] order, CsvTableModelSwing model, AtomicBoolean suspended,
+                                      Runnable finishReorder) {
         Document document = Objects.requireNonNull(getDocument());
         CharSequence snapshot = document.getImmutableCharSequence();
         long stamp = document.getModificationStamp();
@@ -435,6 +468,7 @@ public class CsvTableEditorSwing extends CsvTableEditor {
                                 suspended.set(true);
                                 if (change != null) DocumentUtil.executeInBulk(document, () ->
                                         document.replaceString(change.range().getStartOffset(), change.range().getEndOffset(), change.text()));
+                                finishReorder.run();
                             }), modality);
                     if (suspended.get()) state.set(ReadAction.nonBlocking(model::captureState)
                             .withDocumentsCommitted(project).expireWith(this).executeSynchronously());

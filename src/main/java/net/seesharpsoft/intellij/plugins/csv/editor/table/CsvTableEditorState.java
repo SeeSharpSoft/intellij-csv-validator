@@ -9,7 +9,9 @@ import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class CsvTableEditorState implements FileEditorState {
 
@@ -19,6 +21,12 @@ public class CsvTableEditorState implements FileEditorState {
 
     public CsvTableEditorState() {
         columnWidths = new int[0];
+    }
+
+    public CsvTableEditorState(CsvTableEditorState state) {
+        columnWidths = state.columnWidths.clone();
+        rowHeight = state.getRowHeight();
+        frozenColumnCount = state.frozenColumnCount;
     }
 
     public int[] getColumnWidths() {
@@ -54,6 +62,19 @@ public class CsvTableEditorState implements FileEditorState {
     @Override
     public boolean canBeMergedWith(FileEditorState fileEditorState, FileEditorStateLevel fileEditorStateLevel) {
         return false;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) return true;
+        if (!(other instanceof CsvTableEditorState state)) return false;
+        return Arrays.equals(columnWidths, state.columnWidths) &&
+                getRowHeight() == state.getRowHeight() && frozenColumnCount == state.frozenColumnCount;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(Arrays.hashCode(columnWidths), getRowHeight(), frozenColumnCount);
     }
 
     public void write(@NotNull Project project, @NotNull Element element) {

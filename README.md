@@ -94,7 +94,7 @@ Drag a column header left or right, or drag a row number up or down, to move tha
 
 The context menus also provide **Move Selected Rows Up/Down** and **Move Selected Columns Left/Right**. These actions move the selection by one position, keeping the selected items in order. Movement stops at the table boundaries; the empty row representing a final line break is not movable.
 
-Moves change the CSV document, not just its display order, and can be undone or redone using the IDE's usual commands. Column widths follow their columns, and the moved items remain selected. Both table-editor implementations support movement, including when columns are frozen. Files with syntax errors and read-only files cannot be reordered.
+Moves change the CSV document, not just its display order, and can be undone or redone using the IDE's usual commands. Column widths follow their columns, and the moved items remain selected. Undo and redo also restore the corresponding column widths and row/column selection. Both table-editor implementations support movement, including when columns are frozen. Files with syntax errors and read-only files cannot be reordered.
 
 Small moves complete immediately. Large moves use IntelliJ's standard cancellable progress dialog while preparing the change and updating the table. The editor waits for completion instead of maintaining a separate optimistic preview; no custom rendering or status bar is used.
 

@@ -73,6 +73,26 @@ public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
         assertTrue(true);
     }
 
+    public void testEditorStatesAreIndependentSnapshots() {
+        fileEditor.getTableEditorState().setColumnWidths(new int[]{80, 200});
+        fileEditor.getTableEditorState().setRowHeight(42);
+        fileEditor.getTableEditorState().setFrozenColumnCount(1);
+        for (FileEditorStateLevel level : FileEditorStateLevel.values()) {
+            CsvTableEditorState snapshot = (CsvTableEditorState) fileEditor.getState(level);
+            assertNotSame(snapshot, fileEditor.getTableEditorState());
+            fileEditor.getTableEditorState().getColumnWidths()[0] = 300;
+            assertOrderedEquals(snapshot.getColumnWidths(), new int[]{80, 200});
+            fileEditor.setState(snapshot);
+            assertNotSame(snapshot, fileEditor.getTableEditorState());
+            snapshot.getColumnWidths()[1] = 400;
+            snapshot.setRowHeight(50);
+            snapshot.setFrozenColumnCount(0);
+            assertOrderedEquals(fileEditor.getTableEditorState().getColumnWidths(), new int[]{80, 200});
+            assertEquals(42, fileEditor.getTableEditorState().getRowHeight());
+            assertEquals(1, fileEditor.getTableEditorState().getFrozenColumnCount());
+        }
+    }
+
     public void testEditable() {
         assertEquals(true, fileEditor.isEditable());
         fileEditor.setEditable(false);

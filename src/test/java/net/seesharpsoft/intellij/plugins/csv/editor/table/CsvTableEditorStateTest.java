@@ -40,6 +40,19 @@ public class CsvTableEditorStateTest extends CsvBasePlatformTestCase {
         assertEquals(0, state.getFrozenColumnCount());
     }
 
+    public void testCopiedStatesCompareByLayout() {
+        CsvTableEditorState state = new CsvTableEditorState();
+        state.setColumnWidths(new int[]{80, 200});
+        state.setRowHeight(42);
+        state.setFrozenColumnCount(1);
+        CsvTableEditorState copy = new CsvTableEditorState(state);
+        assertEquals(state, copy);
+        assertEquals(state.hashCode(), copy.hashCode());
+        state.getColumnWidths()[0] = 300;
+        assertOrderedEquals(copy.getColumnWidths(), new int[]{80, 200});
+        assertFalse(state.equals(copy));
+    }
+
     public void testInvalidStoredFrozenColumnCountDoesNotFreezeColumns() {
         for (String value : new String[]{"-1", "invalid"}) {
             Element element = new Element("state").setAttribute("frozenColumnCount", value);

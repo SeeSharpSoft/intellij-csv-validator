@@ -4,6 +4,7 @@ import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.command.undo.UndoManager;
+import com.intellij.openapi.fileEditor.impl.text.TextEditorProvider;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.util.ui.ImageUtil;
 import com.intellij.util.ui.JBUI;
@@ -188,19 +189,137 @@ public class CsvTableMovementTest extends CsvTableEditorSwingTestBase {
 
     public void testMoveCanBeUndoneAndRedoneFromTableEditor() {
         configure(ORIGINAL);
+        fileEditor.getTableEditorState().setColumnWidths(new int[]{80, 200, 160, 240});
+        fileEditor.updateEditorLayout();
         select(1, 1);
         fileEditor.moveSelection(true, true);
         String moved = myFixture.getFile().getText();
+        assertColumnWidths(200, 80, 160, 240);
+        assertEquals(1, fileEditor.getTable().getSelectedRow());
+        assertEquals(0, fileEditor.getTable().getSelectedColumn());
         UndoManager undo = UndoManager.getInstance(getProject());
         assertTrue(undo.isUndoAvailable(fileEditor));
         undo.undo(fileEditor);
         PsiDocumentManager.getInstance(getProject()).commitAllDocuments();
         assertEquals(ORIGINAL, myFixture.getFile().getText());
         assertEquals("a", fileEditor.getTableModel().getValue(0, 0));
+        assertColumnWidths(80, 200, 160, 240);
+        assertEquals(1, fileEditor.getTable().getSelectedRow());
+        assertEquals(1, fileEditor.getTable().getSelectedColumn());
         undo.redo(fileEditor);
         PsiDocumentManager.getInstance(getProject()).commitAllDocuments();
         assertEquals(moved, myFixture.getFile().getText());
         assertEquals("b", fileEditor.getTableModel().getValue(0, 0));
+        assertColumnWidths(200, 80, 160, 240);
+        assertEquals(1, fileEditor.getTable().getSelectedRow());
+        assertEquals(0, fileEditor.getTable().getSelectedColumn());
+    }
+
+    private void assertColumnWidths(int... expected) {
+        assertOrderedEquals(fileEditor.getTableEditorState().getColumnWidths(), expected);
+        for (int column = 0; column < expected.length; column++) {
+            assertEquals(expected[column], fileEditor.getTable().getColumnModel().getColumn(column).getWidth());
+        }
+    }
+
+    public void testMoveUndoSnapshotsSurviveLaterLayoutAndSelectionChanges() {
+        configure(ORIGINAL);
+        fileEditor.getTableEditorState().setColumnWidths(new int[]{80, 200, 160, 240});
+        fileEditor.updateEditorLayout();
+        select(1, 1);
+        fileEditor.moveSelection(true, true);
+        fileEditor.getTableEditorState().getColumnWidths()[0] = 300;
+        fileEditor.updateEditorLayout();
+        select(2, 3);
+        UndoManager undo = UndoManager.getInstance(getProject());
+        for (int repeat = 0; repeat < 2; repeat++) {
+            undo.undo(fileEditor);
+            PsiDocumentManager.getInstance(getProject()).commitAllDocuments();
+            assertEquals(ORIGINAL, myFixture.getFile().getText());
+            assertColumnWidths(80, 200, 160, 240);
+            assertEquals(1, fileEditor.getTable().getSelectedRow());
+            assertEquals(1, fileEditor.getTable().getSelectedColumn());
+            undo.redo(fileEditor);
+            PsiDocumentManager.getInstance(getProject()).commitAllDocuments();
+            assertColumnWidths(200, 80, 160, 240);
+            assertEquals(1, fileEditor.getTable().getSelectedRow());
+            assertEquals(0, fileEditor.getTable().getSelectedColumn());
+        }
+    }
+
+    public void testColumnDragUndoRestoresWidthsAndSelectionAcrossFrozenBoundary() {
+        configure(ORIGINAL);
+        fileEditor.getTableEditorState().setColumnWidths(new int[]{80, 200, 160, 240});
+        fileEditor.updateEditorLayout();
+        fileEditor.setFrozenColumnCount(1);
+        dragColumn(1, 0);
+        assertColumnWidths(200, 80, 160, 240);
+        UndoManager undo = UndoManager.getInstance(getProject());
+        undo.undo(fileEditor);
+        PsiDocumentManager.getInstance(getProject()).commitAllDocuments();
+        assertEquals(ORIGINAL, myFixture.getFile().getText());
+        assertColumnWidths(80, 200, 160, 240);
+        assertOrderedEquals(fileEditor.getTable().getSelectedColumns(), new int[]{1});
+        assertEquals(fileEditor.getTable().getRowCount(), fileEditor.getTable().getSelectedRowCount());
+        assertEquals(1, fileEditor.getFrozenColumnCount());
+        undo.redo(fileEditor);
+        PsiDocumentManager.getInstance(getProject()).commitAllDocuments();
+        assertColumnWidths(200, 80, 160, 240);
+        assertOrderedEquals(fileEditor.getTable().getSelectedColumns(), new int[]{0});
+        assertEquals(1, fileEditor.getFrozenColumnCount());
+    }
+
+    public void testRowMoveUndoRestoresNonContiguousSelection() {
+        configure(ORIGINAL);
+        select(1, 2);
+        fileEditor.getTable().addRowSelectionInterval(3, 3);
+        fileEditor.moveSelection(false, true);
+        UndoManager undo = UndoManager.getInstance(getProject());
+        undo.undo(fileEditor);
+        PsiDocumentManager.getInstance(getProject()).commitAllDocuments();
+        assertEquals(ORIGINAL, myFixture.getFile().getText());
+        assertOrderedEquals(fileEditor.getTable().getSelectedRows(), new int[]{1, 3});
+        assertOrderedEquals(fileEditor.getTable().getSelectedColumns(), new int[]{2});
+        undo.redo(fileEditor);
+        PsiDocumentManager.getInstance(getProject()).commitAllDocuments();
+        assertOrderedEquals(fileEditor.getTable().getSelectedRows(), new int[]{0, 2});
+        assertOrderedEquals(fileEditor.getTable().getSelectedColumns(), new int[]{2});
+    }
+
+    public void testMoveUndoAndRedoKeepLayoutAndSelectionAfterDelayedRefresh() {
+        ManualUpdateScheduler scheduler = configureDelayed();
+        fileEditor.getTableEditorState().setColumnWidths(new int[]{80, 200, 160, 240});
+        fileEditor.updateEditorLayout();
+        select(1, 1);
+        fileEditor.moveSelection(true, true);
+        UndoManager undo = UndoManager.getInstance(getProject());
+        undo.undo(fileEditor);
+        PsiDocumentManager.getInstance(getProject()).commitAllDocuments();
+        scheduler.advanceBy(50);
+        assertColumnWidths(80, 200, 160, 240);
+        assertEquals(1, fileEditor.getTable().getSelectedColumn());
+        undo.redo(fileEditor);
+        PsiDocumentManager.getInstance(getProject()).commitAllDocuments();
+        scheduler.advanceBy(50);
+        assertColumnWidths(200, 80, 160, 240);
+        assertEquals(0, fileEditor.getTable().getSelectedColumn());
+    }
+
+    public void testUndoFromTextEditorAlsoRestoresTableLayout() {
+        configure(ORIGINAL);
+        fileEditor.getTableEditorState().setColumnWidths(new int[]{80, 200, 160, 240});
+        fileEditor.updateEditorLayout();
+        select(1, 1);
+        fileEditor.moveSelection(true, true);
+        var textEditor = TextEditorProvider.getInstance().getTextEditor(myFixture.getEditor());
+        UndoManager undo = UndoManager.getInstance(getProject());
+        undo.undo(textEditor);
+        PsiDocumentManager.getInstance(getProject()).commitAllDocuments();
+        assertEquals(ORIGINAL, myFixture.getFile().getText());
+        assertColumnWidths(80, 200, 160, 240);
+        undo.redo(textEditor);
+        PsiDocumentManager.getInstance(getProject()).commitAllDocuments();
+        assertColumnWidths(200, 80, 160, 240);
     }
 
     public void testMovementPersistsWhenEditorIsReopened() {
