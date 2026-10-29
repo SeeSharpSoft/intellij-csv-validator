@@ -166,22 +166,57 @@ subsection that fits the task:
 Include the issue number (for example, `#1116`) when an entry is based on a GitHub issue
 or ticket.
 
+## Versioning and IDE support
+
+Use the version pattern `VVV.X.x`:
+
+- `VVV` is the earliest officially supported IntelliJ Platform release in JetBrains'
+  three-digit build-branch notation: `252` means `2025.2`.
+- `X` is the major version. Increment it once for every release that changes behavior,
+  introduces incompatible code changes, changes defaults, adds or removes functionality,
+  or introduces features or classes. It increases independently of `VVV` and does not
+  reset when the minimum supported IDE version changes.
+- `x` is the minor bugfix version. Increment it only for releases that restore existing
+  intended behavior without adding, removing, or otherwise altering functionality beyond
+  fixing bugs. Keep `X` unchanged for these releases; reset `x` to `0` whenever `X` increases.
+
+The minimum supported IDE follows the official IntelliJ release cycle with a one-year
+delay. At release preparation, use the latest officially released stable IDE's release
+train from the previous year, not an EAP: if the current release is `262` (`2026.2`),
+the minimum is `252` (`2025.2`). Advance this baseline as new official releases arrive.
+
+For example, from `252.7.3`, a bugfix-only release becomes `252.7.4`, while a release
+containing a new feature becomes `252.8.0`, assuming the IDE support baseline is unchanged.
+
 ## Preparing a new version
 
 When asked to prepare a new version:
 
-1. Use the version number supplied by the user; ask for it if it was not provided.
-2. Update `pluginVersion` in `gradle.properties`.
-3. Move all changelog entries from `## Unreleased`, preserving their subsections, into a
+1. Whenever the user requests a new release, propose a version using
+   [Versioning and IDE support](#versioning-and-ide-support). Base the proposal on the last
+   released version, all changes since that release, and the current official IDE release.
+   Explain the major or bugfix increment and any support-baseline change. If the user
+   supplied a version, check it against the policy and resolve any mismatch before applying it.
+2. Update `pluginVersion` and `pluginSinceBuild` in `gradle.properties` so the minimum
+   build matches `VVV`. The Gradle configuration in `build.gradle.kts` writes the version
+   and `<idea-version since-build="VVV">` into the packaged `META-INF\plugin.xml`; use this
+   mechanism and check the resulting descriptor rather than duplicating metadata in
+   `src\main\resources\META-INF\plugin.xml`.
+3. Align the default build target in `gradle.properties` and the compatibility targets
+   in `.github\workflows` with the support baseline. Cover the earliest supported and
+   current stable IDE releases in CI, retaining the existing IDE-product coverage.
+   Review explicit `IDEA_VERSION` overrides, including `PullRequest.yml` and `CronEAP.yml`;
+   EAP checks supplement, rather than replace, official-support coverage.
+4. Move all changelog entries from `## Unreleased`, preserving their subsections, into a
    new section immediately below it. Use `## <version> - <Date>` with the release date,
-   for example `## 4.7.1 - Oct 30, 2026`. Retain an empty `## Unreleased` section with
+   for example `## 252.8.0 - Oct 30, 2026`. Retain an empty `## Unreleased` section with
    the four subsections listed above.
-4. Run all tests with `.\gradlew.bat test`, without test filters, and run the Gradle
+5. Run all tests with `.\gradlew.bat test`, without test filters, and run the Gradle
    verification task with `.\gradlew.bat verifyPlugin`.
-5. Summarize the test and plugin-verification findings, including failures, warnings,
+6. Summarize the test and plugin-verification findings, including failures, warnings,
    and any incomplete checks. Recommend whether the version is ready for release;
    if it is not, state what must be addressed before release.
-6. Wait for the user's explicit release approval. Only after approval, create a release
+7. Wait for the user's explicit release approval. Only after approval, create a release
    commit, push it, and open a pull request against `main`. If already on `main`, commit
    and push after approval but skip the pull request.
 
