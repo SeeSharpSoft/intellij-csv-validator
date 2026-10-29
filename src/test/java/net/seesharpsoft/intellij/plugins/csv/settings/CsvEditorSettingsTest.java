@@ -25,6 +25,22 @@ public class CsvEditorSettingsTest extends CsvBasePlatformTestCase {
         assertEquals(CsvEditorSettings.ESCAPE_CHARACTER_DEFAULT, CsvHelper.getEscapeCharacter(myFixture.getFile()));
     }
 
+    public void testMaxHighlightingRowsRejectsNegativeValuesExceptUnlimited() {
+        CsvEditorSettings settings = new CsvEditorSettings();
+        assertEquals(-1, settings.getMaxHighlightingRows());
+        for (int invalid : new int[]{-2, Integer.MIN_VALUE}) {
+            assertThrows(IllegalArgumentException.class, () -> settings.setMaxHighlightingRows(invalid));
+            CsvEditorSettings.OptionSet state = new CsvEditorSettings.OptionSet();
+            state.MAX_HIGHLIGHTING_ROWS = invalid;
+            assertThrows(IllegalArgumentException.class, () -> settings.loadState(state));
+            assertEquals(-1, settings.getMaxHighlightingRows());
+        }
+        for (int valid : new int[]{0, 7, Integer.MAX_VALUE, -1}) {
+            settings.setMaxHighlightingRows(valid);
+            assertEquals(valid, settings.getMaxHighlightingRows());
+        }
+    }
+
     public void testGetDisplayDoesNotThrow() {
         for (CsvEditorSettings.EditorPrio prio : CsvEditorSettings.EditorPrio.values()) {
             assertNotNull(prio.getDisplay());

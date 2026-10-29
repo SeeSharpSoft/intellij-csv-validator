@@ -102,6 +102,8 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
         public String CURRENT_PLUGIN_VERSION;
 
         public boolean CARET_ROW_SHOWN = true;
+        public boolean HIGHLIGHT_ACTIVE_COLUMN = true;
+        public int MAX_HIGHLIGHTING_ROWS = -1;
         public boolean USE_SOFT_WRAP = false;
         public boolean HIGHTLIGHT_TAB_SEPARATOR = true;
         public boolean SHOW_INFO_BALLOON = true;
@@ -158,6 +160,7 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
 
     @Override
     public void loadState(@NotNull OptionSet state) {
+        validateMaxHighlightingRows(state.MAX_HIGHLIGHTING_ROWS);
         this.myOptions = state;
     }
 
@@ -169,6 +172,29 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
 
     public void setCaretRowShown(boolean caretRowShown) {
         getState().CARET_ROW_SHOWN = caretRowShown;
+    }
+
+    public boolean isHighlightActiveColumn() {
+        return getState().HIGHLIGHT_ACTIVE_COLUMN;
+    }
+
+    public void setHighlightActiveColumn(boolean highlightActiveColumn) {
+        getState().HIGHLIGHT_ACTIVE_COLUMN = highlightActiveColumn;
+    }
+
+    public int getMaxHighlightingRows() {
+        return getState().MAX_HIGHLIGHTING_ROWS;
+    }
+
+    public void setMaxHighlightingRows(int maxHighlightingRows) {
+        validateMaxHighlightingRows(maxHighlightingRows);
+        getState().MAX_HIGHLIGHTING_ROWS = maxHighlightingRows;
+    }
+
+    private static void validateMaxHighlightingRows(int maxHighlightingRows) {
+        if (maxHighlightingRows < -1) {
+            throw new IllegalArgumentException(getLocalizedText("highlight.active.column.maximum.rows.invalid"));
+        }
     }
 
     public boolean isUseSoftWraps() {

@@ -189,4 +189,5 @@ When asked to prepare a new version:
 
 Commit or push only when explicitly requested by the user, or after the user confirms
 the release in the workflow above. Keep commit messages short and concise, and include
-the issue number when the change is based on a GitHub issue.
+the issue number when the change is based on a GitHub issue. Do not add any co-authors
+or other metadata to the commit message.

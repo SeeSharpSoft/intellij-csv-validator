@@ -144,6 +144,8 @@ Hold **_CTRL_** while using the mouse wheel to change the table text size. Hold 
 
 The plugin provides a customizable text editor and table editor. Their settings can be adjusted in the CSV/TSV editor settings page.
 
+Changes to Text Editor and Table Editor settings do not update already-open editors. Close and reopen the affected files for changes to take effect.
+
 ![Editor settings](./docs/editorsettings.png)
 
 #### General
@@ -202,6 +204,12 @@ The current caret row can be highlighted in CSV, TSV, and PSV files. Disable thi
 ###### Highlight tab separator
 
 Enable or disable highlighting of tab characters when they are used as the value separator in TSV files, and choose the highlight color. Tabs inside a value are not highlighted.
+
+###### Highlight active column
+
+**Highlight active column** under **Settings/Preferences > Editor > General > CSV/TSV/PSV > Text Editor > Highlighting** highlights fields in the selected column. This option is **enabled by default**. Column highlights use the color scheme's write-access-under-caret style, distinct from normal selected-text occurrences, and are cleared while Find or Replace is open. The IDE's selected-text occurrence highlighting remains controlled by its own settings.
+
+Set **Maximum rows** beside the checkbox to **-1** (the default) for no limit, **0** for no highlighted rows, or a positive integer to limit highlighting to nearby CSV rows, including the selected row. Other negative values are not allowed. Multiline values count as one CSV row. Highlighting more rows can reduce editor responsiveness. Close and reopen the editor after changing its settings.
 
 ##### Others
 

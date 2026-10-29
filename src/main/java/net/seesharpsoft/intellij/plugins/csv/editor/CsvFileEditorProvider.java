@@ -9,6 +9,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.SingleRootFileViewProvider;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
+import net.seesharpsoft.intellij.plugins.csv.highlighter.CsvColumnHighlighter;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
@@ -96,7 +97,11 @@ public class CsvFileEditorProvider implements AsyncFileEditorProvider, DumbAware
                     throw new IllegalStateException("TextEditorProvider does not accept file: " + virtualFile);
                 }
                 TextEditor textEditor = (TextEditor) provider.createEditor(project, virtualFile);
-                applySettings(textEditor.getEditor().getSettings(), CsvEditorSettings.getInstance());
+                CsvEditorSettings settings = CsvEditorSettings.getInstance();
+                applySettings(textEditor.getEditor().getSettings(), settings);
+                if (settings.isHighlightActiveColumn()) {
+                    CsvColumnHighlighter.install(project, textEditor);
+                }
                 return textEditor;
             }
         };

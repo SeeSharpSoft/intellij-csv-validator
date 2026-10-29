@@ -10,6 +10,7 @@
 - Added per-file frozen columns in both table editors, with header context-menu actions to freeze through the selection or unfreeze all columns (#195, #319)
 - Added persistent column-header and row-number dragging and context-menu actions for moving selected rows and columns in both table editors (#391, #486)
 - Added CSV and spreadsheet paste in both table editors, starting at the focused cell, overwriting existing values, and adding rows or columns only when needed (#77)
+- Added a text-editor setting to enable or disable active-column highlighting and adjust the maximum number of highlighted rows
 
 ### Changed
 
@@ -19,6 +20,7 @@
 ### Fixed
 
 - Avoid prohibited IDE read-action entry during table/header painting by reusing existing read access or deferring unlocked paints without caching CSV data (#1116)
+- Fixed active-column highlighting interfering with Find/Replace by clearing column highlights while search is open (#371)
 
 ## 4.6.0 - Oct 18, 2026
 
