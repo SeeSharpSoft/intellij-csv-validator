@@ -290,6 +290,47 @@ public class CsvEditorSettingsProviderTest extends CsvBasePlatformTestCase {
         }
     }
 
+    public void testPixelRowHeightPersistsThroughSettingsForm() throws ConfigurationException {
+        CsvEditorSettingsProvider provider = new CsvEditorSettingsProvider();
+        try {
+            provider.reset();
+            JFormattedTextField height = getRowHeightField(provider);
+            assertEquals(48, height.getValue());
+            assertFalse(provider.isModified());
+
+            height.setValue(24);
+            assertTrue(provider.isModified());
+            provider.apply();
+            assertFalse(provider.isModified());
+            provider.reset();
+            assertEquals(24, height.getValue());
+
+            CsvEditorSettings settings = CsvEditorSettings.getInstance();
+            CsvEditorSettings.OptionSet saved = XmlSerializer.deserialize(
+                    XmlSerializer.serialize(settings.getState()), CsvEditorSettings.OptionSet.class);
+            settings.loadState(new CsvEditorSettings.OptionSet());
+            settings.loadState(saved);
+            provider.reset();
+            assertEquals(24, height.getValue());
+            assertEquals(24, settings.getTableEditorRowHeight());
+
+            height.setValue(32);
+            provider.apply();
+            assertFalse(provider.isModified());
+            provider.reset();
+            assertEquals(32, height.getValue());
+        } finally {
+            provider.disposeUIResources();
+        }
+    }
+
+    private JFormattedTextField getRowHeightField(CsvEditorSettingsProvider provider) {
+        JLabel label = UIUtil.findComponentsOfType(provider.createComponent(), JLabel.class).stream()
+                .filter(component -> component.getText() != null && component.getText().startsWith("Default row height"))
+                .findFirst().orElseThrow();
+        return (JFormattedTextField) label.getLabelFor();
+    }
+
     public void testApply() throws ConfigurationException {
         CsvEditorSettingsProvider editorSettingsPanel = new CsvEditorSettingsProvider();
         try {

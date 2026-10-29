@@ -333,6 +333,15 @@ public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
         assertEquals(fileEditor.getTable(), fileEditor.getPreferredFocusedComponent());
     }
 
+    public void testPixelRowHeightDoesNotChangeWithFontSize() {
+        CsvTableEditorState state = new CsvTableEditorState();
+        state.setRowHeight(24);
+        fileEditor.setState(state);
+        fileEditor.changeFontSize(4);
+        assertEquals(24, fileEditor.getTable().getRowHeight());
+        assertEquals(24, ((JTable) fileEditor.getTableScrollPane().getRowHeader().getView()).getRowHeight());
+    }
+
     public void testAddRemovePropertyChangeListener() throws Throwable {
         assertThrows(IllegalArgumentException.class, () -> fileEditor.addPropertyChangeListener(null));
         assertThrows(IllegalArgumentException.class, () -> fileEditor.removePropertyChangeListener(null));

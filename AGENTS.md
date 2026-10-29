@@ -189,5 +189,8 @@ When asked to prepare a new version:
 
 Commit or push only when explicitly requested by the user, or after the user confirms
 the release in the workflow above. Keep commit messages short and concise, and include
-the issue number when the change is based on a GitHub issue. Do not add any co-authors
-or other metadata to the commit message.
+the issue number when the change is based on a GitHub issue.
+
+Never add `Co-authored-by:` trailers, AI/tool attribution (including Copilot or any other
+assistant), or other metadata anywhere in any commit message. Before committing, inspect
+the final commit message and remove any such text.
