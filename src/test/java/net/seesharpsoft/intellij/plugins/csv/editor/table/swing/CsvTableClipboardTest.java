@@ -290,8 +290,8 @@ public class CsvTableClipboardTest extends CsvTableEditorSwingTestBase {
         fileEditor.setEditable(false);
         CsvTable table = fileEditor.getTable();
         for (int modifiers : new int[]{0, KeyEvent.CTRL_DOWN_MASK, KeyEvent.CTRL_DOWN_MASK | KeyEvent.SHIFT_DOWN_MASK}) {
-            fileEditor.tableEditorKeyListener.keyReleased(
-                    new KeyEvent(table, KeyEvent.KEY_RELEASED, 0, modifiers, KeyEvent.VK_DELETE, KeyEvent.CHAR_UNDEFINED));
+            performShortcut(
+                    new KeyEvent(table, KeyEvent.KEY_PRESSED, 0, modifiers, KeyEvent.VK_DELETE, KeyEvent.CHAR_UNDEFINED));
         }
         fileEditor.tableEditorActions.addRowBefore.actionPerformed(null);
         fileEditor.tableEditorActions.addColumnAfter.actionPerformed(null);

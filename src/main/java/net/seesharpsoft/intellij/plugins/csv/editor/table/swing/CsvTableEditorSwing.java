@@ -1,5 +1,10 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
+import com.intellij.ide.DataManager;
+import com.intellij.openapi.actionSystem.ActionGroup;
+import com.intellij.openapi.actionSystem.AnAction;
+import com.intellij.openapi.actionSystem.CommonDataKeys;
+import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.editor.colors.EditorColorsScheme;
 import com.intellij.openapi.actionSystem.ActionManager;
@@ -97,12 +102,26 @@ public class CsvTableEditorSwing extends CsvTableEditor {
             initializedUIComponents();
             editorComponent = new JPanel(new BorderLayout());
             editorComponent.add(panelMain, BorderLayout.CENTER);
+            DataManager.registerDataProvider(editorComponent, dataId -> {
+                if (PlatformDataKeys.FILE_EDITOR.is(dataId)) return this;
+                if (CommonDataKeys.PROJECT.is(dataId)) return project;
+                if (CommonDataKeys.VIRTUAL_FILE.is(dataId)) return file;
+                return null;
+            });
+            registerTableShortcuts();
             registerSearchShortcut(IdeActions.ACTION_FIND, false);
             registerSearchShortcut(IdeActions.ACTION_REPLACE, true);
             initialized = true;
         } finally {
             // Cancel queued model refreshes before they can reach an incomplete UI.
             if (!initialized) super.dispose();
+        }
+    }
+
+    private void registerTableShortcuts() {
+        ActionGroup group = (ActionGroup) ActionManager.getInstance().getAction("CsvTableEditorActions");
+        for (AnAction action : group.getChildren(null)) {
+            action.registerCustomShortcutSet(tblEditor, this);
         }
     }
 
@@ -265,7 +284,7 @@ public class CsvTableEditorSwing extends CsvTableEditor {
     }
 
     @Override
-    protected boolean isInCellEditMode() {
+    public boolean isInCellEditMode() {
         return getTable() != null && getTable().getCellEditor() != null;
     }
 
@@ -361,7 +380,7 @@ public class CsvTableEditorSwing extends CsvTableEditor {
         applyOrder(false, order, new int[]{to}, columns);
     }
 
-    boolean stopCellEditing() {
+    public boolean stopCellEditing() {
         if (!tblEditor.isEditing()) return true;
         if (!tblEditor.getCellEditor().stopCellEditing()) return false;
         getTable().getModel().updateTableImmediately();

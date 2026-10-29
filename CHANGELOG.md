@@ -11,6 +11,7 @@
 - Added persistent column-header and row-number dragging and context-menu actions for moving selected rows and columns in both table editors (#391, #486)
 - Added CSV and spreadsheet paste in both table editors, starting at the focused cell, overwriting existing values, and adding rows or columns only when needed (#77)
 - Added a text-editor setting to enable or disable active-column highlighting and adjust the maximum number of highlighted rows
+- Added configurable table-editor key bindings through the IDE's Keymap settings, with changes applied immediately in both Swing and FlatLaf editors (#836)
 
 ### Changed
 

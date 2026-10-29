@@ -118,7 +118,9 @@ A distinct divider after the last frozen column marks the frozen area in both th
 
 #### Key bindings
 
-The table editor provides the following keyboard shortcuts for navigation and editing:
+Configure table commands in **Settings/Preferences > Keymap > CSV Table Editor** (or search for the action name). You can add, remove, or reassign shortcuts using the IDE's standard keymap controls, including two-stroke shortcuts. Changes take effect in already-open Swing and FlatLaf table editors. The context menus show the current shortcuts, not fixed default labels.
+
+The following are the default shortcuts. Ordinary arrow-key and Enter-based cell navigation remain table controls rather than configurable CSV actions:
 
 - **_ARROW KEYS_** navigate through the table
 - **_ENTER_** start/stop editing current cell (NOTE: almost every default key triggers an edit)
@@ -135,6 +137,9 @@ The table editor provides the following keyboard shortcuts for navigation and ed
 - **_CTRL+DELETE/BACKSPACE_** deletes the current selected row(s)
 
 - **_DELETE/BACKSPACE_** clear content of selected cell(s)
+- **_CTRL+SHIFT+SPACE_** auto-fit column widths
+
+The unmodified Delete/Backspace shortcuts edit text normally while a cell's text editor is open; they clear selected cells only outside cell-editing mode. Other table commands, such as moving rows/columns, freezing columns, and resetting column widths, can also be assigned shortcuts in Keymap.
 
 Hold **_CTRL_** while using the mouse wheel to change the table text size. Hold **_SHIFT_** while using the mouse wheel to scroll horizontally.
 

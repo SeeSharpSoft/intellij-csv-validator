@@ -63,36 +63,6 @@ public class CsvTableEditorKeyListener extends CsvTableEditorUtilBase implements
 
     @Override
     public void keyPressed(KeyEvent e) {
-        switch (e.getKeyCode()) {
-            case KeyEvent.VK_LEFT:
-                if (e.isControlDown() && e.isShiftDown()) {
-                    performTableAction(() -> csvTableEditor.tableEditorActions.addColumnBefore.actionPerformed(null), e);
-                }
-                break;
-            case KeyEvent.VK_RIGHT:
-                if (e.isControlDown() && e.isShiftDown()) {
-                    performTableAction(() -> csvTableEditor.tableEditorActions.addColumnAfter.actionPerformed(null), e);
-                }
-                break;
-            case KeyEvent.VK_UP:
-                if (e.isControlDown() && !e.isShiftDown()) {
-                    performTableAction(() -> csvTableEditor.tableEditorActions.addRowBefore.actionPerformed(null), e);
-                }
-                break;
-            case KeyEvent.VK_DOWN:
-                if (e.isControlDown() && !e.isShiftDown()) {
-                    performTableAction(() -> csvTableEditor.tableEditorActions.addRowAfter.actionPerformed(null), e);
-                }
-                break;
-            default:
-                break;
-        }
-    }
-
-    private void performTableAction(Runnable action, KeyEvent event) {
-        stopEditing();
-        action.run();
-        event.consume();
     }
 
     @Override
@@ -125,24 +95,6 @@ public class CsvTableEditorKeyListener extends CsvTableEditorUtilBase implements
                     if (!e.isControlDown() && !e.isShiftDown()) {
                         startEditing();
                     }
-                }
-                break;
-            case KeyEvent.VK_DELETE:
-            case KeyEvent.VK_BACK_SPACE:
-                if (e.isControlDown() && e.isShiftDown()) {
-                    stopEditing();
-                    csvTableEditor.tableEditorActions.deleteColumn.actionPerformed(null);
-                } else if (e.isControlDown()) {
-                    stopEditing();
-                    csvTableEditor.tableEditorActions.deleteRow.actionPerformed(null);
-                } else if (!csvTableEditor.isInCellEditMode()) {
-                    csvTableEditor.tableEditorActions.clearCells.actionPerformed(null);
-                }
-                break;
-            case KeyEvent.VK_SPACE:
-                if (e.isShiftDown() && e.isControlDown()) {
-                    csvTableEditor.adjustAllColumnWidths();
-                    csvTableEditor.updateEditorLayout();
                 }
                 break;
             default:
