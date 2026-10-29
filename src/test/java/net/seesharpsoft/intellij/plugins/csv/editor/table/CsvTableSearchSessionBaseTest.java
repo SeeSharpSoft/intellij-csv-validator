@@ -3,6 +3,7 @@ package net.seesharpsoft.intellij.plugins.csv.editor.table;
 import com.intellij.find.FindManager;
 import com.intellij.find.FindModel;
 import com.intellij.find.SearchSession;
+import com.intellij.openapi.actionSystem.impl.Utils;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.command.WriteCommandAction;
@@ -107,7 +108,7 @@ public class CsvTableSearchSessionBaseTest extends CsvBasePlatformTestCase {
 
     public void testSearchAndNavigationWithoutSwingTable() {
         configure("alpha alpha,beta\nbeta,ALPHA\n");
-        assertSame(search, search.getComponent().getData(SearchSession.KEY.getName()));
+        assertSame(search, SearchSession.KEY.getData(Utils.createAsyncDataContext(search.getComponent())));
         query("alpha");
         assertEquals("1 of 3 matches", search.getComponent().getStatusText());
         assertEquals(0, search.selectedRow);

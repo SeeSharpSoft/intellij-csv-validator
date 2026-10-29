@@ -2,6 +2,7 @@ package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
 import com.intellij.find.SearchReplaceComponent;
 import com.intellij.find.SearchSession;
+import com.intellij.openapi.actionSystem.impl.Utils;
 import com.intellij.testFramework.PlatformTestUtil;
 import com.intellij.util.ui.UIUtil;
 import net.seesharpsoft.intellij.plugins.csv.CsvFileType;
@@ -36,7 +37,7 @@ public class CsvTableColumnMappingPerformanceTest extends CsvTableEditorSwingTes
         fileEditor.showSearch(false);
         SearchReplaceComponent bar = UIUtil.findComponentOfType(fileEditor.getComponent(), SearchReplaceComponent.class);
         assertNotNull(bar);
-        CsvTableSearchSession search = (CsvTableSearchSession) bar.getData(SearchSession.KEY.getName());
+        CsvTableSearchSession search = (CsvTableSearchSession) SearchSession.KEY.getData(Utils.createAsyncDataContext(bar));
         query(search, "missing");
         TableColumnModel columns = table.getColumnModel();
         CsvTableHeader header = (CsvTableHeader) table.getTableHeader();

@@ -4,6 +4,16 @@
 
 ### Added
 
+### Changed
+
+### Removed
+
+### Fixed
+
+## 252.53.0 - Oct 29, 2026
+
+### Added
+
 - Added a FlatLaf-based table editor with padded cells, a flat header, and rounded scrollbars that follow the IDE's light or dark appearance
 - Added a setting to choose between the FlatLaf table editor (the default) and the existing Swing implementation
 - Added Find/Replace in both table editors, with IDE shortcuts, match navigation, case/word/regex options, and Replace All (#430)
@@ -15,6 +25,10 @@
 
 ### Changed
 
+- Adopted IDE-based `VVV.X.x` versioning, starting at `252.53.0` after 52 historical major releases
+- Raised the minimum supported IntelliJ Platform version to 2025.2, following the official IDE release cycle with a one-year delay
+- Updated Gradle, IntelliJ Platform build tooling, parser/lexer generation, test dependencies, and CI actions while retaining Java 21 compatibility
+- Made spellchecker registration optional and updated search and settings integration for IntelliJ Platform 2025.2 and newer
 - Improved automatic column sizing in the FlatLaf table editor to account for rendered cell padding and column headers
 - Copying table selections now provides properly quoted CSV using the file's separator and escape settings, while preserving HTML table copying
 

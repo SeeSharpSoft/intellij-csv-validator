@@ -1,7 +1,7 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
 import com.intellij.ide.DataManager;
-import com.intellij.openapi.actionSystem.ActionGroup;
+import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
@@ -119,8 +119,9 @@ public class CsvTableEditorSwing extends CsvTableEditor {
     }
 
     private void registerTableShortcuts() {
-        ActionGroup group = (ActionGroup) ActionManager.getInstance().getAction("CsvTableEditorActions");
-        for (AnAction action : group.getChildren(null)) {
+        ActionManager actionManager = ActionManager.getInstance();
+        DefaultActionGroup group = (DefaultActionGroup) actionManager.getAction("CsvTableEditorActions");
+        for (AnAction action : group.getChildren(actionManager)) {
             action.registerCustomShortcutSet(tblEditor, this);
         }
     }

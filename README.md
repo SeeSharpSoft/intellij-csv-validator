@@ -7,7 +7,7 @@
 
 # CSV Editor Plugin for the JetBrains IDE family
 
-Compatible with IntelliJ IDEA and other JetBrains IDEs based on IntelliJ Platform _2024.2 and newer_.
+Compatible with IntelliJ IDEA and other JetBrains IDEs based on IntelliJ Platform _2025.2 and newer_.
 
 This plugin adds support for CSV (Comma-Separated Values) and related file types to JetBrains IDEs. It provides a text editor and a table editor with syntax validation, highlighting, formatting, inspections, and other familiar IDE features.
 
@@ -33,8 +33,9 @@ This plugin adds support for CSV (Comma-Separated Values) and related file types
 
 **Note**
 
-Release 4.x focuses on text-editor features, and the text editor is the default editor.
-**IntelliJ Platform 2024.2 or newer is required.**
+Release numbers follow `VVV.X.x`: the earliest supported IDE build branch, the plugin's
+major version, and its bugfix version. For example, `252.53.0` supports IDEs from 2025.2.
+The minimum supported IDE follows the official IntelliJ release cycle with a one-year delay.
 
 Previous versions, including their README files, can still be downloaded and installed manually (see [Installation](https://github.com/SeeSharpSoft/intellij-csv-validator#installation)).
 
@@ -444,7 +445,7 @@ If the **Table Editor** tab is missing, check the [table editor](#table-editor) 
 
 #### The CSV editor causes the IDE to stop working properly
 
-The current plugin release requires IntelliJ Platform 2024.2 or newer. If your IDE is older, disable the plugin and install a plugin release compatible with your IDE from [GitHub Releases](https://github.com/SeeSharpSoft/intellij-csv-validator/releases).
+The current plugin release requires IntelliJ Platform 2025.2 or newer. If your IDE is older, disable the plugin and install a plugin release compatible with your IDE from [GitHub Releases](https://github.com/SeeSharpSoft/intellij-csv-validator/releases).
 
 #### Code insight is not available for large files
 

@@ -3,8 +3,7 @@ package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 import com.intellij.openapi.application.Application;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
-import com.intellij.openapi.application.ex.ApplicationEx;
-import com.intellij.openapi.application.ex.ApplicationManagerEx;
+import com.intellij.openapi.application.impl.ApplicationImpl;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.fileEditor.FileEditorState;
 import com.intellij.openapi.fileEditor.FileEditorStateLevel;
@@ -183,7 +182,7 @@ public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
     }
 
     private final class DeferredPaintProbe implements AutoCloseable {
-        private final ApplicationEx application = ApplicationManagerEx.getApplicationEx();
+        private final ApplicationImpl application = (ApplicationImpl) ApplicationManager.getApplication();
         private final Application paintApplication = prohibitReadActions(application);
         private final CsvTable table = fileEditor.getTable();
         private final JScrollPane originalScrollPane = fileEditor.getTableScrollPane();
@@ -268,8 +267,9 @@ public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
                 }
             });
             if (unlocked) {
-                application.runUnlockingIntendedWrite(() -> {
-                    application.runWithoutImplicitRead(painting);
+                // runUnlockingIntendedWrite is a no-op with the baseline SDK's nested locking.
+                application.getThreadingSupport().releaseTheAcquiredWriteIntentLockThenExecuteActionAndTakeWriteIntentLockBack(() -> {
+                    painting.run();
                     return null;
                 });
             } else {

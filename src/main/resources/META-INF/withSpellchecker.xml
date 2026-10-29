@@ -1,0 +1,6 @@
+<idea-plugin>
+    <extensions defaultExtensionNs="com.intellij">
+        <spellchecker.support language="csv"
+                              implementationClass="net.seesharpsoft.intellij.plugins.csv.spellchecker.CsvSpellCheckingStrategy"/>
+    </extensions>
+</idea-plugin>

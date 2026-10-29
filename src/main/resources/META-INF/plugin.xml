@@ -46,6 +46,7 @@
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html on how to target different products -->
     <depends>com.intellij.modules.lang</depends>
+    <depends optional="true" config-file="withSpellchecker.xml">com.intellij.modules.spellchecker</depends>
     <depends optional="true" config-file="withGithub.xml">org.jetbrains.plugins.github</depends>
 
     <extensions defaultExtensionNs="com.intellij">
@@ -78,9 +79,6 @@
         <fileEditorProvider implementation="net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditorProvider"/>
 
         <annotator language="csv" implementationClass="net.seesharpsoft.intellij.plugins.csv.editor.CsvAnnotator"/>
-
-        <spellchecker.support language="csv"
-                              implementationClass="net.seesharpsoft.intellij.plugins.csv.spellchecker.CsvSpellCheckingStrategy"/>
 
         <lang.formatter language="csv"
                         implementationClass="net.seesharpsoft.intellij.plugins.csv.formatter.CsvFormattingModelBuilder"/>

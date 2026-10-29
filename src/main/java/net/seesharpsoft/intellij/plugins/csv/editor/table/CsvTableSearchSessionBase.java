@@ -1,6 +1,5 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table;
 
-import com.intellij.find.FindBundle;
 import com.intellij.find.FindManager;
 import com.intellij.find.FindModel;
 import com.intellij.find.FindResult;
@@ -15,12 +14,13 @@ import com.intellij.notification.NotificationGroupManager;
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.ActionManager;
+import com.intellij.openapi.actionSystem.ActionToolbar;
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.IdeActions;
 import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.actionSystem.ex.CustomComponentAction;
-import com.intellij.openapi.actionSystem.impl.ActionToolbarImpl;
+import com.intellij.openapi.actionSystem.toolbarLayout.ToolbarLayoutStrategy;
 import com.intellij.openapi.application.ApplicationBundle;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.application.ReadAction;
@@ -89,8 +89,7 @@ public abstract class CsvTableSearchSessionBase<T extends CsvTableEditor>
         this.editor = editor;
         findManager = FindManager.getInstance(Objects.requireNonNull(editor.getProject()));
         document = Objects.requireNonNull(editor.getDocument());
-        component = SearchReplaceComponent.buildFor(editor.getProject(), Objects.requireNonNull(editor.getPreferredFocusedComponent()))
-                .withDataProvider(dataId -> SearchSession.KEY.is(dataId) ? this : null)
+        component = SearchReplaceComponent.buildFor(editor.getProject(), Objects.requireNonNull(editor.getPreferredFocusedComponent()), this)
                 .addPrimarySearchActions(new NextOccurrenceAction(), new PrevOccurrenceAction())
                 .addExtraSearchActions(new ToggleMatchCase(), new ToggleWholeWordsOnlyAction(), new ToggleRegex())
                 .addPrimaryReplaceActions(new ReplaceAction(false), new ReplaceAction(true))
@@ -173,13 +172,34 @@ public abstract class CsvTableSearchSessionBase<T extends CsvTableEditor>
         constraints.gridy = rows.length;
         constraints.weighty = 1;
         controls.add(Box.createVerticalGlue(), constraints);
-        for (ActionToolbarImpl toolbar : UIUtil.findComponentsOfType(controls, ActionToolbarImpl.class)) {
-            toolbar.setReservePlaceAutoPopupIcon(false);
-            toolbar.setForceMinimumSize(true);
-        }
+        keepToolbarsAtPreferredSize(controls);
         splitter.setSecondComponent(controls);
         splitter.setHonorComponentsMinimumSize(true);
         splitter.setLackOfSpaceStrategy(Splitter.LackOfSpaceStrategy.HONOR_THE_SECOND_MIN_SIZE);
+    }
+
+    private void keepToolbarsAtPreferredSize(JComponent controls) {
+        for (JComponent child : UIUtil.findComponentsOfType(controls, JComponent.class)) {
+            if (!(child instanceof ActionToolbar toolbar)) continue;
+            toolbar.setReservePlaceAutoPopupIcon(false);
+            ToolbarLayoutStrategy originalLayout = toolbar.getLayoutStrategy();
+            toolbar.setLayoutStrategy(new ToolbarLayoutStrategy() {
+                @Override
+                public List<Rectangle> calculateBounds(ActionToolbar toolbar) {
+                    return originalLayout.calculateBounds(toolbar);
+                }
+
+                @Override
+                public Dimension calcPreferredSize(ActionToolbar toolbar) {
+                    return originalLayout.calcPreferredSize(toolbar);
+                }
+
+                @Override
+                public Dimension calcMinimumSize(ActionToolbar toolbar) {
+                    return originalLayout.calcPreferredSize(toolbar);
+                }
+            });
+        }
     }
 
     private void registerNavigationShortcut(String actionId, boolean forward) {
@@ -341,7 +361,7 @@ public abstract class CsvTableSearchSessionBase<T extends CsvTableEditor>
         matches = result.matches;
         if (result.invalidPattern) {
             component.setNotFoundBackground();
-            setStatusText(FindBundle.message(INCORRECT_REGEXP_MESSAGE_KEY));
+            setStatusText(CsvPluginManager.getLocalizedText("table.search.invalid.regexp"));
             component.updateActions();
             return;
         }

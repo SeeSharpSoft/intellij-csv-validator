@@ -36,10 +36,16 @@ Tests mirror the source packages under `src\test\java`, with fixtures in `src\te
 
 ## Build and tests
 
-Use JDK 21 and the checked-in Gradle wrapper. `build.gradle.kts` defines the build;
+Use the checked-in Gradle wrapper and a JDK matching the selected IDE: Java 21 through
+2026.1, Java 25 starting with 2026.2. `build.gradle.kts` derives the toolchain, source/target
+compatibility, compiler release, and generator launchers from the resolved IDE build number.
+`PublishStable.yml` stays pinned to 2025.2/Java 21 so compatibility builds using newer
+SDKs do not raise the published plugin's Java requirement. `build.gradle.kts` defines the build;
 `gradle.properties` defines plugin metadata and the default IntelliJ Platform target.
 `IDEA_PLATFORM` and `IDEA_VERSION` environment variables override the target for compatibility
-checks; keep APIs compatible with the minimum supported platform.
+checks; keep APIs compatible with the minimum supported platform. `VERIFY_IDEA_PLATFORM`
+and `VERIFY_IDEA_VERSION` optionally select a static-verification target without changing
+the build SDK.
 
 Windows/PowerShell commands:
 
@@ -197,9 +203,10 @@ When asked to prepare a new version:
    released version, all changes since that release, and the current official IDE release.
    Explain the major or bugfix increment and any support-baseline change. If the user
    supplied a version, check it against the policy and resolve any mismatch before applying it.
-2. Update `pluginVersion` and `pluginSinceBuild` in `gradle.properties` so the minimum
-   build matches `VVV`. The Gradle configuration in `build.gradle.kts` writes the version
-   and `<idea-version since-build="VVV">` into the packaged `META-INF\plugin.xml`; use this
+2. Update `pluginVersion` in `gradle.properties`. The Gradle configuration in
+   `build.gradle.kts` validates `VVV.X.x` and derives the minimum build from `VVV`,
+   independently of the SDK selected for CI. It writes the version and
+   `<idea-version since-build="VVV">` into the packaged `META-INF\plugin.xml`; use this
    mechanism and check the resulting descriptor rather than duplicating metadata in
    `src\main\resources\META-INF\plugin.xml`.
 3. Align the default build target in `gradle.properties` and the compatibility targets

@@ -16,6 +16,7 @@ import com.intellij.openapi.actionSystem.IdeActions;
 import com.intellij.openapi.actionSystem.ex.ActionUtil;
 import com.intellij.openapi.actionSystem.impl.ActionButton;
 import com.intellij.openapi.actionSystem.impl.ActionToolbarImpl;
+import com.intellij.openapi.actionSystem.impl.Utils;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.command.undo.UndoManager;
 import com.intellij.openapi.editor.event.DocumentEvent;
@@ -41,6 +42,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -56,7 +58,7 @@ public class CsvTableSearchTest extends CsvTableEditorSwingTestBase {
         fileEditor.showSearch(true);
         SearchReplaceComponent bar = UIUtil.findComponentOfType(fileEditor.getComponent(), SearchReplaceComponent.class);
         assertNotNull(bar);
-        search = (CsvTableSearchSession) bar.getData(SearchSession.KEY.getName());
+        search = (CsvTableSearchSession) SearchSession.KEY.getData(Utils.createAsyncDataContext(bar));
     }
 
     private ManualUpdateScheduler configureDelayed(String text) {
@@ -242,18 +244,26 @@ public class CsvTableSearchTest extends CsvTableEditorSwingTestBase {
         private final CountDownLatch started = new CountDownLatch(1);
         private final CountDownLatch release = new CountDownLatch(1);
         private final AtomicBoolean finished = new AtomicBoolean();
-        private final AtomicBoolean blocked = new AtomicBoolean();
+        private final AtomicBoolean blockNewAttempts = new AtomicBoolean(true);
+        private final AtomicInteger activeScans = new AtomicInteger();
+        private final AtomicLong blockedStamp = new AtomicLong(Long.MIN_VALUE);
 
         private BlockedSearch(String query) {
             FindManager manager = spyFindManager();
             doAnswer(invocation -> {
                 FindModel model = invocation.getArgument(2);
-                if (query.equals(model.getStringToFind()) && blocked.compareAndSet(false, true)) {
+                long stamp = fileEditor.getDocument().getModificationStamp();
+                if (query.equals(model.getStringToFind())) {
+                    blockedStamp.compareAndSet(Long.MIN_VALUE, stamp);
+                }
+                if (blockNewAttempts.get() && query.equals(model.getStringToFind()) && blockedStamp.get() == stamp) {
+                    activeScans.incrementAndGet();
                     started.countDown();
                     try {
                         while (!release.await(10, TimeUnit.MILLISECONDS)) ProgressManager.checkCanceled();
                     } finally {
                         finished.set(true);
+                        activeScans.decrementAndGet();
                     }
                 }
                 return invocation.callRealMethod();
@@ -265,7 +275,9 @@ public class CsvTableSearchTest extends CsvTableEditorSwingTestBase {
         }
 
         private void awaitCanceled() {
-            PlatformTestUtil.waitWithEventsDispatching("Waiting for canceled scan to stop", finished::get, 10000);
+            blockNewAttempts.set(false);
+            PlatformTestUtil.waitWithEventsDispatching("Waiting for canceled scan to stop",
+                    () -> finished.get() && activeScans.get() == 0, 10000);
         }
 
         @Override
@@ -369,7 +381,7 @@ public class CsvTableSearchTest extends CsvTableEditorSwingTestBase {
             action.actionPerformed(TestActionEvent.createTestEvent());
             SearchReplaceComponent bar = UIUtil.findComponentOfType(fileEditor.getComponent(), SearchReplaceComponent.class);
             assertNotNull(bar);
-            SearchSession session = (SearchSession) bar.getData(SearchSession.KEY.getName());
+            SearchSession session = SearchSession.KEY.getData(Utils.createAsyncDataContext(bar));
             assertNotNull(session);
             assertEquals(IdeActions.ACTION_REPLACE.equals(actionId), session.getFindModel().isReplaceState());
             assertTrue(bar.isVisible());
@@ -666,6 +678,7 @@ public class CsvTableSearchTest extends CsvTableEditorSwingTestBase {
         search.getFindModel().setRegularExpressions(true);
         query("[");
         assertFalse(search.hasMatches());
+        assertEquals("Bad pattern", search.getComponent().getStatusText());
         replaceAll();
         assertEquals(original, myFixture.getFile().getText());
         query("item(\\d+)");
