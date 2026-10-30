@@ -272,6 +272,15 @@
             <reference ref="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$UnfreezeColumns" />
         </group>
 
+        <group id="CsvEditorViewActions">
+            <action class="net.seesharpsoft.intellij.plugins.csv.actions.CsvEditorViewActions$ShowTextEditor"
+                    id="net.seesharpsoft.intellij.plugins.csv.actions.CsvEditorViewActions$ShowTextEditor"
+                    icon="/media/icons/actions/show-text-editor.svg" />
+            <action class="net.seesharpsoft.intellij.plugins.csv.actions.CsvEditorViewActions$ShowTableEditor"
+                    id="net.seesharpsoft.intellij.plugins.csv.actions.CsvEditorViewActions$ShowTableEditor"
+                    icon="/media/icons/actions/show-table-editor.svg" />
+        </group>
+
         <group id="net.seesharpsoft.intellij.plugins.csv.actions.CsvChangeSeparatorActionGroup"
                class="net.seesharpsoft.intellij.plugins.csv.actions.CsvChangeSeparatorActionGroup"
                popup="true"

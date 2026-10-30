@@ -21,6 +21,7 @@
 - Added CSV and spreadsheet paste in the table editor, starting at the focused cell, overwriting existing values, and adding rows or columns only when needed (#77)
 - Added a text-editor setting to enable or disable active-column highlighting and adjust the maximum number of highlighted rows
 - Added configurable table-editor key bindings through the IDE's Keymap settings, with changes applied immediately in open table editors (#836)
+- Added text- and table-editor toggle buttons to the right side of the editor tab bar, making the views easier to find than the bottom tabs; the switch actions are also available via Find Action and Keymap
 
 ### Changed
 

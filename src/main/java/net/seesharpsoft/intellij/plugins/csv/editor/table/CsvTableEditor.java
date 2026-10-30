@@ -1,6 +1,7 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table;
 
 import com.intellij.ide.structureView.StructureViewBuilder;
+import com.intellij.openapi.actionSystem.ActionGroup;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.editor.Document;
@@ -16,6 +17,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiFile;
 import com.intellij.util.ui.UIUtil;
+import net.seesharpsoft.intellij.plugins.csv.actions.CsvEditorViewActions;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvEscapeCharacter;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvValueSeparator;
@@ -152,6 +154,11 @@ public abstract class CsvTableEditor implements FileEditor, PsiFileHolder {
     public void deselectNotify() {
         // auto save on change - nothing to do here
         getTableModel().suspend();
+    }
+
+    @Override
+    public @Nullable ActionGroup getTabActions() {
+        return CsvEditorViewActions.getEditorViewActionGroup();
     }
 
     public boolean isEditorSelected() {

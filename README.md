@@ -69,7 +69,7 @@ The file types TSV (Tab-Separated Values) and PSV (Pipe-Separated Values) are su
 
 The plugin provides a table editor for CSV, TSV, and PSV files. This editor is separate from the _Edit as Table..._ functionality of [IntelliJ IDEA Ultimate, PhpStorm, DataGrip, and other JetBrains IDEs](https://www.jetbrains.com/help/phpstorm/editing-csv-and-tsv-files.html), and it does not share its implementation or settings. It is an alternative to the CSV text editor and is not intended to replace or mirror the capabilities of the JetBrains _Data_ tab.
 
-To switch between the text editor and the table editor, open a CSV, TSV, or PSV file and select the **Text Editor** or **Table Editor** tab at the bottom of the editor area. Their order can be changed in _Settings > Editor > General > CSV/TSV Editor > Editor Usage_. If the **Table Editor** tab is not shown, check that _Text Editor only_ is not selected and that the file is not too large for the IDE to load.
+To switch between the text editor and the table editor, open a CSV, TSV, or PSV file and use the **Show Text Editor** and **Show Table Editor** buttons on the right side of the editor tab bar. The buttons are shown whenever editor tabs are visible; alternatively, select the **Text Editor** or **Table Editor** tab at the bottom of the editor area. Both actions can also be run via _Find Action_ or assigned shortcuts in **Settings/Preferences > Keymap > CSV Editor View**. The order of the editors can be changed in _Settings > Editor > General > CSV/TSV Editor > Editor Usage_. If the **Table Editor** tab and the buttons are not shown, check that _Text Editor only_ is not selected and that the file is not too large for the IDE to load.
 
 **!!! IMPORTANT !!!**
 
@@ -439,7 +439,7 @@ Make sure the file is assigned to the plugin's file type in _Settings/Preference
 
 If another CSV plugin, such as [Rainbow CSV](https://plugins.jetbrains.com/plugin/12896-rainbow-csv), is enabled, the IDE may assign the file to that plugin instead. Check the file type mapping in _Settings/Preferences > Editor > File Types_ and disable the competing plugin for the affected file type if necessary.
 
-If the **Table Editor** tab is missing, check the [table editor](#table-editor) settings and make sure **Text Editor only** is not selected. The table editor is also unavailable for files the IDE cannot load because they exceed the configured file-size limits.
+If the **Table Editor** tab or the **Show Table Editor** button is missing, check the [table editor](#table-editor) settings and make sure **Text Editor only** is not selected. The table editor is also unavailable for files the IDE cannot load because they exceed the configured file-size limits.
 
 #### The CSV editor causes the IDE to stop working properly
 

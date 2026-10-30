@@ -16,14 +16,18 @@ import java.util.Arrays;
 public class CsvTableContextMenuIconsTest extends CsvBasePlatformTestCase {
 
     public void testRowContextMenuHasScalableLightAndDarkIcons() {
-        assertContextMenuIcons("CsvTableEditorRowContextMenu");
+        assertActionGroupIcons("CsvTableEditorRowContextMenu");
     }
 
     public void testColumnContextMenuHasScalableLightAndDarkIcons() {
-        assertContextMenuIcons("CsvTableEditorColumnContextMenu");
+        assertActionGroupIcons("CsvTableEditorColumnContextMenu");
     }
 
-    private void assertContextMenuIcons(String groupId) {
+    public void testEditorViewSwitchHasScalableLightAndDarkIcons() {
+        assertActionGroupIcons(CsvEditorViewActions.GROUP_ID);
+    }
+
+    private void assertActionGroupIcons(String groupId) {
         ActionManager manager = ActionManager.getInstance();
         DefaultActionGroup group = (DefaultActionGroup) manager.getAction(groupId);
         for (AnAction action : group.getChildren(manager)) {

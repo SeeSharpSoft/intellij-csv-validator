@@ -96,7 +96,7 @@ public class CsvFileEditorProvider implements AsyncFileEditorProvider, DumbAware
                 if (provider == null || !provider.accept(project, virtualFile)) {
                     throw new IllegalStateException("TextEditorProvider does not accept file: " + virtualFile);
                 }
-                TextEditor textEditor = (TextEditor) provider.createEditor(project, virtualFile);
+                TextEditor textEditor = new CsvTextEditor(project, virtualFile, provider);
                 CsvEditorSettings settings = CsvEditorSettings.getInstance();
                 applySettings(textEditor.getEditor().getSettings(), settings);
                 if (settings.isHighlightActiveColumn()) {
