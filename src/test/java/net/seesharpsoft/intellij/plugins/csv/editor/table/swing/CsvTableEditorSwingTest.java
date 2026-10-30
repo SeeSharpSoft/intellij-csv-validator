@@ -1,31 +1,436 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
+import com.intellij.openapi.application.Application;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ModalityState;
+import com.intellij.openapi.application.impl.ApplicationImpl;
+import com.intellij.openapi.command.WriteCommandAction;
+import com.intellij.openapi.fileEditor.FileEditorState;
 import com.intellij.openapi.fileEditor.FileEditorStateLevel;
 import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.util.Key;
+import com.intellij.openapi.util.Computable;
+import com.intellij.openapi.util.Condition;
+import com.intellij.openapi.util.ThrowableComputable;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiDocumentManager;
+import com.intellij.util.ui.UIUtil;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditor;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditorState;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableModel;
 import org.jetbrains.annotations.NotNull;
+import org.mockito.ArgumentMatchers;
+import org.mockito.MockedStatic;
 
+import javax.swing.*;
+import javax.swing.table.TableCellRenderer;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
+import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import static org.mockito.AdditionalAnswers.delegatesTo;
+import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertArrayEquals;
+
 public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
+
+    public void testMultilineCellEditUpdatesCsv() {
+        JTable table = fileEditor.getTable();
+        assertTrue(table.editCellAt(1, 1));
+        JScrollPane cell = (JScrollPane) table.getEditorComponent();
+        JTextArea text = (JTextArea) cell.getViewport().getView();
+        text.setText("first line\nsecond line");
+        assertTrue(table.getCellEditor().stopCellEditing());
+
+        assertEquals("first line\nsecond line", fileEditor.getTableModel().getValue(1, 1));
+        assertTrue(myFixture.getFile().getText().contains("\"first line\nsecond line\""));
+    }
+
+    public void testTableAndHeaderPaintWithoutReadActions() {
+        assertTrue("This regression exercises painting with existing read access",
+                ApplicationManager.getApplication().isReadAccessAllowed());
+        assertPaintsWithoutReadActions(() -> {
+            assertEquals("Header1", fileEditor.getTable().getValueAt(0, 0));
+            assertEquals("Header1 (1)", fileEditor.getTable().getModel().getColumnName(0));
+        });
+
+        WriteCommandAction.runWriteCommandAction(getProject(), () -> myFixture.getEditor().getDocument()
+                .setText("# comment\n\"New \"\"header\"\"\",second\n\"multi\nline\"\n"));
+        PsiDocumentManager.getInstance(getProject()).commitAllDocuments();
+        assertPaintsWithoutReadActions(() -> {
+            CsvTableModelSwing model = fileEditor.getTable().getModel();
+            assertEquals(4, model.getRowCount());
+            assertEquals(2, model.getColumnCount());
+            assertTrue(model.isCommentRow(0));
+            assertFalse(model.hasErrors());
+            assertEquals(" comment", model.getValueAt(0, 1));
+            assertEquals("New \"header\" (1)", model.getColumnName(0));
+            assertEquals("multi\nline", model.getValueAt(2, 0));
+            assertEquals("", model.getValueAt(2, 1));
+            assertEquals("", model.getValueAt(3, 0));
+        });
+    }
+
+    private void assertPaintsWithoutReadActions(Runnable assertions) {
+        JTable table = fileEditor.getTable();
+        table.setSize(800, 400);
+        table.getTableHeader().setSize(800, 40);
+        BufferedImage image = new BufferedImage(800, 400, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D graphics = image.createGraphics();
+
+        // The baseline SDK predates the platform's paint-time lock prohibition.
+        Application paintApplication = prohibitReadActions(ApplicationManager.getApplication());
+        try (MockedStatic<ApplicationManager> manager = mockStatic(ApplicationManager.class, CALLS_REAL_METHODS)) {
+            manager.when(ApplicationManager::getApplication).thenReturn(paintApplication);
+            table.paint(graphics);
+            table.getTableHeader().paint(graphics);
+            assertions.run();
+        } finally {
+            graphics.dispose();
+        }
+    }
+
+    private Application prohibitReadActions(Application application) {
+        Application paintApplication = mock(Application.class, delegatesTo(application));
+        AssertionError prohibited = new AssertionError("The Read/Write lock is disallowed during paint");
+        doThrow(prohibited).when(paintApplication).runReadAction(any(Runnable.class));
+        doThrow(prohibited).when(paintApplication).runReadAction(ArgumentMatchers.<Computable<Object>>any());
+        doThrow(prohibited).when(paintApplication).runReadAction(ArgumentMatchers.<ThrowableComputable<Object, RuntimeException>>any());
+        return paintApplication;
+    }
+
+    public void testUnlockedTableAndHeaderPaintsAreDeferred() {
+        WriteCommandAction.runWriteCommandAction(getProject(), () -> myFixture.getEditor().getDocument()
+                .setText("# comment\n\"New \"\"header\"\"\",second\n\"multi\nline\",value\n"));
+        PsiDocumentManager.getInstance(getProject()).commitAllDocuments();
+        fileEditor.setFrozenColumnCount(1);
+
+        try (DeferredPaintProbe probe = new DeferredPaintProbe()) {
+            probe.paint(false, 1);
+            assertEquals("Ordinary painting must not queue a callback", 0, probe.queuedPaints);
+            assertFalse(probe.cellValues.isEmpty());
+            assertFalse(probe.headerValues.isEmpty());
+            probe.cellValues.clear();
+            probe.headerValues.clear();
+
+            probe.paint(true, 32);
+            assertEquals("Table and header paints must share one pending callback", 1, probe.queuedPaints);
+            assertTrue("Unlocked painting must not read or render cells", probe.cellValues.isEmpty());
+            assertTrue("Unlocked painting must not render headers", probe.headerValues.isEmpty());
+            assertEquals(0, probe.immediatePaints);
+
+            UIUtil.dispatchAllInvocationEvents();
+
+            assertEquals("The callback must paint immediately, not queue another repaint", 1, probe.immediatePaints);
+            assertTrue(probe.cellValues.contains("New \"header\""));
+            assertTrue(probe.cellValues.contains("multi\nline"));
+            assertTrue(probe.headerValues.contains("New \"header\" (1)"));
+            assertEquals("Deferred painting must not start a callback loop", 1, probe.queuedPaints);
+        }
+    }
+
+    public void testUnlockedPaintsRestoreTableAndHeaderPixels() {
+        WriteCommandAction.runWriteCommandAction(getProject(), () -> myFixture.getEditor().getDocument()
+                .setText("# comment\n\"New \"\"header\"\"\",second\n\"multi\nline\",value\n"));
+        PsiDocumentManager.getInstance(getProject()).commitAllDocuments();
+        try (DeferredPaintProbe probe = new DeferredPaintProbe()) {
+            probe.surface.setSize(350, 180);
+            probe.layout(probe.surface);
+            for (int frozenColumns : new int[]{0, 1}) {
+                fileEditor.setFrozenColumnCount(frozenColumns);
+                for (double scale : new double[]{1, 2}) {
+                    probe.paintScale = scale;
+                    for (JComponent component : new JComponent[]{fileEditor.getTable(), fileEditor.getTable().getTableHeader()}) {
+                        probe.paint(false, 1, component);
+                        probe.assertRestoresPixels(component);
+
+                        Rectangle partial = component.getVisibleRect();
+                        partial.width /= 2;
+                        probe.paintClip = partial;
+                        probe.paint(false, 1, component);
+                        probe.paintClip = null;
+                        probe.assertRestoresPixels(component);
+                    }
+                }
+            }
+        }
+    }
+
+    public void testDeferredPaintRefreshesSnapshotAfterDocumentChange() {
+        WriteCommandAction.runWriteCommandAction(getProject(), () -> myFixture.getEditor().getDocument()
+                .setText("First,Second\nold,value\n"));
+        PsiDocumentManager.getInstance(getProject()).commitAllDocuments();
+        try (DeferredPaintProbe probe = new DeferredPaintProbe()) {
+            probe.paint(false, 1, probe.surface);
+            int[] original = probe.image.getRGB(0, 0, 800, 400, null, 0, 800);
+
+            WriteCommandAction.runWriteCommandAction(getProject(), () -> myFixture.getEditor().getDocument()
+                    .setText("Updated,Second\nnew,value\n"));
+            PsiDocumentManager.getInstance(getProject()).commitAllDocuments();
+            probe.paint(true, 1, probe.surface);
+            assertArrayEquals("Keep the previous complete frame until the fresh content is ready",
+                    original, probe.image.getRGB(0, 0, 800, 400, null, 0, 800));
+
+            UIUtil.dispatchAllInvocationEvents();
+
+            assertFalse("The callback must replace stale document content",
+                    Arrays.equals(original, probe.image.getRGB(0, 0, 800, 400, null, 0, 800)));
+            probe.assertRestoresPixels(probe.surface);
+        }
+    }
+
+    public void testPaintRecoversAfterRendererFailure() {
+        try (DeferredPaintProbe probe = new DeferredPaintProbe()) {
+            CsvTable table = fileEditor.getTable();
+            TableCellRenderer renderer = table.getDefaultRenderer(Object.class);
+            table.setDefaultRenderer(Object.class, (target, value, selected, focused, row, column) -> {
+                throw new IllegalStateException("Renderer failure");
+            });
+            assertThrows(IllegalStateException.class, () -> probe.paint(false, 1, table));
+            table.setDefaultRenderer(Object.class, renderer);
+
+            probe.paint(false, 1, table);
+
+            probe.assertRestoresPixels(table);
+        }
+    }
+
+    public void testDeferredPaintSkipsHiddenAndDisposedEditors() {
+        try (DeferredPaintProbe probe = new DeferredPaintProbe()) {
+            probe.paint(true, 1);
+            assertEquals(1, probe.queuedPaints);
+            probe.surface.setVisible(false);
+
+            UIUtil.dispatchAllInvocationEvents();
+
+            assertEquals(0, probe.immediatePaints);
+            assertTrue(probe.cellValues.isEmpty());
+            assertTrue(probe.headerValues.isEmpty());
+
+            probe.surface.setVisible(true);
+            probe.paint(true, 1);
+            assertEquals("Skipping a hidden editor must clear the pending paint", 2, probe.queuedPaints);
+
+            UIUtil.dispatchAllInvocationEvents();
+
+            assertEquals(1, probe.immediatePaints);
+            probe.cellValues.clear();
+            probe.headerValues.clear();
+            probe.paint(true, 1);
+            assertEquals(3, probe.queuedPaints);
+            fileEditor.dispose();
+
+            UIUtil.dispatchAllInvocationEvents();
+
+            assertEquals("A disposed editor must not be painted by a queued callback", 1, probe.immediatePaints);
+            assertTrue(probe.cellValues.isEmpty());
+            assertTrue(probe.headerValues.isEmpty());
+        }
+    }
+
+    public void testHeaderOnlyDeferredPaintUsesCurrentValues() {
+        try (DeferredPaintProbe probe = new DeferredPaintProbe()) {
+            probe.paint(true, 1, fileEditor.getTable().getTableHeader());
+            assertEquals(1, probe.queuedPaints);
+            assertTrue(probe.headerValues.isEmpty());
+
+            WriteCommandAction.runWriteCommandAction(getProject(), () -> myFixture.getEditor().getDocument()
+                    .setText("Updated,second\none,two\n"));
+            PsiDocumentManager.getInstance(getProject()).commitAllDocuments();
+
+            UIUtil.dispatchAllInvocationEvents();
+
+            assertEquals(1, probe.immediatePaints);
+            assertTrue(probe.headerValues.contains("Updated (1)"));
+            assertTrue(probe.cellValues.contains("Updated"));
+            assertTrue(probe.cellValues.contains("two"));
+            assertEquals(1, probe.queuedPaints);
+        }
+    }
+
+    private final class DeferredPaintProbe implements AutoCloseable {
+        private final ApplicationImpl application = (ApplicationImpl) ApplicationManager.getApplication();
+        private final Application paintApplication = prohibitReadActions(application);
+        private final CsvTable table = fileEditor.getTable();
+        private final JScrollPane originalScrollPane = fileEditor.getTableScrollPane();
+        private final TableCellRenderer cellRenderer = table.getDefaultRenderer(Object.class);
+        private final TableCellRenderer commentRenderer = table.getDefaultRenderer(CsvTable.CommentColumn.class);
+        private final TableCellRenderer headerRenderer = table.getTableHeader().getDefaultRenderer();
+        private final List<Object> cellValues = new ArrayList<>();
+        private final List<Object> headerValues = new ArrayList<>();
+        private final BufferedImage image = new BufferedImage(800, 400, BufferedImage.TYPE_INT_ARGB);
+        private int queuedPaints;
+        private int immediatePaints;
+        private double paintScale = 1;
+        private Rectangle paintClip;
+
+        // Adapt the native display seam so the real table/renderers can also run headlessly.
+        private final JScrollPane surface = new JScrollPane(table) {
+            @Override
+            public boolean isShowing() {
+                return isVisible();
+            }
+
+            @Override
+            public void paintImmediately(Rectangle rectangle) {
+                assertTrue("The IDE callback must establish read access before painting",
+                        application.isReadAccessAllowed());
+                immediatePaints++;
+                Graphics2D graphics = image.createGraphics();
+                try {
+                    graphics.scale(paintScale, paintScale);
+                    graphics.setClip(rectangle);
+                    paint(graphics);
+                } finally {
+                    graphics.dispose();
+                }
+            }
+        };
+
+        private DeferredPaintProbe() {
+            surface.setColumnHeaderView(table.getTableHeader());
+            surface.setSize(800, 400);
+            layout(surface);
+            table.setDefaultRenderer(Object.class, recordValues(cellRenderer, cellValues));
+            table.setDefaultRenderer(CsvTable.CommentColumn.class, recordValues(commentRenderer, cellValues));
+            table.getTableHeader().setDefaultRenderer(recordValues(headerRenderer, headerValues));
+
+            doAnswer(invocation -> {
+                queuedPaints++;
+                Runnable callback = invocation.getArgument(0);
+                ModalityState modality = invocation.getArgument(1);
+                Condition<?> expired = invocation.getArgument(2);
+                application.invokeLater(() -> withPaintApplication(callback), modality, expired);
+                return null;
+            }).when(paintApplication).invokeLater(any(Runnable.class), any(ModalityState.class), any(Condition.class));
+        }
+
+        private TableCellRenderer recordValues(TableCellRenderer renderer, List<Object> values) {
+            return (table, value, selected, focused, row, column) -> {
+                values.add(value);
+                return renderer.getTableCellRendererComponent(table, value, selected, focused, row, column);
+            };
+        }
+
+        private void layout(Container container) {
+            container.doLayout();
+            for (Component child : container.getComponents()) {
+                if (child instanceof Container nested) layout(nested);
+            }
+        }
+
+        private void paint(boolean unlocked, int repetitions) {
+            paint(unlocked, repetitions, table, table.getTableHeader());
+        }
+
+        private void assertRestoresPixels(JComponent component) {
+            Rectangle visible = component.getVisibleRect();
+            assertFalse("The rendering comparison needs a visible surface", visible.isEmpty());
+            Rectangle pixels = new Rectangle((int) (visible.x * paintScale), (int) (visible.y * paintScale),
+                    (int) (visible.width * paintScale), (int) (visible.height * paintScale));
+            int[] expected = image.getRGB(pixels.x, pixels.y, pixels.width, pixels.height, null, 0, pixels.width);
+            Graphics2D graphics = image.createGraphics();
+            try {
+                graphics.setColor(Color.MAGENTA);
+                graphics.fill(pixels);
+            } finally {
+                graphics.dispose();
+            }
+
+            paint(true, 1, component);
+
+            assertArrayEquals(component.getClass().getSimpleName() + " must restore its pixels before painting returns",
+                    expected, image.getRGB(pixels.x, pixels.y, pixels.width, pixels.height, null, 0, pixels.width));
+        }
+
+        @SuppressWarnings("UnstableApiUsage")
+        private void paint(boolean unlocked, int repetitions, JComponent... components) {
+            Runnable painting = () -> withPaintApplication(() -> {
+                assertEquals(!unlocked, application.isReadAccessAllowed());
+                Graphics2D graphics = image.createGraphics();
+                try {
+                    graphics.scale(paintScale, paintScale);
+                    graphics.setClip(paintClip);
+                    for (int i = 0; i < repetitions; i++) {
+                        for (JComponent component : components) component.paint(graphics);
+                    }
+                } finally {
+                    graphics.dispose();
+                }
+            });
+            if (unlocked) {
+                // runUnlockingIntendedWrite is a no-op with the baseline SDK's nested locking.
+                application.getThreadingSupport().releaseTheAcquiredWriteIntentLockThenExecuteActionAndTakeWriteIntentLockBack(() -> {
+                    painting.run();
+                    return null;
+                });
+            } else {
+                painting.run();
+            }
+        }
+
+        private void withPaintApplication(Runnable painting) {
+            try (MockedStatic<ApplicationManager> manager = mockStatic(ApplicationManager.class, CALLS_REAL_METHODS)) {
+                manager.when(ApplicationManager::getApplication).thenReturn(paintApplication);
+                painting.run();
+            }
+        }
+
+        @Override
+        public void close() {
+            surface.setVisible(false);
+            table.setDefaultRenderer(Object.class, cellRenderer);
+            table.setDefaultRenderer(CsvTable.CommentColumn.class, commentRenderer);
+            table.getTableHeader().setDefaultRenderer(headerRenderer);
+            originalScrollPane.setViewportView(table);
+            originalScrollPane.setColumnHeaderView(table.getTableHeader());
+            UIUtil.dispatchAllInvocationEvents();
+        }
+    }
+
+    public void testHoveringDoesNotPopUpExpandedCells() {
+        CsvTable table = fileEditor.getTable();
+        assertInstanceOf(table.getParent(), JViewport.class);
+
+        assertFalse(table.getExpandableItemsHandler().isEnabled());
+    }
+
+    public void testSelectedCellColorsRemainVisibleOutsideEditMode() {
+        JTable table = fileEditor.getTable();
+        CsvMultiLineCellRenderer renderer = (CsvMultiLineCellRenderer) table.getCellRenderer(0, 0);
+        JTextArea area = (JTextArea) renderer.getViewport().getView();
+        for (boolean focused : new boolean[]{false, true}) {
+            renderer.getTableCellRendererComponent(table, "Selected", true, focused, 0, 0);
+            assertEquals(table.getSelectionBackground(), area.getBackground());
+            assertEquals(table.getSelectionForeground(), area.getForeground());
+            assertEquals(area.getBackground(), renderer.getViewport().getBackground());
+            assertNull("Normal cell selection must not select text inside the cell", area.getSelectedText());
+        }
+        renderer.getTableCellEditorComponent(table, "Editing", true, 0, 0);
+        assertEquals(table.getBackground(), area.getBackground());
+        assertEquals(table.getForeground(), area.getForeground());
+    }
 
     public void testBasics() {
         assertEquals(CsvTableEditor.EDITOR_NAME, fileEditor.getName());
         assertEquals(null, fileEditor.getCurrentLocation());
         assertInstanceOf(fileEditor.getState(FileEditorStateLevel.FULL), CsvTableEditorState.class);
         assertInstanceOf(fileEditor.getState(FileEditorStateLevel.NAVIGATION), CsvTableEditorState.class);
-        assertInstanceOf(fileEditor.getState(FileEditorStateLevel.UNDO), CsvTableEditorState.class);
+        assertSame(FileEditorState.INSTANCE, fileEditor.getState(FileEditorStateLevel.UNDO));
 
         CsvTableEditorState myState = new CsvTableEditorState();
         fileEditor.setState(myState);
@@ -41,6 +446,15 @@ public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
         assertEquals(fileEditor.getTable(), fileEditor.getPreferredFocusedComponent());
     }
 
+    public void testPixelRowHeightDoesNotChangeWithFontSize() {
+        CsvTableEditorState state = new CsvTableEditorState();
+        state.setRowHeight(24);
+        fileEditor.setState(state);
+        fileEditor.changeFontSize(4);
+        assertEquals(24, fileEditor.getTable().getRowHeight());
+        assertEquals(24, ((JTable) fileEditor.getTableScrollPane().getRowHeader().getView()).getRowHeight());
+    }
+
     public void testAddRemovePropertyChangeListener() throws Throwable {
         assertThrows(IllegalArgumentException.class, () -> fileEditor.addPropertyChangeListener(null));
         assertThrows(IllegalArgumentException.class, () -> fileEditor.removePropertyChangeListener(null));
@@ -54,6 +468,40 @@ public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
         fileEditor.addPropertyChangeListener(listener);
         fileEditor.removePropertyChangeListener(listener);
         assertTrue(true);
+    }
+
+    public void testEditorStatesAreIndependentSnapshots() {
+        fileEditor.getTableEditorState().setColumnWidths(new int[]{80, 200});
+        fileEditor.getTableEditorState().setRowHeight(42);
+        fileEditor.getTableEditorState().setFrozenColumnCount(1);
+        for (FileEditorStateLevel level : new FileEditorStateLevel[]{FileEditorStateLevel.FULL, FileEditorStateLevel.NAVIGATION}) {
+            CsvTableEditorState snapshot = (CsvTableEditorState) fileEditor.getState(level);
+            assertNotSame(snapshot, fileEditor.getTableEditorState());
+            fileEditor.getTableEditorState().getColumnWidths()[0] = 300;
+            assertOrderedEquals(snapshot.getColumnWidths(), new int[]{80, 200});
+            fileEditor.setState(snapshot);
+            assertNotSame(snapshot, fileEditor.getTableEditorState());
+            snapshot.getColumnWidths()[1] = 400;
+            snapshot.setRowHeight(50);
+            snapshot.setFrozenColumnCount(0);
+            assertOrderedEquals(fileEditor.getTableEditorState().getColumnWidths(), new int[]{80, 200});
+            assertEquals(42, fileEditor.getTableEditorState().getRowHeight());
+            assertEquals(1, fileEditor.getTableEditorState().getFrozenColumnCount());
+        }
+    }
+
+    public void testUndoStateDoesNotRestoreTableLayout() {
+        FileEditorState undoState = fileEditor.getState(FileEditorStateLevel.UNDO);
+        fileEditor.getTableEditorState().setColumnWidths(new int[]{80, 200});
+        fileEditor.getTableEditorState().setRowHeight(42);
+        fileEditor.getTableEditorState().setFrozenColumnCount(1);
+
+        assertSame(undoState, fileEditor.getState(FileEditorStateLevel.UNDO));
+        fileEditor.setState(undoState);
+
+        assertOrderedEquals(fileEditor.getTableEditorState().getColumnWidths(), new int[]{80, 200});
+        assertEquals(42, fileEditor.getTableEditorState().getRowHeight());
+        assertEquals(1, fileEditor.getTableEditorState().getFrozenColumnCount());
     }
 
     public void testEditable() {

@@ -1,11 +1,14 @@
 package net.seesharpsoft.intellij.plugins.csv;
 
+import com.intellij.application.options.colors.ColorAndFontOptions;
 import com.intellij.ide.ui.search.SearchableOptionsRegistrarImpl;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.ConfigurableGroup;
 import com.intellij.openapi.options.SearchableConfigurable;
 import com.intellij.openapi.options.ex.ConfigurableExtensionPointUtil;
 import com.intellij.openapi.options.ex.ConfigurableVisitor;
+import com.intellij.psi.codeStyle.CodeStyleSettings;
+import net.seesharpsoft.intellij.plugins.csv.settings.CsvColorSettings;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettingsProvider;
 import java.lang.reflect.Method;
 import java.util.List;
@@ -30,8 +33,19 @@ public class CsvPluginSettingsLinkTest extends CsvBasePlatformTestCase {
         ConfigurableGroup configurableGroup = ConfigurableExtensionPointUtil.getConfigurableGroup(getProject(), true);
 
         assertNotNull(findConfigurable(configurableGroup, CsvEditorSettingsProvider.CSV_EDITOR_SETTINGS_ID));
-        assertNotNull(findConfigurable(configurableGroup, "reference.settingsdialog.IDE.editor.colors.CSV/TSV/PSV"));
-        assertNotNull(findConfigurable(configurableGroup, "preferences.sourceCode.CSV/TSV/PSV"));
+        ColorAndFontOptions colorOptions = new ColorAndFontOptions();
+        try {
+            SearchableConfigurable colorConfigurable = colorOptions.findSubConfigurable(CsvColorSettings.class);
+            assertNotNull(colorConfigurable);
+            assertNotNull(findConfigurable(configurableGroup, colorConfigurable.getId()));
+        } finally {
+            for (Configurable configurable : colorOptions.getConfigurables()) {
+                configurable.disposeUIResources();
+            }
+            colorOptions.disposeUIResources();
+        }
+        assertNotNull(findConfigurable(configurableGroup,
+                CodeStyleSettings.generateConfigurableIdByLanguage(CsvLanguage.INSTANCE)));
     }
 
     private static Configurable findConfigurable(ConfigurableGroup configurableGroup, String settingsId) {

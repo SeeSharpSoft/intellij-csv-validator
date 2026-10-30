@@ -3,10 +3,12 @@ package net.seesharpsoft.intellij.plugins.csv.editor;
 import com.intellij.diff.editor.DiffVirtualFile;
 import com.intellij.diff.impl.DiffRequestProcessor;
 import com.intellij.openapi.editor.EditorSettings;
+import com.intellij.openapi.editor.ex.EditorSettingsExternalizable;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.fileEditor.*;
 import com.intellij.openapi.fileEditor.ex.FileEditorProviderManager;
 import com.intellij.openapi.fileEditor.impl.text.TextEditorState;
+import com.intellij.openapi.fileEditor.impl.text.TextEditorProvider;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.testFramework.LightVirtualFile;
@@ -91,6 +93,36 @@ public class CsvFileEditorTest extends CsvBasePlatformTestCase {
         assertEquals(csvEditorSettings.isUseSoftWraps(), editorSettings.isUseSoftWraps());
 
         disposeTextEditor(textEditor);
+    }
+
+    public void testCsvSelectionHighlightingDoesNotChangeOtherEditors() {
+        EditorSettingsExternalizable settings = EditorSettingsExternalizable.getInstance();
+        boolean highlightSelection = settings.isHighlightSelectionOccurrences();
+        CsvEditorSettings csvSettings = CsvEditorSettings.getInstance();
+        boolean highlightColumn = csvSettings.isHighlightActiveColumn();
+        TextEditor csvEditor = null;
+        TextEditor plainEditor = null;
+        TextEditorProvider provider = TextEditorProvider.getInstance();
+        try {
+            settings.setHighlightSelectionOccurrences(true);
+            csvSettings.setHighlightActiveColumn(true);
+            VirtualFile plainFile = myFixture.addFileToProject("plain.txt", "beta beta").getVirtualFile();
+            plainEditor = (TextEditor) provider.createEditor(getProject(), plainFile);
+            csvEditor = getCurrentTextEditor();
+
+            assertTrue(csvEditor.getEditor().getSettings().isHighlightSelectionOccurrences());
+            assertTrue(plainEditor.getEditor().getSettings().isHighlightSelectionOccurrences());
+            assertTrue(settings.isHighlightSelectionOccurrences());
+        } finally {
+            if (csvEditor != null) {
+                disposeTextEditor(csvEditor);
+            }
+            if (plainEditor != null) {
+                provider.disposeEditor(plainEditor);
+            }
+            settings.setHighlightSelectionOccurrences(highlightSelection);
+            csvSettings.setHighlightActiveColumn(highlightColumn);
+        }
     }
 
     public void testCsvEditorStateReadsAndWritesStates() {

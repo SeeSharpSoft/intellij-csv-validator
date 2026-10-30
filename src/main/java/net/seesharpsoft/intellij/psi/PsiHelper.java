@@ -15,6 +15,7 @@ public class PsiHelper {
         // static helper
     }
 
+    @Nullable
     public static IElementType getElementType(PsiElement element) {
         return element == null || element.getNode() == null ? null : element.getNode().getElementType();
     }

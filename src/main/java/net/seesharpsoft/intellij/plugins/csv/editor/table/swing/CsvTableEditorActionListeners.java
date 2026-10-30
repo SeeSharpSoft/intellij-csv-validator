@@ -32,7 +32,7 @@ public class CsvTableEditorActionListeners extends CsvTableEditorUtilBase implem
 
     @Override
     public void addRow(CsvTableEditorSwing tableEditor, boolean before) {
-        if (tableEditor.getTableModel().hasErrors()) {
+        if (!tableEditor.isEditable() || tableEditor.getTableModel().hasErrors()) {
             return;
         }
 
@@ -54,7 +54,7 @@ public class CsvTableEditorActionListeners extends CsvTableEditorUtilBase implem
 
     @Override
     public void addColumn(CsvTableEditorSwing tableEditor, boolean before) {
-        if (tableEditor.getTableModel().hasErrors()) {
+        if (!tableEditor.isEditable() || tableEditor.getTableModel().hasErrors()) {
             return;
         }
 
@@ -75,7 +75,7 @@ public class CsvTableEditorActionListeners extends CsvTableEditorUtilBase implem
 
     @Override
     public void deleteSelectedRows(CsvTableEditorSwing tableEditor) {
-        if (tableEditor.getTableModel().hasErrors()) {
+        if (!tableEditor.isEditable() || tableEditor.getTableModel().hasErrors()) {
             return;
         }
 
@@ -98,7 +98,7 @@ public class CsvTableEditorActionListeners extends CsvTableEditorUtilBase implem
 
     @Override
     public void deleteSelectedColumns(CsvTableEditorSwing tableEditor) {
-        if (tableEditor.getTableModel().hasErrors()) {
+        if (!tableEditor.isEditable() || tableEditor.getTableModel().hasErrors()) {
             return;
         }
 
@@ -128,7 +128,7 @@ public class CsvTableEditorActionListeners extends CsvTableEditorUtilBase implem
 
     @Override
     public void clearSelectedCells(CsvTableEditorSwing tableEditor) {
-        if (tableEditor.getTableModel().hasErrors()) {
+        if (!tableEditor.isEditable() || tableEditor.getTableModel().hasErrors()) {
             return;
         }
 

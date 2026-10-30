@@ -16,18 +16,26 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - ideaVersion: 2024.2.1
+          - ideaVersion: 2025.2
             ideaPlatform: IC
-          - ideaVersion: 2024.2.1
+            javaVersion: '21'
+          - ideaVersion: 2025.2
             ideaPlatform: PY
+            javaVersion: '21'
+          - ideaVersion: 2026.2.4
+            ideaPlatform: IU
+            javaVersion: '25'
+          - ideaVersion: 2026.2.4
+            ideaPlatform: PY
+            javaVersion: '25'
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up JDK 21
-      uses: actions/setup-java@v2
+    - uses: actions/checkout@v7.0.1
+    - name: Set up JDK ${{ matrix.javaVersion }}
+      uses: actions/setup-java@v6.1.0
       with:
-        java-version: '21'
-        distribution: 'adopt'
+        java-version: ${{ matrix.javaVersion }}
+        distribution: 'temurin'
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     - name: Build with Gradle
@@ -35,4 +43,15 @@ jobs:
         IDEA_VERSION: ${{ matrix.ideaVersion }}
         IDEA_PLATFORM: ${{ matrix.ideaPlatform }}
         IDEA_SOURCES: false
-      run: xvfb-run ./gradlew test
+      run: xvfb-run ./gradlew test verifyPlugin
+    - name: Set up Snyk CLI
+      if: matrix.ideaPlatform == 'IC'
+      uses: snyk/actions/setup@master
+    - name: Run Snyk to check for vulnerabilities
+      if: matrix.ideaPlatform == 'IC'
+      env:
+        IDEA_VERSION: ${{ matrix.ideaVersion }}
+        IDEA_PLATFORM: ${{ matrix.ideaPlatform }}
+        IDEA_SOURCES: false
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      run: snyk test --configuration-matching="^runtimeClasspath$" -- --no-configuration-cache

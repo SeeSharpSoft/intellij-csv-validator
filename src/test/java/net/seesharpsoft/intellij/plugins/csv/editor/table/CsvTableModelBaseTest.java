@@ -1,5 +1,6 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.event.DocumentEvent;
 import com.intellij.openapi.editor.event.DocumentListener;
@@ -17,7 +18,6 @@ import com.intellij.testFramework.PsiTestUtil;
 import net.seesharpsoft.intellij.plugins.csv.CsvBasePlatformTestCase;
 import net.seesharpsoft.intellij.plugins.csv.CsvFileType;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvEscapeCharacter;
-import net.seesharpsoft.intellij.plugins.csv.psi.CsvRecord;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvCodeStyleSettings;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import net.seesharpsoft.intellij.psi.PsiFileHolder;
@@ -27,6 +27,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
@@ -216,19 +217,16 @@ public class CsvTableModelBaseTest extends CsvBasePlatformTestCase implements Ps
     }
 
     public void testReadOperationsRequireReadAction() throws Exception {
-        PsiFileHolder holder = mock(PsiFileHolder.class);
-        PsiFile file = mock(PsiFile.class);
-        CsvRecord record = mock(CsvRecord.class);
-        when(holder.getPsiFile()).thenReturn(file);
-        when(file.getFirstChild()).thenReturn(record);
-        when(record.getFirstChild()).thenReturn(null);
-        CsvTableModel model = new CsvTableModelBase<>(holder);
-        try (MockedStatic<ReadAction> readAction = mockStatic(ReadAction.class)) {
-            readAction.when(() -> ReadAction.compute(any(ThrowableComputable.class)))
-                    .thenAnswer(invocation -> ((ThrowableComputable<?, ?>) invocation.getArgument(0)).compute());
-            assertFalse(model.isCommentRow(0));
-            model.getFieldAt(0, 0);
-            readAction.verify(() -> ReadAction.compute(any(ThrowableComputable.class)));
+        myFixture.configureByFiles("Original.csv");
+        CsvTableModel model = new CsvTableModelBase<>(this);
+        try {
+            ApplicationManager.getApplication().executeOnPooledThread(() -> {
+                assertFalse(ApplicationManager.getApplication().isReadAccessAllowed());
+                assertNotNull(model.getFieldAt(0, 0));
+                assertEquals("Header 1", model.getValue(0, 0));
+                assertFalse(model.hasErrors());
+                assertFalse(ApplicationManager.getApplication().isReadAccessAllowed());
+            }).get(10, TimeUnit.SECONDS);
         } finally {
             model.dispose();
         }

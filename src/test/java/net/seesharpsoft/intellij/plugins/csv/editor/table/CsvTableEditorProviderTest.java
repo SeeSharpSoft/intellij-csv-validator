@@ -6,6 +6,7 @@ import com.intellij.openapi.fileEditor.FileEditorProvider;
 import com.intellij.openapi.fileEditor.FileEditorState;
 import com.intellij.openapi.fileEditor.ex.FileEditorProviderManager;
 import net.seesharpsoft.intellij.plugins.csv.CsvBasePlatformTestCase;
+import net.seesharpsoft.intellij.plugins.csv.editor.table.swing.CsvTableEditorSwing;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import org.jdom.Element;
 
@@ -24,6 +25,35 @@ public class CsvTableEditorProviderTest extends CsvBasePlatformTestCase {
         super.setUp();
         CsvEditorSettings.getInstance().loadState(new CsvEditorSettings.OptionSet());
         myFixture.configureByFiles("AnyFile.csv");
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        try {
+            CsvEditorSettings.getInstance().loadState(new CsvEditorSettings.OptionSet());
+        } finally {
+            super.tearDown();
+        }
+    }
+
+    public void testCreatesStyledSwingEditor() {
+        CsvTableEditorProvider provider = new CsvTableEditorProvider();
+        FileEditor editor = provider.createEditor(getProject(), myFixture.getFile().getVirtualFile());
+        try {
+            assertEquals(CsvTableEditorSwing.class, editor.getClass());
+        } finally {
+            provider.disposeEditor(editor);
+        }
+    }
+
+    public void testCreatesStyledSwingEditorAsynchronously() {
+        CsvTableEditorProvider provider = new CsvTableEditorProvider();
+        FileEditor editor = provider.createEditorAsync(getProject(), myFixture.getFile().getVirtualFile()).build();
+        try {
+            assertEquals(CsvTableEditorSwing.class, editor.getClass());
+        } finally {
+            provider.disposeEditor(editor);
+        }
     }
 
     public void testCsvTableEditorProviderIsAvailableAndHasCorrectNameAndPolicy() {

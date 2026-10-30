@@ -1,11 +1,8 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
-import javax.swing.*;
 import javax.swing.event.*;
 
 public class CsvTableEditorChangeListener extends CsvTableEditorUtilBase implements TableModelListener, TableColumnModelListener {
-
-    private boolean columnPositionWillBeCalculated = false;
 
     public CsvTableEditorChangeListener(CsvTableEditorSwing csvTableEditor) {
         super(csvTableEditor);
@@ -24,19 +21,8 @@ public class CsvTableEditorChangeListener extends CsvTableEditorUtilBase impleme
 
     @Override
     public void columnMoved(TableColumnModelEvent e) {
-        JTable table = csvTableEditor.getTable();
-        if (!columnPositionWillBeCalculated && table.getTableHeader().getDraggedColumn() != null && e.getFromIndex() != e.getToIndex()) {
-            columnPositionWillBeCalculated = true;
-            SwingUtilities.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    if (table.getTableHeader().getDraggedColumn() != null) {
-                        SwingUtilities.invokeLater(this);
-                    } else {
-                        columnPositionWillBeCalculated = false;
-                    }
-                }
-            });
+        if (e.getFromIndex() != e.getToIndex() && csvTableEditor.getTable().getTableHeader().getDraggedColumn() == null) {
+            csvTableEditor.finishColumnReordering();
         }
     }
 

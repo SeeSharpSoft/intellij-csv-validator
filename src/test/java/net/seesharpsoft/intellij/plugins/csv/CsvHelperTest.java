@@ -1,10 +1,10 @@
 package net.seesharpsoft.intellij.plugins.csv;
 
-import com.intellij.testFramework.PlatformLiteFixture;
+import junit.framework.TestCase;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvEscapeCharacter;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvValueSeparator;
 
-public class CsvHelperTest extends PlatformLiteFixture {
+public class CsvHelperTest extends TestCase {
 
     public void testUnquoteCsvValue() {
         String csv = "\"Header\"\" \\\\1\\\\\"";

@@ -13,7 +13,7 @@ import javax.swing.*;
 public final class PsvFileType extends LanguageFileType implements CsvSeparatorHolder {
     public static final PsvFileType INSTANCE = new PsvFileType();
 
-    public static final Icon ICON = IconLoader.getIcon("/media/icons/psv-icon.png", PsvFileType.class);
+    public static final Icon ICON = IconLoader.getIcon("/media/icons/psv-icon.svg", PsvFileType.class);
 
     private PsvFileType() {
         super(CsvLanguage.INSTANCE);

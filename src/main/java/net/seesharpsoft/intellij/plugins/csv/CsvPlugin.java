@@ -1,7 +1,9 @@
 package net.seesharpsoft.intellij.plugins.csv;
 
+import com.intellij.application.options.colors.ColorAndFontOptions;
 import com.intellij.ide.BrowserUtil;
 import com.intellij.notification.*;
+import com.intellij.openapi.actionSystem.impl.SimpleDataContext;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.SearchableConfigurable;
@@ -12,9 +14,11 @@ import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.startup.ProjectActivity;
+import com.intellij.psi.codeStyle.CodeStyleSettings;
 import kotlin.Unit;
 import kotlin.coroutines.Continuation;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvFileAttributes;
+import net.seesharpsoft.intellij.plugins.csv.settings.CsvColorSettings;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettingsProvider;
 import org.jetbrains.annotations.NotNull;
@@ -103,10 +107,12 @@ public class CsvPlugin implements ProjectActivity, DumbAware {
                 openLink(project, "#" + CsvEditorSettingsProvider.CSV_EDITOR_SETTINGS_ID);
             }));
             notification.addAction(NotificationAction.create("Color scheme", (anActionEvent, notification1) -> {
-                openLink(project, "#reference.settingsdialog.IDE.editor.colors.CSV/TSV/PSV");
+                if (!project.isDisposed()) {
+                    ColorAndFontOptions.selectOrEditColor(SimpleDataContext.getProjectContext(project), null, CsvColorSettings.class);
+                }
             }));
             notification.addAction(NotificationAction.create("Formatting", (anActionEvent, notification1) -> {
-                openLink(project, "#preferences.sourceCode.CSV/TSV/PSV");
+                openLink(project, "#" + CodeStyleSettings.generateConfigurableIdByLanguage(CsvLanguage.INSTANCE));
             }));
             notification.addAction(NotificationAction.create("Open CSV Editor homepage", (anActionEvent, notification1) -> {
                 openLink(project, "https://github.com/SeeSharpSoft/intellij-csv-validator");

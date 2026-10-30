@@ -17,7 +17,11 @@ public class CsvLexerFactory {
     }
 
     protected Lexer createLexer(@NotNull CsvValueSeparator separator, @NotNull CsvEscapeCharacter escapeCharacter) {
-        final String commentIndicator = CsvEditorSettings.getInstance().getCommentIndicator();
+        return createLexer(separator, escapeCharacter, CsvEditorSettings.getInstance().getCommentIndicator());
+    }
+
+    public Lexer createLexer(@NotNull CsvValueSeparator separator, @NotNull CsvEscapeCharacter escapeCharacter,
+                             @NotNull String commentIndicator) {
         if (separator.requiresCustomLexer() ||
                 escapeCharacter.isCustom() ||
                 (!commentIndicator.isEmpty() && !commentIndicator.equals(CsvEditorSettings.COMMENT_INDICATOR_DEFAULT))) {
