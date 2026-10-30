@@ -5,14 +5,13 @@ import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorManagerEvent;
 import com.intellij.openapi.fileEditor.FileEditorManagerListener;
-import com.intellij.openapi.fileEditor.impl.EditorComposite;
 import com.intellij.openapi.fileEditor.impl.EditorWindow;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiDocumentManager;
-import com.intellij.testFramework.FileEditorManagerTestCase;
 import com.intellij.testFramework.PlatformTestUtil;
 import com.intellij.util.ui.UIUtil;
+import net.seesharpsoft.intellij.plugins.csv.CsvFileEditorManagerTestCase;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditorProvider;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.swing.CsvTable;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.swing.CsvTableEditorSwing;
@@ -23,7 +22,7 @@ import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
-public class CsvEditorFieldSyncTest extends FileEditorManagerTestCase {
+public class CsvEditorFieldSyncTest extends CsvFileEditorManagerTestCase {
 
     private static final String CONTENT = "name,value\nalpha,1\nbeta,2\n";
 
@@ -133,7 +132,7 @@ public class CsvEditorFieldSyncTest extends FileEditorManagerTestCase {
                 .filter(window -> window != firstTab.window())
                 .findFirst()
                 .orElseThrow();
-        CsvEditorTab secondTab = new CsvEditorTab(secondWindow, secondWindow.getComposite(csvFile));
+        CsvEditorTab secondTab = new CsvEditorTab(secondWindow, waitForEditors(secondWindow.getComposite(csvFile)));
         showTableAndAwait(secondTab);
         clickTableCell(secondTab, 1, 0);
         runAndAwaitSelectionChange(textEditor(firstTab), () -> firstTab.window().setAsCurrentWindow(false));
@@ -149,9 +148,7 @@ public class CsvEditorFieldSyncTest extends FileEditorManagerTestCase {
         PlatformTestUtil.dispatchAllEventsInIdeEventQueue();
         EditorWindow window = manager.getCurrentWindow();
         assertNotNull(window);
-        EditorComposite composite = window.getComposite(csvFile);
-        assertNotNull(composite);
-        return new CsvEditorTab(window, composite);
+        return new CsvEditorTab(window, waitForEditors(window.getComposite(csvFile)));
     }
 
     private static CsvTextEditor textEditor(CsvEditorTab tab) {

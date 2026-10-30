@@ -9,8 +9,8 @@ import com.intellij.openapi.fileEditor.impl.EditorComposite;
 import com.intellij.openapi.fileEditor.impl.EditorWindow;
 import com.intellij.openapi.fileEditor.impl.text.PsiAwareTextEditorImpl;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.testFramework.FileEditorManagerTestCase;
 import com.intellij.testFramework.PlatformTestUtil;
+import net.seesharpsoft.intellij.plugins.csv.CsvFileEditorManagerTestCase;
 import net.seesharpsoft.intellij.plugins.csv.editor.CsvTextEditor;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditor;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
@@ -20,7 +20,7 @@ import javax.swing.SwingConstants;
 import java.awt.Component;
 import java.util.Arrays;
 
-public class CsvEditorViewActionsTest extends FileEditorManagerTestCase {
+public class CsvEditorViewActionsTest extends CsvFileEditorManagerTestCase {
 
     private static final String SHOW_TEXT_EDITOR = "net.seesharpsoft.intellij.plugins.csv.actions.CsvEditorViewActions$ShowTextEditor";
     private static final String SHOW_TABLE_EDITOR = "net.seesharpsoft.intellij.plugins.csv.actions.CsvEditorViewActions$ShowTableEditor";
@@ -142,14 +142,6 @@ public class CsvEditorViewActionsTest extends FileEditorManagerTestCase {
         manager.openFile(csvFile, true);
         PlatformTestUtil.dispatchAllEventsInIdeEventQueue();
         return waitForEditors(currentWindow().getComposite(csvFile));
-    }
-
-    private static EditorComposite waitForEditors(EditorComposite composite) {
-        assertNotNull(composite);
-        // The composite creates its file editors asynchronously, after the editor window shows it.
-        PlatformTestUtil.waitWithEventsDispatching("file editors must be created",
-                () -> !composite.getAllEditors().isEmpty(), 10);
-        return composite;
     }
 
     private EditorWindow currentWindow() {
