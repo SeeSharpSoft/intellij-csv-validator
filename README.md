@@ -71,6 +71,8 @@ The plugin provides a table editor for CSV, TSV, and PSV files. This editor is s
 
 To switch between the text editor and the table editor, open a CSV, TSV, or PSV file and use the **Show Text Editor** and **Show Table Editor** buttons on the right side of the editor tab bar. The buttons are shown whenever editor tabs are visible; alternatively, select the **Text Editor** or **Table Editor** tab at the bottom of the editor area. Both actions can also be run via _Find Action_ or assigned shortcuts in **Settings/Preferences > Keymap > CSV Editor View**. The order of the editors can be changed in _Settings > Editor > General > CSV/TSV Editor > Editor Usage_. If the **Table Editor** tab and the buttons are not shown, check that _Text Editor only_ is not selected and that the file is not too large for the IDE to load.
 
+Switching between the editors keeps your place: the table editor selects and reveals the cell of the field at the text caret, and the text editor moves its caret to the start of the focused table cell. If the caret is already inside that field, it stays where it is. Switching between split windows that show the same file does not change their selections. This behavior can be disabled with [Keep selected field when switching editors](#keep-selected-field-when-switching-editors).
+
 **!!! IMPORTANT !!!**
 
 The table editor works best with a syntactically valid CSV file. If the file contains syntax errors, the table editor shows the data it can read but is read-only. Fix the errors in the text editor before continuing to edit the file in the table editor.
@@ -159,6 +161,10 @@ Changes to Text Editor and Table Editor settings do not update already-open edit
 ##### Editor Usage
 
 You can choose **Text Editor first**, **Table Editor first**, or **Text Editor only**. This controls the order of the editor tabs and whether the table editor is shown. A **Table Editor only** option is not available because the table editor cannot edit files with syntax errors.
+
+##### Keep selected field when switching editors
+
+When switching between the text editor and the table editor, the newly shown editor selects the field that was selected in the other one (see [Table Editor](#table-editor)). This option is **enabled by default**. Disable it to keep independent positions in both editors, e.g. to preserve a multi-cell table selection or multiple text carets while checking something in the other editor. Changes apply to already-open editors.
 
 ##### Default Value Separator (CSV only)
 

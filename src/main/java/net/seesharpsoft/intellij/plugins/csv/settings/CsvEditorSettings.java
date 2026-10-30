@@ -90,6 +90,7 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
         public boolean SHOW_INFO_BALLOON = true;
         public String TAB_HIGHLIGHT_COLOR = "-7984";
         public EditorPrio EDITOR_PRIO = EditorPrio.TEXT_FIRST;
+        public boolean SYNC_SELECTED_FIELD = true;
         public int TABLE_EDITOR_ROW_HEIGHT = TABLE_EDITOR_ROW_HEIGHT_DEFAULT;
         public int TABLE_AUTO_MAX_COLUMN_WIDTH = TABLE_AUTO_MAX_COLUMN_WIDTH_DEFAULT;
         public int TABLE_DEFAULT_COLUMN_WIDTH = TABLE_DEFAULT_COLUMN_WIDTH_DEFAULT;
@@ -220,6 +221,14 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
 
     public void setEditorPrio(EditorPrio editorPrio) {
         getState().EDITOR_PRIO = editorPrio;
+    }
+
+    public boolean isSyncSelectedField() {
+        return getState().SYNC_SELECTED_FIELD;
+    }
+
+    public void setSyncSelectedField(boolean syncSelectedField) {
+        getState().SYNC_SELECTED_FIELD = syncSelectedField;
     }
 
     public boolean showTableEditorInfoPanel() {

@@ -22,6 +22,7 @@
 - Added a text-editor setting to enable or disable active-column highlighting and adjust the maximum number of highlighted rows
 - Added configurable table-editor key bindings through the IDE's Keymap settings, with changes applied immediately in open table editors (#836)
 - Added text- and table-editor toggle buttons to the right side of the editor tab bar, making the views easier to find than the bottom tabs; the switch actions are also available via Find Action and Keymap
+- Added selected-field sync when switching between the text and table editor: the table selects the cell at the text caret, and the caret moves to the focused table cell; it can be disabled with the new general setting "Keep selected field when switching editors"
 
 ### Changed
 

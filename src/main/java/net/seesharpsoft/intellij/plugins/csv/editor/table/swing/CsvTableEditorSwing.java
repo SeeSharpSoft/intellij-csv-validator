@@ -32,6 +32,8 @@ import com.intellij.util.ui.JBUI;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.CsvLexerFactory;
 import net.seesharpsoft.intellij.plugins.csv.CsvPluginManager;
+import net.seesharpsoft.intellij.plugins.csv.editor.CsvFieldPosition;
+import net.seesharpsoft.intellij.plugins.csv.editor.CsvFieldView;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableReorder;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableActions;
@@ -53,7 +55,7 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.IntStream;
 
-public class CsvTableEditorSwing extends CsvTableEditor {
+public class CsvTableEditorSwing extends CsvTableEditor implements CsvFieldView {
 
     protected static final int COLUMN_WIDTH_MAX_TEXT_SAMPLE_SIZE = 10;
 
@@ -571,6 +573,34 @@ public class CsvTableEditorSwing extends CsvTableEditor {
     @Override
     public CsvTableModel getTableModel() {
         return (CsvTableModel) tblEditor.getModel();
+    }
+
+    @Override
+    public @Nullable CsvFieldPosition getSelectedField() {
+        ListSelectionModel rowSelection = tblEditor.getSelectionModel();
+        ListSelectionModel columnSelection = tblEditor.getColumnModel().getSelectionModel();
+        int row = rowSelection.getLeadSelectionIndex();
+        int column = columnSelection.getLeadSelectionIndex();
+        if (rowSelection.isSelectionEmpty() || columnSelection.isSelectionEmpty() ||
+                row < 0 || column < 0 || row >= tblEditor.getRowCount() || column >= tblEditor.getColumnCount()) {
+            return null;
+        }
+        int modelRow = tblEditor.convertRowIndexToModel(row);
+        // a comment spans all columns of its row
+        int modelColumn = getTable().isCommentRow(row) ? 0 : tblEditor.convertColumnIndexToModel(column);
+        return new CsvFieldPosition(modelRow, modelColumn);
+    }
+
+    @Override
+    public void selectField(@NotNull CsvFieldPosition field) {
+        if (isDisposed()) return;
+        // A shown table refreshes after a delay; apply the pending refresh before addressing its rows.
+        getTable().getModel().updateTableImmediately();
+        if (field.equals(getSelectedField()) || field.row() >= tblEditor.getRowCount() || tblEditor.getColumnCount() == 0) {
+            return;
+        }
+        int column = Math.min(field.column(), tblEditor.getColumnCount() - 1);
+        getTable().changeSelection(tblEditor.convertRowIndexToView(field.row()), tblEditor.convertColumnIndexToView(column), false, false);
     }
 
     public void selectColumn(int currentColumn, boolean append) {

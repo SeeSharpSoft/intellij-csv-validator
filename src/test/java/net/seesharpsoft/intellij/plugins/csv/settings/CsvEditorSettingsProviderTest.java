@@ -150,6 +150,39 @@ public class CsvEditorSettingsProviderTest extends CsvBasePlatformTestCase {
         }
     }
 
+    public void testSelectedFieldSyncDefaultsOnAndPersistsThroughSettingsForm() throws ConfigurationException {
+        CsvEditorSettingsProvider provider = new CsvEditorSettingsProvider();
+        try {
+            provider.reset();
+            JCheckBox checkbox = UIUtil.findComponentsOfType(provider.createComponent(), JCheckBox.class).stream()
+                    .filter(component -> "keep selected field when switching editors".equals(component.getText()))
+                    .findFirst().orElse(null);
+            assertNotNull("General settings must expose the selected-field sync checkbox", checkbox);
+            assertNotNull("The checkbox must explain the sync", checkbox.getToolTipText());
+            assertTrue(checkbox.isSelected());
+            assertFalse(provider.isModified());
+
+            checkbox.setSelected(false);
+            assertTrue(provider.isModified());
+            provider.apply();
+            assertFalse(provider.isModified());
+            CsvEditorSettings settings = CsvEditorSettings.getInstance();
+            assertFalse(settings.isSyncSelectedField());
+
+            CsvEditorSettings.OptionSet savedState = XmlSerializer.deserialize(
+                    XmlSerializer.serialize(settings.getState()), CsvEditorSettings.OptionSet.class);
+            settings.loadState(new CsvEditorSettings.OptionSet());
+            provider.reset();
+            assertTrue(checkbox.isSelected());
+            settings.loadState(savedState);
+            provider.reset();
+            assertFalse(checkbox.isSelected());
+            assertFalse(provider.isModified());
+        } finally {
+            provider.disposeUIResources();
+        }
+    }
+
     public void testColumnHighlightingRowLimitDefaultsToUnlimitedAndPersistsThroughSettingsForm() throws ConfigurationException {
         CsvEditorSettingsProvider provider = new CsvEditorSettingsProvider();
         try {

@@ -2,14 +2,10 @@ package net.seesharpsoft.intellij.plugins.csv.actions;
 
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.fileEditor.FileEditor;
-import com.intellij.openapi.fileEditor.FileEditorProvider;
-import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx;
-import com.intellij.openapi.fileEditor.ex.FileEditorWithProvider;
-import com.intellij.openapi.fileEditor.impl.EditorComposite;
-import com.intellij.openapi.fileEditor.impl.EditorWindow;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
+import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorTab;
 import net.seesharpsoft.intellij.plugins.csv.editor.CsvFileEditorProvider;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditorProvider;
 import org.jetbrains.annotations.NotNull;
@@ -41,20 +37,20 @@ public abstract class CsvEditorViewActions extends ToggleAction implements DumbA
     @Override
     public void update(@NotNull AnActionEvent event) {
         super.update(event);
-        event.getPresentation().setEnabledAndVisible(CsvEditorViews.find(event) != null);
+        event.getPresentation().setEnabledAndVisible(findSwitchableTab(event) != null);
     }
 
     @Override
     public boolean isSelected(@NotNull AnActionEvent event) {
-        CsvEditorViews views = CsvEditorViews.find(event);
-        return views != null && views.isShowing(editorTypeId);
+        CsvEditorTab tab = findSwitchableTab(event);
+        return tab != null && tab.isShowing(editorTypeId);
     }
 
     @Override
     public void setSelected(@NotNull AnActionEvent event, boolean state) {
-        CsvEditorViews views = CsvEditorViews.find(event);
-        if (state && views != null) {
-            views.show(editorTypeId);
+        CsvEditorTab tab = findSwitchableTab(event);
+        if (state && tab != null) {
+            tab.show(editorTypeId);
         }
     }
 
@@ -71,48 +67,16 @@ public abstract class CsvEditorViewActions extends ToggleAction implements DumbA
     }
 
     /**
-     * The editor tab containing both CSV editors of the action's file editor.
-     * The tab is resolved via its file editor instance, because the same file can be open in several split windows.
+     * Returns the tab of the action's file editor if it can switch between the CSV text and table editor.
      */
-    private record CsvEditorViews(@NotNull EditorWindow window, @NotNull EditorComposite composite) {
-
-        static @Nullable CsvEditorViews find(@NotNull AnActionEvent event) {
-            Project project = event.getProject();
-            FileEditor fileEditor = event.getData(PlatformCoreDataKeys.FILE_EDITOR);
-            VirtualFile file = event.getData(CommonDataKeys.VIRTUAL_FILE);
-            if (project == null || fileEditor == null || file == null) {
-                return null;
-            }
-            for (EditorWindow window : FileEditorManagerEx.getInstanceEx(project).getWindows()) {
-                EditorComposite composite = window.getComposite(file);
-                if (composite != null && composite.getAllEditors().contains(fileEditor)) {
-                    return hasTextAndTableEditor(composite) ? new CsvEditorViews(window, composite) : null;
-                }
-            }
+    private static @Nullable CsvEditorTab findSwitchableTab(@NotNull AnActionEvent event) {
+        Project project = event.getProject();
+        FileEditor fileEditor = event.getData(PlatformCoreDataKeys.FILE_EDITOR);
+        VirtualFile file = event.getData(CommonDataKeys.VIRTUAL_FILE);
+        if (project == null || fileEditor == null || file == null) {
             return null;
         }
-
-        private static boolean hasTextAndTableEditor(@NotNull EditorComposite composite) {
-            return hasEditor(composite, CsvFileEditorProvider.EDITOR_TYPE_ID) &&
-                    hasEditor(composite, CsvTableEditorProvider.EDITOR_TYPE_ID);
-        }
-
-        private static boolean hasEditor(@NotNull EditorComposite composite, @NotNull String editorTypeId) {
-            return composite.getAllProviders().stream()
-                    .map(FileEditorProvider::getEditorTypeId)
-                    .anyMatch(editorTypeId::equals);
-        }
-
-        boolean isShowing(@NotNull String editorTypeId) {
-            FileEditorWithProvider selected = composite.getSelectedWithProvider();
-            return selected != null && editorTypeId.equals(selected.getProvider().getEditorTypeId());
-        }
-
-        void show(@NotNull String editorTypeId) {
-            composite.setSelectedEditor(editorTypeId);
-            // Toolbar buttons do not take focus. Activating the window like a tab click focuses the shown editor
-            // and lets the IDE notify the editors about the changed selection.
-            window.setAsCurrentWindow(true);
-        }
+        CsvEditorTab tab = CsvEditorTab.find(project, file, fileEditor);
+        return tab != null && tab.hasTextAndTableEditor() ? tab : null;
     }
 }

@@ -145,6 +145,11 @@
         <notificationGroup displayType="STICKY_BALLOON" id="net.seesharpsoft.intellij.plugins.csv" isLogByDefault="true" hideFromSettings="true" />
     </extensions>
 
+    <projectListeners>
+        <listener class="net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorFieldSync"
+                  topic="com.intellij.openapi.fileEditor.FileEditorManagerListener" />
+    </projectListeners>
+
     <actions resource-bundle="localization.CsvEditorActions">
         <group id="CsvTableEditorColumnContextMenu"
                popup="true"
