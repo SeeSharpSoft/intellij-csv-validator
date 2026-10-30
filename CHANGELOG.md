@@ -10,18 +10,17 @@
 
 ### Fixed
 
-## 252.53.0 - Oct 29, 2026
+## 252.53.0 - Oct 30, 2026
 
 ### Added
 
-- Added a FlatLaf-based table editor with padded cells, a flat header, and rounded scrollbars that follow the IDE's light or dark appearance
-- Added a setting to choose between the FlatLaf table editor (the default) and the existing Swing implementation
-- Added Find/Replace in both table editors, with IDE shortcuts, match navigation, case/word/regex options, and Replace All (#430)
-- Added per-file frozen columns in both table editors, with header context-menu actions to freeze through the selection or unfreeze all columns (#195, #319)
-- Added persistent column-header and row-number dragging and context-menu actions for moving selected rows and columns in both table editors (#391, #486)
-- Added CSV and spreadsheet paste in both table editors, starting at the focused cell, overwriting existing values, and adding rows or columns only when needed (#77)
+- Added padded cells, a flat header, and rounded scrollbars to the Swing table editor, following the IDE's light or dark appearance
+- Added Find/Replace in the table editor, with IDE shortcuts, match navigation, case/word/regex options, and Replace All (#430)
+- Added per-file frozen columns in the table editor, with header context-menu actions to freeze through the selection or unfreeze all columns (#195, #319)
+- Added persistent column-header and row-number dragging and context-menu actions for moving selected rows and columns in the table editor (#391, #486)
+- Added CSV and spreadsheet paste in the table editor, starting at the focused cell, overwriting existing values, and adding rows or columns only when needed (#77)
 - Added a text-editor setting to enable or disable active-column highlighting and adjust the maximum number of highlighted rows
-- Added configurable table-editor key bindings through the IDE's Keymap settings, with changes applied immediately in both Swing and FlatLaf editors (#836)
+- Added configurable table-editor key bindings through the IDE's Keymap settings, with changes applied immediately in open table editors (#836)
 
 ### Changed
 
@@ -29,8 +28,10 @@
 - Raised the minimum supported IntelliJ Platform version to 2025.2, following the official IDE release cycle with a one-year delay
 - Updated Gradle, IntelliJ Platform build tooling, parser/lexer generation, test dependencies, and CI actions while retaining Java 21 compatibility
 - Made spellchecker registration optional and updated search and settings integration for IntelliJ Platform 2025.2 and newer
-- Improved automatic column sizing in the FlatLaf table editor to account for rendered cell padding and column headers
+- Improved automatic column sizing in the table editor to account for rendered cell padding and column headers
 - Copying table selections now provides properly quoted CSV using the file's separator and escape settings, while preserving HTML table copying
+- Replaced table-editor context-menu icons with a consistent SVG set, including move and freeze/unfreeze actions, with light/dark theme variants and HiDPI scaling
+- Modernized CSV, TSV, and PSV file-type icons while retaining their document-and-table design, using distinct violet, slate-blue, and teal colors; replaced field, header, and transparent placeholder icons with SVGs
 
 ### Fixed
 

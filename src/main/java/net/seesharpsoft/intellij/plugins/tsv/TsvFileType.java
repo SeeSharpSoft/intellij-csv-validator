@@ -13,7 +13,7 @@ import javax.swing.*;
 public final class TsvFileType extends LanguageFileType implements CsvSeparatorHolder {
     public static final TsvFileType INSTANCE = new TsvFileType();
 
-    public static final Icon ICON = IconLoader.getIcon("/media/icons/tsv-icon.png", TsvFileType.class);
+    public static final Icon ICON = IconLoader.getIcon("/media/icons/tsv-icon.svg", TsvFileType.class);
 
     private TsvFileType() {
         super(CsvLanguage.INSTANCE);

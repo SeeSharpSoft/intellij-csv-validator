@@ -157,30 +157,32 @@
             <separator />
         </group>
         <action class="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$FreezeColumns"
-                id="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$FreezeColumns">
+                id="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$FreezeColumns"
+                icon="/media/icons/actions/freeze-columns.svg">
             <add-to-group group-id="CsvTableEditorColumnContextMenu" />
         </action>
         <action class="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$UnfreezeColumns"
-                id="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$UnfreezeColumns">
+                id="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$UnfreezeColumns"
+                icon="/media/icons/actions/unfreeze-columns.svg">
             <add-to-group group-id="CsvTableEditorColumnContextMenu" relative-to-action="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$FreezeColumns" anchor="after" />
         </action>
         <action class="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AddColumnBefore"
                 id="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AddColumnBefore"
-                icon="/media/icons/add-column-before.png"
+                icon="/media/icons/actions/add-column-before.svg"
         >
             <add-to-group group-id="CsvTableEditorColumnContextMenu" anchor="first" />
             <keyboard-shortcut keymap="$default" first-keystroke="control shift LEFT" />
         </action>
         <action class="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AddColumnAfter"
                 id="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AddColumnAfter"
-                icon="/media/icons/add-column.png"
+                icon="/media/icons/actions/add-column-after.svg"
         >
             <add-to-group group-id="CsvTableEditorColumnContextMenu" relative-to-action="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AddColumnBefore" anchor="after" />
             <keyboard-shortcut keymap="$default" first-keystroke="control shift RIGHT" />
         </action>
         <action class="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$DeleteSelectedColumns"
                 id="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$DeleteSelectedColumns"
-                icon="/media/icons/remove-column.png"
+                icon="/media/icons/actions/remove-column.svg"
         >
             <add-to-group group-id="CsvTableEditorColumnContextMenu" relative-to-action="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AddColumnAfter" anchor="after" />
             <keyboard-shortcut keymap="$default" first-keystroke="control shift DELETE" />
@@ -189,21 +191,21 @@
 
         <action class="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AddRowBefore"
                 id="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AddRowBefore"
-                icon="/media/icons/add-row-before.png"
+                icon="/media/icons/actions/add-row-before.svg"
         >
             <add-to-group group-id="CsvTableEditorRowContextMenu" anchor="first" />
             <keyboard-shortcut keymap="$default" first-keystroke="control UP" />
         </action>
         <action class="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AddRowAfter"
                 id="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AddRowAfter"
-                icon="/media/icons/add-row.png"
+                icon="/media/icons/actions/add-row-after.svg"
         >
             <add-to-group group-id="CsvTableEditorRowContextMenu" relative-to-action="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AddRowBefore" anchor="after" />
             <keyboard-shortcut keymap="$default" first-keystroke="control DOWN" />
         </action>
         <action class="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$DeleteSelectedRows"
                 id="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$DeleteSelectedRows"
-                icon="/media/icons/remove-row.png"
+                icon="/media/icons/actions/remove-row.svg"
         >
             <add-to-group group-id="CsvTableEditorRowContextMenu" relative-to-action="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AddRowAfter" anchor="after" />
             <keyboard-shortcut keymap="$default" first-keystroke="control DELETE" />
@@ -218,31 +220,35 @@
 
         <action class="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AdjustColumnWidths"
                 id="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AdjustColumnWidths"
-                icon="/media/icons/adjust-column-width.png"
+                icon="/media/icons/actions/adjust-column-width.svg"
         >
             <add-to-group group-id="CsvTableEditorColumnContextMenu" />
             <add-to-group group-id="CsvTableEditorRowContextMenu" />
             <keyboard-shortcut keymap="$default" first-keystroke="control shift SPACE" />
         </action>
         <action class="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$MoveRowsUp"
-                id="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$MoveRowsUp">
+                id="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$MoveRowsUp"
+                icon="/media/icons/actions/move-row-up.svg">
             <add-to-group group-id="CsvTableEditorRowContextMenu" relative-to-action="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$DeleteSelectedRows" anchor="after" />
         </action>
         <action class="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$MoveRowsDown"
-                id="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$MoveRowsDown">
+                id="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$MoveRowsDown"
+                icon="/media/icons/actions/move-row-down.svg">
             <add-to-group group-id="CsvTableEditorRowContextMenu" relative-to-action="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$MoveRowsUp" anchor="after" />
         </action>
         <action class="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$MoveColumnsLeft"
-                id="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$MoveColumnsLeft">
+                id="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$MoveColumnsLeft"
+                icon="/media/icons/actions/move-column-left.svg">
             <add-to-group group-id="CsvTableEditorColumnContextMenu" relative-to-action="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$DeleteSelectedColumns" anchor="after" />
         </action>
         <action class="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$MoveColumnsRight"
-                id="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$MoveColumnsRight">
+                id="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$MoveColumnsRight"
+                icon="/media/icons/actions/move-column-right.svg">
             <add-to-group group-id="CsvTableEditorColumnContextMenu" relative-to-action="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$MoveColumnsLeft" anchor="after" />
         </action>
         <action class="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$ResetColumnWidths"
                 id="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$ResetColumnWidths"
-                icon="/media/icons/reset-column-width.png"
+                icon="/media/icons/actions/reset-column-width.svg"
         >
             <add-to-group group-id="CsvTableEditorColumnContextMenu" relative-to-action="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AdjustColumnWidths" anchor="after" />
             <add-to-group group-id="CsvTableEditorRowContextMenu" relative-to-action="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AdjustColumnWidths" anchor="after" />
@@ -269,7 +275,7 @@
         <group id="net.seesharpsoft.intellij.plugins.csv.actions.CsvChangeSeparatorActionGroup"
                class="net.seesharpsoft.intellij.plugins.csv.actions.CsvChangeSeparatorActionGroup"
                popup="true"
-               icon="/media/icons/csv-icon.png"
+               icon="/media/icons/actions/change-separator.svg"
         >
             <add-to-group group-id="EditorPopupMenu" anchor="last"/>
             <add-to-group group-id="CsvTableEditorColumnContextMenu" anchor="last"/>
@@ -279,7 +285,7 @@
         <group id="net.seesharpsoft.intellij.plugins.csv.actions.CsvChangeEscapeCharacterActionGroup"
                class="net.seesharpsoft.intellij.plugins.csv.actions.CsvChangeEscapeCharacterActionGroup"
                popup="true"
-               icon="/media/icons/csv-icon.png"
+               icon="/media/icons/actions/change-escape-character.svg"
         >
             <add-to-group group-id="EditorPopupMenu" anchor="last"/>
             <add-to-group group-id="CsvTableEditorColumnContextMenu" anchor="last"/>
