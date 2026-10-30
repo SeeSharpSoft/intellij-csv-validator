@@ -141,19 +141,22 @@ The default scheduler still refreshes immediately in other unit tests.
 ## Table painting and read access
 
 Table reads reuse existing IDE read access without entering another read action, since even redundant
-read-action entry can be prohibited during painting. Table/header paints without read access are skipped
-and coalesced into one application UI callback per table. The callback paints the visible scroll-pane
-area immediately while it has read access; queuing `repaint()` instead would lose that access before
-rendering. Hidden targets are skipped and disposed editors/projects expire the callback. This requires
-no additional CSV-value cache or file-wide preprocessing, but a skipped paint can briefly leave stale/blank pixels.
-Other PSI reads still acquire a read lock when necessary.
+read-action entry can be prohibited during painting. Table/header paints without read access draw
+their last viewport-sized pixel snapshots and coalesce a refresh into one application UI callback per
+table. The callback paints the visible scroll-pane area immediately while it has read access;
+queuing `repaint()` instead would lose that access before rendering. Viewports use simple scrolling
+so native blitting cannot mix scrolled pixels with a retained frame. Snapshot capture preserves the
+caller's clip, including offscreen row-drag previews, and reuses HiDPI-aware images until their size
+or scale changes. Snapshots are released when components leave the display hierarchy. Hidden targets
+are skipped and disposed editors/projects expire the callback. No CSV values or file-wide render data
+are cached; other PSI reads still acquire a read lock when necessary.
 
 The inherited Swing/FlatLaf paint regressions remove actual IDE read access and reject explicit
 read-action entry. A test-only scroll pane adapts the native display seam for headless execution;
 the real table/header renderers still run, and deferred callbacks use the real application UI queue.
 
 The relevant implementation is in `CsvTableModelBase.computeWithReadAccess`, `CsvTable.paint`,
-and `CsvTableHeader.paint`; regression coverage is in `CsvTableEditorSwingTest` and its
+`CsvTableHeader.paint`, and `CsvTablePaintSnapshot`; regression coverage is in `CsvTableEditorSwingTest` and its
 `CsvTableEditorFlatLafTest` subclass.
 
 ## Updating the changelog

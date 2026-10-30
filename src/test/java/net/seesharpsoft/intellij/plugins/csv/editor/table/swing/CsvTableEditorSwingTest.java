@@ -25,6 +25,7 @@ import org.mockito.MockedStatic;
 
 import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Graphics2D;
@@ -33,6 +34,7 @@ import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -42,6 +44,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.mockito.AdditionalAnswers.delegatesTo;
 import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertArrayEquals;
 
 public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
 
@@ -128,6 +131,72 @@ public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
         }
     }
 
+    public void testUnlockedPaintsRestoreTableAndHeaderPixels() {
+        WriteCommandAction.runWriteCommandAction(getProject(), () -> myFixture.getEditor().getDocument()
+                .setText("# comment\n\"New \"\"header\"\"\",second\n\"multi\nline\",value\n"));
+        PsiDocumentManager.getInstance(getProject()).commitAllDocuments();
+        try (DeferredPaintProbe probe = new DeferredPaintProbe()) {
+            probe.surface.setSize(350, 180);
+            probe.layout(probe.surface);
+            for (int frozenColumns : new int[]{0, 1}) {
+                fileEditor.setFrozenColumnCount(frozenColumns);
+                for (double scale : new double[]{1, 2}) {
+                    probe.paintScale = scale;
+                    for (JComponent component : new JComponent[]{fileEditor.getTable(), fileEditor.getTable().getTableHeader()}) {
+                        probe.paint(false, 1, component);
+                        probe.assertRestoresPixels(component);
+
+                        Rectangle partial = component.getVisibleRect();
+                        partial.width /= 2;
+                        probe.paintClip = partial;
+                        probe.paint(false, 1, component);
+                        probe.paintClip = null;
+                        probe.assertRestoresPixels(component);
+                    }
+                }
+            }
+        }
+    }
+
+    public void testDeferredPaintRefreshesSnapshotAfterDocumentChange() {
+        WriteCommandAction.runWriteCommandAction(getProject(), () -> myFixture.getEditor().getDocument()
+                .setText("First,Second\nold,value\n"));
+        PsiDocumentManager.getInstance(getProject()).commitAllDocuments();
+        try (DeferredPaintProbe probe = new DeferredPaintProbe()) {
+            probe.paint(false, 1, probe.surface);
+            int[] original = probe.image.getRGB(0, 0, 800, 400, null, 0, 800);
+
+            WriteCommandAction.runWriteCommandAction(getProject(), () -> myFixture.getEditor().getDocument()
+                    .setText("Updated,Second\nnew,value\n"));
+            PsiDocumentManager.getInstance(getProject()).commitAllDocuments();
+            probe.paint(true, 1, probe.surface);
+            assertArrayEquals("Keep the previous complete frame until the fresh content is ready",
+                    original, probe.image.getRGB(0, 0, 800, 400, null, 0, 800));
+
+            UIUtil.dispatchAllInvocationEvents();
+
+            assertFalse("The callback must replace stale document content",
+                    Arrays.equals(original, probe.image.getRGB(0, 0, 800, 400, null, 0, 800)));
+            probe.assertRestoresPixels(probe.surface);
+        }
+    }
+
+    public void testPaintRecoversAfterRendererFailure() {
+        try (DeferredPaintProbe probe = new DeferredPaintProbe()) {
+            CsvTable table = fileEditor.getTable();
+            TableCellRenderer renderer = table.getDefaultRenderer(Object.class);
+            table.setDefaultRenderer(Object.class, (target, value, selected, focused, row, column) -> {
+                throw new IllegalStateException("Renderer failure");
+            });
+            assertThrows(IllegalStateException.class, () -> probe.paint(false, 1, table));
+            table.setDefaultRenderer(Object.class, renderer);
+
+            probe.paint(false, 1, table);
+
+            probe.assertRestoresPixels(table);
+        }
+    }
+
     public void testDeferredPaintSkipsHiddenAndDisposedEditors() {
         try (DeferredPaintProbe probe = new DeferredPaintProbe()) {
             probe.paint(true, 1);
@@ -194,6 +263,8 @@ public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
         private final BufferedImage image = new BufferedImage(800, 400, BufferedImage.TYPE_INT_ARGB);
         private int queuedPaints;
         private int immediatePaints;
+        private double paintScale = 1;
+        private Rectangle paintClip;
 
         // Adapt the native display seam so the real table/renderers can also run headlessly.
         private final JScrollPane surface = new JScrollPane(table) {
@@ -209,6 +280,7 @@ public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
                 immediatePaints++;
                 Graphics2D graphics = image.createGraphics();
                 try {
+                    graphics.scale(paintScale, paintScale);
                     graphics.setClip(rectangle);
                     paint(graphics);
                 } finally {
@@ -253,12 +325,34 @@ public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
             paint(unlocked, repetitions, table, table.getTableHeader());
         }
 
+        private void assertRestoresPixels(JComponent component) {
+            Rectangle visible = component.getVisibleRect();
+            assertFalse("The rendering comparison needs a visible surface", visible.isEmpty());
+            Rectangle pixels = new Rectangle((int) (visible.x * paintScale), (int) (visible.y * paintScale),
+                    (int) (visible.width * paintScale), (int) (visible.height * paintScale));
+            int[] expected = image.getRGB(pixels.x, pixels.y, pixels.width, pixels.height, null, 0, pixels.width);
+            Graphics2D graphics = image.createGraphics();
+            try {
+                graphics.setColor(Color.MAGENTA);
+                graphics.fill(pixels);
+            } finally {
+                graphics.dispose();
+            }
+
+            paint(true, 1, component);
+
+            assertArrayEquals(component.getClass().getSimpleName() + " must restore its pixels before painting returns",
+                    expected, image.getRGB(pixels.x, pixels.y, pixels.width, pixels.height, null, 0, pixels.width));
+        }
+
         @SuppressWarnings("UnstableApiUsage")
         private void paint(boolean unlocked, int repetitions, JComponent... components) {
             Runnable painting = () -> withPaintApplication(() -> {
                 assertEquals(!unlocked, application.isReadAccessAllowed());
                 Graphics2D graphics = image.createGraphics();
                 try {
+                    graphics.scale(paintScale, paintScale);
+                    graphics.setClip(paintClip);
                     for (int i = 0; i < repetitions; i++) {
                         for (JComponent component : components) component.paint(graphics);
                     }

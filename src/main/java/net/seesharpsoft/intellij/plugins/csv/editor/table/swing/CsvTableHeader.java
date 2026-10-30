@@ -10,6 +10,7 @@ import java.awt.event.MouseEvent;
 public class CsvTableHeader extends JTableHeader {
     private boolean painting;
     private Runnable columnReorderingHandler;
+    private final CsvTablePaintSnapshot paintSnapshot = new CsvTablePaintSnapshot();
 
     public CsvTableHeader(TableColumnModel columnModel) {
         super(columnModel);
@@ -81,8 +82,17 @@ public class CsvTableHeader extends JTableHeader {
 
     @Override
     public void paint(Graphics g) {
-        if (getTable() instanceof CsvTable csvTable && csvTable.deferPaintWithoutReadAccess()) return;
-        super.paint(g);
+        if (getTable() instanceof CsvTable csvTable) {
+            paintSnapshot.paint(this, g, !csvTable.deferPaintWithoutReadAccess(), super::paint);
+        } else {
+            super.paint(g);
+        }
+    }
+
+    @Override
+    public void removeNotify() {
+        paintSnapshot.clear();
+        super.removeNotify();
     }
 
     @Override

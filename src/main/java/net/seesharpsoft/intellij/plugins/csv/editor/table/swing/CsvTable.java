@@ -32,6 +32,7 @@ public class CsvTable extends JBTable {
     private int searchMatchColumn;
     private int frozenColumnCount;
     private boolean deferredPaintPending;
+    private final CsvTablePaintSnapshot paintSnapshot = new CsvTablePaintSnapshot();
 
     public CsvTable(TableModel model) {
         super(model);
@@ -68,12 +69,12 @@ public class CsvTable extends JBTable {
             throw new IllegalArgumentException("Frozen column count must not be negative");
         }
         frozenColumnCount = count;
-        int scrollMode = count > 0 ? JViewport.SIMPLE_SCROLL_MODE : JViewport.BLIT_SCROLL_MODE;
+        // Blitting would mix scrolled pixels with the complete previous frame used by unlocked paints.
         if (getParent() instanceof JViewport viewport) {
-            viewport.setScrollMode(scrollMode);
+            viewport.setScrollMode(JViewport.SIMPLE_SCROLL_MODE);
         }
         if (getTableHeader().getParent() instanceof JViewport viewport) {
-            viewport.setScrollMode(scrollMode);
+            viewport.setScrollMode(JViewport.SIMPLE_SCROLL_MODE);
         }
         updateFrozenColumnLayout();
     }
@@ -102,13 +103,22 @@ public class CsvTable extends JBTable {
 
     @Override
     public void paint(@NotNull Graphics g) {
-        if (deferPaintWithoutReadAccess()) return;
+        paintSnapshot.paint(this, g, !deferPaintWithoutReadAccess(), this::paintWithReadAccess);
+    }
+
+    private void paintWithReadAccess(Graphics g) {
         super.paint(g);
         // Paint above spanning comment rows and cell editors as well as ordinary cells.
         paintFrozenColumnSeparator(g, getHeight());
         if (getClientProperty(CsvTableRowDragListener.class) instanceof CsvTableRowDragListener drag) {
             drag.paintFeedback(g, this);
         }
+    }
+
+    @Override
+    public void removeNotify() {
+        paintSnapshot.clear();
+        super.removeNotify();
     }
 
     boolean deferPaintWithoutReadAccess() {
