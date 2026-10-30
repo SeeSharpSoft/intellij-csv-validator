@@ -22,10 +22,10 @@ jobs:
           - ideaVersion: 2025.2
             ideaPlatform: PY
             javaVersion: '21'
-          - ideaVersion: 2026.2.3
+          - ideaVersion: 2026.2.4
             ideaPlatform: IU
             javaVersion: '25'
-          - ideaVersion: 2026.2.3
+          - ideaVersion: 2026.2.4
             ideaPlatform: PY
             javaVersion: '25'
 

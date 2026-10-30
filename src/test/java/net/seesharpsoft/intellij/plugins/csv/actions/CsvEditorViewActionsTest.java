@@ -116,7 +116,7 @@ public class CsvEditorViewActionsTest extends FileEditorManagerTestCase {
                 .filter(window -> window != firstWindow)
                 .findFirst()
                 .orElseThrow();
-        EditorComposite secondComposite = secondWindow.getComposite(csvFile);
+        EditorComposite secondComposite = waitForEditors(secondWindow.getComposite(csvFile));
         firstWindow.setAsCurrentWindow(false);
 
         performFromEditorTab(SHOW_TABLE_EDITOR, secondWindow);
@@ -141,8 +141,14 @@ public class CsvEditorViewActionsTest extends FileEditorManagerTestCase {
     private EditorComposite openCsvFile() {
         manager.openFile(csvFile, true);
         PlatformTestUtil.dispatchAllEventsInIdeEventQueue();
-        EditorComposite composite = currentWindow().getComposite(csvFile);
+        return waitForEditors(currentWindow().getComposite(csvFile));
+    }
+
+    private static EditorComposite waitForEditors(EditorComposite composite) {
         assertNotNull(composite);
+        // The composite creates its file editors asynchronously, after the editor window shows it.
+        PlatformTestUtil.waitWithEventsDispatching("file editors must be created",
+                () -> !composite.getAllEditors().isEmpty(), 10);
         return composite;
     }
 
