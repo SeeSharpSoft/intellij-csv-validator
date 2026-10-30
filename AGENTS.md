@@ -65,9 +65,15 @@ edit the grammar/lexer inputs or handwritten sources rather than generated files
 
 Use the existing IntelliJ fixture tests and resource-based expected results. Most editor
 tests extend `CsvBasePlatformTestCase`; table fixtures use `CsvTableEditorSwingTestBase`.
+Tests of editor tabs and split windows extend `CsvFileEditorManagerTestCase` and call
+`waitForEditors` after opening a file or splitting a window, because editor composites
+create their file editors asynchronously.
 
 - Prefer real collaborators and existing test fixtures over mocks. Use mocks only when
   exercising the real dependency is impractical.
+- Exclude the platform's PSI update from time budgets with `CsvPsiUpdateTimer`. Its duration
+  depends on the machine and on other plugins' PSI listeners, which makes wall-clock budgets
+  that include it flaky on CI.
 - Prefer integration tests for functional and behavioral testing. Exercise the actual
   flow through collaborating components rather than relying only on isolated function tests.
 - Use focused unit tests mainly to validate input/output contracts and error handling.

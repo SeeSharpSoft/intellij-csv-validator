@@ -21,6 +21,7 @@ import com.intellij.testFramework.ServiceContainerUtil;
 import com.intellij.util.ui.UIUtil;
 import net.seesharpsoft.intellij.plugins.csv.CsvBasePlatformTestCase;
 import net.seesharpsoft.intellij.plugins.csv.CsvFileType;
+import net.seesharpsoft.intellij.plugins.csv.CsvPsiUpdateTimer;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import org.jetbrains.annotations.NotNull;
 
@@ -190,9 +191,10 @@ public class CsvTableSearchSessionBaseTest extends CsvBasePlatformTestCase {
             uiRan.set(true);
         });
         fieldLookups.set(0);
+        CsvPsiUpdateTimer psiUpdate = CsvPsiUpdateTimer.start(getProject(), getTestRootDisposable());
         long start = System.nanoTime();
         search.replaceAll();
-        long preparedAndApplied = System.nanoTime() - start;
+        long preparedAndApplied = System.nanoTime() - start - psiUpdate.takeNanos();
         awaitSearch();
         assertEquals(original.replace("cat", "dog"), myFixture.getFile().getText());
         assertEquals(4096, replacements.get());
@@ -201,8 +203,11 @@ public class CsvTableSearchSessionBaseTest extends CsvBasePlatformTestCase {
         assertFalse("Replacement preparation must run off the EDT", preparedOnEdt.get());
         assertEquals("Replace All must traverse fields once, not look up each cell", 0, fieldLookups.get());
         long millis = preparedAndApplied / 1_000_000;
-        assertTrue("Replacing 4,096 wide-table cells took " + millis + " ms", millis < 5000);
-        System.out.println("Wide Replace All prepare/apply: " + millis + " ms");
+        assertTrue("PSI must be updated for the replacement", psiUpdate.getTotalMillis() > 0);
+        assertTrue("Replacing 4,096 wide-table cells took " + millis + " ms besides " +
+                psiUpdate.getTotalMillis() + " ms PSI update", millis < 5000);
+        System.out.println("Wide Replace All prepare/apply: " + millis + " ms besides " +
+                psiUpdate.getTotalMillis() + " ms PSI update");
     }
 
     public void testCancellationPartwayThroughWideReplacementDoesNotApplyPartialChanges() throws Exception {
