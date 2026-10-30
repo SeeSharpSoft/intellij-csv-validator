@@ -7,8 +7,12 @@ import com.intellij.openapi.actionSystem.KeyboardShortcut;
 import com.intellij.openapi.actionSystem.PlatformCoreDataKeys;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.actionSystem.impl.SimpleDataContext;
+import com.intellij.openapi.keymap.Keymap;
+import com.intellij.openapi.keymap.KeymapManager;
+import com.intellij.openapi.keymap.ex.KeymapManagerEx;
 import com.intellij.openapi.keymap.impl.ActionProcessor;
 import com.intellij.openapi.keymap.impl.IdeKeyEventDispatcher;
+import com.intellij.openapi.util.Disposer;
 import net.seesharpsoft.intellij.plugins.csv.CsvBasePlatformTestCase;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableModel;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
@@ -39,6 +43,7 @@ public abstract class CsvTableEditorSwingTestBase extends CsvBasePlatformTestCas
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+        activateDefaultKeymap();
         initializeEditorSettings(CsvEditorSettings.getInstance());
         myFixture.configureByFiles(getTestFile());
 
@@ -54,6 +59,14 @@ public abstract class CsvTableEditorSwingTestBase extends CsvBasePlatformTestCas
         fileEditor.dispose();
 
         super.tearDown();
+    }
+
+    // Tests send plugin.xml's $default shortcuts; OS keymaps convert them (macOS maps Ctrl to Cmd).
+    private void activateDefaultKeymap() {
+        KeymapManagerEx keymapManager = KeymapManagerEx.getInstanceEx();
+        Keymap platformKeymap = keymapManager.getActiveKeymap();
+        keymapManager.setActiveKeymap(keymapManager.getKeymap(KeymapManager.DEFAULT_IDEA_KEYMAP));
+        Disposer.register(getTestRootDisposable(), () -> keymapManager.setActiveKeymap(platformKeymap));
     }
 
     protected CsvTableModel getTableModel() {
