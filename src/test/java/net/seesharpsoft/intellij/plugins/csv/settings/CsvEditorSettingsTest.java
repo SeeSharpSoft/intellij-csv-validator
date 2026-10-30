@@ -3,8 +3,7 @@ package net.seesharpsoft.intellij.plugins.csv.settings;
 import com.intellij.util.xmlb.XmlSerializer;
 import net.seesharpsoft.intellij.plugins.csv.CsvBasePlatformTestCase;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
-
-import java.util.Objects;
+import org.jdom.Element;
 
 public class CsvEditorSettingsTest extends CsvBasePlatformTestCase {
 
@@ -48,26 +47,23 @@ public class CsvEditorSettingsTest extends CsvBasePlatformTestCase {
         for (CsvEditorSettings.ValueColoring coloring : CsvEditorSettings.ValueColoring.values()) {
             assertNotNull(coloring.getDisplay());
         }
-        for (CsvEditorSettings.TableEditorType type : CsvEditorSettings.TableEditorType.values()) {
-            assertNotNull(type.getDisplay());
+    }
+
+    public void testLegacyEditorPreferenceIsIgnoredWithoutLosingTableSettings() {
+        for (String legacyType : new String[]{"FLATLAF", "SWING"}) {
+            Element state = new Element("CsvEditorSettings");
+            state.addContent(new Element("option").setAttribute("name", "TABLE_EDITOR_TYPE").setAttribute("value", legacyType));
+            state.addContent(new Element("option").setAttribute("name", "TABLE_EDITOR_ROW_HEIGHT").setAttribute("value", "36"));
+            state.addContent(new Element("option").setAttribute("name", "TABLE_DEFAULT_COLUMN_WIDTH").setAttribute("value", "160"));
+
+            CsvEditorSettings settings = new CsvEditorSettings();
+            settings.loadState(XmlSerializer.deserialize(state, CsvEditorSettings.OptionSet.class));
+
+            assertEquals(36, settings.getTableEditorRowHeight());
+            assertEquals(160, settings.getTableDefaultColumnWidth());
+            Element saved = XmlSerializer.serialize(settings.getState());
+            assertFalse(saved.getChildren("option").stream()
+                    .anyMatch(option -> "TABLE_EDITOR_TYPE".equals(option.getAttributeValue("name"))));
         }
-    }
-
-    public void testTableEditorTypePersists() {
-        CsvEditorSettings settings = new CsvEditorSettings();
-        assertEquals(CsvEditorSettings.TableEditorType.FLATLAF, settings.getTableEditorType());
-        settings.setTableEditorType(CsvEditorSettings.TableEditorType.SWING);
-
-        CsvEditorSettings restored = new CsvEditorSettings();
-        restored.loadState(XmlSerializer.deserialize(XmlSerializer.serialize(Objects.requireNonNull(settings.getState())), CsvEditorSettings.OptionSet.class));
-        assertEquals(CsvEditorSettings.TableEditorType.SWING, restored.getTableEditorType());
-    }
-
-    public void testNullTableEditorTypeFallsBackToFlatLaf() {
-        CsvEditorSettings settings = new CsvEditorSettings();
-        Objects.requireNonNull(settings.getState()).TABLE_EDITOR_TYPE = null;
-        assertEquals(CsvEditorSettings.TableEditorType.FLATLAF, settings.getTableEditorType());
-        settings.setTableEditorType(null);
-        assertEquals(CsvEditorSettings.TableEditorType.FLATLAF, settings.getState().TABLE_EDITOR_TYPE);
     }
 }

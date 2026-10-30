@@ -3,7 +3,7 @@
 ## Start here
 
 This is the CSV Editor plugin for IntelliJ Platform IDEs, implemented in Java. CSV, TSV,
-and PSV share language support, a text editor, and two table-editor implementations.
+and PSV share language support, a text editor, and a Swing table editor.
 
 Read [README.md](README.md) before changing user-facing behavior: it documents supported
 formats, editor features, settings, and limitations. Read [CONTRIBUTING.md](CONTRIBUTING.md)
@@ -24,8 +24,7 @@ The following paths are relative to that directory:
 - `csv\editor\table`: shared PSI-backed model (`CsvTableModelBase`), editor state,
   search/replace, and reordering logic.
 - `csv\editor\table\swing`: table UI, Swing model, clipboard, selection, movement, and
-  rendering. `csv\editor\table\flatlaf` extends this implementation with FlatLaf components;
-  keep behavior consistent across both editors.
+  rendering using Swing components and IDE theme colors.
 - `csv\formatter`, `csv\highlighter`, `csv\inspection`, and `csv\intention`: text-editor
   language features. The sibling `tsv` and `psv` packages provide fixed-separator variants.
 
@@ -66,8 +65,6 @@ edit the grammar/lexer inputs or handwritten sources rather than generated files
 
 Use the existing IntelliJ fixture tests and resource-based expected results. Most editor
 tests extend `CsvBasePlatformTestCase`; table fixtures use `CsvTableEditorSwingTestBase`.
-For shared table changes, cover both Swing and FlatLaf (several FlatLaf suites inherit the
-Swing tests).
 
 - Prefer real collaborators and existing test fixtures over mocks. Use mocks only when
   exercising the real dependency is impractical.
@@ -151,13 +148,12 @@ or scale changes. Snapshots are released when components leave the display hiera
 are skipped and disposed editors/projects expire the callback. No CSV values or file-wide render data
 are cached; other PSI reads still acquire a read lock when necessary.
 
-The inherited Swing/FlatLaf paint regressions remove actual IDE read access and reject explicit
+The Swing paint regressions remove actual IDE read access and reject explicit
 read-action entry. A test-only scroll pane adapts the native display seam for headless execution;
 the real table/header renderers still run, and deferred callbacks use the real application UI queue.
 
 The relevant implementation is in `CsvTableModelBase.computeWithReadAccess`, `CsvTable.paint`,
-`CsvTableHeader.paint`, and `CsvTablePaintSnapshot`; regression coverage is in `CsvTableEditorSwingTest` and its
-`CsvTableEditorFlatLafTest` subclass.
+`CsvTableHeader.paint`, and `CsvTablePaintSnapshot`; regression coverage is in `CsvTableEditorSwingTest`.
 
 ## Updating the changelog
 

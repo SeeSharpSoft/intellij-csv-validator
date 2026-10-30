@@ -4,6 +4,9 @@ import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.util.ThrowableComputable;
 
 import javax.swing.table.TableModel;
+import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.image.BufferedImage;
 
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.never;
@@ -38,5 +41,23 @@ public class CsvTableCommentsAtBeginningTest extends CsvTableEditorSwingTestBase
 
             readAction.verify(() -> ReadAction.compute(any(ThrowableComputable.class)), never());
         }
+    }
+
+    public void testCommentRowSpansAllColumnsAndPaints() {
+        CsvTable table = fileEditor.getTable();
+        table.setSize(800, 400);
+        assertTrue(table.isCommentRow(0));
+        assertEquals(table.getWidth(), table.getCellRect(0, 0, true).width);
+        assertTrue(table.getCellRect(0, 1, true).isEmpty());
+        assertFalse(table.isCellEditable(0, 1));
+
+        BufferedImage image = new BufferedImage(800, 400, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D graphics = image.createGraphics();
+        try {
+            table.paint(graphics);
+        } finally {
+            graphics.dispose();
+        }
+        assertEquals(0, table.columnAtPoint(new Point(500, table.getRowHeight() / 2)));
     }
 }

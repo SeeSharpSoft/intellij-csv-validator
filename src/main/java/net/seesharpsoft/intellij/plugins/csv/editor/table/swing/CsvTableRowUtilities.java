@@ -22,7 +22,11 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
 import com.intellij.ui.table.JBTable;
+import com.intellij.ui.JBColor;
+import com.intellij.util.ui.JBUI;
+import com.intellij.util.ui.UIUtil;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditor;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -50,7 +54,7 @@ import java.util.Objects;
  */
 public final class CsvTableRowUtilities {
 
-    public static final int ROW_NUMBER_CELL_PADDING = 4;
+    public static final int ROW_NUMBER_CELL_PADDING = 8;
 
     private CsvTableRowUtilities() {
         // static helper
@@ -84,6 +88,23 @@ public final class CsvTableRowUtilities {
     private static JTable createRowHeadersTable(final JTable userTable, int startingNumber) {
         final JBTable rowHeadersTable = new JBTable(new RowHeadersTableModel(userTable.getModel().getRowCount(), startingNumber)) {
             @Override
+            public void updateUI() {
+                super.updateUI();
+                setBackground(UIUtil.getPanelBackground());
+                setForeground(UIUtil.getLabelForeground());
+                setFont(UIUtil.getLabelFont());
+                setGridColor(JBColor.border());
+                setShowHorizontalLines(true);
+                setShowVerticalLines(false);
+                setIntercellSpacing(JBUI.size(0, 1));
+            }
+
+            @Override
+            protected @NotNull JTableHeader createDefaultTableHeader() {
+                return new CsvTableHeader(columnModel);
+            }
+
+            @Override
             public void paint(Graphics graphics) {
                 super.paint(graphics);
                 if (getClientProperty(CsvTableRowDragListener.class) instanceof CsvTableRowDragListener drag) {
@@ -96,9 +117,6 @@ public final class CsvTableRowUtilities {
         rowHeadersTable.createDefaultColumnsFromModel();
 
         // make the rows look and behave like headers
-        rowHeadersTable.setBackground(rowHeadersTable.getTableHeader().getBackground());
-        rowHeadersTable.setForeground(rowHeadersTable.getTableHeader().getForeground());
-        rowHeadersTable.setFont(rowHeadersTable.getTableHeader().getFont());
         rowHeadersTable.setRowHeight(userTable.getRowHeight());
         rowHeadersTable.getTableHeader().setReorderingAllowed(false);
         rowHeadersTable.setRowSelectionAllowed(true);
@@ -123,6 +141,10 @@ public final class CsvTableRowUtilities {
         // label used for rendering
         final JLabel label = new JLabel();
         label.setOpaque(true);
+        label.setHorizontalAlignment(JLabel.CENTER);
+        label.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(0, 0, 0, 1, JBColor.border()),
+                JBUI.Borders.empty(3, ROW_NUMBER_CELL_PADDING)));
 
         scrollPane.getVerticalScrollBar().addAdjustmentListener(new AdjustmentListener() {
             public void adjustmentValueChanged(AdjustmentEvent e) {
@@ -136,6 +158,7 @@ public final class CsvTableRowUtilities {
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
                                                            boolean hasFocus, int row, int column) {
                 label.setText("" + value);
+                label.setFont(rowHeadersTable.getFont());
 
                 if (isSelected) {
                     label.setForeground(rowHeadersTable.getSelectionForeground());
@@ -289,7 +312,8 @@ public final class CsvTableRowUtilities {
         FontMetrics fontMetrics = label.getFontMetrics(label.getFont());
 
         int widthFactor;
-        int totalPadding = 2 * ROW_NUMBER_CELL_PADDING;
+        Insets insets = label.getInsets();
+        int totalPadding = insets.left + insets.right;
 
         if (fontMetrics != null && label.getText() != null) {
             widthFactor = fontMetrics.stringWidth(label.getText());

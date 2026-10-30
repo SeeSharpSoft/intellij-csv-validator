@@ -7,6 +7,7 @@ import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.editor.colors.EditorColorsScheme;
+import com.intellij.openapi.editor.colors.EditorColorsListener;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.IdeActions;
 import com.intellij.openapi.project.DumbAwareAction;
@@ -26,6 +27,8 @@ import com.intellij.notification.NotificationType;
 import com.intellij.util.DocumentUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.components.labels.LinkLabel;
+import com.intellij.ui.JBColor;
+import com.intellij.util.ui.JBUI;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.CsvLexerFactory;
 import net.seesharpsoft.intellij.plugins.csv.CsvPluginManager;
@@ -43,6 +46,7 @@ import javax.swing.*;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.util.Arrays;
 import java.util.Objects;
@@ -52,7 +56,6 @@ import java.util.stream.IntStream;
 public class CsvTableEditorSwing extends CsvTableEditor {
 
     protected static final int COLUMN_WIDTH_MAX_TEXT_SAMPLE_SIZE = 10;
-    private static final int TOTAL_CELL_WIDTH_SPACING = 16;
 
     private JTable tblEditor;
     private JPanel panelMain;
@@ -102,6 +105,15 @@ public class CsvTableEditorSwing extends CsvTableEditor {
             initializedUIComponents();
             editorComponent = new JPanel(new BorderLayout());
             editorComponent.add(panelMain, BorderLayout.CENTER);
+            editorComponent.setBorder(JBUI.Borders.empty(8));
+            tableScrollPane.setBorder(JBUI.Borders.customLine(JBColor.border()));
+            tableScrollPane.getViewport().setBackground(tblEditor.getBackground());
+            tblEditor.addPropertyChangeListener("background",
+                    event -> tableScrollPane.getViewport().setBackground(tblEditor.getBackground()));
+            styleScrollBar(tableScrollPane.getVerticalScrollBar());
+            styleScrollBar(tableScrollPane.getHorizontalScrollBar());
+            ApplicationManager.getApplication().getMessageBus().connect(this)
+                    .subscribe(EditorColorsManager.TOPIC, (EditorColorsListener) scheme -> tblEditor.updateUI());
             DataManager.registerDataProvider(editorComponent, dataId -> {
                 if (PlatformDataKeys.FILE_EDITOR.is(dataId)) return this;
                 if (CommonDataKeys.PROJECT.is(dataId)) return project;
@@ -167,6 +179,15 @@ public class CsvTableEditorSwing extends CsvTableEditor {
     protected CsvMultiLineCellRenderer createCellRenderer(boolean comment) {
         return comment ? new CsvMultiLineCellRenderer.Comment(this.tableEditorKeyListener, this)
                 : new CsvMultiLineCellRenderer(this.tableEditorKeyListener, this);
+    }
+
+    private void styleScrollBar(JScrollBar scrollBar) {
+        scrollBar.setUI(new CsvTableScrollBarUI());
+        scrollBar.addPropertyChangeListener("UI", event -> {
+            if (!(scrollBar.getUI() instanceof CsvTableScrollBarUI)) {
+                scrollBar.setUI(new CsvTableScrollBarUI());
+            }
+        });
     }
 
     private void initializedUIComponents() {
@@ -612,32 +633,28 @@ public class CsvTableEditorSwing extends CsvTableEditor {
     }
 
     protected int[] getMaxTextWidthForAllColumns() {
-        CsvTableModel tableModel = getTableModel();
-        int maxRow = Math.min(tableModel.getRowCount(), COLUMN_WIDTH_MAX_TEXT_SAMPLE_SIZE);
-        int[] textLengths = new int[tableModel.getColumnCount()];
-
-        for (int row = 0; row < maxRow; ++row) {
-            if (!tableModel.isCommentRow(row)) {
-                for (int col = 0; col < textLengths.length; ++col) {
-                    String currentText = tableModel.getValue(row, col);
-                    textLengths[col] = Math.max(getStringWidth(currentText), textLengths[col]);
-                }
-            }
-        }
-
-        return textLengths;
-    }
-
-    @Override
-    protected int getStringWidth(String text) {
-        if (text == null || text.isEmpty()) {
-            return 0;
-        }
         JTable table = getTable();
-        FontMetrics fontMetrics = getTable().getFontMetrics(table.getFont());
-        return CsvHelper.getMaxTextLineLength(text, input ->
-                (int) Math.ceil((float) (fontMetrics.stringWidth(input) + TOTAL_CELL_WIDTH_SPACING) / getZoomFactor())
-        );
+        int[] widths = new int[table.getColumnCount()];
+        int sampleSize = Math.min(table.getRowCount(), COLUMN_WIDTH_MAX_TEXT_SAMPLE_SIZE);
+        float zoomFactor = getZoomFactor();
+        for (int column = 0; column < widths.length; column++) {
+            TableColumn tableColumn = table.getColumnModel().getColumn(column);
+            TableCellRenderer headerRenderer = tableColumn.getHeaderRenderer();
+            if (headerRenderer == null) {
+                headerRenderer = table.getTableHeader().getDefaultRenderer();
+            }
+            int width = headerRenderer.getTableCellRendererComponent(table, tableColumn.getHeaderValue(),
+                    false, false, -1, column).getPreferredSize().width;
+            for (int row = 0; row < sampleSize; row++) {
+                if (getTableModel().isCommentRow(row)) continue;
+                CsvMultiLineCellRenderer renderer = (CsvMultiLineCellRenderer) table.prepareRenderer(
+                        table.getDefaultRenderer(Object.class), row, column);
+                width = Math.max(width, renderer.getPreferredUnwrappedWidth() + table.getIntercellSpacing().width);
+            }
+            // Layout applies zoom to stored widths; renderer measurements are already in screen pixels.
+            widths[column] = (int) Math.ceil(width / zoomFactor);
+        }
+        return widths;
     }
 
     public void changeFontSize(int changeAmount) {

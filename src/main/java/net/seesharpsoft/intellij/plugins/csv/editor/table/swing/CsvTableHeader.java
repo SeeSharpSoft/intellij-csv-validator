@@ -1,6 +1,14 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
+import com.intellij.ui.JBColor;
+import com.intellij.util.ui.JBUI;
+import com.intellij.util.ui.UIUtil;
+
+import javax.swing.BorderFactory;
+import javax.swing.JTable;
 import javax.swing.SwingUtilities;
+import javax.swing.border.Border;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
@@ -14,6 +22,35 @@ public class CsvTableHeader extends JTableHeader {
 
     public CsvTableHeader(TableColumnModel columnModel) {
         super(columnModel);
+    }
+
+    @Override
+    public void updateUI() {
+        super.updateUI();
+        applyHeaderStyle();
+    }
+
+    private void applyHeaderStyle() {
+        setBackground(UIUtil.getPanelBackground());
+        setForeground(UIUtil.getLabelForeground());
+        setFont(UIUtil.getLabelFont().deriveFont(Font.BOLD));
+        setDefaultRenderer(new DefaultTableCellRenderer() {
+            private final Border border = BorderFactory.createCompoundBorder(
+                    BorderFactory.createMatteBorder(0, 0, 1, 1, JBColor.border()),
+                    JBUI.Borders.empty(8, 10));
+
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean selected,
+                                                            boolean focused, int row, int column) {
+                super.getTableCellRendererComponent(table, value, false, false, row, column);
+                JTableHeader header = table.getTableHeader();
+                setBackground(header.getBackground());
+                setForeground(header.getForeground());
+                setFont(header.getFont());
+                setBorder(border);
+                return this;
+            }
+        });
     }
 
     void setColumnReorderingHandler(Runnable handler) {

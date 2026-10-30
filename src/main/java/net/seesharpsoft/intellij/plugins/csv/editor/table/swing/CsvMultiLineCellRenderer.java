@@ -9,6 +9,7 @@ import net.seesharpsoft.intellij.plugins.csv.highlighter.CsvTextAttributeKeys;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.event.CellEditorListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.table.TableCellEditor;
@@ -29,11 +30,11 @@ public class CsvMultiLineCellRenderer extends JBScrollPane implements TableCellR
     private final UserDataHolder myUserDataHolder;
 
     private final JTextArea myTextArea;
+    private final Border cellPadding = JBUI.Borders.empty(3, 8);
 
     public CsvMultiLineCellRenderer(CsvTableEditorKeyListener keyListener, UserDataHolder userDataHolderParam) {
         this.myUserDataHolder = userDataHolderParam;
         myTextArea = new JTextArea();
-        // Keep wrapping enabled for the editor use case. Renderers will no longer use this class.
         myTextArea.setLineWrap(true);
         myTextArea.setWrapStyleWord(true);
         myTextArea.setOpaque(true);
@@ -80,13 +81,14 @@ public class CsvMultiLineCellRenderer extends JBScrollPane implements TableCellR
             myTextArea.setBackground(getColumnBackgroundColor(column, table.getBackground()));
         }
         if (hasFocus) {
-            myTextArea.setBorder(UIManager.getBorder("Table.focusCellHighlightBorder"));
+            myTextArea.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(table.getSelectionBackground(), JBUI.scale(1)), JBUI.Borders.empty(2, 7)));
             if (!isSelected && table.isCellEditable(row, column)) {
                 myTextArea.setForeground(table.getForeground());
                 myTextArea.setBackground(table.getBackground());
             }
         } else {
-            myTextArea.setBorder(JBUI.Borders.empty(1, 2));
+            myTextArea.setBorder(cellPadding);
         }
         getViewport().setBackground(myTextArea.getBackground());
 
@@ -101,6 +103,17 @@ public class CsvMultiLineCellRenderer extends JBScrollPane implements TableCellR
         myTextArea.setSize(columnWidth, rowHeight);
 
         return this;
+    }
+
+    int getPreferredUnwrappedWidth() {
+        boolean lineWrap = myTextArea.getLineWrap();
+        try {
+            myTextArea.setLineWrap(false);
+            Insets insets = getInsets();
+            return myTextArea.getPreferredSize().width + insets.left + insets.right;
+        } finally {
+            myTextArea.setLineWrap(lineWrap);
+        }
     }
 
     @Override

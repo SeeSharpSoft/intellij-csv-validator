@@ -1,18 +1,17 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
-import net.seesharpsoft.intellij.plugins.csv.editor.table.flatlaf.CsvTableEditorFlatLaf;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 
 import javax.swing.*;
 import javax.swing.table.TableColumn;
 import java.awt.*;
 
-public class CsvTableEditorFlatLafAutoColumnWidthTest extends CsvTableEditorSwingTestBase {
+public class CsvTableEditorSwingAutoColumnWidthTest extends CsvTableEditorSwingTestBase {
 
     @Override
     protected CsvTableEditorSwing createEditor() {
         myFixture.configureByText("AutoFit.csv", "Description,Value\nx,0123456789012345678901234567890123456789\n");
-        return new CsvTableEditorFlatLaf(getProject(), myFixture.getFile().getVirtualFile());
+        return new CsvTableEditorSwing(getProject(), myFixture.getFile().getVirtualFile());
     }
 
     @Override

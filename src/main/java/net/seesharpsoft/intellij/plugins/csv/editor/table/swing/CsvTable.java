@@ -3,9 +3,12 @@ package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 import com.intellij.openapi.application.Application;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
+import com.intellij.openapi.editor.colors.EditorColorsManager;
+import com.intellij.openapi.editor.colors.EditorColorsScheme;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.table.JBTable;
 import com.intellij.util.ui.JBUI;
+import com.intellij.util.ui.UIUtil;
 import net.seesharpsoft.intellij.ui.EditableCellFocusAction;
 import org.jetbrains.annotations.NotNull;
 
@@ -36,7 +39,6 @@ public class CsvTable extends JBTable {
 
     public CsvTable(TableModel model) {
         super(model);
-        setUI(new MultiSpanCellTableUI());
         setCellSelectionEnabled(true);
         new EditableCellFocusAction(this, KeyStroke.getKeyStroke("TAB"));
         new EditableCellFocusAction(this, KeyStroke.getKeyStroke("shift TAB"));
@@ -48,11 +50,16 @@ public class CsvTable extends JBTable {
 
     @Override
     public void setUI(TableUI ui) {
-        super.setUI(createTableUI());
-    }
-
-    protected TableUI createTableUI() {
-        return new MultiSpanCellTableUI();
+        super.setUI(new MultiSpanCellTableUI());
+        EditorColorsScheme scheme = EditorColorsManager.getInstance().getGlobalScheme();
+        setBackground(scheme.getDefaultBackground());
+        setForeground(scheme.getDefaultForeground());
+        setSelectionBackground(UIUtil.getTableSelectionBackground(true));
+        setSelectionForeground(UIUtil.getTableSelectionForeground(true));
+        setGridColor(JBColor.border());
+        setShowHorizontalLines(true);
+        setShowVerticalLines(false);
+        setIntercellSpacing(JBUI.size(0, 1));
     }
 
     @Override
@@ -295,8 +302,7 @@ public class CsvTable extends JBTable {
         }
     }
 
-    // Both UI delegates need the same spanning behavior for comment rows.
-    protected void paintTable(Graphics g, CellRendererPane rendererPane, Consumer<Graphics> paintCells) {
+    private void paintTable(Graphics g, CellRendererPane rendererPane, Consumer<Graphics> paintCells) {
         paintCounter++;
         try {
             paintCells.accept(g);

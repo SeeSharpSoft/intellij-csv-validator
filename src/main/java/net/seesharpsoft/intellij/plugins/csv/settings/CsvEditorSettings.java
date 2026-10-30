@@ -79,25 +79,6 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
         }
     }
 
-    public enum TableEditorType {
-        FLATLAF("settings.table.editor.type.flatlaf"),
-        SWING("settings.table.editor.type.swing");
-
-        private final String resourceKey;
-        private String display;
-
-        TableEditorType(String resourceKey) {
-            this.resourceKey = resourceKey;
-        }
-
-        public String getDisplay() {
-            if (display == null) {
-                display = getLocalizedText(this.resourceKey);
-            }
-            return display;
-        }
-    }
-
     public static final class OptionSet {
         public String CURRENT_PLUGIN_VERSION;
 
@@ -109,7 +90,6 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
         public boolean SHOW_INFO_BALLOON = true;
         public String TAB_HIGHLIGHT_COLOR = "-7984";
         public EditorPrio EDITOR_PRIO = EditorPrio.TEXT_FIRST;
-        public TableEditorType TABLE_EDITOR_TYPE = TableEditorType.FLATLAF;
         public int TABLE_EDITOR_ROW_HEIGHT = TABLE_EDITOR_ROW_HEIGHT_DEFAULT;
         public int TABLE_AUTO_MAX_COLUMN_WIDTH = TABLE_AUTO_MAX_COLUMN_WIDTH_DEFAULT;
         public int TABLE_DEFAULT_COLUMN_WIDTH = TABLE_DEFAULT_COLUMN_WIDTH_DEFAULT;
@@ -240,15 +220,6 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
 
     public void setEditorPrio(EditorPrio editorPrio) {
         getState().EDITOR_PRIO = editorPrio;
-    }
-
-    public TableEditorType getTableEditorType() {
-        TableEditorType type = getState().TABLE_EDITOR_TYPE;
-        return type == null ? TableEditorType.FLATLAF : type;
-    }
-
-    public void setTableEditorType(TableEditorType tableEditorType) {
-        getState().TABLE_EDITOR_TYPE = tableEditorType == null ? TableEditorType.FLATLAF : tableEditorType;
     }
 
     public boolean showTableEditorInfoPanel() {

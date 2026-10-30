@@ -369,19 +369,14 @@ public class CsvEditorSettingsProviderTest extends CsvBasePlatformTestCase {
         }
     }
 
-    public void testTableEditorTypeResetAndApply() throws ConfigurationException {
+    public void testTableSettingsHaveNoImplementationSelector() {
         CsvEditorSettingsProvider provider = new CsvEditorSettingsProvider();
         try {
-            CsvEditorSettings settings = CsvEditorSettings.getInstance();
-            settings.setTableEditorType(CsvEditorSettings.TableEditorType.FLATLAF);
-            provider.reset();
-            assertFalse(provider.isModified());
-
-            settings.setTableEditorType(CsvEditorSettings.TableEditorType.SWING);
-            assertTrue(provider.isModified());
-            provider.apply();
-            assertEquals(CsvEditorSettings.TableEditorType.FLATLAF, settings.getTableEditorType());
-            assertFalse(provider.isModified());
+            JPanel tableSettings = UIUtil.findComponentsOfType(provider.createComponent(), JPanel.class).stream()
+                    .filter(panel -> panel.getBorder() instanceof TitledBorder border && "Table Editor".equals(border.getTitle()))
+                    .findFirst().orElseThrow();
+            assertTrue(UIUtil.findComponentsOfType(tableSettings, JComboBox.class).isEmpty());
+            assertEquals(3, UIUtil.findComponentsOfType(tableSettings, JFormattedTextField.class).size());
         } finally {
             provider.disposeUIResources();
         }

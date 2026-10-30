@@ -79,13 +79,13 @@ The table editor works best with a syntactically valid CSV file. If the file con
 
 #### Find and Replace
 
-Use the IDE's **Find** and **Replace** shortcuts in either table editor (Ctrl+F and Ctrl+R in the default Windows/Linux keymap). The search bar supports case-sensitive, whole-word, and regular-expression searches. Matches select and scroll to the corresponding cell; use the previous/next buttons to navigate, including multiple matches within a cell. **Replace** changes the current occurrence, and **Replace All** changes every occurrence in the table as one undoable edit. Press Escape in the search bar to close it and return to the selected cell.
+Use the IDE's **Find** and **Replace** shortcuts in the table editor (Ctrl+F and Ctrl+R in the default Windows/Linux keymap). The search bar supports case-sensitive, whole-word, and regular-expression searches. Matches select and scroll to the corresponding cell; use the previous/next buttons to navigate, including multiple matches within a cell. **Replace** changes the current occurrence, and **Replace All** changes every occurrence in the table as one undoable edit. Press Escape in the search bar to close it and return to the selected cell.
 
 Search starts in the background as you type, keeping the table responsive. The bar shows **Searching...** while scanning, then the current match and total count. Changing the query or closing the bar cancels the previous search.
 
 #### Copy and Paste
 
-Use the IDE's **Copy** and **Paste** shortcuts in either table editor. Copying selected cells provides CSV text using the file's separator, escape character, and quoting settings, as well as an HTML table. Selecting a column header selects the whole column for copying. Read-only files and files with syntax errors still allow selecting and copying cells; open a cell to select and copy part of its text without changing it.
+Use the IDE's **Copy** and **Paste** shortcuts in the table editor. Copying selected cells provides CSV text using the file's separator, escape character, and quoting settings, as well as an HTML table. Selecting a column header selects the whole column for copying. Read-only files and files with syntax errors still allow selecting and copying cells; open a cell to select and copy part of its text without changing it.
 
 Outside a cell's text editor, paste starts at the focused cell, overwrites existing values, and adds rows or columns only when the clipboard extends beyond the table. Clipboard CSV uses the file's separator and escape character; tab-separated spreadsheet data is also supported. Quoted separators, quotes, and multiline values are preserved. A final clipboard line break does not add an extra row. Paste is a single undoable edit.
 
@@ -105,7 +105,7 @@ Drag a column header left or right, or drag a row number up or down, to move tha
 
 The context menus also provide **Move Selected Rows Up/Down** and **Move Selected Columns Left/Right**. These actions move the selection by one position, keeping the selected items in order. Movement stops at the table boundaries; the empty row representing a final line break is not movable.
 
-Moves change the CSV document, not just its display order, and can be undone or redone using the IDE's usual commands. Column widths follow their columns, and the moved items remain selected. Undo and redo also restore the corresponding column widths and row/column selection. Both table-editor implementations support movement, including when columns are frozen. Files with syntax errors and read-only files cannot be reordered.
+Moves change the CSV document, not just its display order, and can be undone or redone using the IDE's usual commands. Column widths follow their columns, and the moved items remain selected. Undo and redo also restore the corresponding column widths and row/column selection. Movement is supported even when columns are frozen. Files with syntax errors and read-only files cannot be reordered.
 
 Small moves complete immediately. Large moves use IntelliJ's standard cancellable progress dialog while preparing the change and updating the table. The editor waits for completion instead of maintaining a separate optimistic preview; no custom rendering or status bar is used.
 
@@ -115,11 +115,11 @@ Cancel during preparation to leave the file unchanged. If the file or its CSV se
 
 Select a column header, then right-click the header and choose **Freeze Columns Through Selection** to keep that column and all columns to its left visible while scrolling horizontally. If multiple columns are selected, the rightmost selected column determines the frozen area. Choose **Unfreeze Columns** in the same menu to restore normal scrolling.
 
-A distinct divider after the last frozen column marks the frozen area in both the header and table. Frozen columns remain editable and support the same selection, resizing, and Find/Replace controls as other columns. The frozen-column count is saved for each file and works in both table-editor implementations.
+A distinct divider after the last frozen column marks the frozen area in both the header and table. Frozen columns remain editable and support the same selection, resizing, and Find/Replace controls as other columns. The frozen-column count is saved for each file.
 
 #### Key bindings
 
-Configure table commands in **Settings/Preferences > Keymap > CSV Table Editor** (or search for the action name). You can add, remove, or reassign shortcuts using the IDE's standard keymap controls, including two-stroke shortcuts. Changes take effect in already-open Swing and FlatLaf table editors. The context menus show the current shortcuts, not fixed default labels.
+Configure table commands in **Settings/Preferences > Keymap > CSV Table Editor** (or search for the action name). You can add, remove, or reassign shortcuts using the IDE's standard keymap controls, including two-stroke shortcuts. Changes take effect in already-open table editors. The context menus show the current shortcuts, not fixed default labels.
 
 The following are the default shortcuts. Ordinary arrow-key and Enter-based cell navigation remain table controls rather than configurable CSV actions:
 
@@ -235,9 +235,7 @@ If enabled, trailing whitespace is always preserved when editing CSV, TSV, and P
 
 #### Table Editor
 
-##### Table editor implementation
-
-**FlatLaf** is the default, providing a modern table with padded cells, a flat header, and rounded scrollbars. You can also choose **Swing**. Both editors support the same CSV editing actions and shortcuts. Close and reopen a file after changing this setting to use the selected implementation. FlatLaf follows the IDE's light or dark appearance without changing the IDE theme.
+The table editor uses Swing components with padded cells, a flat header, and rounded scrollbars. It follows the IDE's light or dark appearance without changing the IDE theme.
 
 ##### Default row height
 

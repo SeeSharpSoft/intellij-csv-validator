@@ -48,6 +48,18 @@ import static org.junit.Assert.assertArrayEquals;
 
 public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
 
+    public void testMultilineCellEditUpdatesCsv() {
+        JTable table = fileEditor.getTable();
+        assertTrue(table.editCellAt(1, 1));
+        JScrollPane cell = (JScrollPane) table.getEditorComponent();
+        JTextArea text = (JTextArea) cell.getViewport().getView();
+        text.setText("first line\nsecond line");
+        assertTrue(table.getCellEditor().stopCellEditing());
+
+        assertEquals("first line\nsecond line", fileEditor.getTableModel().getValue(1, 1));
+        assertTrue(myFixture.getFile().getText().contains("\"first line\nsecond line\""));
+    }
+
     public void testTableAndHeaderPaintWithoutReadActions() {
         assertTrue("This regression exercises painting with existing read access",
                 ApplicationManager.getApplication().isReadAccessAllowed());
