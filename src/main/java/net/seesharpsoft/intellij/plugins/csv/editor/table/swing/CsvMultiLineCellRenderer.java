@@ -14,7 +14,9 @@ import javax.swing.event.CellEditorListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumnModel;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.DefaultCaret;
 import java.awt.*;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
@@ -73,6 +75,14 @@ public class CsvMultiLineCellRenderer extends JBScrollPane implements TableCellR
 
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+        // One renderer paints every cell, so neither caret scrolling nor a scroll position may carry over between cells.
+        setCaretUpdatePolicy(DefaultCaret.NEVER_UPDATE);
+        prepareCell(table, value, isSelected, hasFocus, row, column);
+        getViewport().setViewPosition(new Point());
+        return this;
+    }
+
+    private void prepareCell(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         if (isSelected) {
             myTextArea.setForeground(table.getSelectionForeground());
             myTextArea.setBackground(table.getSelectionBackground());
@@ -95,14 +105,20 @@ public class CsvMultiLineCellRenderer extends JBScrollPane implements TableCellR
         this.setFont(table.getFont());
         this.setText(value == null ? "" : value.toString());
 
-        final int columnWidth = table.getColumnModel().getColumn(column).getWidth();
-        final int rowHeight = table.getRowHeight(row);
+        // Wrap at the painted cell's width so scroll bars and line breaks are decided once, at their final size.
+        Dimension size = getCellSize(table, row, column);
+        this.setSize(size);
+        myTextArea.setSize(size);
+    }
 
-        // Apply sizes but avoid triggering validation/layout here to prevent heavy layout work during painting
-        this.setSize(columnWidth, rowHeight);
-        myTextArea.setSize(columnWidth, rowHeight);
+    protected Dimension getCellSize(JTable table, int row, int column) {
+        TableColumnModel columns = table.getColumnModel();
+        return new Dimension(columns.getColumn(column).getWidth() - columns.getColumnMargin(),
+                table.getRowHeight(row) - table.getRowMargin());
+    }
 
-        return this;
+    private void setCaretUpdatePolicy(int policy) {
+        if (myTextArea.getCaret() instanceof DefaultCaret caret) caret.setUpdatePolicy(policy);
     }
 
     int getPreferredUnwrappedWidth() {
@@ -133,8 +149,11 @@ public class CsvMultiLineCellRenderer extends JBScrollPane implements TableCellR
 
     @Override
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
+        // The editor's caret follows typing and keeps itself scrolled into view.
+        setCaretUpdatePolicy(DefaultCaret.UPDATE_WHEN_ON_EDT);
         myTextArea.setEditable(table.getModel().isCellEditable(row, column));
-        return getTableCellRendererComponent(table, value, false, true, row, column);
+        prepareCell(table, value, false, true, row, column);
+        return this;
     }
 
     @Override
@@ -216,6 +235,12 @@ public class CsvMultiLineCellRenderer extends JBScrollPane implements TableCellR
         @Override
         protected TextAttributes getColumnTextAttributes(int column) {
             return CsvTextAttributeKeys.getCommentTextAttributes();
+        }
+
+        @Override
+        protected Dimension getCellSize(JTable table, int row, int column) {
+            // Comments span all columns.
+            return table.getCellRect(row, column, false).getSize();
         }
     }
 }

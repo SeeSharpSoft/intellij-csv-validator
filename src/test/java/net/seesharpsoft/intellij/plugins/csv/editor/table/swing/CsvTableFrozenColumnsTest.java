@@ -320,14 +320,12 @@ public class CsvTableFrozenColumnsTest extends CsvTableEditorSwingTestBase {
         fileEditor.setFrozenColumnCount(2);
         scroll(230, 0);
         assertEquals(230, table.getCellRect(0, 0, true).x);
-        assertEquals(table.getWidth(), table.getCellRect(0, 0, true).width);
-        assertTrue(table.getCellRect(0, 1, true).isEmpty());
+        assertEquals(viewport().getViewRect().width, table.getCellRect(0, 0, true).width);
+        assertEquals(table.getCellRect(0, 0, true), table.getCellRect(0, 1, true));
         assertEquals(0, table.columnAtPoint(new Point(440, table.getRowHeight() / 2)));
         assertTrue(table.editCellAt(0, 0));
         paint(table, viewport().getViewRect());
-        Rectangle expected = table.getCellRect(0, 0, false);
-        expected.width -= table.getColumnModel().getColumnMargin();
-        assertEquals(expected, table.getEditorComponent().getBounds());
+        assertEquals(table.getCellRect(0, 0, false), table.getEditorComponent().getBounds());
         table.getCellEditor().cancelCellEditing();
     }
 

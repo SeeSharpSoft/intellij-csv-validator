@@ -48,7 +48,7 @@ public class CsvTableCommentsAtBeginningTest extends CsvTableEditorSwingTestBase
         table.setSize(800, 400);
         assertTrue(table.isCommentRow(0));
         assertEquals(table.getWidth(), table.getCellRect(0, 0, true).width);
-        assertTrue(table.getCellRect(0, 1, true).isEmpty());
+        assertEquals(table.getCellRect(0, 0, true), table.getCellRect(0, 1, true));
         assertFalse(table.isCellEditable(0, 1));
 
         BufferedImage image = new BufferedImage(800, 400, BufferedImage.TYPE_INT_ARGB);

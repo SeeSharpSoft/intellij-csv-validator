@@ -402,6 +402,13 @@ public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
         }
     }
 
+    public void testHoveringDoesNotPopUpExpandedCells() {
+        CsvTable table = fileEditor.getTable();
+        assertInstanceOf(table.getParent(), JViewport.class);
+
+        assertFalse(table.getExpandableItemsHandler().isEnabled());
+    }
+
     public void testSelectedCellColorsRemainVisibleOutsideEditMode() {
         JTable table = fileEditor.getTable();
         CsvMultiLineCellRenderer renderer = (CsvMultiLineCellRenderer) table.getCellRenderer(0, 0);

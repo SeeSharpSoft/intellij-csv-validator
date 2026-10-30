@@ -37,6 +37,7 @@
 
 - Avoid prohibited IDE read-action entry during table/header painting by reusing existing read access or deferring unlocked paints without caching CSV data (#1116)
 - Fixed active-column highlighting interfering with Find/Replace by clearing column highlights while search is open (#371)
+- Fixed table-editor flickering and rendering glitches: comment rows now edit, select, and repaint across their full span, and cells no longer shift vertically or show stray scrollbars when hovering or searching
 
 ## 4.6.0 - Oct 18, 2026
 

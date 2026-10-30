@@ -11,8 +11,10 @@ import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
 import net.seesharpsoft.intellij.ui.EditableCellFocusAction;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
 import javax.swing.plaf.TableUI;
 import javax.swing.plaf.basic.BasicTableUI;
 import javax.swing.table.TableCellEditor;
@@ -40,6 +42,8 @@ public class CsvTable extends JBTable {
     public CsvTable(TableModel model) {
         super(model);
         setCellSelectionEnabled(true);
+        // Expansion re-renders and rewraps the shared multi-line renderer on hover, flickering at the viewport edge.
+        setExpandableItemsEnabled(false);
         new EditableCellFocusAction(this, KeyStroke.getKeyStroke("TAB"));
         new EditableCellFocusAction(this, KeyStroke.getKeyStroke("shift TAB"));
         new EditableCellFocusAction(this, KeyStroke.getKeyStroke("RIGHT"));
@@ -158,13 +162,11 @@ public class CsvTable extends JBTable {
     }
 
     private void positionCellEditor() {
-        if (isEditing()) {
-            Rectangle rect = getCellRect(getEditingRow(), getEditingColumn(), false);
-            if (isCommentRow(getEditingRow())) {
-                rect.width -= getColumnModel().getColumnMargin();
-            }
-            getEditorComponent().setBounds(rect);
-        }
+        if (!isEditing()) return;
+        Component editor = getEditorComponent();
+        editor.setBounds(getCellRect(getEditingRow(), getEditingColumn(), false));
+        // A resized multi-line editor must wrap its text again before it is painted.
+        editor.validate();
     }
 
     @Override
@@ -219,29 +221,45 @@ public class CsvTable extends JBTable {
 
     @Override
     public @NotNull Rectangle getCellRect(int row, int column, boolean includeSpacing) {
-        Rectangle rect = super.getCellRect(row, column, includeSpacing);
         if (getColumnCount() > 0 && isCommentRow(row)) {
-            if (column == 0) {
-                rect.width = this.getWidth();
-            } else {
-                return new Rectangle();
-            }
+            return getCommentRect(row, includeSpacing);
         }
+        Rectangle rect = super.getCellRect(row, column, includeSpacing);
+        // The translated frozen-column paint pass needs the columns' unshifted positions.
         if (paintCounter == 0 && column >= 0 && column < getFrozenColumnCount()) {
             rect.x += getFrozenColumnOffset();
         }
         return rect;
     }
 
-    // TODO this enables proper selection/handling of comment row, but leads to bad drawing issues - don't know why
+    /**
+     * Comments span all columns like a merged cell, so every column of a comment row shares this rectangle.
+     * Frozen columns pin comments to the viewport, where text wider than the viewport could never be scrolled into view.
+     */
+    private Rectangle getCommentRect(int row, boolean includeSpacing) {
+        Rectangle rect = super.getCellRect(row, 0, includeSpacing);
+        int x = 0;
+        int width = getWidth();
+        if (getFrozenColumnCount() > 0) {
+            Rectangle visible = getVisibleRect();
+            if (!visible.isEmpty()) {
+                x = visible.x;
+                width = visible.width;
+            }
+        }
+        int margin = includeSpacing ? 0 : getColumnModel().getColumnMargin();
+        rect.x = x + margin / 2;
+        rect.width = width - margin;
+        return rect;
+    }
+
     @Override
     public int columnAtPoint(@NotNull Point point) {
+        // BasicTableUI hit-tests painted positions, which exclude the frozen offset during the translated pass.
         if (paintCounter != 0) {
-            // the original paint algorithm doesn't handle cell span well
             return super.columnAtPoint(point);
         }
-        int rowAtPoint = super.rowAtPoint(point);
-        if (isCommentRow(rowAtPoint)) return 0;
+        if (isCommentRow(rowAtPoint(point))) return 0;
         Point location = new Point(point);
         int offset = getFrozenColumnOffset();
         if (location.x >= offset && location.x < offset + getFrozenColumnWidth()) {
@@ -251,8 +269,29 @@ public class CsvTable extends JBTable {
     }
 
     @Override
-    public void setColumnSelectionInterval(int index0, int index1) {
-        super.setColumnSelectionInterval(index0, index1);
+    public boolean isCellSelected(int row, int column) {
+        // Like copying and clearing, a comment belongs to every selection intersecting any of its columns.
+        int selectionColumn = isCommentRow(row)
+                ? Math.max(getColumnModel().getSelectionModel().getMinSelectionIndex(), 0) : column;
+        return super.isCellSelected(row, selectionColumn);
+    }
+
+    @Override
+    public void columnSelectionChanged(ListSelectionEvent event) {
+        super.columnSelectionChanged(event);
+        // Swing repaints only the changed columns, but every column affects a comment's selection.
+        repaintSelectedCommentRows();
+    }
+
+    private void repaintSelectedCommentRows() {
+        RowRange rows = getRowsIn(getVisibleRect());
+        if (rows == null) return;
+        ListSelectionModel selection = getSelectionModel();
+        for (int row = rows.first(); row <= rows.last(); row++) {
+            if ((selection.isSelectedIndex(row) || selection.getLeadSelectionIndex() == row) && isCommentRow(row)) {
+                repaint(getCellRect(row, 0, true));
+            }
+        }
     }
 
     @Override
@@ -298,14 +337,71 @@ public class CsvTable extends JBTable {
 
         @Override
         public void paint(Graphics g, JComponent c) {
-            paintTable(g, rendererPane, graphics -> super.paint(graphics, c));
+            paintTable(g, rendererPane, graphics -> paintRecordRows(graphics, c));
+        }
+
+        /**
+         * BasicTableUI renders comments once per column and resizes and validates a comment editor to the first
+         * column on every paint, so it only receives the bands of record rows between comments.
+         */
+        private void paintRecordRows(Graphics g, JComponent c) {
+            if (getRowCount() == 0 || getColumnCount() == 0) {
+                super.paint(g, c);
+                return;
+            }
+            RowRange rows = getRowsIn(getClipBounds(g));
+            if (rows == null) return;
+            int bandStart = rows.first();
+            for (int row = rows.first(); row <= rows.last(); row++) {
+                if (!isCommentRow(row)) continue;
+                paintRecordBand(g, c, bandStart, row - 1);
+                bandStart = row + 1;
+            }
+            if (bandStart == rows.first()) {
+                super.paint(g, c);
+            } else {
+                paintRecordBand(g, c, bandStart, rows.last());
+            }
+        }
+
+        private void paintRecordBand(Graphics g, JComponent c, int firstRow, int lastRow) {
+            if (firstRow > lastRow) return;
+            int top = getCellRect(firstRow, 0, true).y;
+            Rectangle last = getCellRect(lastRow, 0, true);
+            Graphics band = g.create();
+            try {
+                band.clipRect(0, top, getWidth(), last.y + last.height - top);
+                super.paint(band, c);
+            } finally {
+                band.dispose();
+            }
         }
     }
 
-    private void paintTable(Graphics g, CellRendererPane rendererPane, Consumer<Graphics> paintCells) {
+    private record RowRange(int first, int last) {
+    }
+
+    private Rectangle getClipBounds(Graphics g) {
+        Rectangle clip = g.getClipBounds();
+        return clip == null ? new Rectangle(0, 0, getWidth(), getHeight()) : clip;
+    }
+
+    /**
+     * Returns the rows intersecting the area, or null if it misses all rows.
+     */
+    private @Nullable RowRange getRowsIn(Rectangle area) {
+        Rectangle visible = area.intersection(new Rectangle(0, 0, getWidth(), getHeight()));
+        if (visible.isEmpty() || getRowCount() == 0 || getColumnCount() == 0) return null;
+        int first = rowAtPoint(visible.getLocation());
+        if (first < 0) return null;
+        int last = rowAtPoint(new Point(visible.x, visible.y + visible.height - 1));
+        return new RowRange(first, last < 0 ? getRowCount() - 1 : last);
+    }
+
+    private void paintTable(Graphics g, CellRendererPane rendererPane, Consumer<Graphics> paintRecordRows) {
         paintCounter++;
         try {
-            paintCells.accept(g);
+            paintRecordRows.accept(g);
             if (getFrozenColumnCount() > 0) {
                 // Keep one selection and column model; only the leading columns' painted position changes.
                 Graphics frozen = g.create();
@@ -314,29 +410,12 @@ public class CsvTable extends JBTable {
                     frozen.clipRect(0, 0, getFrozenColumnWidth(), getHeight());
                     frozen.setColor(getBackground());
                     frozen.fillRect(0, 0, getFrozenColumnWidth(), getHeight());
-                    paintCells.accept(frozen);
+                    paintRecordRows.accept(frozen);
                 } finally {
                     frozen.dispose();
                 }
             }
-            Rectangle bounds = new Rectangle(0, 0, getWidth(), getHeight());
-            Rectangle clip = g.getClipBounds();
-            if (getRowCount() <= 0 || getColumnCount() <= 0 || (clip != null && !bounds.intersects(clip))) {
-                return;
-            }
-
-            Rectangle visibleBounds = clip == null ? bounds : clip.intersection(bounds);
-            int firstRow = rowAtPoint(visibleBounds.getLocation());
-            int lastRow = rowAtPoint(new Point(visibleBounds.x + visibleBounds.width - 1,
-                    visibleBounds.y + visibleBounds.height - 1));
-            if (firstRow == -1) firstRow = 0;
-            if (lastRow == -1) lastRow = getRowCount() - 1;
-
-            for (int row = firstRow; row <= lastRow; row++) {
-                if (isCommentRow(row)) {
-                    paintCommentRow(g, rendererPane, row);
-                }
-            }
+            paintCommentRows(g, rendererPane);
         } finally {
             paintCounter--;
             positionCellEditor();
@@ -364,39 +443,31 @@ public class CsvTable extends JBTable {
         }
     }
 
-    private void paintCommentRow(Graphics g, CellRendererPane rendererPane, int row) {
-        Rectangle cellRect = getCellRect(row, 0, true);
-        cellRect.x = getFrozenColumnOffset();
-        cellRect.width = getWidth();
-        int spacingHeight = getRowMargin();
-        int spacingWidth = getColumnModel().getColumnMargin();
+    private void paintCommentRows(Graphics g, CellRendererPane rendererPane) {
+        RowRange rows = getRowsIn(getClipBounds(g));
+        if (rows == null) return;
+        for (int row = rows.first(); row <= rows.last(); row++) {
+            if (isCommentRow(row)) paintCommentRow(g, rendererPane, row);
+        }
+    }
 
+    private void paintCommentRow(Graphics g, CellRendererPane rendererPane, int row) {
+        paintCommentGridLines(g, getCellRect(row, 0, true));
+        // An edited comment is painted by its editor component.
+        if (isEditing() && getEditingRow() == row) return;
+        Rectangle cell = getCellRect(row, 0, false);
+        Component component = prepareRenderer(getCellRenderer(row, 0), row, 0);
+        rendererPane.paintComponent(g, component, this, cell.x, cell.y, cell.width, cell.height, true);
+    }
+
+    private void paintCommentGridLines(Graphics g, Rectangle span) {
         Color color = g.getColor();
         g.setColor(getGridColor());
-        if (getShowHorizontalLines()) {
-            g.drawLine(cellRect.x, cellRect.y, cellRect.x + cellRect.width - 1, cellRect.y);
-            g.drawLine(cellRect.x, cellRect.y + cellRect.height - 1,
-                    cellRect.x + cellRect.width - 1, cellRect.y + cellRect.height - 1);
-        }
-        if (getShowVerticalLines()) {
-            g.drawLine(cellRect.x, cellRect.y, cellRect.x, cellRect.y + cellRect.height - 1);
-            g.drawLine(cellRect.x + cellRect.width - 1, cellRect.y,
-                    cellRect.x + cellRect.width - 1, cellRect.y + cellRect.height - 1);
-        }
+        int right = span.x + span.width - 1;
+        int bottom = span.y + span.height - 1;
+        if (getShowHorizontalLines()) g.drawLine(span.x, bottom, right, bottom);
+        if (getShowVerticalLines()) g.drawLine(right, span.y, right, bottom);
         g.setColor(color);
-        cellRect.setBounds(cellRect.x + spacingWidth / 2, cellRect.y + spacingHeight / 2,
-                cellRect.width - spacingWidth, cellRect.height - spacingHeight);
-
-        if (isEditing() && getEditingRow() == row && getEditingColumn() == 0) {
-            getEditorComponent().setBounds(cellRect);
-        } else {
-            Component component = prepareRenderer(getCellRenderer(row, 0), row, 0);
-            if (component.getParent() == null) {
-                rendererPane.add(component);
-            }
-            rendererPane.paintComponent(g, component, this, cellRect.x, cellRect.y,
-                    cellRect.width, cellRect.height, true);
-        }
     }
 
 }
