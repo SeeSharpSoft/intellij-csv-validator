@@ -19,6 +19,8 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 import javax.swing.text.NumberFormatter;
 import java.text.NumberFormat;
+import java.text.ParseException;
+import java.text.ParsePosition;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -33,11 +35,15 @@ public class CsvEditorSettingsProvider implements EditorOptionsProvider, Searcha
     public static final int MAX_TABLE_COLUMN_SIZE = 10000;
 
     private JCheckBox cbCaretRowShown;
+    private JCheckBox cbHighlightActiveColumn;
+    private JLabel lbMaxHighlightingRows;
+    private JFormattedTextField tfMaxHighlightingRows;
     private JPanel myMainPanel;
     private JCheckBox cbUseSoftWraps;
     private CheckBoxWithColorChooser cbTabHighlightColor;
     private JCheckBox cbShowInfoBalloonCheckBox;
     private JComboBox<CsvEditorSettings.EditorPrio> cbEditorUsage;
+    private JCheckBox cbSyncSelectedField;
     private JCheckBox cbQuotingEnforced;
     private JCheckBox cbZeroBasedColumnNumbering;
     private JFormattedTextField tfMaxColumnWidth;
@@ -49,6 +55,17 @@ public class CsvEditorSettingsProvider implements EditorOptionsProvider, Searcha
     private JComboBox<CsvEditorSettings.ValueColoring> comboValueColoring;
     private JCheckBox cbAutoDetectSeparator;
     private JFormattedTextField tfDefaultRowHeight;
+
+    public CsvEditorSettingsProvider() {
+        cbHighlightActiveColumn.addItemListener(event -> updateColumnHighlightingControls());
+        updateColumnHighlightingControls();
+    }
+
+    private void updateColumnHighlightingControls() {
+        boolean enabled = cbHighlightActiveColumn.isSelected();
+        lbMaxHighlightingRows.setEnabled(enabled);
+        tfMaxHighlightingRows.setEnabled(enabled);
+    }
 
     @NotNull
     @Override
@@ -76,6 +93,8 @@ public class CsvEditorSettingsProvider implements EditorOptionsProvider, Searcha
     public boolean isModified() {
         CsvEditorSettings csvEditorSettings = CsvEditorSettings.getInstance();
         return Configurable.isCheckboxModified(cbCaretRowShown, csvEditorSettings.isCaretRowShown()) ||
+                Configurable.isCheckboxModified(cbHighlightActiveColumn, csvEditorSettings.isHighlightActiveColumn()) ||
+                isMaxHighlightingRowsModified(csvEditorSettings.getMaxHighlightingRows()) ||
                 Configurable.isCheckboxModified(cbUseSoftWraps, csvEditorSettings.isUseSoftWraps()) ||
                 Configurable.isCheckboxModified(cbShowInfoBalloonCheckBox, csvEditorSettings.isShowInfoBalloon()) ||
                 cbTabHighlightColor.isSelected() != csvEditorSettings.isHighlightTabSeparator() ||
@@ -83,6 +102,7 @@ public class CsvEditorSettingsProvider implements EditorOptionsProvider, Searcha
                 !tfDefaultRowHeight.getValue().equals(csvEditorSettings.getTableEditorRowHeight()) ||
                 Configurable.isCheckboxModified(cbQuotingEnforced, csvEditorSettings.isQuotingEnforced()) ||
                 !Objects.equals(cbEditorUsage.getSelectedItem(), csvEditorSettings.getEditorPrio()) ||
+                Configurable.isCheckboxModified(cbSyncSelectedField, csvEditorSettings.isSyncSelectedField()) ||
                 Configurable.isCheckboxModified(cbZeroBasedColumnNumbering, csvEditorSettings.isZeroBasedColumnNumbering()) ||
                 !tfMaxColumnWidth.getValue().equals(csvEditorSettings.getTableAutoMaxColumnWidth()) ||
                 !tfDefaultColumnWidth.getValue().equals(csvEditorSettings.getTableDefaultColumnWidth()) ||
@@ -94,16 +114,28 @@ public class CsvEditorSettingsProvider implements EditorOptionsProvider, Searcha
                 Configurable.isCheckboxModified(cbAutoDetectSeparator, csvEditorSettings.isAutoDetectValueSeparator());
     }
 
+    private boolean isMaxHighlightingRowsModified(int maxHighlightingRows) {
+        try {
+            return !Objects.equals(tfMaxHighlightingRows.getFormatter().stringToValue(tfMaxHighlightingRows.getText()),
+                    maxHighlightingRows);
+        } catch (ParseException exception) {
+            return true;
+        }
+    }
+
     @Override
     public void reset() {
         CsvEditorSettings csvEditorSettings = CsvEditorSettings.getInstance();
         cbCaretRowShown.setSelected(csvEditorSettings.isCaretRowShown());
+        cbHighlightActiveColumn.setSelected(csvEditorSettings.isHighlightActiveColumn());
+        tfMaxHighlightingRows.setValue(csvEditorSettings.getMaxHighlightingRows());
         cbUseSoftWraps.setSelected(csvEditorSettings.isUseSoftWraps());
         cbShowInfoBalloonCheckBox.setSelected(csvEditorSettings.isShowInfoBalloon());
         cbTabHighlightColor.setSelected(csvEditorSettings.isHighlightTabSeparator());
         cbTabHighlightColor.setColor(csvEditorSettings.getTabHighlightColor());
         tfDefaultRowHeight.setValue(csvEditorSettings.getTableEditorRowHeight());
         cbEditorUsage.setSelectedItem(csvEditorSettings.getEditorPrio());
+        cbSyncSelectedField.setSelected(csvEditorSettings.isSyncSelectedField());
         cbQuotingEnforced.setSelected(csvEditorSettings.isQuotingEnforced());
         cbZeroBasedColumnNumbering.setSelected(csvEditorSettings.isZeroBasedColumnNumbering());
         tfMaxColumnWidth.setValue(csvEditorSettings.getTableAutoMaxColumnWidth());
@@ -118,14 +150,22 @@ public class CsvEditorSettingsProvider implements EditorOptionsProvider, Searcha
 
     @Override
     public void apply() throws ConfigurationException {
+        try {
+            tfMaxHighlightingRows.commitEdit();
+        } catch (ParseException exception) {
+            throw new ConfigurationException(getLocalizedText("highlight.active.column.maximum.rows.invalid"));
+        }
         CsvEditorSettings csvEditorSettings = CsvEditorSettings.getInstance();
         csvEditorSettings.setCaretRowShown(cbCaretRowShown.isSelected());
+        csvEditorSettings.setHighlightActiveColumn(cbHighlightActiveColumn.isSelected());
+        csvEditorSettings.setMaxHighlightingRows((int) tfMaxHighlightingRows.getValue());
         csvEditorSettings.setUseSoftWraps(cbUseSoftWraps.isSelected());
         csvEditorSettings.setShowInfoBalloon(cbShowInfoBalloonCheckBox.isSelected());
         csvEditorSettings.setHighlightTabSeparator(cbTabHighlightColor.isSelected());
         csvEditorSettings.setTabHighlightColor(cbTabHighlightColor.getColor());
         csvEditorSettings.setTableEditorRowHeight((int) tfDefaultRowHeight.getValue());
         csvEditorSettings.setEditorPrio((CsvEditorSettings.EditorPrio) cbEditorUsage.getSelectedItem());
+        csvEditorSettings.setSyncSelectedField(cbSyncSelectedField.isSelected());
         csvEditorSettings.setQuotingEnforced(cbQuotingEnforced.isSelected());
         csvEditorSettings.setZeroBasedColumnNumbering(cbZeroBasedColumnNumbering.isSelected());
         csvEditorSettings.setTableAutoMaxColumnWidth((int) tfMaxColumnWidth.getValue());
@@ -156,7 +196,7 @@ public class CsvEditorSettingsProvider implements EditorOptionsProvider, Searcha
     protected void createUIComponents() {
         cbEditorUsage = new ComboBox<>(CsvEditorSettings.EditorPrio.values());
         cbEditorUsage.setRenderer(new CustomDisplayListCellRenderer<>(CsvEditorSettings.EditorPrio::getDisplay));
-        
+
         comboEscapeCharacter = new ComboBox<>(CsvEscapeCharacter.values());
         comboEscapeCharacter.setRenderer(new CustomDisplayListCellRenderer<>(CsvEscapeCharacter::getDisplay));
 
@@ -168,6 +208,28 @@ public class CsvEditorSettingsProvider implements EditorOptionsProvider, Searcha
 
         cbTabHighlightColor = new CheckBoxWithColorChooser(getLocalizedText("settings.editor.highlight.tab.separator"));
         cbTabHighlightColor.setColor(JBColor.CYAN);
+
+        NumberFormatter highlightingRowsFormatter = new NumberFormatter(NumberFormat.getIntegerInstance()) {
+            @Override
+            public Object stringToValue(String text) throws ParseException {
+                ParsePosition position = new ParsePosition(0);
+                Object value = getFormat().parseObject(text, position);
+                if (!(value instanceof Number number) || position.getIndex() != text.length()
+                        || number.doubleValue() != number.longValue()
+                        || number.longValue() < -1 || number.longValue() > Integer.MAX_VALUE) {
+                    throw new ParseException(getLocalizedText("highlight.active.column.maximum.rows.invalid"),
+                            position.getIndex());
+                }
+                return number.intValue();
+            }
+        };
+        highlightingRowsFormatter.setValueClass(Integer.class);
+        highlightingRowsFormatter.setAllowsInvalid(true);
+        highlightingRowsFormatter.setCommitsOnValidEdit(true);
+        highlightingRowsFormatter.setMinimum(-1);
+        highlightingRowsFormatter.setMaximum(Integer.MAX_VALUE);
+        tfMaxHighlightingRows = new JFormattedTextField(highlightingRowsFormatter);
+        tfMaxHighlightingRows.setFocusLostBehavior(JFormattedTextField.PERSIST);
 
         NumberFormat numberFormat = NumberFormat.getIntegerInstance();
         NumberFormatter numberFormatter = new NumberFormatter(numberFormat);

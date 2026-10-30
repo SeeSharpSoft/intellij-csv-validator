@@ -9,15 +9,24 @@ import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class CsvTableEditorState implements FileEditorState {
 
     private int[] columnWidths;
     private Integer rowHeight;
+    private int frozenColumnCount;
 
     public CsvTableEditorState() {
         columnWidths = new int[0];
+    }
+
+    public CsvTableEditorState(CsvTableEditorState state) {
+        columnWidths = state.columnWidths.clone();
+        rowHeight = state.getRowHeight();
+        frozenColumnCount = state.frozenColumnCount;
     }
 
     public int[] getColumnWidths() {
@@ -39,13 +48,38 @@ public class CsvTableEditorState implements FileEditorState {
         rowHeight = rowHeightArg;
     }
 
+    public int getFrozenColumnCount() {
+        return frozenColumnCount;
+    }
+
+    public void setFrozenColumnCount(int count) {
+        if (count < 0) {
+            throw new IllegalArgumentException("Frozen column count must not be negative");
+        }
+        frozenColumnCount = count;
+    }
+
     @Override
     public boolean canBeMergedWith(FileEditorState fileEditorState, FileEditorStateLevel fileEditorStateLevel) {
         return false;
     }
 
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) return true;
+        if (!(other instanceof CsvTableEditorState state)) return false;
+        return Arrays.equals(columnWidths, state.columnWidths) &&
+                getRowHeight() == state.getRowHeight() && frozenColumnCount == state.frozenColumnCount;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(Arrays.hashCode(columnWidths), getRowHeight(), frozenColumnCount);
+    }
+
     public void write(@NotNull Project project, @NotNull Element element) {
         element.setAttribute("rowHeight", "" + getRowHeight());
+        element.setAttribute("frozenColumnCount", "" + getFrozenColumnCount());
         for (int i = 0; i < columnWidths.length; ++i) {
             Element cwElement = new Element("column");
 
@@ -62,6 +96,7 @@ public class CsvTableEditorState implements FileEditorState {
         state.setRowHeight(
                 StringUtilRt.parseInt(element.getAttributeValue("rowHeight"), CsvEditorSettings.getInstance().getTableEditorRowHeight())
         );
+        state.setFrozenColumnCount(Math.max(0, StringUtilRt.parseInt(element.getAttributeValue("frozenColumnCount"), 0)));
 
         List<Element> columnWidthElements = element.getChildren("column");
         int[] columnWidths = new int[columnWidthElements.size()];

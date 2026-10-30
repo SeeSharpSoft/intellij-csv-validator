@@ -5,7 +5,6 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
-import com.intellij.openapi.editor.ex.EditorSettingsExternalizable;
 import com.intellij.util.xmlb.annotations.OptionTag;
 import com.intellij.util.xmlb.annotations.Transient;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvEscapeCharacter;
@@ -84,11 +83,14 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
         public String CURRENT_PLUGIN_VERSION;
 
         public boolean CARET_ROW_SHOWN = true;
+        public boolean HIGHLIGHT_ACTIVE_COLUMN = true;
+        public int MAX_HIGHLIGHTING_ROWS = -1;
         public boolean USE_SOFT_WRAP = false;
         public boolean HIGHTLIGHT_TAB_SEPARATOR = true;
         public boolean SHOW_INFO_BALLOON = true;
         public String TAB_HIGHLIGHT_COLOR = "-7984";
         public EditorPrio EDITOR_PRIO = EditorPrio.TEXT_FIRST;
+        public boolean SYNC_SELECTED_FIELD = true;
         public int TABLE_EDITOR_ROW_HEIGHT = TABLE_EDITOR_ROW_HEIGHT_DEFAULT;
         public int TABLE_AUTO_MAX_COLUMN_WIDTH = TABLE_AUTO_MAX_COLUMN_WIDTH_DEFAULT;
         public int TABLE_DEFAULT_COLUMN_WIDTH = TABLE_DEFAULT_COLUMN_WIDTH_DEFAULT;
@@ -139,6 +141,7 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
 
     @Override
     public void loadState(@NotNull OptionSet state) {
+        validateMaxHighlightingRows(state.MAX_HIGHLIGHTING_ROWS);
         this.myOptions = state;
     }
 
@@ -150,6 +153,29 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
 
     public void setCaretRowShown(boolean caretRowShown) {
         getState().CARET_ROW_SHOWN = caretRowShown;
+    }
+
+    public boolean isHighlightActiveColumn() {
+        return getState().HIGHLIGHT_ACTIVE_COLUMN;
+    }
+
+    public void setHighlightActiveColumn(boolean highlightActiveColumn) {
+        getState().HIGHLIGHT_ACTIVE_COLUMN = highlightActiveColumn;
+    }
+
+    public int getMaxHighlightingRows() {
+        return getState().MAX_HIGHLIGHTING_ROWS;
+    }
+
+    public void setMaxHighlightingRows(int maxHighlightingRows) {
+        validateMaxHighlightingRows(maxHighlightingRows);
+        getState().MAX_HIGHLIGHTING_ROWS = maxHighlightingRows;
+    }
+
+    private static void validateMaxHighlightingRows(int maxHighlightingRows) {
+        if (maxHighlightingRows < -1) {
+            throw new IllegalArgumentException(getLocalizedText("highlight.active.column.maximum.rows.invalid"));
+        }
     }
 
     public boolean isUseSoftWraps() {
@@ -195,6 +221,14 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
 
     public void setEditorPrio(EditorPrio editorPrio) {
         getState().EDITOR_PRIO = editorPrio;
+    }
+
+    public boolean isSyncSelectedField() {
+        return getState().SYNC_SELECTED_FIELD;
+    }
+
+    public void setSyncSelectedField(boolean syncSelectedField) {
+        getState().SYNC_SELECTED_FIELD = syncSelectedField;
     }
 
     public boolean showTableEditorInfoPanel() {

@@ -23,16 +23,13 @@ public class CsvTableEditorProvider implements AsyncFileEditorProvider, DumbAwar
     }
 
     @Override
-    public FileEditorPolicy getPolicy() {
-        switch (CsvEditorSettings.getInstance().getEditorPrio()) {
-            case TEXT_FIRST:
-            case TEXT_ONLY:
-                return FileEditorPolicy.PLACE_AFTER_DEFAULT_EDITOR;
-            case TABLE_FIRST:
-                return FileEditorPolicy.HIDE_DEFAULT_EDITOR;
-            default:
-                throw new IllegalArgumentException("unhandled EditorPrio: " + CsvEditorSettings.getInstance().getEditorPrio());
-        }
+    public @NotNull FileEditorPolicy getPolicy() {
+        return switch (CsvEditorSettings.getInstance().getEditorPrio()) {
+            case TEXT_FIRST, TEXT_ONLY -> FileEditorPolicy.PLACE_AFTER_DEFAULT_EDITOR;
+            case TABLE_FIRST -> FileEditorPolicy.HIDE_DEFAULT_EDITOR;
+            default ->
+                    throw new IllegalArgumentException("unhandled EditorPrio: " + CsvEditorSettings.getInstance().getEditorPrio());
+        };
     }
 
     @Override

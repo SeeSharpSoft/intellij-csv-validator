@@ -1,6 +1,13 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ReadAction;
+import com.intellij.openapi.editor.Document;
+import com.intellij.openapi.progress.ProgressManager;
+import com.intellij.openapi.util.Computable;
+import com.intellij.openapi.util.Pair;
+import com.intellij.openapi.util.TextRange;
+import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiErrorElement;
 import com.intellij.psi.PsiFile;
@@ -22,9 +29,18 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel {
+    public record ModelState(PsiFile file, long stamp, int rows, int columns, Set<Integer> comments,
+                             List<String> headers, boolean errors) {
+    }
+
+    private record RowMetadata(int rows, int columns, Set<Integer> comments) {
+    }
+
     private final T myPsiFileHolder;
     private volatile boolean myDisposed = false;
 
@@ -33,6 +49,7 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
     private CsvEscapeCharacter myCachedEscapeCharacter;
     private Boolean myCachedHasErrors = null;
     private int myPointedRow = -1;
+    private long myPointedStamp = -1;
     private PsiElement myPointedRecord = null;
     private volatile Set<Integer> myCachedCommentRows = Collections.emptySet();
     private final CsvPsiTreeUpdater myPsiTreeUpdater;
@@ -144,6 +161,68 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
         getRowCount();
     }
 
+    /** Captures model metadata under a background read action, without changing the displayed model. */
+    public ModelState captureState() {
+        PsiFile file = myPsiFileHolder.getPsiFile();
+        if (file == null) throw new IllegalStateException("CSV file is no longer available");
+        Document document = PsiDocumentManager.getInstance(file.getProject()).getDocument(file);
+        if (document == null) throw new IllegalStateException("CSV document is no longer available");
+        RowMetadata metadata = readRowMetadata(file);
+        int[] visited = {0};
+        boolean errors = !PsiTreeUtil.processElements(file, element -> {
+            if ((visited[0]++ & 1023) == 0) ProgressManager.checkCanceled();
+            return !(element instanceof PsiErrorElement);
+        });
+        return new ModelState(file, document.getModificationStamp(), metadata.rows(), metadata.columns(),
+                metadata.comments(), readHeaderTexts(file), errors);
+    }
+
+    /** Reads metadata for the records that can be displayed, stopping at a top-level parse error. */
+    private static RowMetadata readRowMetadata(@Nullable PsiFile file) {
+        int rows = 0;
+        int columns = 0;
+        Set<Integer> comments = new HashSet<>();
+        for (PsiElement child = file == null ? null : file.getFirstChild();
+             child != null; child = child.getNextSibling()) {
+            if ((rows & 1023) == 0) ProgressManager.checkCanceled();
+            if (child instanceof PsiErrorElement) break;
+            if (child instanceof CsvRecord record) {
+                if (CsvHelper.isCommentElement(record.getFirstChild())) comments.add(rows);
+                columns = Math.max(columns, PsiTreeUtil.countChildrenOfType(record, CsvField.class));
+                rows++;
+            }
+        }
+        return new RowMetadata(rows, comments.isEmpty() ? columns : Math.max(1, columns), Set.copyOf(comments));
+    }
+
+    /** Decodes the first non-comment record's headers; the caller must hold a read action. */
+    protected static List<String> readHeaderTexts(@Nullable PsiFile file) {
+        PsiElement field = PsiHelper.findFirst(file, CsvTypes.FIELD);
+        if (field == null) return List.of();
+        CsvEscapeCharacter escapeCharacter = CsvHelper.getEscapeCharacter(file);
+        List<String> headers = new ArrayList<>();
+        for (; field != null; field = field.getNextSibling()) {
+            if (field instanceof CsvField) {
+                headers.add(CsvHelper.unquoteCsvValue(field.getText(), escapeCharacter).trim());
+            }
+        }
+        return List.copyOf(headers);
+    }
+
+    protected boolean applyState(ModelState state) {
+        PsiFile file = getPsiFile();
+        if (file != state.file()) return false;
+        Document document = PsiDocumentManager.getInstance(file.getProject()).getDocument(file);
+        if (document == null || document.getModificationStamp() != state.stamp()) return false;
+        invalidateModelState();
+        myCachedRowCount = state.rows();
+        myCachedColumnCount = state.columns();
+        myCachedCommentRows = state.comments();
+        myCachedHasErrors = state.errors();
+        resetPointer();
+        return true;
+    }
+
     private void invalidateModelState() {
         myCachedRowCount = -1;
         myCachedColumnCount = -1;
@@ -159,6 +238,7 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
             PsiFile psiFile = getPsiFile();
             myPointedRecord = psiFile == null ? null : PsiHelper.getFirstChildOfType(psiFile, CsvRecord.class);
             myPointedRow = 0;
+            myPointedStamp = psiFile == null ? -1 : psiFile.getModificationStamp();
         });
     }
 
@@ -173,14 +253,25 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
         return myCachedEscapeCharacter;
     }
 
+    protected static <V> V computeWithReadAccess(Computable<V> computation) {
+        // Even a redundant read-action entry is prohibited during painting.
+        return ApplicationManager.getApplication().isReadAccessAllowed()
+                ? computation.compute() : ReadAction.compute(computation::compute);
+    }
+
     @Override
     public PsiElement getFieldAt(int row, int column) {
-        return ReadAction.compute(() -> {
+        return computeWithReadAccess(() -> {
             PsiFile psiFile = getPsiFile();
             if (psiFile == null) return null;
+            long stamp = psiFile.getModificationStamp();
+            if (myPointedStamp != stamp) {
+                myPointedRecord = null;
+                myPointedStamp = stamp;
+            }
 
             int diffToCurrent = Math.abs(myPointedRow - row);
-            if (diffToCurrent > row || myPointedRecord == null) {
+            if (diffToCurrent > row || myPointedRecord == null || !myPointedRecord.isValid()) {
                 myPointedRecord = PsiHelper.getFirstChildOfType(psiFile, CsvRecord.class);
                 myPointedRow = 0;
                 diffToCurrent = row;
@@ -203,7 +294,7 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
     public boolean hasErrors() {
         getPsiFile();
         if (myCachedHasErrors == null) {
-            myCachedHasErrors = ReadAction.compute(() -> {
+            myCachedHasErrors = computeWithReadAccess(() -> {
                 PsiFile psiFile = getPsiFile();
                 return psiFile != null && PsiTreeUtil.hasErrorElements(psiFile);
             });
@@ -215,24 +306,11 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
     public int getRowCount() {
         getPsiFile();
         if (myCachedRowCount == -1) {
-            myCachedRowCount = ReadAction.compute(() -> {
-                PsiFile psiFile = getPsiFile();
-                Set<Integer> commentRows = new HashSet<>();
-                int rowCount = 0;
-                if (psiFile != null) {
-                    for (PsiElement child = psiFile.getFirstChild();
-                         child != null && !(child instanceof PsiErrorElement);
-                         child = child.getNextSibling()) {
-                        if (child instanceof CsvRecord) {
-                            if (PsiHelper.getElementType(child.getFirstChild()) == CsvTypes.COMMENT) {
-                                commentRows.add(rowCount);
-                            }
-                            rowCount++;
-                        }
-                    }
-                }
-                myCachedCommentRows = commentRows;
-                return rowCount;
+            myCachedRowCount = computeWithReadAccess(() -> {
+                RowMetadata metadata = readRowMetadata(getPsiFile());
+                myCachedColumnCount = metadata.columns();
+                myCachedCommentRows = metadata.comments();
+                return metadata.rows();
             });
         }
         return myCachedRowCount;
@@ -240,10 +318,7 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
 
     @Override
     public int getColumnCount() {
-        getPsiFile();
-        if (myCachedColumnCount == -1) {
-            myCachedColumnCount = ReadAction.compute(() -> CsvTableModel.getColumnCount(getPsiFile()));
-        }
+        getRowCount();
         return myCachedColumnCount;
     }
 
@@ -268,6 +343,13 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
         if (commitImmediately) getPsiTreeUpdater().commit();
     }
 
+    public void setValuesAt(List<List<String>> values, Set<Integer> commentRows, int rowIndex, int columnIndex) {
+        Pair<TextRange, String> replacement = ReadAction.compute(
+                () -> CsvTablePaste.prepare(getPsiFile(), values, commentRows, rowIndex, columnIndex));
+        getPsiTreeUpdater().replaceTexts(Collections.singletonList(replacement));
+        getPsiTreeUpdater().commit();
+    }
+
     private void prepareSetValueAt(String value, int rowIndex, int columnIndex) {
         PsiElement field = getFieldAt(rowIndex, columnIndex);
         CsvPsiTreeUpdater updater = getPsiTreeUpdater();
@@ -289,7 +371,7 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
 
     @Override
     public @NotNull String getValue(int rowIndex, int columnIndex) {
-        return ReadAction.compute(() -> {
+        return computeWithReadAccess(() -> {
             PsiElement field = getFieldAt(rowIndex, columnIndex);
             return CsvHelper.getFieldValue(field, getEscapeCharacter());
         });
@@ -324,6 +406,18 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
         CsvPsiTreeUpdater updater = getPsiTreeUpdater();
         updater.deleteColumns(indices);
         updater.commit();
+    }
+
+    @Override
+    public void reorderRows(int[] order) {
+        getPsiTreeUpdater().reorderRows(order);
+        getPsiTreeUpdater().commit();
+    }
+
+    @Override
+    public void reorderColumns(int[] order) {
+        getPsiTreeUpdater().reorderColumns(order);
+        getPsiTreeUpdater().commit();
     }
 
     @Override

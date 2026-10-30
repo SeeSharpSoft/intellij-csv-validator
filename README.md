@@ -7,7 +7,7 @@
 
 # CSV Editor Plugin for the JetBrains IDE family
 
-Compatible with IntelliJ IDEA and other JetBrains IDEs based on IntelliJ Platform _2024.2 and newer_.
+Compatible with IntelliJ IDEA and other JetBrains IDEs based on IntelliJ Platform _2025.2 and newer_.
 
 This plugin adds support for CSV (Comma-Separated Values) and related file types to JetBrains IDEs. It provides a text editor and a table editor with syntax validation, highlighting, formatting, inspections, and other familiar IDE features.
 
@@ -33,8 +33,9 @@ This plugin adds support for CSV (Comma-Separated Values) and related file types
 
 **Note**
 
-Release 4.x focuses on text-editor features, and the text editor is the default editor.
-**IntelliJ Platform 2024.2 or newer is required.**
+Release numbers follow `VVV.X.x`: the earliest supported IDE build branch, the plugin's
+major version, and its bugfix version. For example, `252.53.0` supports IDEs from 2025.2.
+The minimum supported IDE follows the official IntelliJ release cycle with a one-year delay.
 
 Previous versions, including their README files, can still be downloaded and installed manually (see [Installation](https://github.com/SeeSharpSoft/intellij-csv-validator#installation)).
 
@@ -68,7 +69,9 @@ The file types TSV (Tab-Separated Values) and PSV (Pipe-Separated Values) are su
 
 The plugin provides a table editor for CSV, TSV, and PSV files. This editor is separate from the _Edit as Table..._ functionality of [IntelliJ IDEA Ultimate, PhpStorm, DataGrip, and other JetBrains IDEs](https://www.jetbrains.com/help/phpstorm/editing-csv-and-tsv-files.html), and it does not share its implementation or settings. It is an alternative to the CSV text editor and is not intended to replace or mirror the capabilities of the JetBrains _Data_ tab.
 
-To switch between the text editor and the table editor, open a CSV, TSV, or PSV file and select the **Text Editor** or **Table Editor** tab at the bottom of the editor area. Their order can be changed in _Settings > Editor > General > CSV/TSV Editor > Editor Usage_. If the **Table Editor** tab is not shown, check that _Text Editor only_ is not selected and that the file is not too large for the IDE to load.
+To switch between the text editor and the table editor, open a CSV, TSV, or PSV file and use the **Show Text Editor** and **Show Table Editor** buttons on the right side of the editor tab bar. The buttons are shown whenever editor tabs are visible; alternatively, select the **Text Editor** or **Table Editor** tab at the bottom of the editor area. Both actions can also be run via _Find Action_ or assigned shortcuts in **Settings/Preferences > Keymap > CSV Editor View**. The order of the editors can be changed in _Settings > Editor > General > CSV/TSV Editor > Editor Usage_. If the **Table Editor** tab and the buttons are not shown, check that _Text Editor only_ is not selected and that the file is not too large for the IDE to load.
+
+Switching between the editors keeps your place: the table editor selects and reveals the cell of the field at the text caret, and the text editor moves its caret to the start of the focused table cell. If the caret is already inside that field, it stays where it is. Switching between split windows that show the same file does not change their selections. This behavior can be disabled with [Keep selected field when switching editors](#keep-selected-field-when-switching-editors).
 
 **!!! IMPORTANT !!!**
 
@@ -76,15 +79,51 @@ The table editor works best with a syntactically valid CSV file. If the file con
 
 ![Table editor](./docs/tableeditor.png)
 
+#### Find and Replace
+
+Use the IDE's **Find** and **Replace** shortcuts in the table editor (Ctrl+F and Ctrl+R in the default Windows/Linux keymap). The search bar supports case-sensitive, whole-word, and regular-expression searches. Matches select and scroll to the corresponding cell; use the previous/next buttons to navigate, including multiple matches within a cell. **Replace** changes the current occurrence, and **Replace All** changes every occurrence in the table as one undoable edit. Press Escape in the search bar to close it and return to the selected cell.
+
+Search starts in the background as you type, keeping the table responsive. The bar shows **Searching...** while scanning, then the current match and total count. Changing the query or closing the bar cancels the previous search.
+
+#### Copy and Paste
+
+Use the IDE's **Copy** and **Paste** shortcuts in the table editor. Copying selected cells provides CSV text using the file's separator, escape character, and quoting settings, as well as an HTML table. Selecting a column header selects the whole column for copying. Read-only files and files with syntax errors still allow selecting and copying cells; open a cell to select and copy part of its text without changing it.
+
+Outside a cell's text editor, paste starts at the focused cell, overwrites existing values, and adds rows or columns only when the clipboard extends beyond the table. Clipboard CSV uses the file's separator and escape character; tab-separated spreadsheet data is also supported. Quoted separators, quotes, and multiline values are preserved. A final clipboard line break does not add an extra row. Paste is a single undoable edit.
+
+Comment rows are copied once, with their comment indicator. Pasting comment lines at the first column replaces whole rows and preserves them as comments. Quoted values beginning with the comment indicator remain CSV values. A comment pasted at another column, or multiple CSV values pasted into an existing comment row, is rejected without changing the file.
+
+Inside a cell's text editor, paste inserts text into that cell instead of spreading it across the table. Read-only tables cannot be pasted into. An existing comment row also accepts a single-line value in its first column to replace its text while keeping the comment indicator.
+
 #### Context menu
 
-A right-click within the table opens a context menu for adding or removing rows. Right-click the table header to add or remove columns.
+A right-click within the table or on its row numbers opens a context menu for adding or removing rows. Right-click the table header to add or remove columns.
 
 The actions in these menus apply to the currently selected rows or columns, which may differ from the cell or header where the context menu appears. A right-click does not change the selection by default.
 
+#### Moving rows and columns
+
+Drag a column header left or right, or drag a row number up or down, to move that column or row in the file. Drag from the middle of a row number to move it; dragging its bottom edge still resizes rows.
+
+The context menus also provide **Move Selected Rows Up/Down** and **Move Selected Columns Left/Right**. These actions move the selection by one position, keeping the selected items in order. Movement stops at the table boundaries; the empty row representing a final line break is not movable.
+
+Moves change the CSV document, not just its display order, and can be undone or redone using the IDE's usual commands. Column widths follow their columns, and the moved items remain selected. Undo and redo also restore the corresponding column widths and row/column selection. Movement is supported even when columns are frozen. Files with syntax errors and read-only files cannot be reordered.
+
+Small moves complete immediately. Large moves use IntelliJ's standard cancellable progress dialog while preparing the change and updating the table. The editor waits for completion instead of maintaining a separate optimistic preview; no custom rendering or status bar is used.
+
+Cancel during preparation to leave the file unchanged. If the file or its CSV settings change before the move is applied, the prepared result is discarded rather than overwriting newer edits. Once application begins, the update finishes as one undoable change; use Undo to reverse it. Expensive preparation and model calculations run off the UI thread, while the document mutation uses the IDE's required write thread.
+
+#### Frozen columns
+
+Select a column header, then right-click the header and choose **Freeze Columns Through Selection** to keep that column and all columns to its left visible while scrolling horizontally. If multiple columns are selected, the rightmost selected column determines the frozen area. Choose **Unfreeze Columns** in the same menu to restore normal scrolling.
+
+A distinct divider after the last frozen column marks the frozen area in both the header and table. Frozen columns remain editable and support the same selection, resizing, and Find/Replace controls as other columns. The frozen-column count is saved for each file.
+
 #### Key bindings
 
-The table editor provides the following keyboard shortcuts for navigation and editing:
+Configure table commands in **Settings/Preferences > Keymap > CSV Table Editor** (or search for the action name). You can add, remove, or reassign shortcuts using the IDE's standard keymap controls, including two-stroke shortcuts. Changes take effect in already-open table editors. The context menus show the current shortcuts, not fixed default labels.
+
+The following are the default shortcuts. Ordinary arrow-key and Enter-based cell navigation remain table controls rather than configurable CSV actions:
 
 - **_ARROW KEYS_** navigate through the table
 - **_ENTER_** start/stop editing current cell (NOTE: almost every default key triggers an edit)
@@ -101,6 +140,9 @@ The table editor provides the following keyboard shortcuts for navigation and ed
 - **_CTRL+DELETE/BACKSPACE_** deletes the current selected row(s)
 
 - **_DELETE/BACKSPACE_** clear content of selected cell(s)
+- **_CTRL+SHIFT+SPACE_** auto-fit column widths
+
+The unmodified Delete/Backspace shortcuts edit text normally while a cell's text editor is open; they clear selected cells only outside cell-editing mode. Other table commands, such as moving rows/columns, freezing columns, and resetting column widths, can also be assigned shortcuts in Keymap.
 
 Hold **_CTRL_** while using the mouse wheel to change the table text size. Hold **_SHIFT_** while using the mouse wheel to scroll horizontally.
 
@@ -110,6 +152,8 @@ Hold **_CTRL_** while using the mouse wheel to change the table text size. Hold 
 
 The plugin provides a customizable text editor and table editor. Their settings can be adjusted in the CSV/TSV editor settings page.
 
+Changes to Text Editor and Table Editor settings do not update already-open editors. Close and reopen the affected files for changes to take effect.
+
 ![Editor settings](./docs/editorsettings.png)
 
 #### General
@@ -117,6 +161,10 @@ The plugin provides a customizable text editor and table editor. Their settings 
 ##### Editor Usage
 
 You can choose **Text Editor first**, **Table Editor first**, or **Text Editor only**. This controls the order of the editor tabs and whether the table editor is shown. A **Table Editor only** option is not available because the table editor cannot edit files with syntax errors.
+
+##### Keep selected field when switching editors
+
+When switching between the text editor and the table editor, the newly shown editor selects the field that was selected in the other one (see [Table Editor](#table-editor)). This option is **enabled by default**. Disable it to keep independent positions in both editors, e.g. to preserve a multi-cell table selection or multiple text carets while checking something in the other editor. Changes apply to already-open editors.
 
 ##### Default Value Separator (CSV only)
 
@@ -169,6 +217,12 @@ The current caret row can be highlighted in CSV, TSV, and PSV files. Disable thi
 
 Enable or disable highlighting of tab characters when they are used as the value separator in TSV files, and choose the highlight color. Tabs inside a value are not highlighted.
 
+###### Highlight active column
+
+**Highlight active column** under **Settings/Preferences > Editor > General > CSV/TSV/PSV > Text Editor > Highlighting** highlights fields in the selected column. This option is **enabled by default**. Column highlights use the color scheme's write-access-under-caret style, distinct from normal selected-text occurrences, and are cleared while Find or Replace is open. The IDE's selected-text occurrence highlighting remains controlled by its own settings.
+
+Set **Maximum rows** beside the checkbox to **-1** (the default) for no limit, **0** for no highlighted rows, or a positive integer to limit highlighting to nearby CSV rows, including the selected row. Other negative values are not allowed. Multiline values count as one CSV row. Highlighting more rows can reduce editor responsiveness. Close and reopen the editor after changing its settings.
+
 ##### Others
 
 ###### Show info balloon
@@ -186,6 +240,8 @@ If enabled, trailing whitespace is always preserved when editing CSV, TSV, and P
 **Note:** This setting has no effect on the table editor. Unquoted values are trimmed when the table editor opens them. When a value is edited in the table editor, leading or trailing whitespace causes the value to be quoted.
 
 #### Table Editor
+
+The table editor uses Swing components with padded cells, a flat header, and rounded scrollbars. It follows the IDE's light or dark appearance without changing the IDE theme.
 
 ##### Default row height
 
@@ -389,11 +445,11 @@ Make sure the file is assigned to the plugin's file type in _Settings/Preference
 
 If another CSV plugin, such as [Rainbow CSV](https://plugins.jetbrains.com/plugin/12896-rainbow-csv), is enabled, the IDE may assign the file to that plugin instead. Check the file type mapping in _Settings/Preferences > Editor > File Types_ and disable the competing plugin for the affected file type if necessary.
 
-If the **Table Editor** tab is missing, check the [table editor](#table-editor) settings and make sure **Text Editor only** is not selected. The table editor is also unavailable for files the IDE cannot load because they exceed the configured file-size limits.
+If the **Table Editor** tab or the **Show Table Editor** button is missing, check the [table editor](#table-editor) settings and make sure **Text Editor only** is not selected. The table editor is also unavailable for files the IDE cannot load because they exceed the configured file-size limits.
 
 #### The CSV editor causes the IDE to stop working properly
 
-The current plugin release requires IntelliJ Platform 2024.2 or newer. If your IDE is older, disable the plugin and install a plugin release compatible with your IDE from [GitHub Releases](https://github.com/SeeSharpSoft/intellij-csv-validator/releases).
+The current plugin release requires IntelliJ Platform 2025.2 or newer. If your IDE is older, disable the plugin and install a plugin release compatible with your IDE from [GitHub Releases](https://github.com/SeeSharpSoft/intellij-csv-validator/releases).
 
 #### Code insight is not available for large files
 

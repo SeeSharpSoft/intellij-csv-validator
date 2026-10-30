@@ -22,7 +22,11 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
 import com.intellij.ui.table.JBTable;
+import com.intellij.ui.JBColor;
+import com.intellij.util.ui.JBUI;
+import com.intellij.util.ui.UIUtil;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditor;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -33,7 +37,6 @@ import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.ArrayList;
 import java.util.Objects;
 
 /**
@@ -51,28 +54,75 @@ import java.util.Objects;
  */
 public final class CsvTableRowUtilities {
 
-    public static final int ROW_NUMBER_CELL_PADDING = 4;
+    public static final int ROW_NUMBER_CELL_PADDING = 8;
 
     private CsvTableRowUtilities() {
         // static helper
     }
 
+    static void setSelection(ListSelectionModel selection, int[] indices, int count) {
+        boolean adjusting = selection.getValueIsAdjusting();
+        selection.setValueIsAdjusting(true);
+        try {
+            selection.clearSelection();
+            int start = -1;
+            int end = -1;
+            for (int index : indices) {
+                if (count == 0) break;
+                index = Math.min(index, count - 1);
+                if (start < 0) {
+                    start = end = index;
+                } else if (index <= end + 1) {
+                    end = index;
+                } else {
+                    selection.addSelectionInterval(start, end);
+                    start = end = index;
+                }
+            }
+            if (start >= 0) selection.addSelectionInterval(start, end);
+        } finally {
+            selection.setValueIsAdjusting(adjusting);
+        }
+    }
+
     private static JTable createRowHeadersTable(final JTable userTable, int startingNumber) {
-        final JBTable rowHeadersTable = new JBTable(new RowHeadersTableModel(userTable.getModel().getRowCount(), startingNumber));
+        final JBTable rowHeadersTable = new JBTable(new RowHeadersTableModel(userTable.getModel().getRowCount(), startingNumber)) {
+            @Override
+            public void updateUI() {
+                super.updateUI();
+                setBackground(UIUtil.getPanelBackground());
+                setForeground(UIUtil.getLabelForeground());
+                setFont(UIUtil.getLabelFont());
+                setGridColor(JBColor.border());
+                setShowHorizontalLines(true);
+                setShowVerticalLines(false);
+                setIntercellSpacing(JBUI.size(0, 1));
+            }
+
+            @Override
+            protected @NotNull JTableHeader createDefaultTableHeader() {
+                return new CsvTableHeader(columnModel);
+            }
+
+            @Override
+            public void paint(Graphics graphics) {
+                super.paint(graphics);
+                if (getClientProperty(CsvTableRowDragListener.class) instanceof CsvTableRowDragListener drag) {
+                    drag.paintFeedback(graphics, this);
+                }
+            }
+        };
 
         // this is where you set the width of the row headers
         rowHeadersTable.createDefaultColumnsFromModel();
 
         // make the rows look and behave like headers
-        rowHeadersTable.setBackground(rowHeadersTable.getTableHeader().getBackground());
-        rowHeadersTable.setForeground(rowHeadersTable.getTableHeader().getForeground());
-        rowHeadersTable.setFont(rowHeadersTable.getTableHeader().getFont());
         rowHeadersTable.setRowHeight(userTable.getRowHeight());
         rowHeadersTable.getTableHeader().setReorderingAllowed(false);
         rowHeadersTable.setRowSelectionAllowed(true);
         rowHeadersTable.setCellSelectionEnabled(true);
         rowHeadersTable.setFocusable(true);
-        rowHeadersTable.setDragEnabled(true);
+        rowHeadersTable.setDragEnabled(false);
         rowHeadersTable.setSelectionMode(userTable.getSelectionModel().getSelectionMode());
         rowHeadersTable.getEmptyText().setText("");
 
@@ -90,6 +140,11 @@ public final class CsvTableRowUtilities {
 
         // label used for rendering
         final JLabel label = new JLabel();
+        label.setOpaque(true);
+        label.setHorizontalAlignment(JLabel.CENTER);
+        label.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(0, 0, 0, 1, JBColor.border()),
+                JBUI.Borders.empty(3, ROW_NUMBER_CELL_PADDING)));
 
         scrollPane.getVerticalScrollBar().addAdjustmentListener(new AdjustmentListener() {
             public void adjustmentValueChanged(AdjustmentEvent e) {
@@ -103,6 +158,7 @@ public final class CsvTableRowUtilities {
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
                                                            boolean hasFocus, int row, int column) {
                 label.setText("" + value);
+                label.setFont(rowHeadersTable.getFont());
 
                 if (isSelected) {
                     label.setForeground(rowHeadersTable.getSelectionForeground());
@@ -168,7 +224,7 @@ public final class CsvTableRowUtilities {
      * Table Model for the row number column. It just has one column (the numbers)
      */
     private static final class RowHeadersTableModel extends AbstractTableModel {
-        private final ArrayList<Integer> numbersList = new ArrayList<Integer>();
+        private int rowCount;
         private final int startNumber;
 
         /**
@@ -178,24 +234,16 @@ public final class CsvTableRowUtilities {
          * @param startingNumber usually zero or 1
          */
         RowHeadersTableModel(int maxNumber, int startingNumber) {
-            // start at starting number and then go to row count (plus starting number amount)
             this.startNumber = startingNumber;
-            int j = 0;
-            for (int i = startingNumber; i < maxNumber + startNumber; i++) {
-                numbersList.add(j + startNumber);
-                j++;
-            }
+            rowCount = maxNumber;
         }
 
         public int getRowCount() {
-            return numbersList.size();
+            return rowCount;
         }
 
         public int getMaxIntValue() {
-            if (numbersList.size() != 0) {
-                return (Integer) getValueAt(numbersList.size() - 1, 0);
-            }
-            return 0;
+            return rowCount == 0 ? 0 : startNumber + rowCount - 1;
         }
 
         public int getColumnCount() {
@@ -215,21 +263,13 @@ public final class CsvTableRowUtilities {
         }
 
         public Object getValueAt(int rowIndex, int columnIndex) {
-            return numbersList.get(rowIndex);
+            return startNumber + rowIndex;
         }
 
-        public void addNumber() {
-            if (numbersList.isEmpty()) {
-                numbersList.add(0, startNumber);
-            } else {
-                Integer maxNum = numbersList.get(numbersList.size() - 1);
-                numbersList.add(numbersList.size(), maxNum + 1);
-            }
-            this.fireTableDataChanged();
-        }
-
-        public void removeNumber() {
-            numbersList.remove(numbersList.size() - 1);
+        void setRowCount(int count) {
+            if (rowCount == count) return;
+            rowCount = count;
+            fireTableDataChanged();
         }
 
         @Override
@@ -272,7 +312,8 @@ public final class CsvTableRowUtilities {
         FontMetrics fontMetrics = label.getFontMetrics(label.getFont());
 
         int widthFactor;
-        int totalPadding = 2 * ROW_NUMBER_CELL_PADDING;
+        Insets insets = label.getInsets();
+        int totalPadding = insets.left + insets.right;
 
         if (fontMetrics != null && label.getText() != null) {
             widthFactor = fontMetrics.stringWidth(label.getText());
@@ -291,6 +332,7 @@ public final class CsvTableRowUtilities {
         private final JTable rowHeadersTable;
         private final JTable userTable;
         private final TableRowResizer tableRowResizer;
+        private boolean synchronizing;
 
         private TableSynchronizer(JTable rowHeadersTableArg, JTable userTableArg, TableRowResizer tableRowResizerArg) {
             this.userTable = userTableArg;
@@ -312,54 +354,27 @@ public final class CsvTableRowUtilities {
         }
 
         public void valueChanged(ListSelectionEvent e) {
-            if (tableRowResizer.isResizing()) return;
-
-            if (Objects.equals(e.getSource(), userTable.getSelectionModel())) {
-                rowHeadersTable.getSelectionModel().removeListSelectionListener(this);
-                rowHeadersTable.getSelectionModel().clearSelection();
-
-                int[] rows = userTable.getSelectedRows();
-                for (int row : rows) {
-                    rowHeadersTable.getSelectionModel().addSelectionInterval(row, row);
+            if (synchronizing || e.getValueIsAdjusting() || tableRowResizer.isResizing()) return;
+            synchronizing = true;
+            try {
+                if (userTable.getSelectionModel().equals(e.getSource())) {
+                    setSelection(rowHeadersTable.getSelectionModel(), userTable.getSelectedRows(), rowHeadersTable.getRowCount());
+                } else {
+                    int[] rows = rowHeadersTable.getSelectedRows();
+                    setSelection(userTable.getSelectionModel(), rows, userTable.getRowCount());
+                    if (rows.length > 0 && userTable.getColumnCount() > 0) {
+                        userTable.setColumnSelectionInterval(0, userTable.getColumnCount() - 1);
+                    }
                 }
-
-                rowHeadersTable.getSelectionModel().addListSelectionListener(this);
-            } else if (Objects.equals(e.getSource(), rowHeadersTable.getSelectionModel())) {
-                userTable.getSelectionModel().removeListSelectionListener(this);
-
-                int[] rows = rowHeadersTable.getSelectedRows();
-                for (int row : rows) {
-                    userTable.getSelectionModel().addSelectionInterval(row, row);
-                }
-
-                // re-adding the listener to the user table
-                userTable.getSelectionModel().addListSelectionListener(this);
+            } finally {
+                synchronizing = false;
             }
         }
 
         @Override
         public void tableChanged(TableModelEvent e) {
-
             RowHeadersTableModel m = (RowHeadersTableModel) rowHeadersTable.getModel();
-
-            if (userTable.getRowCount() != m.getRowCount()) {
-                if (userTable.getRowCount() > m.getRowCount()) {
-
-                    int rowDiff = userTable.getRowCount() - m.getRowCount();
-
-                    for (int i = 0; i < rowDiff; i++) {
-                        m.addNumber();
-                    }
-                } else if (userTable.getRowCount() < m.getRowCount()) {
-
-                    int rowDiff = m.getRowCount() - userTable.getRowCount();
-
-                    for (int i = 0; i < rowDiff; i++) {
-                        m.removeNumber();
-                    }
-                }
-                m.fireTableDataChanged();
-            }
+            m.setRowCount(userTable.getRowCount());
         }
     }
 
@@ -407,6 +422,7 @@ public final class CsvTableRowUtilities {
         }
 
         public void mousePressed(MouseEvent e) {
+            if (!rowHeadersTable.isEnabled()) return;
             Point p = e.getPoint();
 
             resizingRow = getResizingRow(p);

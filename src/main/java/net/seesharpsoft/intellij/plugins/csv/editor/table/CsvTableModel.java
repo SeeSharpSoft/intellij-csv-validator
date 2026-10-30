@@ -1,5 +1,6 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table;
 
+import com.intellij.openapi.application.ReadAction;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiErrorElement;
 import com.intellij.psi.PsiFile;
@@ -101,6 +102,23 @@ public interface CsvTableModel extends PsiFileHolder, Suspendable {
     }
 
     void removeColumns(Collection<Integer> indices);
+
+    /** Maps each new position to its original row index. */
+    void reorderRows(int[] order);
+
+    /** Maps each new position to its original column index. */
+    void reorderColumns(int[] order);
+
+    default int getMovableRowCount() {
+        return ReadAction.compute(() -> {
+            int count = getRowCount();
+            if (count <= 1) return count;
+            PsiFile file = getPsiFile();
+            PsiElement last = file == null ? null : file.getLastChild();
+            while (last != null && !(last instanceof CsvRecord)) last = last.getPrevSibling();
+            return last != null && last.getTextLength() == 0 ? count - 1 : count;
+        });
+    }
 
     void clearCells(Collection<Integer> rows, Collection<Integer> columns);
 

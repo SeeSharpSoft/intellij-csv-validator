@@ -7,45 +7,52 @@
     <resource-bundle>localization.CsvEditorResources</resource-bundle>
 
     <description><![CDATA[
-        <p>Plugin for editing CSV files with a rainbow colored table- & text-editor. It provides syntax-validation, highlighting, customization, and plenty more besides.</p>
+        <p><b>Edit CSV, TSV, and PSV files as text or as a table</b> &ndash; with rainbow column colors, syntax validation, formatting, quick fixes, and a spreadsheet-style table editor, right inside your JetBrains IDE.</p>
         <img width="600" height="297" src="https://plugins.jetbrains.com/files/10037/screenshot_80656a25-da46-4f76-b5c1-a9e8263b8bf3" />
-        <p><b>Features:</b><br>
+
+        <h3>Major upgrade: a whole new table editor experience</h3>
+        <p>Version <b>252.53</b> is a major upgrade of CSV Editor. The table editor has been redesigned and packed with the
+        features you know from spreadsheets &ndash; while every change is still written straight to your CSV document and can be undone like any other edit.</p>
         <ul>
-            <li>support for CSV/TSV/PSV file extensions</li>
-            <li>customizable table editor</li>
-            <li>customizable text editor</li>
-            <li>customizable column coloring</li>
-            <li>customizable line comment</li>
-            <li>syntax validation</li>
-            <li>syntax highlighting</li>
-            <li>content formatting</li>
-            <li>quick fix inspections</li>
-            <li>intentions (Alt+Enter), e.g. Quote/Unquote (all), Shift Column Left/Right</li>
-            <li>balloon help & spell checker</li>
-            <li>support for ',', ';', '|' or '&#8633;' as value separator</li>
-            <li>support for '"' or '\' as escape character</li>
-            <li>support line comments (# by default, customizable)</li>
-            <li>highlight of active column values</li>
-            <li>tab (&#8633;) separator highlighting</li>
+            <li><b>Fresh, modern look</b> &ndash; padded cells, a flat header, and rounded scrollbars that follow the IDE's light or dark appearance, plus flicker-free rendering.</li>
+            <li><b>Find &amp; Replace in tables</b> &ndash; search with the IDE's familiar shortcuts, including case-sensitive, whole-word, and regex matching; jump between matches and <em>Replace All</em> in one undoable step.</li>
+            <li><b>Frozen columns</b> &ndash; keep ID or name columns in view while scrolling horizontally; the setting is remembered per file.</li>
+            <li><b>Drag &amp; drop rows and columns</b> &ndash; reorder data by dragging column headers or row numbers, or use the new <em>Move</em> actions in the context menu.</li>
+            <li><b>Spreadsheet-style copy &amp; paste</b> &ndash; copy cells as correctly quoted CSV or as an HTML table, and paste CSV or spreadsheet data at the focused cell; the table grows only when needed.</li>
+            <li><b>One-click view switching</b> &ndash; toggle between text and table editor from the editor tab bar, and your selected field follows you between both views.</li>
+            <li><b>Your shortcuts, your way</b> &ndash; assign or change every table editor shortcut in the IDE's Keymap settings; changes apply instantly to open editors.</li>
+            <li><b>Smarter column highlighting</b> &ndash; switch active-column highlighting on or off and limit how many rows get highlighted.</li>
+            <li><b>Refreshed icons</b> &ndash; new CSV, TSV, and PSV file icons and a consistent SVG icon set, crisp on HiDPI screens in light and dark themes.</li>
+            <li><b>Built for current IDEs</b> &ndash; targets IntelliJ Platform 2025.2 and newer, with a new version scheme where <em>252.53.0</em> tells you the earliest supported IDE (2025.2) at a glance.</li>
         </ul>
-        </p><br>
-        <p>
-        <b>TSV/PSV file support:</b> <em>TSV/PSV files are recognized as such but treated as a variant of CSV files, the same syntax highlighting and code style settings are applied.</em>
-        <br><br>
-        For more detailed information please have a look at the <a href="https://github.com/SeeSharpSoft/intellij-csv-validator/blob/main/README.md">README</a>.
-        <br><br><br>
-        <em>Thanks to @royqh1979, @egoisticalgoat, @sabi0, @ptahchiev, @ghost, @MarkJeronimus, <a href="https://finevisuals.de" target="_blank">FineVisuals</a> and others for supporting me and the project!</em>
-        <br><br><br>
-        </p>
-        <p>
-        <span style="color: #555555">
-            <b>IntelliJ IDEA Ultimate/PhpStorm/DataGrip/etc.:</b> The plugin is fully compatible with the <em>'Edit as Table...'</em> functionality.<br><br>
-        </span>
-        </p>
+
+        <h3>Everything you need for tabular data</h3>
+        <ul>
+            <li><b>Text and table editor</b> &ndash; choose which editor opens first, or use the text editor only.</li>
+            <li><b>Rainbow column coloring</b> &ndash; spot columns instantly with 10 configurable column colors, or use plain text coloring instead.</li>
+            <li><b>Syntax validation &amp; highlighting</b> &ndash; RFC 4180-based validation that tolerates common real-world variations.</li>
+            <li><b>Quick fixes &amp; intentions</b> (Alt+Enter) &ndash; add missing quotes or separators, quote/unquote values or the whole file, and shift columns left or right.</li>
+            <li><b>Formatting</b> &ndash; control spacing around separators, trim whitespace, or align values as a readable table.</li>
+            <li><b>Flexible separators</b> &ndash; comma, semicolon, colon, pipe, tab, record separator, or your own; auto-detected and adjustable per file.</li>
+            <li><b>Escape characters &amp; comments</b> &ndash; use <code>"</code> or <code>\</code> as escape character, and customizable line comments (<code>#</code> by default).</li>
+            <li><b>Helpful extras</b> &ndash; an info tooltip with value, header, and column number, spell checking, and caret-row and tab-separator highlighting.</li>
+            <li><b>Localized UI</b> &ndash; available in English and Simplified Chinese.</li>
+        </ul>
+
+        <p><b>TSV/PSV support:</b> TSV and PSV files are recognized as their own file types and get the same editors, highlighting, inspections, intentions, and code style settings as CSV files.</p>
+        <p><b>IntelliJ IDEA Ultimate, PhpStorm, DataGrip, etc.:</b> CSV Editor works alongside the built-in <em>Edit as Table...</em> functionality.</p>
+        <p><b>Using an older IDE?</b> Previous plugin versions remain available for <a href="https://github.com/SeeSharpSoft/intellij-csv-validator#installation">manual installation</a>.</p>
+        <br>
+        <p>Learn more in the <a href="https://github.com/SeeSharpSoft/intellij-csv-validator/blob/main/README.md">README</a>,
+        see what's new in the <a href="https://github.com/SeeSharpSoft/intellij-csv-validator/blob/main/CHANGELOG.md">changelog</a>,
+        and share feedback or report issues on <a href="https://github.com/SeeSharpSoft/intellij-csv-validator/issues">GitHub</a>.</p>
+        <br>
+        <p><em>Thanks to @royqh1979, @egoisticalgoat, @sabi0, @ptahchiev, @ghost, @MarkJeronimus and others for supporting me and the project!</em></p>
     ]]></description>
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html on how to target different products -->
     <depends>com.intellij.modules.lang</depends>
+    <depends optional="true" config-file="withSpellchecker.xml">com.intellij.modules.spellchecker</depends>
     <depends optional="true" config-file="withGithub.xml">org.jetbrains.plugins.github</depends>
 
     <extensions defaultExtensionNs="com.intellij">
@@ -64,9 +71,6 @@
                                    implementationClass="net.seesharpsoft.intellij.plugins.csv.highlighter.CsvEditorHighlighterProvider"/>
         <editorHighlighterProvider filetype="PSV"
                                    implementationClass="net.seesharpsoft.intellij.plugins.csv.highlighter.CsvEditorHighlighterProvider"/>
-        <highlightUsagesHandlerFactory
-                implementation="net.seesharpsoft.intellij.plugins.csv.highlighter.CsvHighlightUsagesHandlerFactory"/>
-
         <colorSettingsPage implementation="net.seesharpsoft.intellij.plugins.csv.settings.CsvColorSettings"/>
 
         <additionalTextAttributes scheme="Default" file="misc/column_coloring_default.xml" />
@@ -81,9 +85,6 @@
         <fileEditorProvider implementation="net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditorProvider"/>
 
         <annotator language="csv" implementationClass="net.seesharpsoft.intellij.plugins.csv.editor.CsvAnnotator"/>
-
-        <spellchecker.support language="csv"
-                              implementationClass="net.seesharpsoft.intellij.plugins.csv.spellchecker.CsvSpellCheckingStrategy"/>
 
         <lang.formatter language="csv"
                         implementationClass="net.seesharpsoft.intellij.plugins.csv.formatter.CsvFormattingModelBuilder"/>
@@ -150,6 +151,11 @@
         <notificationGroup displayType="STICKY_BALLOON" id="net.seesharpsoft.intellij.plugins.csv" isLogByDefault="true" hideFromSettings="true" />
     </extensions>
 
+    <projectListeners>
+        <listener class="net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorFieldSync"
+                  topic="com.intellij.openapi.fileEditor.FileEditorManagerListener" />
+    </projectListeners>
+
     <actions resource-bundle="localization.CsvEditorActions">
         <group id="CsvTableEditorColumnContextMenu"
                popup="true"
@@ -161,63 +167,135 @@
         >
             <separator />
         </group>
+        <action class="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$FreezeColumns"
+                id="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$FreezeColumns"
+                icon="/media/icons/actions/freeze-columns.svg">
+            <add-to-group group-id="CsvTableEditorColumnContextMenu" />
+        </action>
+        <action class="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$UnfreezeColumns"
+                id="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$UnfreezeColumns"
+                icon="/media/icons/actions/unfreeze-columns.svg">
+            <add-to-group group-id="CsvTableEditorColumnContextMenu" relative-to-action="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$FreezeColumns" anchor="after" />
+        </action>
         <action class="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AddColumnBefore"
                 id="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AddColumnBefore"
-                icon="/media/icons/add-column-before.png"
+                icon="/media/icons/actions/add-column-before.svg"
         >
             <add-to-group group-id="CsvTableEditorColumnContextMenu" anchor="first" />
+            <keyboard-shortcut keymap="$default" first-keystroke="control shift LEFT" />
         </action>
         <action class="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AddColumnAfter"
                 id="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AddColumnAfter"
-                icon="/media/icons/add-column.png"
+                icon="/media/icons/actions/add-column-after.svg"
         >
             <add-to-group group-id="CsvTableEditorColumnContextMenu" relative-to-action="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AddColumnBefore" anchor="after" />
+            <keyboard-shortcut keymap="$default" first-keystroke="control shift RIGHT" />
         </action>
         <action class="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$DeleteSelectedColumns"
                 id="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$DeleteSelectedColumns"
-                icon="/media/icons/remove-column.png"
+                icon="/media/icons/actions/remove-column.svg"
         >
             <add-to-group group-id="CsvTableEditorColumnContextMenu" relative-to-action="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AddColumnAfter" anchor="after" />
+            <keyboard-shortcut keymap="$default" first-keystroke="control shift DELETE" />
+            <keyboard-shortcut keymap="$default" first-keystroke="control shift BACK_SPACE" />
         </action>
 
         <action class="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AddRowBefore"
                 id="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AddRowBefore"
-                icon="/media/icons/add-row-before.png"
+                icon="/media/icons/actions/add-row-before.svg"
         >
             <add-to-group group-id="CsvTableEditorRowContextMenu" anchor="first" />
+            <keyboard-shortcut keymap="$default" first-keystroke="control UP" />
         </action>
         <action class="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AddRowAfter"
                 id="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AddRowAfter"
-                icon="/media/icons/add-row.png"
+                icon="/media/icons/actions/add-row-after.svg"
         >
             <add-to-group group-id="CsvTableEditorRowContextMenu" relative-to-action="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AddRowBefore" anchor="after" />
+            <keyboard-shortcut keymap="$default" first-keystroke="control DOWN" />
         </action>
         <action class="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$DeleteSelectedRows"
                 id="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$DeleteSelectedRows"
-                icon="/media/icons/remove-row.png"
+                icon="/media/icons/actions/remove-row.svg"
         >
             <add-to-group group-id="CsvTableEditorRowContextMenu" relative-to-action="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AddRowAfter" anchor="after" />
+            <keyboard-shortcut keymap="$default" first-keystroke="control DELETE" />
+            <keyboard-shortcut keymap="$default" first-keystroke="control BACK_SPACE" />
+        </action>
+
+        <action class="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$ClearSelectedCells"
+                id="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$ClearSelectedCells">
+            <keyboard-shortcut keymap="$default" first-keystroke="DELETE" />
+            <keyboard-shortcut keymap="$default" first-keystroke="BACK_SPACE" />
         </action>
 
         <action class="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AdjustColumnWidths"
                 id="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AdjustColumnWidths"
-                icon="/media/icons/adjust-column-width.png"
+                icon="/media/icons/actions/adjust-column-width.svg"
         >
             <add-to-group group-id="CsvTableEditorColumnContextMenu" />
             <add-to-group group-id="CsvTableEditorRowContextMenu" />
+            <keyboard-shortcut keymap="$default" first-keystroke="control shift SPACE" />
+        </action>
+        <action class="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$MoveRowsUp"
+                id="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$MoveRowsUp"
+                icon="/media/icons/actions/move-row-up.svg">
+            <add-to-group group-id="CsvTableEditorRowContextMenu" relative-to-action="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$DeleteSelectedRows" anchor="after" />
+        </action>
+        <action class="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$MoveRowsDown"
+                id="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$MoveRowsDown"
+                icon="/media/icons/actions/move-row-down.svg">
+            <add-to-group group-id="CsvTableEditorRowContextMenu" relative-to-action="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$MoveRowsUp" anchor="after" />
+        </action>
+        <action class="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$MoveColumnsLeft"
+                id="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$MoveColumnsLeft"
+                icon="/media/icons/actions/move-column-left.svg">
+            <add-to-group group-id="CsvTableEditorColumnContextMenu" relative-to-action="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$DeleteSelectedColumns" anchor="after" />
+        </action>
+        <action class="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$MoveColumnsRight"
+                id="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$MoveColumnsRight"
+                icon="/media/icons/actions/move-column-right.svg">
+            <add-to-group group-id="CsvTableEditorColumnContextMenu" relative-to-action="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$MoveColumnsLeft" anchor="after" />
         </action>
         <action class="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$ResetColumnWidths"
                 id="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$ResetColumnWidths"
-                icon="/media/icons/reset-column-width.png"
+                icon="/media/icons/actions/reset-column-width.svg"
         >
             <add-to-group group-id="CsvTableEditorColumnContextMenu" relative-to-action="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AdjustColumnWidths" anchor="after" />
             <add-to-group group-id="CsvTableEditorRowContextMenu" relative-to-action="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AdjustColumnWidths" anchor="after" />
         </action>
 
+        <group id="CsvTableEditorActions" popup="true">
+            <reference ref="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AddColumnBefore" />
+            <reference ref="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AddColumnAfter" />
+            <reference ref="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$DeleteSelectedColumns" />
+            <reference ref="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AddRowBefore" />
+            <reference ref="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AddRowAfter" />
+            <reference ref="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$DeleteSelectedRows" />
+            <reference ref="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$ClearSelectedCells" />
+            <reference ref="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$AdjustColumnWidths" />
+            <reference ref="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$ResetColumnWidths" />
+            <reference ref="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$MoveRowsUp" />
+            <reference ref="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$MoveRowsDown" />
+            <reference ref="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$MoveColumnsLeft" />
+            <reference ref="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$MoveColumnsRight" />
+            <reference ref="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$FreezeColumns" />
+            <reference ref="net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions$UnfreezeColumns" />
+        </group>
+
+        <group id="CsvEditorViewActions">
+            <action class="net.seesharpsoft.intellij.plugins.csv.actions.CsvEditorViewActions$ShowTextEditor"
+                    id="net.seesharpsoft.intellij.plugins.csv.actions.CsvEditorViewActions$ShowTextEditor"
+                    icon="/media/icons/actions/show-text-editor.svg" />
+            <action class="net.seesharpsoft.intellij.plugins.csv.actions.CsvEditorViewActions$ShowTableEditor"
+                    id="net.seesharpsoft.intellij.plugins.csv.actions.CsvEditorViewActions$ShowTableEditor"
+                    icon="/media/icons/actions/show-table-editor.svg" />
+        </group>
+
         <group id="net.seesharpsoft.intellij.plugins.csv.actions.CsvChangeSeparatorActionGroup"
                class="net.seesharpsoft.intellij.plugins.csv.actions.CsvChangeSeparatorActionGroup"
                popup="true"
-               icon="/media/icons/csv-icon.png"
+               icon="/media/icons/actions/change-separator.svg"
         >
             <add-to-group group-id="EditorPopupMenu" anchor="last"/>
             <add-to-group group-id="CsvTableEditorColumnContextMenu" anchor="last"/>
@@ -227,7 +305,7 @@
         <group id="net.seesharpsoft.intellij.plugins.csv.actions.CsvChangeEscapeCharacterActionGroup"
                class="net.seesharpsoft.intellij.plugins.csv.actions.CsvChangeEscapeCharacterActionGroup"
                popup="true"
-               icon="/media/icons/csv-icon.png"
+               icon="/media/icons/actions/change-escape-character.svg"
         >
             <add-to-group group-id="EditorPopupMenu" anchor="last"/>
             <add-to-group group-id="CsvTableEditorColumnContextMenu" anchor="last"/>
