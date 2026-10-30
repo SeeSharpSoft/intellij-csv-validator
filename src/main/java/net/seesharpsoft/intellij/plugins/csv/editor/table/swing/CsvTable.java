@@ -28,9 +28,6 @@ public class CsvTable extends JBTable {
 
     private static final Color FROZEN_COLUMN_SEPARATOR_COLOR = new JBColor(0x8C9199, 0x737882);
 
-    public static class CommentColumn {
-    }
-
     private int paintCounter;
     private TableCellRenderer searchMatchRenderer;
     private int searchMatchRow;
@@ -38,6 +35,9 @@ public class CsvTable extends JBTable {
     private int frozenColumnCount;
     private boolean deferredPaintPending;
     private final CsvTablePaintSnapshot paintSnapshot = new CsvTablePaintSnapshot();
+
+    public static class CommentColumn {
+    }
 
     public CsvTable(TableModel model) {
         super(model);

@@ -187,35 +187,42 @@ final class CsvTableRowDragListener extends MouseInputAdapter {
         Graphics g = graphics.create();
         try {
             g.clipRect(visible.x, visible.y, visible.width, visible.height);
-            Color accent = dragAccent(target);
-            Rectangle source = target.getCellRect(sourceRow, 0, true);
-            g.setColor(new Color(accent.getRed(), accent.getGreen(), accent.getBlue(), 40));
-            g.fillRect(visible.x, source.y, visible.width, source.height);
-            g.setColor(accent);
-            g.drawRect(visible.x, source.y, visible.width - 1, source.height - 1);
+            paintSourceRow(g, target, visible);
             Rectangle destination = target.getCellRect(targetRow, 0, true);
             int y = destination.y + (targetRow > sourceRow ? destination.height : 0);
-            if (targetRow != sourceRow) {
-                int thickness = JBUI.scale(3);
-                g.fillRect(visible.x, y - thickness / 2, visible.width, thickness);
-                if (target == rowHeaders) {
-                    int right = visible.x + visible.width - 1;
-                    int arrow = JBUI.scale(6);
-                    g.fillPolygon(new int[]{right, right - arrow, right - arrow},
-                            new int[]{y, y - arrow, y + arrow}, 3);
-                }
-            }
-            if (target != rowHeaders && dragPreview != null) {
-                int padding = JBUI.scale(6);
-                int height = ImageUtil.getUserHeight(dragPreview);
-                int top = y + padding;
-                if (top + height > visible.y + visible.height - padding) top = y - height - padding;
-                top = Math.max(visible.y + padding, top);
-                UIUtil.drawImage(g, dragPreview, visible.x + padding, top, null);
-            }
+            boolean rowHeader = rowHeaders.equals(target);
+            if (targetRow != sourceRow) paintDropLine(g, visible, y, rowHeader);
+            if (!rowHeader && dragPreview != null) paintDragPreview(g, visible, y);
         } finally {
             g.dispose();
         }
+    }
+
+    private void paintSourceRow(Graphics g, JTable target, Rectangle visible) {
+        Color accent = dragAccent(target);
+        Rectangle source = target.getCellRect(sourceRow, 0, true);
+        g.setColor(new Color(accent.getRed(), accent.getGreen(), accent.getBlue(), 40));
+        g.fillRect(visible.x, source.y, visible.width, source.height);
+        g.setColor(accent);
+        g.drawRect(visible.x, source.y, visible.width - 1, source.height - 1);
+    }
+
+    private static void paintDropLine(Graphics g, Rectangle visible, int y, boolean withArrow) {
+        int thickness = JBUI.scale(3);
+        g.fillRect(visible.x, y - thickness / 2, visible.width, thickness);
+        if (!withArrow) return;
+        int right = visible.x + visible.width - 1;
+        int arrow = JBUI.scale(6);
+        g.fillPolygon(new int[]{right, right - arrow, right - arrow}, new int[]{y, y - arrow, y + arrow}, 3);
+    }
+
+    private void paintDragPreview(Graphics g, Rectangle visible, int y) {
+        int padding = JBUI.scale(6);
+        int height = ImageUtil.getUserHeight(dragPreview);
+        int top = y + padding;
+        if (top + height > visible.y + visible.height - padding) top = y - height - padding;
+        top = Math.max(visible.y + padding, top);
+        UIUtil.drawImage(g, dragPreview, visible.x + padding, top, null);
     }
 
     private int targetRow(MouseEvent event) {

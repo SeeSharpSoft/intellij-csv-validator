@@ -378,17 +378,28 @@ public class CsvTableEditorSwing extends CsvTableEditor implements CsvFieldView 
         if (!canMoveSelection(columns, backwards) || !stopCellEditing()) return;
         int[] rows = tblEditor.getSelectedRows();
         int[] cols = tblEditor.getSelectedColumns();
-        int[] selected = columns ? cols : rows;
-        int[] order = IntStream.range(0, columns ? tblEditor.getColumnCount() : tblEditor.getRowCount()).toArray();
         int offset = backwards ? -1 : 1;
+        if (columns) {
+            applyOrder(true, orderAfterMove(tblEditor.getColumnCount(), cols, offset), rows, shift(cols, offset));
+        } else {
+            applyOrder(false, orderAfterMove(tblEditor.getRowCount(), rows, offset), shift(rows, offset), cols);
+        }
+    }
+
+    private static int[] orderAfterMove(int count, int[] selected, int offset) {
+        int[] order = IntStream.range(0, count).toArray();
+        // Start with the selected index nearest the move direction so adjacent selections move as a block.
         for (int i = 0; i < selected.length; i++) {
-            int index = selected[backwards ? i : selected.length - 1 - i];
+            int index = selected[offset < 0 ? i : selected.length - 1 - i];
             int adjacent = order[index + offset];
             order[index + offset] = order[index];
             order[index] = adjacent;
         }
-        int[] moved = Arrays.stream(selected).map(index -> index + offset).toArray();
-        applyOrder(columns, order, columns ? rows : moved, columns ? moved : cols);
+        return order;
+    }
+
+    private static int[] shift(int[] indices, int offset) {
+        return Arrays.stream(indices).map(index -> index + offset).toArray();
     }
 
     void moveRow(int from, int to) {

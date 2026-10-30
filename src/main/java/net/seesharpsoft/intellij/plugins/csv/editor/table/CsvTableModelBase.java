@@ -17,7 +17,6 @@ import com.intellij.psi.PsiTreeChangeListener;
 import com.intellij.psi.util.PsiTreeUtil;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvEscapeCharacter;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
-import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvField;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvPsiTreeUpdater;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvRecord;
@@ -345,78 +344,10 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
     }
 
     public void setValuesAt(List<List<String>> values, Set<Integer> commentRows, int rowIndex, int columnIndex) {
-        Pair<TextRange, String> replacement = ReadAction.compute(() -> {
-            PsiFile file = getPsiFile();
-            List<CsvRecord> records = PsiTreeUtil.getChildrenOfTypeAsList(file, CsvRecord.class);
-            if (rowIndex < 0 || rowIndex >= records.size() || columnIndex < 0 || values.isEmpty()) {
-                throw new IllegalArgumentException("Invalid paste position or empty grid");
-            }
-            String source = file.getText();
-            StringBuilder result = new StringBuilder();
-            int start = records.get(rowIndex).getTextOffset();
-            int end = start;
-            String separator = CsvHelper.getValueSeparator(file).getCharacter();
-            String comment = CsvEditorSettings.getInstance().getCommentIndicator();
-            for (int index = 0; index < values.size(); index++) {
-                int targetRow = rowIndex + index;
-                List<String> row = values.get(index);
-                if (row.isEmpty()) throw new IllegalArgumentException("Empty clipboard row");
-                boolean pastedComment = commentRows.contains(index);
-                if (pastedComment && (columnIndex != 0 || row.size() != 1 || row.getFirst().contains("\n") || comment.isEmpty())) {
-                    throw new IllegalArgumentException("A clipboard comment requires a single-line cell in the first column");
-                }
-                if (targetRow < records.size()) {
-                    CsvRecord record = records.get(targetRow);
-                    result.append(source, end, record.getTextOffset());
-                    end = record.getTextRange().getEndOffset();
-                    if (pastedComment) {
-                        result.append(comment).append(row.getFirst());
-                        continue;
-                    }
-                    if (CsvHelper.isCommentElement(record.getFirstChild())) {
-                        if (columnIndex != 0 || row.size() != 1 || row.getFirst().contains("\n")) {
-                            throw new IllegalArgumentException("A comment row has only one single-line cell");
-                        }
-                        result.append(comment).append(row.getFirst());
-                        continue;
-                    }
-                    List<CsvField> fields = PsiTreeUtil.getChildrenOfTypeAsList(record, CsvField.class);
-                    if (columnIndex < fields.size()) {
-                        result.append(source, record.getTextOffset(), fields.get(columnIndex).getTextOffset());
-                    } else {
-                        result.append(record.getText());
-                        result.repeat(separator, columnIndex - Math.max(0, fields.size() - 1));
-                    }
-                    appendPastedValues(result, row, columnIndex, file, comment);
-                    int lastColumn = columnIndex + row.size() - 1;
-                    if (lastColumn < fields.size()) {
-                        result.append(source, fields.get(lastColumn).getTextRange().getEndOffset(), end);
-                    }
-                } else {
-                    result.append('\n');
-                    if (pastedComment) result.append(comment).append(row.getFirst());
-                    else {
-                        result.repeat(separator, columnIndex);
-                        appendPastedValues(result, row, columnIndex, file, comment);
-                    }
-                }
-            }
-            return Pair.create(new TextRange(start, end), result.toString());
-        });
+        Pair<TextRange, String> replacement = ReadAction.compute(
+                () -> CsvTablePaste.prepare(getPsiFile(), values, commentRows, rowIndex, columnIndex));
         getPsiTreeUpdater().replaceTexts(Collections.singletonList(replacement));
         getPsiTreeUpdater().commit();
-    }
-
-    private void appendPastedValues(StringBuilder result, List<String> values, int columnIndex, PsiFile file, String comment) {
-        var separator = CsvHelper.getValueSeparator(file);
-        var escape = CsvHelper.getEscapeCharacter(file);
-        boolean quoting = CsvEditorSettings.getInstance().isQuotingEnforced();
-        for (int column = 0; column < values.size(); column++) {
-            if (column > 0) result.append(separator.getCharacter());
-            String value = values.get(column);
-            result.append(CsvHelper.quoteCsvField(value, escape, separator,
-                    quoting || columnIndex + column == 0 && !comment.isEmpty() && value.trim().startsWith(comment)));
-        }
     }
 
     private void prepareSetValueAt(String value, int rowIndex, int columnIndex) {

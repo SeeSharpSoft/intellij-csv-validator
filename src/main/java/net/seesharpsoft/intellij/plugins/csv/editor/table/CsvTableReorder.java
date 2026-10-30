@@ -4,6 +4,7 @@ import com.intellij.lexer.Lexer;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.TokenType;
+import com.intellij.psi.tree.IElementType;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvEscapeCharacter;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvValueSeparator;
@@ -19,61 +20,56 @@ public final class CsvTableReorder {
     public record Change(TextRange range, String text) {
     }
 
-    private CsvTableReorder() {
+    private abstract static class Reordering {
+        protected final CharSequence text;
+        protected final int[] order;
+        protected final StringBuilder result;
+
+        Reordering(CharSequence text, int[] order) {
+            this.text = text;
+            this.order = order;
+            this.result = new StringBuilder(text.length());
+        }
+
+        final StringBuilder reorder(Lexer lexer) {
+            lexer.start(text);
+            boolean quoted = false;
+            int tokens = 0;
+            for (IElementType type = lexer.getTokenType(); type != null; type = lexer.getTokenType()) {
+                if ((tokens++ & 1023) == 0) ProgressManager.checkCanceled();
+                if (type == TokenType.BAD_CHARACTER) throw new IllegalArgumentException("Invalid CSV character");
+                if (type == CsvTypes.QUOTE) quoted = !quoted;
+                onToken(type, lexer.getTokenStart(), lexer.getTokenEnd());
+                lexer.advance();
+            }
+            ProgressManager.checkCanceled();
+            if (quoted) throw new IllegalArgumentException("Unclosed CSV quote");
+            finish();
+            return result;
+        }
+
+        protected abstract void onToken(IElementType type, int start, int end);
+
+        protected abstract void finish();
     }
 
-    public static Change prepare(CharSequence text, Lexer lexer, int[] order, boolean columns,
-                                 CsvValueSeparator separator, CsvEscapeCharacter escape, String commentIndicator) {
-        validateOrder(order, order.length);
-        lexer.start(text);
-        StringBuilder result = new StringBuilder(text.length());
-        List<TextRange> records = columns ? null : new ArrayList<>();
-        int[] starts = new int[columns ? Math.max(1, order.length) : 1];
-        int[] ends = new int[starts.length];
-        int rowStart = 0;
-        int fieldCount = 0;
-        int maxColumns = 0;
-        boolean comment = false;
-        boolean quoted = false;
-        int tokens = 0;
-        while (lexer.getTokenType() != null) {
-            if ((tokens++ & 1023) == 0) ProgressManager.checkCanceled();
-            if (lexer.getTokenType() == TokenType.BAD_CHARACTER)
-                throw new IllegalArgumentException("Invalid CSV character");
-            if (lexer.getTokenType() == CsvTypes.QUOTE) quoted = !quoted;
-            if (lexer.getTokenType() == CsvTypes.COMMENT) comment = true;
-            if (columns && lexer.getTokenType() == CsvTypes.COMMA) {
-                if (fieldCount + 1 >= starts.length) throw new IllegalArgumentException("Column count changed");
-                ends[fieldCount++] = lexer.getTokenStart();
-                starts[fieldCount] = lexer.getTokenEnd();
-            } else if (lexer.getTokenType() == CsvTypes.CRLF) {
-                if (columns) {
-                    ends[fieldCount] = lexer.getTokenStart();
-                    maxColumns = Math.max(maxColumns, fieldCount + 1);
-                    appendColumns(result, text, rowStart, lexer.getTokenStart(), starts, ends, fieldCount + 1,
-                            comment, order, separator, escape, commentIndicator);
-                    result.append(text, lexer.getTokenStart(), lexer.getTokenEnd());
-                } else {
-                    records.add(new TextRange(rowStart, lexer.getTokenStart()));
-                }
-                rowStart = lexer.getTokenEnd();
-                starts[0] = rowStart;
-                fieldCount = 0;
-                comment = false;
-            }
-            lexer.advance();
+    private static final class RowReordering extends Reordering {
+        private final List<TextRange> records = new ArrayList<>();
+        private int rowStart;
+
+        RowReordering(CharSequence text, int[] order) {
+            super(text, order);
         }
-        ProgressManager.checkCanceled();
-        if (quoted) throw new IllegalArgumentException("Unclosed CSV quote");
-        if (columns) {
-            ends[fieldCount] = text.length();
-            maxColumns = Math.max(maxColumns, fieldCount + 1);
-            if (rowStart < text.length() || text.isEmpty()) {
-                appendColumns(result, text, rowStart, text.length(), starts, ends, fieldCount + 1,
-                        comment, order, separator, escape, commentIndicator);
-            }
-            validateOrder(order, maxColumns);
-        } else {
+
+        @Override
+        protected void onToken(IElementType type, int start, int end) {
+            if (type != CsvTypes.CRLF) return;
+            records.add(new TextRange(rowStart, start));
+            rowStart = end;
+        }
+
+        @Override
+        protected void finish() {
             records.add(new TextRange(rowStart, text.length()));
             validateOrder(order, records.size());
             if (records.size() > 1 && records.getLast().isEmpty() && order[order.length - 1] != order.length - 1) {
@@ -88,41 +84,104 @@ public final class CsvTableReorder {
                 }
             }
         }
-        return changedSpan(text, result);
     }
 
-    private static void appendColumns(StringBuilder result, CharSequence text, int rowStart, int rowEnd,
-                                      int[] starts, int[] ends, int fieldCount, boolean comment, int[] order,
-                                      CsvValueSeparator separator, CsvEscapeCharacter escape, String commentIndicator) {
-        if (comment) {
-            result.append(text, rowStart, rowEnd);
-            return;
+    private static final class ColumnReordering extends Reordering {
+        private final CsvValueSeparator separator;
+        private final CsvEscapeCharacter escape;
+        private final String commentIndicator;
+        private final int[] starts;
+        private final int[] ends;
+        private int fieldCount;
+        private int maxColumns;
+        private boolean comment;
+
+        ColumnReordering(CharSequence text, int[] order, CsvValueSeparator separator, CsvEscapeCharacter escape,
+                         String commentIndicator) {
+            super(text, order);
+            this.separator = separator;
+            this.escape = escape;
+            this.commentIndicator = commentIndicator;
+            this.starts = new int[Math.max(1, order.length)];
+            this.ends = new int[starts.length];
         }
-        int last = order.length - 1;
-        while (last > 0 && order[last] >= fieldCount) last--;
-        for (int column = 0; column <= last; column++) {
-            if (column > 0) result.append(separator.getCharacter());
-            int source = order[column];
-            if (source >= fieldCount) continue;
-            int start = starts[source];
-            int end = ends[source];
-            if (column == 0 && startsComment(text, start, end, commentIndicator)) {
+
+        @Override
+        protected void onToken(IElementType type, int start, int end) {
+            if (type == CsvTypes.COMMENT) {
+                comment = true;
+            } else if (type == CsvTypes.COMMA) {
+                if (fieldCount + 1 >= starts.length) throw new IllegalArgumentException("Column count changed");
+                ends[fieldCount++] = start;
+                starts[fieldCount] = end;
+            } else if (type == CsvTypes.CRLF) {
+                endRow(start);
+                appendRow(start);
+                result.append(text, start, end);
+                starts[0] = end;
+                fieldCount = 0;
+                comment = false;
+            }
+        }
+
+        @Override
+        protected void finish() {
+            endRow(text.length());
+            if (starts[0] < text.length() || text.isEmpty()) appendRow(text.length());
+            validateOrder(order, maxColumns);
+        }
+
+        private void endRow(int rowEnd) {
+            ends[fieldCount] = rowEnd;
+            maxColumns = Math.max(maxColumns, fieldCount + 1);
+        }
+
+        private void appendRow(int rowEnd) {
+            if (comment) {
+                result.append(text, starts[0], rowEnd);
+                return;
+            }
+            int fields = fieldCount + 1;
+            int last = order.length - 1;
+            while (last > 0 && order[last] >= fields) last--;
+            for (int column = 0; column <= last; column++) {
+                if (column > 0) result.append(separator.getCharacter());
+                int source = order[column];
+                if (source < fields) appendField(column, starts[source], ends[source]);
+            }
+        }
+
+        private void appendField(int column, int start, int end) {
+            if (column == 0 && startsComment(start, end)) {
                 String field = text.subSequence(start, end).toString();
                 result.append(CsvHelper.quoteCsvField(CsvHelper.unquoteCsvValue(field, escape), escape, separator, true));
             } else {
                 result.append(text, start, end);
             }
         }
+
+        private boolean startsComment(int start, int end) {
+            if (commentIndicator.isEmpty()) return false;
+            int offset = start;
+            while (offset < end && text.charAt(offset) <= ' ') offset++;
+            if (end - offset < commentIndicator.length()) return false;
+            for (int index = 0; index < commentIndicator.length(); index++) {
+                if (text.charAt(offset + index) != commentIndicator.charAt(index)) return false;
+            }
+            return true;
+        }
     }
 
-    private static boolean startsComment(CharSequence text, int start, int end, String indicator) {
-        if (indicator.isEmpty()) return false;
-        while (start < end && text.charAt(start) <= ' ') start++;
-        if (end - start < indicator.length()) return false;
-        for (int index = 0; index < indicator.length(); index++) {
-            if (text.charAt(start + index) != indicator.charAt(index)) return false;
-        }
-        return true;
+    private CsvTableReorder() {
+    }
+
+    public static Change prepare(CharSequence text, Lexer lexer, int[] order, boolean columns,
+                                 CsvValueSeparator separator, CsvEscapeCharacter escape, String commentIndicator) {
+        validateOrder(order, order.length);
+        Reordering reordering = columns
+                ? new ColumnReordering(text, order, separator, escape, commentIndicator)
+                : new RowReordering(text, order);
+        return changedSpan(text, reordering.reorder(lexer));
     }
 
     private static Change changedSpan(CharSequence original, StringBuilder reordered) {

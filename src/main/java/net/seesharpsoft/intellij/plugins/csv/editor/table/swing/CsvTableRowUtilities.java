@@ -357,7 +357,7 @@ public final class CsvTableRowUtilities {
             if (synchronizing || e.getValueIsAdjusting() || tableRowResizer.isResizing()) return;
             synchronizing = true;
             try {
-                if (e.getSource() == userTable.getSelectionModel()) {
+                if (userTable.getSelectionModel().equals(e.getSource())) {
                     setSelection(rowHeadersTable.getSelectionModel(), userTable.getSelectedRows(), rowHeadersTable.getRowCount());
                 } else {
                     int[] rows = rowHeadersTable.getSelectedRows();

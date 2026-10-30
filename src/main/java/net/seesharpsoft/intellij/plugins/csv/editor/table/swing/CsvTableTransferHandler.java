@@ -33,10 +33,57 @@ import java.util.List;
 import java.util.Set;
 
 final class CsvTableTransferHandler extends TransferHandler {
+    private static final DataFlavor CELLS_FLAVOR = createCellsFlavor();
+
+    private final CsvTableEditorSwing editor;
+    private final TransferHandler copyHandler;
+
     private record Cells(List<List<String>> values, Set<Integer> commentRows) {
     }
 
-    private static final DataFlavor CELLS_FLAVOR = createCellsFlavor();
+    /** Adds the table cells and CSV/HTML text to the transferable exported by the default copy handler. */
+    private record CellsTransferable(Transferable original, Cells cells, String csv, @Nullable String html)
+            implements Transferable {
+        @Override
+        public DataFlavor[] getTransferDataFlavors() {
+            DataFlavor[] flavors = original.getTransferDataFlavors();
+            DataFlavor[] result = Arrays.copyOf(flavors, flavors.length + 1);
+            result[flavors.length] = CELLS_FLAVOR;
+            return result;
+        }
+
+        @Override
+        public boolean isDataFlavorSupported(DataFlavor flavor) {
+            return CELLS_FLAVOR.equals(flavor) || original.isDataFlavorSupported(flavor);
+        }
+
+        @Override
+        public @NotNull Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException, IOException {
+            if (CELLS_FLAVOR.equals(flavor)) return cells;
+            if (!original.isDataFlavorSupported(flavor)) throw new UnsupportedFlavorException(flavor);
+            String text = getText(flavor);
+            return text == null ? original.getTransferData(flavor) : represent(text, flavor);
+        }
+
+        private @Nullable String getText(DataFlavor flavor) {
+            if (isPlainTextFlavor(flavor)) return csv;
+            return flavor.isMimeTypeEqual("text/html") ? html : null;
+        }
+
+        private static Object represent(String text, DataFlavor flavor) throws UnsupportedFlavorException, IOException {
+            Class<?> type = flavor.getRepresentationClass();
+            if (String.class.equals(type)) return text;
+            if (Reader.class.equals(type)) return new StringReader(text);
+            String charset = flavor.getParameter("charset");
+            if (InputStream.class.equals(type) && charset != null) return new ByteArrayInputStream(text.getBytes(charset));
+            throw new UnsupportedFlavorException(flavor);
+        }
+    }
+
+    CsvTableTransferHandler(CsvTableEditorSwing editor, TransferHandler copyHandler) {
+        this.editor = editor;
+        this.copyHandler = copyHandler;
+    }
 
     private static DataFlavor createCellsFlavor() {
         try {
@@ -45,14 +92,6 @@ final class CsvTableTransferHandler extends TransferHandler {
         } catch (ClassNotFoundException exception) {
             throw new ExceptionInInitializerError(exception);
         }
-    }
-
-    private final CsvTableEditorSwing editor;
-    private final TransferHandler copyHandler;
-
-    CsvTableTransferHandler(CsvTableEditorSwing editor, TransferHandler copyHandler) {
-        this.editor = editor;
-        this.copyHandler = copyHandler;
     }
 
     @Override
@@ -66,54 +105,31 @@ final class CsvTableTransferHandler extends TransferHandler {
         if (table.getSelectedRowCount() == 0 || table.getSelectedColumnCount() == 0) return null;
         Clipboard clipboard = new Clipboard("CSV selection");
         copyHandler.exportToClipboard(component, clipboard, COPY);
-        Transferable original = clipboard.getContents(null);
+        Cells cells = collectSelectedCells(table);
+        String html = cells.commentRows().isEmpty() ? null : toHtml(cells, table.getSelectedColumnCount());
+        return new CellsTransferable(clipboard.getContents(null), cells, toCsv(cells), html);
+    }
+
+    private static Cells collectSelectedCells(CsvTable table) {
         List<List<String>> values = new ArrayList<>();
         Set<Integer> commentRows = new HashSet<>();
+        int[] columns = table.getSelectedColumns();
         for (int row : table.getSelectedRows()) {
             int modelRow = table.convertRowIndexToModel(row);
             if (table.getModel().isCommentRow(modelRow)) {
                 commentRows.add(values.size());
                 values.add(List.of(table.getModel().getValue(modelRow, 0)));
-                continue;
+            } else {
+                values.add(getValues(table, row, columns));
             }
-            List<String> cells = new ArrayList<>();
-            for (int column : table.getSelectedColumns()) cells.add((String) table.getValueAt(row, column));
-            values.add(List.copyOf(cells));
         }
-        Cells cells = new Cells(List.copyOf(values), Set.copyOf(commentRows));
-        String csv = toCsv(cells);
-        String html = commentRows.isEmpty() ? null : toHtml(cells, table.getSelectedColumnCount());
-        return new Transferable() {
-            @Override
-            public DataFlavor[] getTransferDataFlavors() {
-                DataFlavor[] flavors = original.getTransferDataFlavors();
-                DataFlavor[] result = Arrays.copyOf(flavors, flavors.length + 1);
-                result[flavors.length] = CELLS_FLAVOR;
-                return result;
-            }
+        return new Cells(List.copyOf(values), Set.copyOf(commentRows));
+    }
 
-            @Override
-            public boolean isDataFlavorSupported(DataFlavor flavor) {
-                return CELLS_FLAVOR.equals(flavor) || original.isDataFlavorSupported(flavor);
-            }
-
-            @Override
-            public @NotNull Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException, IOException {
-                if (CELLS_FLAVOR.equals(flavor)) return cells;
-                if (!original.isDataFlavorSupported(flavor)) throw new UnsupportedFlavorException(flavor);
-                String text = isPlainTextFlavor(flavor) ? csv : flavor.isMimeTypeEqual("text/html") ? html : null;
-                if (text != null) {
-                    if (String.class.equals(flavor.getRepresentationClass())) return text;
-                    if (Reader.class.equals(flavor.getRepresentationClass())) return new StringReader(text);
-                    if (InputStream.class.equals(flavor.getRepresentationClass())) {
-                        String charset = flavor.getParameter("charset");
-                        if (charset != null) return new ByteArrayInputStream(text.getBytes(charset));
-                    }
-                    throw new UnsupportedFlavorException(flavor);
-                }
-                return original.getTransferData(flavor);
-            }
-        };
+    private static List<String> getValues(CsvTable table, int row, int[] columns) {
+        List<String> values = new ArrayList<>(columns.length);
+        for (int column : columns) values.add((String) table.getValueAt(row, column));
+        return List.copyOf(values);
     }
 
     private String toCsv(Cells selection) {

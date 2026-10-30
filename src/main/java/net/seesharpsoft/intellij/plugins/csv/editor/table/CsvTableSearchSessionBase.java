@@ -32,6 +32,7 @@ import com.intellij.openapi.ui.Splitter;
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.Ref;
 import com.intellij.openapi.util.TextRange;
+import com.intellij.openapi.util.ThrowableComputable;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiElement;
@@ -58,6 +59,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.BooleanSupplier;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -377,35 +379,44 @@ public abstract class CsvTableSearchSessionBase<T extends CsvTableEditor>
 
     private SearchResult collectMatches(FindModel query, int rowCount, int[] rows, int[] columns) {
         List<Match> found = new ArrayList<>();
-        try {
-            if (query.isRegularExpressions()) Pattern.compile(query.getStringToFind());
-        } catch (PatternSyntaxException exception) {
-            return new SearchResult(found, true);
-        }
+        if (isInvalidPattern(query)) return new SearchResult(found, true);
         PsiFile file = editor.getPsiFile();
         if (file == null) return new SearchResult(found, false);
         CsvEscapeCharacter escapeCharacter = CsvHelper.getEscapeCharacter(file);
         int row = 0;
-        for (PsiElement child = file.getFirstChild(); child != null && !(child instanceof PsiErrorElement); child = child.getNextSibling()) {
+        for (PsiElement child = file.getFirstChild(); child != null && !(child instanceof PsiErrorElement) && row < rowCount;
+             child = child.getNextSibling()) {
             ProgressManager.checkCanceled();
             if (!(child instanceof CsvRecord)) continue;
-            if (row >= rowCount) break;
             int viewRow = rows == null ? row : rows[row];
             row++;
-            if (viewRow < 0) continue;
-            int column = 0;
-            for (PsiElement field = child.getFirstChild(); field != null && column < columns.length; field = field.getNextSibling()) {
-                ProgressManager.checkCanceled();
-                if (field instanceof CsvField || CsvHelper.isCommentElement(field)) {
-                    int viewColumn = columns[column++];
-                    if (viewColumn >= 0) {
-                        collectCellMatches(CsvHelper.getFieldValue(field, escapeCharacter), viewRow, viewColumn, query, found);
-                    }
-                }
-            }
+            if (viewRow >= 0) collectRecordMatches(child, viewRow, columns, query, escapeCharacter, found);
         }
         found.sort(Match::compareTo);
         return new SearchResult(found, false);
+    }
+
+    private static boolean isInvalidPattern(FindModel query) {
+        if (!query.isRegularExpressions()) return false;
+        try {
+            Pattern.compile(query.getStringToFind());
+            return false;
+        } catch (PatternSyntaxException exception) {
+            return true;
+        }
+    }
+
+    private void collectRecordMatches(PsiElement record, int row, int[] columns, FindModel query,
+                                      CsvEscapeCharacter escapeCharacter, List<Match> found) {
+        int column = 0;
+        for (PsiElement field = record.getFirstChild(); field != null && column < columns.length; field = field.getNextSibling()) {
+            ProgressManager.checkCanceled();
+            if (!(field instanceof CsvField) && !CsvHelper.isCommentElement(field)) continue;
+            int viewColumn = columns[column++];
+            if (viewColumn >= 0) {
+                collectCellMatches(CsvHelper.getFieldValue(field, escapeCharacter), row, viewColumn, query, found);
+            }
+        }
     }
 
     private void collectCellMatches(String value, int row, int column, FindModel query, List<Match> found) {
@@ -504,66 +515,89 @@ public abstract class CsvTableSearchSessionBase<T extends CsvTableEditor>
         int[] rows = getViewRowIndices();
         int[] columns = getViewColumnIndices();
         CsvTableReplacement.Settings settings = CsvTableReplacement.Settings.capture(file);
-        Ref<CsvTableReplacement.Change> change = Ref.create();
-        Ref<FindManager.MalformedReplacementStringException> error = Ref.create();
         Ref<CsvTableModel> suspendedModel = Ref.create();
-        Ref<Boolean> applied = Ref.create(false);
         replacing = true;
         component.updateActions();
         try {
-            if (!runReplaceAllWithProgress(() -> {
-                try {
-                    change.set(CsvTableReplacement.prepare(snapshot, targets, rows, columns, query, findManager, settings));
-                } catch (FindManager.MalformedReplacementStringException exception) {
-                    error.set(exception);
-                }
-                ProgressManager.checkCanceled();
-            })) return;
-            if (!error.isNull()) {
-                component.setNotFoundBackground();
-                setStatusText(error.get().getMessage());
-                return;
-            }
-            if (disposed || editor.isDisposed() || !component.isVisible()) return;
-            CsvTableReplacement.Change prepared = change.get();
-            WriteCommandAction.runWriteCommandAction(editor.getProject(), "CSV Editor Changes", null, () -> {
-                if (!canApplyReplacement(file, stamp, generation, query, settings)) return;
-                if (prepared != null) {
-                    CsvTableModel model = editor.getTableModel();
-                    model.suspend();
-                    suspendedModel.set(model);
-                    DocumentUtil.executeInBulk(document, () -> {
-                        document.replaceString(prepared.range().getStartOffset(), prepared.range().getEndOffset(), prepared.text());
-                        PsiDocumentManager.getInstance(Objects.requireNonNull(editor.getProject())).commitDocument(document);
-                    });
-                }
-                applied.set(true);
-            });
-            if (!applied.get()) {
+            Ref<CsvTableReplacement.Change> change = prepareReplacement(
+                    () -> CsvTableReplacement.prepare(snapshot, targets, rows, columns, query, findManager, settings));
+            if (change == null || !isActive()) return;
+            if (applyReplacement(change.get(), () -> canApplyReplacement(file, stamp, generation, query, settings), suspendedModel)) {
+                component.addTextToRecent(component.getSearchTextComponent());
+                component.addTextToRecent(component.getReplaceTextComponent());
+                pendingAnchor = anchor;
+            } else {
                 NotificationGroupManager.getInstance().getNotificationGroup("net.seesharpsoft.intellij.plugins.csv")
                         .createNotification(CsvPluginManager.getLocalizedText("table.search.replace.changed"),
                                 NotificationType.WARNING).notify(editor.getProject());
-                return;
             }
-            component.addTextToRecent(component.getSearchTextComponent());
-            component.addTextToRecent(component.getReplaceTextComponent());
-            pendingAnchor = anchor;
         } finally {
             replacing = false;
-            if (!suspendedModel.isNull() && !editor.isDisposed()) suspendedModel.get().resume();
-            if (!disposed && !editor.isDisposed() && component.isVisible()) {
-                if (suspendedModel.isNull()) {
-                    if (pendingAnchor != null) editor.getTableModel().notifyUpdate();
-                    else if (resultsStamp != document.getModificationStamp() || generation != searchGeneration.get()) refresh(anchor);
-                }
-                component.updateActions();
-            }
+            finishReplaceAll(anchor, generation, suspendedModel.get());
         }
+    }
+
+    private boolean isActive() {
+        return !disposed && !editor.isDisposed() && component.isVisible();
+    }
+
+    /**
+     * Returns null if the preparation was cancelled or the replacement string is malformed.
+     * A prepared null change means the replacement leaves the document unchanged.
+     */
+    private @Nullable Ref<CsvTableReplacement.Change> prepareReplacement(
+            ThrowableComputable<CsvTableReplacement.Change, FindManager.MalformedReplacementStringException> preparation) {
+        Ref<CsvTableReplacement.Change> change = Ref.create();
+        Ref<FindManager.MalformedReplacementStringException> error = Ref.create();
+        boolean completed = runReplaceAllWithProgress(() -> {
+            try {
+                change.set(preparation.compute());
+            } catch (FindManager.MalformedReplacementStringException exception) {
+                error.set(exception);
+            }
+            ProgressManager.checkCanceled();
+        });
+        if (!completed) return null;
+        if (!error.isNull()) {
+            component.setNotFoundBackground();
+            setStatusText(error.get().getMessage());
+            return null;
+        }
+        return change;
+    }
+
+    private boolean applyReplacement(@Nullable CsvTableReplacement.Change change, BooleanSupplier isCurrent,
+                                     Ref<CsvTableModel> suspendedModel) {
+        Ref<Boolean> applied = Ref.create(false);
+        WriteCommandAction.runWriteCommandAction(editor.getProject(), "CSV Editor Changes", null, () -> {
+            if (!isCurrent.getAsBoolean()) return;
+            if (change != null) {
+                CsvTableModel model = editor.getTableModel();
+                model.suspend();
+                suspendedModel.set(model);
+                DocumentUtil.executeInBulk(document, () -> {
+                    document.replaceString(change.range().getStartOffset(), change.range().getEndOffset(), change.text());
+                    PsiDocumentManager.getInstance(Objects.requireNonNull(editor.getProject())).commitDocument(document);
+                });
+            }
+            applied.set(true);
+        });
+        return applied.get();
+    }
+
+    private void finishReplaceAll(Match anchor, long generation, @Nullable CsvTableModel suspendedModel) {
+        if (suspendedModel != null && !editor.isDisposed()) suspendedModel.resume();
+        if (!isActive()) return;
+        if (suspendedModel == null) {
+            if (pendingAnchor != null) editor.getTableModel().notifyUpdate();
+            else if (resultsStamp != document.getModificationStamp() || generation != searchGeneration.get()) refresh(anchor);
+        }
+        component.updateActions();
     }
 
     private boolean canApplyReplacement(PsiFile file, long stamp, long generation, FindModel query,
                                         CsvTableReplacement.Settings settings) {
-        return !disposed && !editor.isDisposed() && component.isVisible()
+        return isActive()
                 && document.getModificationStamp() == stamp && generation == searchGeneration.get()
                 && document.isWritable() && editor.isEditable() && file.isWritable()
                 && editor.getPsiFile() == file && file.isValid() && settings.isCurrent(file)
