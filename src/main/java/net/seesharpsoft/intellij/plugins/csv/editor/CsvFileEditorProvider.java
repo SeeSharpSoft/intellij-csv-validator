@@ -4,7 +4,6 @@ import com.intellij.diff.editor.DiffViewerVirtualFile;
 import com.intellij.openapi.editor.EditorSettings;
 import com.intellij.openapi.fileEditor.*;
 import com.intellij.openapi.fileEditor.impl.text.TextEditorProvider;
-import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.SingleRootFileViewProvider;
@@ -14,7 +13,7 @@ import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
 
-public class CsvFileEditorProvider implements AsyncFileEditorProvider, DumbAware {
+public class CsvFileEditorProvider extends CsvFileEditorProviderBase {
 
     public static final String EDITOR_TYPE_ID = "csv-text-editor";
 
@@ -37,16 +36,12 @@ public class CsvFileEditorProvider implements AsyncFileEditorProvider, DumbAware
     }
 
     @Override
-    public @NotNull FileEditorPolicy getPolicy() {
-        switch (CsvEditorSettings.getInstance().getEditorPrio()) {
-            case TEXT_FIRST:
-            case TEXT_ONLY:
-                return FileEditorPolicy.HIDE_DEFAULT_EDITOR;
-            case TABLE_FIRST:
-                return FileEditorPolicy.PLACE_AFTER_DEFAULT_EDITOR;
-            default:
-                throw new IllegalArgumentException("unhandled EditorPrio: " + CsvEditorSettings.getInstance().getEditorPrio());
-        }
+    protected boolean isPrimaryEditor(@NotNull CsvEditorSettings.EditorPrio editorPrio) {
+        return switch (editorPrio) {
+            case TEXT_FIRST, TEXT_ONLY -> true;
+            case TABLE_FIRST -> false;
+            default -> throw new IllegalArgumentException("unhandled EditorPrio: " + editorPrio);
+        };
     }
 
     @Override

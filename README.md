@@ -162,6 +162,10 @@ Changes to Text Editor and Table Editor settings do not update already-open edit
 
 You can choose **Text Editor first**, **Table Editor first**, or **Text Editor only**. This controls the order of the editor tabs and whether the table editor is shown. A **Table Editor only** option is not available because the table editor cannot edit files with syntax errors.
 
+##### Hide editors of other plugins
+
+Some plugins, such as [Big Data Tools](https://plugins.jetbrains.com/plugin/12494-big-data-tools), provide their own editors for CSV and TSV files and hide all other editors, including the CSV text and table editors. Enable this option to keep the CSV text and table editors available: they are shown first, ordered according to [Editor Usage](#editor-usage), followed by editors of other plugins that hide all other editors as well. Editors of other plugins that do not hide other editors are not shown. This option is **disabled by default** to keep the editors of other plugins as they are. Close and reopen files that are already open for the change to take effect.
+
 ##### Keep selected field when switching editors
 
 When switching between the text editor and the table editor, the newly shown editor selects the field that was selected in the other one (see [Table Editor](#table-editor)). This option is **enabled by default**. Disable it to keep independent positions in both editors, e.g. to preserve a multi-cell table selection or multiple text carets while checking something in the other editor. Changes apply to already-open editors.

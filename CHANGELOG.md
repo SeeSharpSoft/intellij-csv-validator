@@ -4,7 +4,11 @@
 
 ### Added
 
+- Added the general setting "Hide editors of other plugins", disabled by default, which keeps the CSV text and table editors available and first when other plugins, such as Big Data Tools, hide all other editors of CSV/TSV files (#937)
+
 ### Changed
+
+- Capitalized the label of the general setting "Keep selected field when switching editors"
 
 ### Removed
 
