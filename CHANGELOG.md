@@ -15,6 +15,8 @@
 
 ### Fixed
 
+- Quoted values keep their quotes when edited or replaced in the table editor, and leaving a cell unchanged no longer rewrites it (#209)
+
 ## 252.53.0 - Oct 30, 2026
 
 ### Added

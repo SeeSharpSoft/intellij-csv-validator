@@ -267,6 +267,8 @@ If the file ends with a completely empty line (without spaces or tabs), the tabl
 
 When a value is created or edited in the table editor, always quote it, even when quoting is not required.
 
+Without this setting, editing or replacing a value in the table editor keeps its quotes if it was quoted before, while other values are quoted only when required.
+
 ### Color Scheme
 
 CSV elements such as separators (for example commas, pipes, and semicolons), quote characters, escaped text, comments, and values are colored according to the CSV color scheme settings:
