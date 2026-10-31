@@ -9,6 +9,7 @@
 ### Changed
 
 - Capitalized the label of the general setting "Keep selected field when switching editors"
+- Modernized the plugin icon shown in the IDE's plugin list and on JetBrains Marketplace, with light and dark theme variants
 
 ### Removed
 
