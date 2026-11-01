@@ -28,24 +28,48 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import static java.awt.event.InputEvent.CTRL_DOWN_MASK;
 
 public class CsvMultiLineCellRenderer extends JBScrollPane implements TableCellRenderer, TableCellEditor {
+    /**
+     * Unscaled space between the top of a cell and its first text line.
+     */
+    public static final int CELL_VERTICAL_PADDING = 3;
+
     private final Set<CellEditorListener> cellEditorListenerSet = new CopyOnWriteArraySet<>();
     private final UserDataHolder myUserDataHolder;
 
     private final JTextArea myTextArea;
-    private final Border cellPadding = JBUI.Borders.empty(3, 8);
+    private final Border cellPadding = JBUI.Borders.empty(CELL_VERTICAL_PADDING, 8);
 
     public CsvMultiLineCellRenderer(CsvTableEditorKeyListener keyListener, UserDataHolder userDataHolderParam) {
+        this(userDataHolderParam);
+        myTextArea.addKeyListener(keyListener);
+        myTextArea.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "DO_NOTHING_AT_ALL");
+    }
+
+    public CsvMultiLineCellRenderer(UserDataHolder userDataHolderParam) {
         this.myUserDataHolder = userDataHolderParam;
         myTextArea = new JTextArea();
         myTextArea.setLineWrap(true);
         myTextArea.setWrapStyleWord(true);
         myTextArea.setOpaque(true);
         myTextArea.setRequestFocusEnabled(true);
-        myTextArea.addKeyListener(keyListener);
         myTextArea.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, CTRL_DOWN_MASK), myTextArea.getInputMap().get(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0)));
-        myTextArea.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "DO_NOTHING_AT_ALL");
+        myTextArea.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "csv.commit");
+        myTextArea.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "csv.cancel");
+        myTextArea.getActionMap().put("csv.commit", new AbstractAction() {
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent event) {
+                stopCellEditing();
+            }
+        });
+        myTextArea.getActionMap().put("csv.cancel", new AbstractAction() {
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent event) {
+                cancelCellEditing();
+            }
+        });
         this.setOpaque(true);
-        this.setBorder(null);
+        // A non-UIResource border prevents look-and-feel updates from adding scroll-pane insets to cells.
+        this.setBorder(JBUI.Borders.empty());
         this.setViewportView(myTextArea);
     }
 
@@ -55,7 +79,7 @@ public class CsvMultiLineCellRenderer extends JBScrollPane implements TableCellR
 
     @Override
     public boolean contains(int x, int y) {
-        if (getParent() instanceof CsvTable table && table.getFrozenColumnCount() > 0 &&
+        if (getParent() instanceof CsvTableBase table && table.getFrozenColumnCount() > 0 &&
                 table.getEditingColumn() >= table.getFrozenColumnCount() && !table.isCommentRow(table.getEditingRow()) &&
                 getX() + x < table.getVisibleRect().x + table.getFrozenColumnWidth()) {
             return false;
@@ -63,12 +87,14 @@ public class CsvMultiLineCellRenderer extends JBScrollPane implements TableCellR
         return super.contains(x, y);
     }
 
-    private Color getColumnForegroundColor(int column, Color fallback) {
+    protected Color getCellForegroundColor(JTable table, int row, int column) {
+        Color fallback = table.getForeground();
         TextAttributes textAttributes = getColumnTextAttributes(column);
         return textAttributes == null || textAttributes.getForegroundColor() == null ? fallback : textAttributes.getForegroundColor();
     }
 
-    private Color getColumnBackgroundColor(int column, Color fallback) {
+    protected Color getCellBackgroundColor(JTable table, int row, int column) {
+        Color fallback = table.getBackground();
         TextAttributes textAttributes = getColumnTextAttributes(column);
         return textAttributes == null || textAttributes.getBackgroundColor() == null ? fallback : textAttributes.getBackgroundColor();
     }
@@ -87,13 +113,13 @@ public class CsvMultiLineCellRenderer extends JBScrollPane implements TableCellR
             myTextArea.setForeground(table.getSelectionForeground());
             myTextArea.setBackground(table.getSelectionBackground());
         } else {
-            myTextArea.setForeground(getColumnForegroundColor(column, table.getForeground()));
-            myTextArea.setBackground(getColumnBackgroundColor(column, table.getBackground()));
+            myTextArea.setForeground(getCellForegroundColor(table, row, column));
+            myTextArea.setBackground(getCellBackgroundColor(table, row, column));
         }
         if (hasFocus) {
             myTextArea.setBorder(BorderFactory.createCompoundBorder(
                     BorderFactory.createLineBorder(table.getSelectionBackground(), JBUI.scale(1)), JBUI.Borders.empty(2, 7)));
-            if (!isSelected && table.isCellEditable(row, column)) {
+            if (!isSelected && table.isCellEditable(row, column) && usePlainFocusedCellColors()) {
                 myTextArea.setForeground(table.getForeground());
                 myTextArea.setBackground(table.getBackground());
             }
@@ -101,6 +127,8 @@ public class CsvMultiLineCellRenderer extends JBScrollPane implements TableCellR
             myTextArea.setBorder(cellPadding);
         }
         getViewport().setBackground(myTextArea.getBackground());
+        setBackground(myTextArea.getBackground());
+        setForeground(myTextArea.getForeground());
 
         this.setFont(table.getFont());
         this.setText(value == null ? "" : value.toString());
@@ -112,9 +140,16 @@ public class CsvMultiLineCellRenderer extends JBScrollPane implements TableCellR
     }
 
     protected Dimension getCellSize(JTable table, int row, int column) {
+        if (table instanceof CsvTableBase csvTable && csvTable.isCommentCell(row, column)) {
+            return table.getCellRect(row, column, false).getSize();
+        }
         TableColumnModel columns = table.getColumnModel();
         return new Dimension(columns.getColumn(column).getWidth() - columns.getColumnMargin(),
                 table.getRowHeight(row) - table.getRowMargin());
+    }
+
+    protected boolean usePlainFocusedCellColors() {
+        return true;
     }
 
     private void setCaretUpdatePolicy(int policy) {

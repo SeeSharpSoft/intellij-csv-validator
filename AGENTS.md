@@ -21,10 +21,13 @@ The following paths are relative to that directory:
   per-file separator/escape attributes (`CsvFileAttributes`), and editor/code-style settings.
 - `csv\psi`: handwritten PSI support and `CsvPsiTreeUpdater`, which batches document/PSI
   changes into IDE write actions and undoable commands.
-- `csv\editor\table`: shared PSI-backed model (`CsvTableModelBase`), editor state,
+- `csv\editor\table`: Swing-independent PSI model (`CsvTableModelBase`), editor state,
   search/replace, and reordering logic.
-- `csv\editor\table\swing`: table UI, Swing model, clipboard, selection, movement, and
-  rendering using Swing components and IDE theme colors.
+- `csv\editor\table\swing`: shared `CsvTableBase`, `CsvTableModelSwingBase`, and
+  `CsvMultiLineCellRenderer`; `CsvTableModelSwing` delegates PSI work to `CsvTableModelBase`.
+  Clipboard, selection, movement, and rendering use Swing components and IDE theme colors.
+- `csv\diff`: snapshot-backed table comparisons and undoable diff edits; reuse the shared
+  Swing table, model, and renderer foundations for common UI behavior.
 - `csv\formatter`, `csv\highlighter`, `csv\inspection`, and `csv\intention`: text-editor
   language features. The sibling `tsv` and `psv` packages provide fixed-separator variants.
 
@@ -143,8 +146,8 @@ The default scheduler still refreshes immediately in other unit tests.
 
 ## Table painting and read access
 
-Table reads reuse existing IDE read access without entering another read action, since even redundant
-read-action entry can be prohibited during painting. Table/header paints without read access draw
+PSI-backed table reads reuse existing IDE read access without entering another read action, since even redundant
+read-action entry can be prohibited during painting. Their table/header paints without read access draw
 their last viewport-sized pixel snapshots and coalesce a refresh into one application UI callback per
 table. The callback paints the visible scroll-pane area immediately while it has read access;
 queuing `repaint()` instead would lose that access before rendering. Viewports use simple scrolling
@@ -159,7 +162,9 @@ read-action entry. A test-only scroll pane adapts the native display seam for he
 the real table/header renderers still run, and deferred callbacks use the real application UI queue.
 
 The relevant implementation is in `CsvTableModelBase.computeWithReadAccess`, `CsvTable.paint`,
-`CsvTableHeader.paint`, and `CsvTablePaintSnapshot`; regression coverage is in `CsvTableEditorSwingTest`.
+`CsvTable.deferPaintWithoutReadAccess`, `CsvTableHeader.paint`, and `CsvTablePaintSnapshot`;
+regression coverage is in `CsvTableEditorSwingTest`. Snapshot-backed diff tables share the
+geometry and renderer behavior but render their immutable data without acquiring PSI read access.
 
 ## Updating the changelog
 

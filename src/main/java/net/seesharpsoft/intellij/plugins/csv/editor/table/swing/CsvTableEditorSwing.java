@@ -36,6 +36,7 @@ import net.seesharpsoft.intellij.plugins.csv.editor.CsvFieldPosition;
 import net.seesharpsoft.intellij.plugins.csv.editor.CsvFieldView;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableReorder;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
+import net.seesharpsoft.intellij.plugins.csv.highlighter.CsvTextAttributeKeys;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableActions;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditor;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditorState;
@@ -118,7 +119,10 @@ public class CsvTableEditorSwing extends CsvTableEditor implements CsvFieldView 
             styleScrollBar(tableScrollPane.getVerticalScrollBar());
             styleScrollBar(tableScrollPane.getHorizontalScrollBar());
             ApplicationManager.getApplication().getMessageBus().connect(this)
-                    .subscribe(EditorColorsManager.TOPIC, (EditorColorsListener) scheme -> tblEditor.updateUI());
+                    .subscribe(EditorColorsManager.TOPIC, (EditorColorsListener) scheme -> {
+                        CsvTextAttributeKeys.clearColumnTextAttributes(this);
+                        tblEditor.updateUI();
+                    });
             registerTableShortcuts();
             registerSearchShortcut(IdeActions.ACTION_FIND, false);
             registerSearchShortcut(IdeActions.ACTION_REPLACE, true);

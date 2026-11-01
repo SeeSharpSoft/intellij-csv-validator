@@ -17,6 +17,7 @@ This plugin adds support for CSV (Comma-Separated Values) and related file types
 
 - CSV, TSV, and PSV file detection
 - customizable text and table editors
+- side-by-side table diffs with cell highlighting, editing, and undoable change application
 - customizable column coloring (rainbow coloring)
 - syntax validation and highlighting
 - code formatting
@@ -85,6 +86,41 @@ Use the IDE's **Find** and **Replace** shortcuts in the table editor (Ctrl+F and
 
 Search starts in the background as you type, keeping the table responsive. The bar shows **Searching...** while scanning, then the current match and total count. Changing the query or closing the bar cancels the previous search.
 
+#### Table diffs
+
+When comparing two CSV, TSV, or PSV revisions or files, select **CSV Table** in the diff
+viewer's view selector. The normal side-by-side and unified text diffs remain available.
+The table diff aligns inserted and deleted records, highlights changed cells using the
+IDE's diff colors, and synchronizes horizontal and vertical scrolling. Use the diff
+toolbar's previous/next difference actions to select and reveal changed records.
+It shares the CSV table editor's cell padding and borders, column coloring, header labels,
+wrapped cell controls, and merged comment rows. As in the text diff, the divider between both
+tables shows the record numbers of both sides, leaving a number empty where
+a record exists only on the other side. Numbers of changed records use the editor's text color so they
+stay readable on the change colors. A thin, fixed-width row header beside each table marks changed rows;
+click it to select entire rows. Drag the empty middle of the divider to change the width of both tables.
+Diff backgrounds overlay the column colors, and comment rows span all data columns.
+
+Double-click a cell on a writable side to edit its value. Enter commits the edit,
+Ctrl+Enter inserts a line break, and Escape cancels. Colored bands in the divider connect
+the records of each change. Click a change's **>>** (left of the record numbers)
+or **<<** (right of the record numbers) arrow to copy its entire change block to the right or left side,
+including inserted or deleted records. The IDE's **Accept Left Side** and **Accept Right Side**
+shortcuts apply the selected row's change to the right or left side, respectively. Edits and applied changes
+update the original diff documents and support the IDE's Undo/Redo commands. Historical
+revisions and sides marked read-only cannot be edited or receive changes, so they offer no arrows.
+
+File-specific separators and escape characters are respected, including custom
+multicharacter separators, quoting, multiline values, and comment records. Applying
+between different formats uses the destination's separator and escape character.
+A difference in the final line break is displayed separately and can also be applied.
+Comparison is based on record order, not a key column.
+
+Comparisons refresh in the background when either document changes. Malformed CSV or
+comparisons too large to compute show an explicit message; use the text diff to inspect
+them. Three-way comparisons and merge-conflict resolution continue to use IntelliJ's
+standard text/merge viewers.
+
 #### Copy and Paste
 
 Use the IDE's **Copy** and **Paste** shortcuts in the table editor. Copying selected cells provides CSV text using the file's separator, escape character, and quoting settings, as well as an HTML table. Selecting a column header selects the whole column for copying. Read-only files and files with syntax errors still allow selecting and copying cells; open a cell to select and copy part of its text without changing it.
@@ -103,7 +139,7 @@ The actions in these menus apply to the currently selected rows or columns, whic
 
 #### Moving rows and columns
 
-Drag a column header left or right, or drag a row number up or down, to move that column or row in the file. Drag from the middle of a row number to move it; dragging its bottom edge still resizes rows.
+Drag a column header left or right, or drag a row number up or down, to move that column or row in the file. Drag from the middle of a row number to move it; dragging its bottom edge still resizes rows. Drag the right edge of the header above the row numbers to widen or narrow the row number column.
 
 The context menus also provide **Move Selected Rows Up/Down** and **Move Selected Columns Left/Right**. These actions move the selection by one position, keeping the selected items in order. Movement stops at the table boundaries; the empty row representing a final line break is not movable.
 

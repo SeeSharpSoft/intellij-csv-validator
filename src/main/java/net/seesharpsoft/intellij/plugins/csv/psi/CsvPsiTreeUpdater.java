@@ -5,6 +5,7 @@ import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.command.CommandProcessor;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.fileTypes.FileType;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.*;
@@ -484,7 +485,7 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
         try {
             ApplicationManager.getApplication().runWriteAction(() ->
                     doCommit(
-                            psiFile,
+                            psiFile.getProject(),
                             document,
                             () -> actionsToCommit.forEach(PsiAction::execute)));
         } finally {
@@ -493,12 +494,27 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
         }
     }
 
-    private void doCommit(
-            @NotNull PsiFile psiFile,
+    public static boolean replaceDocumentText(@Nullable Project project, @NotNull Document document, long expectedStamp,
+                                              @NotNull TextRange range, @NotNull String text) {
+        boolean[] applied = {false};
+        ApplicationManager.getApplication().runWriteAction(() -> doCommit(project, document, () -> {
+            if (!document.isWritable()) return;
+            PsiDocumentManager manager = project == null ? null : PsiDocumentManager.getInstance(project);
+            if (manager != null) manager.doPostponedOperationsAndUnblockDocument(document);
+            if (document.getModificationStamp() != expectedStamp) return;
+            document.replaceString(range.getStartOffset(), range.getEndOffset(), text);
+            if (manager != null) manager.commitDocument(document);
+            applied[0] = true;
+        }));
+        return applied[0];
+    }
+
+    private static void doCommit(
+            @Nullable Project project,
             @NotNull Document document,
             @NotNull Runnable runnable) {
         CommandProcessor.getInstance().executeCommand(
-                psiFile.getProject(),
+                project,
                 () -> DocumentUtil.executeInBulk(document, runnable),
                 "CSV Editor Changes",
                 null,

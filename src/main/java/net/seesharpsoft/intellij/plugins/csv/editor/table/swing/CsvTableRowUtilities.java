@@ -39,6 +39,8 @@ import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.Objects;
+import java.util.function.BooleanSupplier;
+import java.util.function.IntFunction;
 
 /**
  * TableRowUtilities. Utility for adding a row column to a JTable.
@@ -47,6 +49,7 @@ import java.util.Objects;
  * <p>
  * Changes for CSV-Plugin:
  * - addNumberColumn method returns the created row header table
+ * - addRowMarkerColumn shows thin row markers instead of numbers in the same row header
  * - use JBTable as RowHeaderTable instead of (deprecated) JTable
  * - removed System.out
  * - several code clean ups
@@ -86,8 +89,8 @@ public final class CsvTableRowUtilities {
         }
     }
 
-    private static JTable createRowHeadersTable(final JTable userTable, int startingNumber) {
-        final JBTable rowHeadersTable = new JBTable(new RowHeadersTableModel(userTable.getModel().getRowCount(), startingNumber)) {
+    private static JTable createRowHeadersTable(final JTable userTable, IntFunction<?> rowLabels) {
+        final JBTable rowHeadersTable = new JBTable(new RowHeadersTableModel(userTable.getModel().getRowCount(), rowLabels)) {
             @Override
             public void updateUI() {
                 super.updateUI();
@@ -130,7 +133,7 @@ public final class CsvTableRowUtilities {
         return rowHeadersTable;
     }
 
-    private static void adjustComponents(final JScrollPane scrollPane, final CsvTableEditor tableEditor, final JTable rowHeadersTable, final JTable userTable) {
+    private static void installRowHeader(final JScrollPane scrollPane, final JTable rowHeadersTable) {
         scrollPane.setRowHeaderView(rowHeadersTable);
         // set the row header name into the top left corner
         scrollPane.setCorner(JScrollPane.UPPER_LEFT_CORNER, rowHeadersTable.getTableHeader());
@@ -138,6 +141,11 @@ public final class CsvTableRowUtilities {
         if (border == null || border instanceof UIResource) {
             scrollPane.setBorder(UIManager.getBorder("Table.scrollPaneBorder"));
         }
+    }
+
+    private static void adjustComponents(final JScrollPane scrollPane, final CsvTableEditor tableEditor, final JTable rowHeadersTable,
+                                         final JTable userTable, BooleanSupplier resizing) {
+        installRowHeader(scrollPane, rowHeadersTable);
 
         // label used for rendering
         final JLabel label = new JLabel();
@@ -187,7 +195,8 @@ public final class CsvTableRowUtilities {
             }
         });
 
-        new TableSynchronizer(rowHeadersTable, userTable, new TableRowResizer(rowHeadersTable, userTable, tableEditor));
+        new TableSynchronizer(rowHeadersTable, userTable,
+                () -> adjustColumnWidth(tableEditor, rowHeadersTable, scrollPane.getVerticalScrollBar().getValue()), resizing);
     }
 
     /**
@@ -199,56 +208,65 @@ public final class CsvTableRowUtilities {
      * @param startingNumber - Number to start number column with, typically 0 or 1.
      */
     public static JTable addNumberColumn(final CsvTableEditor tableEditor, final JTable userTable, int startingNumber) {
-        Container parentContainer = userTable.getParent();
-
-        if (parentContainer instanceof JViewport) {
-            Container parentParentContainer = parentContainer.getParent();
-
-            if (parentParentContainer instanceof JScrollPane) {
-                final JScrollPane scrollPane = (JScrollPane) parentParentContainer;
-
-                // Make certain we are the viewPort's view and not, for  example, the rowHeaderView of the scrollPane - an implementor of fixed columns might do this.
-                JViewport viewport = scrollPane.getViewport();
-
-                if (viewport == null || !Objects.equals(viewport.getView(), userTable)) {
-                    return null;
-                }
-
-                JTableHeader tableHeader = userTable.getTableHeader();
-                scrollPane.setColumnHeaderView(tableHeader);
-
-                final JTable rowHeadersTable = createRowHeadersTable(userTable, startingNumber);
-                adjustComponents(scrollPane, tableEditor, rowHeadersTable, userTable);
-                return rowHeadersTable;
-            }
-        }
-        return null;
+        JScrollPane scrollPane = getScrollPane(userTable);
+        if (scrollPane == null) return null;
+        JTable rowHeadersTable = createRowHeadersTable(userTable, row -> startingNumber + row);
+        TableRowResizer resizer = new TableRowResizer(rowHeadersTable, userTable, tableEditor);
+        adjustComponents(scrollPane, tableEditor, rowHeadersTable, userTable, resizer::isResizing);
+        return rowHeadersTable;
     }
 
     /**
-     * Table Model for the row number column. It just has one column (the numbers)
+     * Adds a fixed row header of the given width that marks rows with colors instead of numbers; rows without a
+     * marker color show the header background. Like {@link #addNumberColumn}, clicking it selects entire rows.
+     * Neither its width nor its rows can be resized; callers keep its row heights aligned with the table.
+     */
+    public static JTable addRowMarkerColumn(final JTable userTable, int width, IntFunction<Color> rowMarkers) {
+        JScrollPane scrollPane = getScrollPane(userTable);
+        if (scrollPane == null) return null;
+        JTable rowHeadersTable = createRowHeadersTable(userTable, row -> "");
+        installRowHeader(scrollPane, rowHeadersTable);
+        rowHeadersTable.setPreferredScrollableViewportSize(new Dimension(width, 0));
+        TableColumn column = rowHeadersTable.getColumnModel().getColumn(0);
+        column.setMinWidth(width);
+        column.setMaxWidth(width);
+        column.setResizable(false);
+        JLabel marker = new JLabel();
+        marker.setOpaque(true);
+        column.setCellRenderer((table, value, isSelected, hasFocus, row, columnIndex) -> {
+            Color color = isSelected ? table.getSelectionBackground() : rowMarkers.apply(row);
+            marker.setBackground(color == null ? table.getBackground() : color);
+            return marker;
+        });
+        new TableSynchronizer(rowHeadersTable, userTable, rowHeadersTable::repaint, () -> false);
+        return rowHeadersTable;
+    }
+
+    private static JScrollPane getScrollPane(JTable userTable) {
+        if (!(userTable.getParent() instanceof JViewport viewport)
+                || !(viewport.getParent() instanceof JScrollPane scrollPane)) {
+            return null;
+        }
+        // Make certain we are the viewPort's view and not, for example, the rowHeaderView of the scrollPane - an implementor of fixed columns might do this.
+        if (!Objects.equals(scrollPane.getViewport(), viewport)) return null;
+        scrollPane.setColumnHeaderView(userTable.getTableHeader());
+        return scrollPane;
+    }
+
+    /**
+     * Table Model for the row header column. It just has one column (the row labels)
      */
     private static final class RowHeadersTableModel extends AbstractTableModel {
         private int rowCount;
-        private final int startNumber;
+        private final IntFunction<?> rowLabels;
 
-        /**
-         * Initialize model
-         *
-         * @param maxNumber      determined by JTable row size
-         * @param startingNumber usually zero or 1
-         */
-        RowHeadersTableModel(int maxNumber, int startingNumber) {
-            this.startNumber = startingNumber;
-            rowCount = maxNumber;
+        RowHeadersTableModel(int rowCount, IntFunction<?> rowLabels) {
+            this.rowCount = rowCount;
+            this.rowLabels = rowLabels;
         }
 
         public int getRowCount() {
             return rowCount;
-        }
-
-        public int getMaxIntValue() {
-            return rowCount == 0 ? 0 : startNumber + rowCount - 1;
         }
 
         public int getColumnCount() {
@@ -259,16 +277,16 @@ public final class CsvTableRowUtilities {
             return "";
         }
 
-        public Class<Integer> getColumnClass(int columnIndex) {
-            return Integer.class;
-        }
-
         public boolean isCellEditable(int rowIndex, int columnIndex) {
             return false;
         }
 
         public Object getValueAt(int rowIndex, int columnIndex) {
-            return startNumber + rowIndex;
+            return rowLabels.apply(rowIndex);
+        }
+
+        Object getLastLabel() {
+            return rowLabels.apply(Math.max(0, rowCount - 1));
         }
 
         void setRowCount(int count) {
@@ -284,7 +302,7 @@ public final class CsvTableRowUtilities {
     }
 
     /**
-     * Uses the saved width, or fits the last visible row number until the user resizes the column.
+     * Uses the saved width, or fits the last visible row label until the user resizes the column.
      *
      * @param tableEditor     - editor storing the per-file width
      * @param rowHeadersTable - single column table in the row header
@@ -297,7 +315,7 @@ public final class CsvTableRowUtilities {
             int height = rowHeadersTable.getVisibleRect().height;
             int row = rowHeadersTable.rowAtPoint(new Point(0, scrollBarValue + height));
             RowHeadersTableModel model = (RowHeadersTableModel) rowHeadersTable.getModel();
-            Object value = row == -1 ? model.getMaxIntValue() : model.getValueAt(row, 0);
+            Object value = row == -1 ? model.getLastLabel() : model.getValueAt(row, 0);
             Component renderer = column.getCellRenderer().getTableCellRendererComponent(
                     rowHeadersTable, value, false, false, row, 0);
             width = renderer.getPreferredSize().width;
@@ -316,13 +334,15 @@ public final class CsvTableRowUtilities {
 
         private final JTable rowHeadersTable;
         private final JTable userTable;
-        private final TableRowResizer tableRowResizer;
+        private final Runnable rowsChanged;
+        private final BooleanSupplier resizing;
         private boolean synchronizing;
 
-        private TableSynchronizer(JTable rowHeadersTableArg, JTable userTableArg, TableRowResizer tableRowResizerArg) {
+        private TableSynchronizer(JTable rowHeadersTableArg, JTable userTableArg, Runnable rowsChangedArg, BooleanSupplier resizingArg) {
             this.userTable = userTableArg;
             this.rowHeadersTable = rowHeadersTableArg;
-            this.tableRowResizer = tableRowResizerArg;
+            this.rowsChanged = rowsChangedArg;
+            this.resizing = resizingArg;
 
             Container p = userTableArg.getParent();
             JViewport userTableViewPort = (JViewport) p;
@@ -339,7 +359,7 @@ public final class CsvTableRowUtilities {
         }
 
         public void valueChanged(ListSelectionEvent e) {
-            if (synchronizing || e.getValueIsAdjusting() || tableRowResizer.isResizing()) return;
+            if (synchronizing || e.getValueIsAdjusting() || resizing.getAsBoolean()) return;
             synchronizing = true;
             try {
                 if (userTable.getSelectionModel().equals(e.getSource())) {
@@ -360,6 +380,8 @@ public final class CsvTableRowUtilities {
         public void tableChanged(TableModelEvent e) {
             RowHeadersTableModel m = (RowHeadersTableModel) rowHeadersTable.getModel();
             m.setRowCount(userTable.getRowCount());
+            // Labels are derived from the table's rows and may change without a change of the row count.
+            rowsChanged.run();
         }
     }
 

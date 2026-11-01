@@ -35,10 +35,14 @@ import javax.swing.table.TableCellRenderer;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Cursor;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Shape;
+import java.awt.event.ComponentEvent;
+import java.awt.event.InputEvent;
+import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
@@ -552,6 +556,41 @@ public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
         fileEditor.changeFontSize(4);
         assertEquals(24, fileEditor.getTable().getRowHeight());
         assertEquals(24, ((JTable) fileEditor.getTableScrollPane().getRowHeader().getView()).getRowHeight());
+    }
+
+    public void testRowNumberColumnKeepsTheWidthDraggedOnItsHeader() {
+        JScrollPane scrollPane = fileEditor.getTableScrollPane();
+        JComponent root = fileEditor.getComponent();
+        root.setBounds(0, 0, 600, 300);
+        layout(root);
+        int initialWidth = scrollPane.getRowHeader().getWidth();
+        JComponent corner = (JComponent) scrollPane.getCorner(JScrollPane.UPPER_LEFT_CORNER);
+        int edge = corner.getWidth() - 1;
+
+        corner.dispatchEvent(mouse(corner, MouseEvent.MOUSE_MOVED, edge, 0));
+        assertEquals("The row number header must offer resizing", Cursor.E_RESIZE_CURSOR, corner.getCursor().getType());
+        corner.dispatchEvent(mouse(corner, MouseEvent.MOUSE_PRESSED, edge, InputEvent.BUTTON1_DOWN_MASK));
+        corner.dispatchEvent(mouse(corner, MouseEvent.MOUSE_DRAGGED, edge + 40, InputEvent.BUTTON1_DOWN_MASK));
+        corner.dispatchEvent(mouse(corner, MouseEvent.MOUSE_RELEASED, edge + 40, 0));
+        layout(root);
+        assertEquals(initialWidth + 40, scrollPane.getRowHeader().getWidth());
+
+        scrollPane.dispatchEvent(new ComponentEvent(scrollPane, ComponentEvent.COMPONENT_RESIZED));
+        ((CsvTableModelSwingBase) fileEditor.getTable().getModel()).fireTableDataChanged();
+        layout(root);
+        assertEquals("Resized row numbers must keep their width", initialWidth + 40, scrollPane.getRowHeader().getWidth());
+    }
+
+    private static MouseEvent mouse(Component component, int id, int x, int modifiers) {
+        return new MouseEvent(component, id, System.currentTimeMillis(), modifiers, x, 5, 1, false,
+                id == MouseEvent.MOUSE_MOVED ? MouseEvent.NOBUTTON : MouseEvent.BUTTON1);
+    }
+
+    private static void layout(Container container) {
+        container.doLayout();
+        for (Component child : container.getComponents()) {
+            if (child instanceof Container nested) layout(nested);
+        }
     }
 
     public void testAddRemovePropertyChangeListener() throws Throwable {

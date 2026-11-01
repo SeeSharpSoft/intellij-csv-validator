@@ -36,7 +36,7 @@ public class CsvTableFrozenColumnsTest extends CsvTableEditorSwingTestBase {
         fileEditor.updateEditorLayout();
         JPanel root = new JPanel(new BorderLayout());
         root.add(fileEditor.getTableScrollPane());
-        root.setSize(450, 180);
+        root.setSize(399, 180);
         layoutRecursively(root);
     }
 

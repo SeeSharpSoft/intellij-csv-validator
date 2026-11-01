@@ -149,6 +149,12 @@ public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttrib
     private CsvValueSeparator autoDetectSeparator(Project project, VirtualFile virtualFile) {
         final Document document = FileDocumentManager.getInstance().getDocument(virtualFile);
         final String text = document == null ? "" : document.getText();
+        CsvValueSeparator valueSeparator = detectValueSeparator(text);
+        setFileSeparator(project, virtualFile, valueSeparator);
+        return valueSeparator;
+    }
+
+    public static @NotNull CsvValueSeparator detectValueSeparator(@NotNull String text) {
         final List<CsvValueSeparator> applicableValueSeparators = new ArrayList<>(Arrays.asList(CsvValueSeparator.values()));
         final CsvValueSeparator defaultValueSeparator = CsvEditorSettings.getInstance().getDefaultValueSeparator();
         if (defaultValueSeparator.isCustom()) {
@@ -168,12 +174,9 @@ public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttrib
                         // failsafe (e.g. empty document)
                         .orElse(null);
 
-        CsvValueSeparator valueSeparator = separatorWithCount != null ?
+        return separatorWithCount != null ?
                 separatorWithCount.getFirst() :
                 defaultValueSeparator;
-
-        setFileSeparator(project, virtualFile, valueSeparator);
-        return valueSeparator;
     }
 
     @NotNull

@@ -41,7 +41,7 @@ public class CsvTableHeader extends JTableHeader {
 
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean selected,
-                                                            boolean focused, int row, int column) {
+                                                           boolean focused, int row, int column) {
                 super.getTableCellRendererComponent(table, value, false, false, row, column);
                 JTableHeader header = table.getTableHeader();
                 setBackground(header.getBackground());
@@ -72,10 +72,10 @@ public class CsvTableHeader extends JTableHeader {
     @Override
     protected void processMouseEvent(MouseEvent event) {
         if (event.getID() == MouseEvent.MOUSE_PRESSED && SwingUtilities.isLeftMouseButton(event) &&
-                getTable() instanceof CsvTable csvTable && csvTable.isEditing()) {
+                getTable() instanceof CsvTableBase csvTable && csvTable.isEditing()) {
             if (!csvTable.getCellEditor().stopCellEditing()) return;
             // Flush the delayed cell update before the UI captures a dragged TableColumn.
-            csvTable.getModel().updateTableImmediately();
+            if (csvTable.getModel() instanceof CsvTableModelSwing model) model.updateTableImmediately();
         }
         super.processMouseEvent(event);
     }
@@ -83,7 +83,7 @@ public class CsvTableHeader extends JTableHeader {
     @Override
     protected void processMouseMotionEvent(MouseEvent event) {
         if (event.getID() == MouseEvent.MOUSE_DRAGGED && getDraggedColumn() != null &&
-                getReorderingAllowed() && getTable() instanceof CsvTable csvTable && csvTable.getFrozenColumnCount() > 0) {
+                getReorderingAllowed() && getTable() instanceof CsvTableBase csvTable && csvTable.getFrozenColumnCount() > 0) {
             // Native header dragging assumes contiguous, unscrolled column rectangles.
             // Frozen columns instead need hit testing in their painted positions.
             int from = csvTable.convertColumnIndexToView(getDraggedColumn().getModelIndex());
@@ -99,7 +99,7 @@ public class CsvTableHeader extends JTableHeader {
     @Override
     public Rectangle getHeaderRect(int column) {
         Rectangle rect = super.getHeaderRect(column);
-        if (!painting && getTable() instanceof CsvTable table && column >= 0 && column < table.getFrozenColumnCount()) {
+        if (!painting && getTable() instanceof CsvTableBase table && column >= 0 && column < table.getFrozenColumnCount()) {
             rect.x += table.getFrozenColumnOffset();
         }
         return rect;
@@ -108,7 +108,7 @@ public class CsvTableHeader extends JTableHeader {
     @Override
     public int columnAtPoint(Point point) {
         Point location = new Point(point);
-        if (!painting && getTable() instanceof CsvTable table) {
+        if (!painting && getTable() instanceof CsvTableBase table) {
             int offset = table.getFrozenColumnOffset();
             if (location.x >= offset && location.x < offset + table.getFrozenColumnWidth()) {
                 location.x -= offset;
@@ -137,7 +137,7 @@ public class CsvTableHeader extends JTableHeader {
         painting = true;
         try {
             super.paintComponent(g);
-            if (getTable() instanceof CsvTable table && table.getFrozenColumnCount() > 0) {
+            if (getTable() instanceof CsvTableBase table && table.getFrozenColumnCount() > 0) {
                 Graphics frozen = g.create();
                 try {
                     frozen.translate(table.getFrozenColumnOffset(), 0);
