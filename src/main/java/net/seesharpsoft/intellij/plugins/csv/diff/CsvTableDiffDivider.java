@@ -23,11 +23,14 @@ import java.util.function.ToDoubleFunction;
 /**
  * Connects the changed row ranges of both diff tables like the text diff divider. Like the text diff gutters, it shows
  * the row numbers of both sides between a {@code >>} and a {@code <<} arrow that apply each change to the writable
- * side. Dragging the empty middle between the row numbers changes the width of both tables.
+ * side, and continues the wavy lines of collapsed unchanged rows. Dragging the empty middle between the row numbers
+ * changes the width of both tables.
  */
 final class CsvTableDiffDivider extends JComponent {
     interface Host {
         CsvDiffComparison comparison();
+
+        CsvDiffFolding folding();
 
         boolean isWritable(int side);
 
@@ -130,13 +133,15 @@ final class CsvTableDiffDivider extends JComponent {
      */
     Rectangle applyArrowBounds(int row, int targetSide) {
         CsvDiffComparison comparison = host.comparison();
-        CsvDiffComparison.Change change = comparison == null ? null : comparison.changeAt(row);
+        CsvDiffFolding folding = host.folding();
+        CsvDiffComparison.Change change = comparison == null || folding.isFold(row) ? null
+                : comparison.changeAt(folding.firstRow(row));
         return change == null ? null : arrowBounds(change, targetSide, columns());
     }
 
     /**
      * Returns the record number shown for the given side's table row and the area it is drawn in,
-     * or {@code null} if the row is not displayed.
+     * or {@code null} if the row is not displayed. Fold rows skip the numbers of their hidden records.
      */
     RowNumber rowNumber(int side, int row) {
         return rowNumber(side, row, columns());
@@ -144,13 +149,16 @@ final class CsvTableDiffDivider extends JComponent {
 
     private RowNumber rowNumber(int side, int row, Columns columns) {
         CsvDiffComparison comparison = host.comparison();
-        if (comparison == null || row < 0 || row >= comparison.rows().size() || row >= tables[side].getRowCount()) {
+        CsvDiffFolding folding = host.folding();
+        if (comparison == null || row < 0 || row >= folding.displayRowCount() || row >= tables[side].getRowCount()) {
             return null;
         }
         Rectangle rowBounds = rowBounds(side, row);
-        return new RowNumber(comparison.rowNumber(side, row),
+        boolean fold = folding.isFold(row);
+        int alignedRow = folding.firstRow(row);
+        return new RowNumber(fold ? "" : comparison.rowNumber(side, alignedRow),
                 new Rectangle(columns.numbersX(side), rowBounds.y, columns.numbersWidth(side), rowBounds.height),
-                numberColor(comparison.changeAt(row) != null));
+                numberColor(!fold && comparison.changeAt(alignedRow) != null));
     }
 
     @Override
@@ -163,6 +171,7 @@ final class CsvTableDiffDivider extends JComponent {
             Columns columns = columns();
             List<CsvDiffComparison.Change> changes = visibleChanges(comparison);
             for (CsvDiffComparison.Change change : changes) paintBand(g, change, columns);
+            paintFolds(g, columns);
             paintRowNumbers(g, columns);
             for (CsvDiffComparison.Change change : changes) paintArrows(g, change, columns);
         } finally {
@@ -183,6 +192,24 @@ final class CsvTableDiffDivider extends JComponent {
         // The curve fills through its end coordinates, which would overhang the exclusive bottom of the rows.
         DiffDrawUtil.drawCurveTrapezium(g, columns.curveStart(), columns.curveEnd(),
                 left.y, (int) left.getMaxY() - 1, right.y, (int) right.getMaxY() - 1, color, null);
+    }
+
+    /**
+     * Continues the waves of each side's fold rows through the divider; each side's wave covers half of the splitter.
+     */
+    private void paintFolds(Graphics2D g, Columns columns) {
+        CsvDiffFolding folding = host.folding();
+        int middle = (columns.curveStart() + columns.curveEnd()) / 2;
+        int originX = CsvDiffFoldWave.originX(this);
+        for (int side = 0; side < 2; side++) {
+            int lastRow = visibleRow(side, Rectangle::getMaxY);
+            for (int row = Math.max(0, visibleRow(side, Rectangle::getMinY)); row <= lastRow; row++) {
+                if (!folding.isFold(row)) continue;
+                Rectangle bounds = rowBounds(side, row);
+                CsvDiffFoldWave.paint(g, side == 0 ? 0 : middle, side == 0 ? middle : getWidth(),
+                        bounds.y, bounds.height, originX);
+            }
+        }
     }
 
     private void paintRowNumbers(Graphics2D g, Columns columns) {
@@ -237,7 +264,7 @@ final class CsvTableDiffDivider extends JComponent {
         if (!host.isWritable(targetSide)) return null;
         Icon icon = arrow(targetSide);
         int sourceSide = 1 - targetSide;
-        Rectangle firstRow = rowBounds(sourceSide, change.startRow());
+        Rectangle firstRow = rowBounds(sourceSide, host.folding().displayRow(change.startRow()));
         int lineHeight = getFontMetrics(numberFont()).getHeight();
         int y = firstLineTop(firstRow) + (lineHeight - icon.getIconHeight()) / 2;
         return new Rectangle(columns.arrowX(sourceSide), y, icon.getIconWidth(), icon.getIconHeight());
@@ -309,7 +336,9 @@ final class CsvTableDiffDivider extends JComponent {
     }
 
     private Rectangle rows(int side, CsvDiffComparison.Change change) {
-        return rowBounds(side, change.startRow()).union(rowBounds(side, change.endRow() - 1));
+        CsvDiffFolding folding = host.folding();
+        return rowBounds(side, folding.displayRow(change.startRow()))
+                .union(rowBounds(side, folding.displayRow(change.endRow() - 1)));
     }
 
     private Rectangle rowBounds(int side, int row) {
@@ -335,8 +364,9 @@ final class CsvTableDiffDivider extends JComponent {
 
     private List<CsvDiffComparison.Change> visibleChanges(CsvDiffComparison comparison) {
         List<CsvDiffComparison.Change> changes = comparison.differences();
-        int firstRow = Math.min(visibleRow(0, Rectangle::getMinY), visibleRow(1, Rectangle::getMinY));
-        int lastRow = Math.max(visibleRow(0, Rectangle::getMaxY), visibleRow(1, Rectangle::getMaxY));
+        CsvDiffFolding folding = host.folding();
+        int firstRow = folding.firstRow(Math.min(visibleRow(0, Rectangle::getMinY), visibleRow(1, Rectangle::getMinY)));
+        int lastRow = folding.lastRow(Math.max(visibleRow(0, Rectangle::getMaxY), visibleRow(1, Rectangle::getMaxY)));
         int first = comparison.firstChangeEndingAfter(firstRow);
         int last = first;
         while (last < changes.size() && changes.get(last).startRow() <= lastRow) last++;

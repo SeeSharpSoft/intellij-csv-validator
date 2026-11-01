@@ -89,10 +89,15 @@ Search starts in the background as you type, keeping the table responsive. The b
 #### Table diffs
 
 When comparing two CSV, TSV, or PSV revisions or files, select **CSV Table** in the diff
-viewer's view selector. The normal side-by-side and unified text diffs remain available.
+viewer's view selector; in IDEs showing icons there, it is the icon with two side-by-side tables.
+The normal side-by-side and unified text diffs remain available.
 The table diff aligns inserted and deleted records, highlights changed cells using the
 IDE's diff colors, and synchronizes horizontal and vertical scrolling. Use the diff
 toolbar's previous/next difference actions to select and reveal changed records.
+Like the text diff, the **Collapse Unchanged Fragments** toolbar toggle replaces unchanged records
+farther from a change than the diff's context range with a single row showing a wavy line, skipping
+their record numbers; click such a row to expand it. The toggle shares its state and context range
+with the text diff.
 It shares the CSV table editor's cell padding and borders, column coloring, header labels,
 wrapped cell controls, and merged comment rows. As in the text diff, the divider between both
 tables shows the record numbers of both sides, leaving a number empty where

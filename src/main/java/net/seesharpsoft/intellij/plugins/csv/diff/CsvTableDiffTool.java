@@ -7,14 +7,28 @@ import com.intellij.diff.contents.DocumentContent;
 import com.intellij.diff.contents.EmptyContent;
 import com.intellij.diff.requests.ContentDiffRequest;
 import com.intellij.diff.requests.DiffRequest;
+import com.intellij.openapi.util.IconLoader;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.CsvPluginManager;
 import org.jetbrains.annotations.NotNull;
 
+import javax.swing.*;
+
 public final class CsvTableDiffTool implements FrameDiffTool {
+    static final Icon ICON = IconLoader.getIcon("/media/icons/actions/show-table-diff.svg", CsvTableDiffTool.class);
+
     @Override
     public @NotNull String getName() {
         return CsvPluginManager.getLocalizedText("table.diff");
+    }
+
+    /**
+     * Distinguishes the table diff from the text diff's side-by-side icon in the diff view switcher.
+     * Not annotated with {@code @Override}, since {@link FrameDiffTool} declares this method only since 2026.3.
+     */
+    @SuppressWarnings("MissingOverrideAnnotation")
+    public @NotNull Icon getIcon() {
+        return ICON;
     }
 
     @Override

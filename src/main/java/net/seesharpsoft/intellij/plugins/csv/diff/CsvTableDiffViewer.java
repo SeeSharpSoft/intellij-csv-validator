@@ -5,6 +5,7 @@ import com.intellij.diff.FrameDiffTool;
 import com.intellij.diff.contents.DocumentContent;
 import com.intellij.diff.contents.FileContent;
 import com.intellij.diff.requests.ContentDiffRequest;
+import com.intellij.diff.tools.util.base.TextDiffSettingsHolder;
 import com.intellij.openapi.diff.DiffColors;
 import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.editor.colors.EditorFontType;
@@ -20,6 +21,7 @@ import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.project.DumbAwareAction;
+import com.intellij.openapi.project.DumbAwareToggleAction;
 import com.intellij.icons.AllIcons;
 import com.intellij.diff.util.DiffUserDataKeys;
 import com.intellij.util.Alarm;
@@ -41,7 +43,11 @@ import org.jetbrains.concurrency.CancellablePromise;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
+import javax.swing.table.TableCellRenderer;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.Arrays;
 import java.util.List;
 
 final class CsvTableDiffViewer implements FrameDiffTool.DiffViewer {
@@ -58,6 +64,10 @@ final class CsvTableDiffViewer implements FrameDiffTool.DiffViewer {
     private final CsvTableDiffDivider divider;
     private final JLabel status = new JLabel();
     private final Alarm refreshAlarm = new Alarm(Alarm.ThreadToUse.SWING_THREAD, this);
+    private final TextDiffSettingsHolder.TextDiffSettings settings;
+    private final FoldRenderer foldRenderer = new FoldRenderer();
+    private CsvDiffFolding folding = CsvDiffFolding.expanded(0);
+    private List<CsvDiffFolding.Fold> revealed = List.of();
     private CancellablePromise<CsvDiffComparison> pending;
     private CancellablePromise<CsvDiffChange> pendingChange;
     private boolean applying;
@@ -70,6 +80,7 @@ final class CsvTableDiffViewer implements FrameDiffTool.DiffViewer {
     CsvTableDiffViewer(DiffContext context, ContentDiffRequest request) {
         this.context = context;
         this.request = request;
+        this.settings = textSettings(context);
         JPanel[] panes = new JPanel[2];
         for (int side = 0; side < 2; side++) {
             models[side] = new Model(side);
@@ -91,6 +102,7 @@ final class CsvTableDiffViewer implements FrameDiffTool.DiffViewer {
             table.setDefaultEditor(CsvTableBase.CommentColumn.class, new DiffCellRenderer(side, true));
             table.setFont(EditorColorsManager.getInstance().getGlobalScheme().getFont(EditorFontType.PLAIN));
             table.getTableHeader().setReorderingAllowed(false);
+            installFoldExpansion(table);
             String title = request.getContentTitles().get(side);
             table.getAccessibleContext().setAccessibleName(title);
             JPanel pane = new JPanel(new BorderLayout());
@@ -115,6 +127,99 @@ final class CsvTableDiffViewer implements FrameDiffTool.DiffViewer {
         updateColors();
         ApplicationManager.getApplication().getMessageBus().connect(this)
                 .subscribe(EditorColorsManager.TOPIC, (EditorColorsListener) scheme -> updateColors());
+        settings.addListener(new TextDiffSettingsHolder.TextDiffSettings.Listener.Adapter() {
+            @Override
+            public void foldingChanged() {
+                revealed = List.of();
+                updateFolding();
+            }
+        }, this);
+    }
+
+    /**
+     * Shares the text diff settings of the diff place, so collapsing unchanged fragments applies to both viewers.
+     */
+    private static TextDiffSettingsHolder.TextDiffSettings textSettings(DiffContext context) {
+        TextDiffSettingsHolder.TextDiffSettings settings = context.getUserData(TextDiffSettingsHolder.TextDiffSettings.KEY);
+        if (settings == null) {
+            settings = TextDiffSettingsHolder.TextDiffSettings.getSettings(context.getUserData(DiffUserDataKeys.PLACE));
+            context.putUserData(TextDiffSettingsHolder.TextDiffSettings.KEY, settings);
+        }
+        return settings;
+    }
+
+    private void installFoldExpansion(JTable table) {
+        MouseAdapter listener = new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent event) {
+                if (SwingUtilities.isLeftMouseButton(event)) expandFold(table.rowAtPoint(event.getPoint()));
+            }
+
+            @Override
+            public void mouseMoved(MouseEvent event) {
+                boolean fold = folding.isFold(table.rowAtPoint(event.getPoint()));
+                table.setCursor(fold ? Cursor.getPredefinedCursor(Cursor.HAND_CURSOR) : null);
+            }
+        };
+        table.addMouseListener(listener);
+        table.addMouseMotionListener(listener);
+    }
+
+    private void expandFold(int row) {
+        CsvDiffFolding.Fold fold = folding.foldAt(row);
+        if (fold == null) return;
+        revealed = CsvDiffFolding.reveal(revealed, fold);
+        updateFolding();
+    }
+
+    private boolean isCollapsingUnchanged() {
+        return settings.getContextRange() >= 0 && !settings.isExpandByDefault();
+    }
+
+    private CsvDiffFolding computeFolding(CsvDiffComparison result) {
+        if (result == null) return CsvDiffFolding.expanded(0);
+        if (!isCollapsingUnchanged()) return CsvDiffFolding.expanded(result.rows().size());
+        return CsvDiffFolding.collapse(result, settings.getContextRange(), revealed);
+    }
+
+    private void updateFolding() {
+        if (comparison == null) return;
+        finishEditing();
+        int[][] selectedRows = selectedRows();
+        folding = computeFolding(comparison);
+        for (Model model : models) model.fireTableDataChanged();
+        restoreSelectedRows(selectedRows);
+        updateRowHeights();
+    }
+
+    /**
+     * Commits cell edits before the displayed rows change, since an editor would otherwise write to a shifted row.
+     */
+    private void finishEditing() {
+        for (JTable table : tables) {
+            if (table.isEditing() && !table.getCellEditor().stopCellEditing()) table.getCellEditor().cancelCellEditing();
+        }
+    }
+
+    /**
+     * Returns the aligned rows selected on each side, which remain valid while the folding changes.
+     */
+    private int[][] selectedRows() {
+        int[][] rows = new int[2][];
+        for (int side = 0; side < 2; side++) {
+            rows[side] = Arrays.stream(tables[side].getSelectedRows()).map(folding::firstRow).toArray();
+        }
+        return rows;
+    }
+
+    private void restoreSelectedRows(int[][] rows) {
+        for (int side = 0; side < 2; side++) {
+            JTable table = tables[side];
+            for (int row : rows[side]) {
+                int displayRow = row < comparison.rows().size() ? folding.displayRow(row) : -1;
+                if (displayRow >= 0 && displayRow < table.getRowCount()) table.addRowSelectionInterval(displayRow, displayRow);
+            }
+        }
     }
 
     @Override
@@ -123,8 +228,8 @@ final class CsvTableDiffViewer implements FrameDiffTool.DiffViewer {
     }
 
     private Color rowMarker(int row) {
-        if (comparison == null || row >= comparison.rows().size()) return null;
-        CsvDiffComparison.Change change = comparison.changeAt(row);
+        if (comparison == null || row >= folding.displayRowCount() || folding.isFold(row)) return null;
+        CsvDiffComparison.Change change = comparison.changeAt(folding.firstRow(row));
         return change == null ? null : change.type().getMarkerColor(null);
     }
 
@@ -148,7 +253,8 @@ final class CsvTableDiffViewer implements FrameDiffTool.DiffViewer {
         registerApplyShortcuts();
         FrameDiffTool.ToolbarComponents toolbar = new FrameDiffTool.ToolbarComponents();
         toolbar.statusPanel = status;
-        toolbar.toolbarActions = List.of(new NavigationAction(false), new NavigationAction(true));
+        toolbar.toolbarActions = List.of(new NavigationAction(false), new NavigationAction(true),
+                Separator.getInstance(), new CollapseUnchangedAction());
         return toolbar;
     }
 
@@ -186,6 +292,11 @@ final class CsvTableDiffViewer implements FrameDiffTool.DiffViewer {
         }
 
         @Override
+        public TableCellRenderer getCellRenderer(int row, int column) {
+            return folding.isFold(row) ? foldRenderer : super.getCellRenderer(row, column);
+        }
+
+        @Override
         public void uiDataSnapshot(@NotNull DataSink sink) {
             sink.set(CommonDataKeys.PROJECT, context.getProject());
             sink.set(PlatformDataKeys.FILE_EDITOR, fileEditors[side]);
@@ -196,6 +307,11 @@ final class CsvTableDiffViewer implements FrameDiffTool.DiffViewer {
         @Override
         public CsvDiffComparison comparison() {
             return comparison;
+        }
+
+        @Override
+        public CsvDiffFolding folding() {
+            return folding;
         }
 
         @Override
@@ -211,7 +327,8 @@ final class CsvTableDiffViewer implements FrameDiffTool.DiffViewer {
 
     private int nextDifference(boolean forward, int side) {
         if (comparison == null || isBusy()) return -1;
-        int selected = tables[side].getSelectedRow();
+        int selectedRow = tables[side].getSelectedRow();
+        int selected = selectedRow < 0 ? -1 : forward ? folding.lastRow(selectedRow) : folding.firstRow(selectedRow);
         List<CsvDiffComparison.Change> changes = comparison.differences();
         for (int step = 0; step < changes.size(); step++) {
             int index = forward ? step : changes.size() - 1 - step;
@@ -224,9 +341,10 @@ final class CsvTableDiffViewer implements FrameDiffTool.DiffViewer {
     private void revealDifference(int row) {
         if (row < 0) return;
         int column = comparison.firstChangedColumn(row);
+        int displayRow = folding.displayRow(row);
         for (JTable table : tables) {
-            table.changeSelection(row, column, false, false);
-            table.scrollRectToVisible(table.getCellRect(row, column, true));
+            table.changeSelection(displayRow, column, false, false);
+            table.scrollRectToVisible(table.getCellRect(displayRow, column, true));
         }
     }
 
@@ -274,17 +392,17 @@ final class CsvTableDiffViewer implements FrameDiffTool.DiffViewer {
             return;
         }
         int oldColumns = tables[0].getColumnCount();
-        int[][] selectedRows = new int[2][];
+        int[][] selectedRows = selectedRows();
         int[][] selectedColumns = new int[2][];
         int[][] widths = new int[2][oldColumns];
         for (int side = 0; side < 2; side++) {
-            selectedRows[side] = tables[side].getSelectedRows();
             selectedColumns[side] = tables[side].getSelectedColumns();
             for (int column = 0; column < oldColumns; column++) {
                 widths[side][column] = tables[side].getColumnModel().getColumn(column).getWidth();
             }
         }
         comparison = result;
+        folding = computeFolding(result);
         refreshing = false;
         status.setText(result.error() == null
                 ? String.format(CsvPluginManager.getLocalizedText("table.diff.differences"), result.differences().size())
@@ -302,13 +420,11 @@ final class CsvTableDiffViewer implements FrameDiffTool.DiffViewer {
                 models[side].fireTableDataChanged();
             }
             table.clearSelection();
-            for (int row : selectedRows[side]) {
-                if (row < table.getRowCount()) table.addRowSelectionInterval(row, row);
-            }
             for (int column : selectedColumns[side]) {
                 if (column < table.getColumnCount()) table.addColumnSelectionInterval(column, column);
             }
         }
+        restoreSelectedRows(selectedRows);
         updateRowHeights();
     }
 
@@ -330,8 +446,9 @@ final class CsvTableDiffViewer implements FrameDiffTool.DiffViewer {
             int minimum = CsvEditorSettings.getInstance().getTableEditorRowHeight();
             table.setRowHeight(minimum);
             rowHeaders[side].setRowHeight(minimum);
-            for (int row = 0; row < comparison.rowLines().size(); row++) {
-                int height = Math.max(minimum, comparison.rowLines().get(row) * lineHeight + JBUI.scale(8));
+            for (int row = 0; row < folding.displayRowCount(); row++) {
+                if (folding.isFold(row)) continue;
+                int height = Math.max(minimum, comparison.rowLines().get(folding.firstRow(row)) * lineHeight + JBUI.scale(8));
                 if (height == minimum) continue;
                 table.setRowHeight(row, height);
                 rowHeaders[side].setRowHeight(row, height);
@@ -366,6 +483,7 @@ final class CsvTableDiffViewer implements FrameDiffTool.DiffViewer {
         pending = null;
         pendingChange = null;
         comparison = null;
+        folding = CsvDiffFolding.expanded(0);
         for (JTable table : tables) {
             if (table.isEditing()) table.getCellEditor().cancelCellEditing();
         }
@@ -382,7 +500,7 @@ final class CsvTableDiffViewer implements FrameDiffTool.DiffViewer {
 
         @Override
         public int getRowCount() {
-            return comparison == null ? 0 : comparison.rows().size();
+            return folding.displayRowCount();
         }
 
         @Override
@@ -399,22 +517,29 @@ final class CsvTableDiffViewer implements FrameDiffTool.DiffViewer {
 
         @Override
         public String getValue(int row, int column) {
-            return comparison.value(side, row, column);
+            return folding.isFold(row) ? "" : comparison.value(side, folding.firstRow(row), column);
         }
 
+        /**
+         * Fold rows span all columns like comments.
+         */
         @Override
         public boolean isCommentRow(int row) {
-            if (comparison == null || row < 0 || row >= getRowCount() || comparison.isLineBreakRow(row)) return false;
-            int index = comparison.rows().get(row).index(side);
+            if (comparison == null || row < 0 || row >= getRowCount()) return false;
+            if (folding.isFold(row)) return true;
+            int alignedRow = folding.firstRow(row);
+            if (comparison.isLineBreakRow(alignedRow)) return false;
+            int index = comparison.rows().get(alignedRow).index(side);
             return index >= 0 && comparison.sides().get(side).rows().get(index).comment();
         }
 
         @Override
         public boolean isCellEditable(int row, int column) {
-            if (comparison == null || row < 0 || row >= getRowCount() ||             refreshing || applying ||
-                    !isWritable(side) || column < 0 || comparison.isLineBreakRow(row))
-                return false;
-            int index = comparison.rows().get(row).index(side);
+            if (comparison == null || row < 0 || row >= getRowCount() || refreshing || applying ||
+                    !isWritable(side) || column < 0 || folding.isFold(row)) return false;
+            int alignedRow = folding.firstRow(row);
+            if (comparison.isLineBreakRow(alignedRow)) return false;
+            int index = comparison.rows().get(alignedRow).index(side);
             if (index < 0) return false;
             CsvDiffData.Row record = comparison.sides().get(side).rows().get(index);
             return !record.comment() || column == 0;
@@ -432,7 +557,7 @@ final class CsvTableDiffViewer implements FrameDiffTool.DiffViewer {
                 return;
             }
             CsvDiffData data = comparison.sides().get(side);
-            CsvDiffData.Row record = data.rows().get(comparison.rows().get(row).index(side));
+            CsvDiffData.Row record = data.rows().get(comparison.rows().get(folding.firstRow(row)).index(side));
             String text = value;
             TextRange range;
             if (record.comment()) {
@@ -481,6 +606,58 @@ final class CsvTableDiffViewer implements FrameDiffTool.DiffViewer {
             focusedSide = sideFor(event);
             revealDifference(nextDifference(forward, focusedSide));
             tables[focusedSide].requestFocusInWindow();
+        }
+    }
+
+    private final class CollapseUnchangedAction extends DumbAwareToggleAction {
+        CollapseUnchangedAction() {
+            super(CsvPluginManager.getLocalizedText("table.diff.collapse.unchanged"), null, AllIcons.Actions.Collapseall);
+        }
+
+        @Override
+        public @NotNull ActionUpdateThread getActionUpdateThread() {
+            return ActionUpdateThread.EDT;
+        }
+
+        @Override
+        public void update(@NotNull AnActionEvent event) {
+            super.update(event);
+            event.getPresentation().setVisible(settings.getContextRange() >= 0);
+        }
+
+        @Override
+        public boolean isSelected(@NotNull AnActionEvent event) {
+            return !settings.isExpandByDefault();
+        }
+
+        @Override
+        public void setSelected(@NotNull AnActionEvent event, boolean state) {
+            settings.setExpandByDefault(!state);
+        }
+    }
+
+    /**
+     * Renders a fold row as a wavy line through all columns, like the text diff's collapsed unchanged fragments.
+     */
+    private final class FoldRenderer extends JComponent implements TableCellRenderer {
+        private int originX;
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
+                                                       int row, int column) {
+            CsvDiffFolding.Fold fold = folding.foldAt(row);
+            setToolTipText(fold == null ? null
+                    : String.format(CsvPluginManager.getLocalizedText("table.diff.folded.rows"), fold.size()));
+            setBackground(isSelected ? table.getSelectionBackground() : table.getBackground());
+            originX = CsvDiffFoldWave.originX(table) + table.getCellRect(row, column, false).x;
+            return this;
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            g.setColor(getBackground());
+            g.fillRect(0, 0, getWidth(), getHeight());
+            CsvDiffFoldWave.paint(g, 0, getWidth(), 0, getHeight(), originX);
         }
     }
 
@@ -542,7 +719,8 @@ final class CsvTableDiffViewer implements FrameDiffTool.DiffViewer {
     }
 
     private CsvDiffComparison.Change selectedChange(AnActionEvent event) {
-        return comparison.changeAt(tables[sideFor(event)].getSelectedRow());
+        int row = tables[sideFor(event)].getSelectedRow();
+        return row < 0 || folding.isFold(row) ? null : comparison.changeAt(folding.firstRow(row));
     }
 
     private int sideFor(AnActionEvent event) {
@@ -625,8 +803,9 @@ final class CsvTableDiffViewer implements FrameDiffTool.DiffViewer {
         protected Color getCellBackgroundColor(JTable table, int row, int column) {
             var scheme = EditorColorsManager.getInstance().getGlobalScheme();
             Color background = super.getCellBackgroundColor(table, row, column);
-            if (comparison.changed(row, column)) {
-                var aligned = comparison.rows().get(row);
+            int alignedRow = folding.firstRow(row);
+            if (comparison.changed(alignedRow, column)) {
+                var aligned = comparison.rows().get(alignedRow);
                 var key = aligned.index(side) < 0 ? DiffColors.DIFF_ABSENT
                         : aligned.index(1 - side) < 0 ? side == 0 ? DiffColors.DIFF_DELETED : DiffColors.DIFF_INSERTED
                         : DiffColors.DIFF_MODIFIED;

@@ -6,6 +6,7 @@ import com.intellij.diff.DiffTool;
 import com.intellij.diff.FrameDiffTool;
 import com.intellij.diff.contents.DocumentContent;
 import com.intellij.diff.requests.SimpleDiffRequest;
+import com.intellij.diff.tools.util.base.TextDiffSettingsHolder;
 import com.intellij.diff.util.DiffUserDataKeys;
 import com.intellij.diff.util.TextDiffType;
 import com.intellij.ide.DataManager;
@@ -15,6 +16,8 @@ import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.ActionUiKind;
+import com.intellij.openapi.actionSystem.ToggleAction;
+import com.intellij.openapi.actionSystem.Toggleable;
 import com.intellij.openapi.actionSystem.ex.ActionUtil;
 import com.intellij.openapi.command.undo.UndoManager;
 import com.intellij.openapi.command.WriteCommandAction;
@@ -48,7 +51,9 @@ import java.awt.*;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -105,6 +110,22 @@ public class CsvTableDiffTest extends CsvBasePlatformTestCase {
 
     private DocumentContent content(String text) {
         return DiffContentFactory.getInstance().create(getProject(), text, CsvFileType.INSTANCE);
+    }
+
+    public void testTableDiffShowsItsOwnIconInTheDiffViewSwitcher() throws Exception {
+        FrameDiffTool tool = tableTool();
+        Method getIcon;
+        try {
+            // IDEs before 2026.3 do not show icons for diff tools.
+            getIcon = FrameDiffTool.class.getMethod("getIcon");
+        } catch (NoSuchMethodException exception) {
+            getIcon = tool.getClass().getMethod("getIcon");
+        }
+        Icon icon = (Icon) getIcon.invoke(tool);
+        assertSame(CsvTableDiffTool.ICON, icon);
+        assertEquals(16, icon.getIconWidth());
+        assertEquals(16, icon.getIconHeight());
+        assertNotNull(CsvTableDiffTool.class.getResource("/media/icons/actions/show-table-diff_dark.svg"));
     }
 
     public void testInsertedRowsStayAlignedAndOnlyChangedCellsAreHighlighted() {
@@ -497,8 +518,8 @@ public class CsvTableDiffTest extends CsvBasePlatformTestCase {
         FrameDiffTool.DiffViewer viewer = tableTool().createComponent(context, request);
         Disposer.register(getTestRootDisposable(), viewer);
         FrameDiffTool.ToolbarComponents toolbar = viewer.init();
-        assertEquals(List.of("Previous Difference", "Next Difference"), toolbar.toolbarActions.stream()
-                .map(action -> action.getTemplatePresentation().getText()).toList());
+        assertEquals(Arrays.asList("Previous Difference", "Next Difference", null, "Collapse Unchanged Fragments"),
+                toolbar.toolbarActions.stream().map(action -> action.getTemplatePresentation().getText()).toList());
         ActionManager actions = ActionManager.getInstance();
         assertArrayEquals(actions.getAction("Diff.ApplyLeftSide").getShortcutSet().getShortcuts(),
                 shortcutAction(viewer, "Apply Difference to Right").getShortcutSet().getShortcuts());
@@ -597,6 +618,157 @@ public class CsvTableDiffTest extends CsvBasePlatformTestCase {
 
         next.actionPerformed(actionEvent(tables.getLast()));
         assertChangedCellRevealed(tables, 42, 1);
+    }
+
+    public void testCollapsingUnchangedFragmentsShowsOneWavyRowPerHiddenRangeAndSkipsItsRowNumbers() {
+        TextDiffSettingsHolder.TextDiffSettings settings = textDiffSettings();
+        SimpleDiffRequest request = new SimpleDiffRequest("CSV comparison",
+                content(records(Map.of())), editable(records(Map.of(10, "changed"))), "Before", "After");
+        FrameDiffTool.DiffViewer viewer = tableTool().createComponent(context, request);
+        Disposer.register(getTestRootDisposable(), viewer);
+        FrameDiffTool.ToolbarComponents toolbar = viewer.init();
+        List<JTable> tables = tables(viewer.getComponent());
+        PlatformTestUtil.waitWithEventsDispatching("CSV rows displayed", () -> tables.getLast().getRowCount() == 21, 10);
+        ToggleAction collapse = (ToggleAction) toolbarAction(toolbar, "Collapse Unchanged Fragments");
+        AnActionEvent event = actionEvent(tables.getLast());
+        collapse.update(event);
+        assertTrue(event.getPresentation().isVisible());
+        assertFalse("Unchanged fragments are expanded by default", Toggleable.isSelected(event.getPresentation()));
+
+        collapse.setSelected(event, true);
+        assertFalse("The setting is shared with the text diff", settings.isExpandByDefault());
+        assertEquals("Records 0-5 and 15-20 are farther than 4 rows from the change", 11, tables.getLast().getRowCount());
+        show(viewer, 600, 600);
+        CsvTableDiffDivider divider = divider(viewer);
+        List<String> expectedNumbers = List.of("", "7", "8", "9", "10", "11", "12", "13", "14", "15", "");
+        for (int side = 0; side < 2; side++) {
+            JTable table = tables.get(side);
+            assertEquals(expectedNumbers, rowNumbers(divider, side, table.getRowCount()));
+            assertEquals("6", table.getValueAt(1, 0));
+            assertEquals(side == 0 ? "r10" : "changed", table.getValueAt(5, 1));
+            for (int fold : new int[]{0, 10}) {
+                assertEquals("Fold rows span all columns", table.getCellRect(fold, 0, true), table.getCellRect(fold, 1, true));
+                assertFalse(table.isCellEditable(fold, 0));
+                assertWaveSpansRow(table, table.getCellRect(fold, 0, true), table.getBackground());
+                Rectangle row = SwingUtilities.convertRectangle(table, table.getCellRect(fold, 0, true), divider);
+                assertWaveSpansRow(divider, new Rectangle(0, row.y, divider.getWidth(), row.height), null);
+            }
+        }
+        assertNotNull("Changed rows still offer apply arrows", divider.applyArrowBounds(5, 1));
+        assertNull("Fold rows offer no apply arrows", divider.applyArrowBounds(10, 1));
+
+        collapse.setSelected(event, false);
+        assertEquals(21, tables.getLast().getRowCount());
+        assertEquals("21", divider.rowNumber(0, 20).text());
+
+        collapse.setSelected(event, true);
+        settings.setContextRange(-1);
+        assertEquals("Disabled collapsing shows every row", 21, tables.getLast().getRowCount());
+        collapse.update(event);
+        assertFalse(event.getPresentation().isVisible());
+    }
+
+    public void testClickingAWavyRowExpandsItsRowsAndKeepsThemExpandedAfterRefresh() {
+        textDiffSettings().setExpandByDefault(false);
+        DocumentContent right = editable(records(Map.of(10, "changed")));
+        SimpleDiffRequest request = new SimpleDiffRequest("CSV comparison",
+                content(records(Map.of())), right, "Before", "After");
+        FrameDiffTool.DiffViewer viewer = tableTool().createComponent(context, request);
+        Disposer.register(getTestRootDisposable(), viewer);
+        viewer.init();
+        List<JTable> tables = tables(viewer.getComponent());
+        PlatformTestUtil.waitWithEventsDispatching("Collapsed CSV rows displayed", () -> tables.getLast().getRowCount() == 11, 10);
+        show(viewer, 600, 600);
+        JTable left = tables.getFirst();
+        Rectangle fold = left.getCellRect(0, 0, true);
+        left.dispatchEvent(mouseEvent(left, MouseEvent.MOUSE_MOVED, fold));
+        assertEquals(Cursor.HAND_CURSOR, left.getCursor().getType());
+        left.dispatchEvent(mouseEvent(left, MouseEvent.MOUSE_CLICKED, fold));
+        for (JTable table : tables) {
+            assertEquals("Only the clicked fold expands", 16, table.getRowCount());
+            assertEquals("id", table.getValueAt(0, 0));
+            assertEquals("5", table.getValueAt(5, 0));
+        }
+        assertEquals("1", divider(viewer).rowNumber(1, 0).text());
+
+        WriteCommandAction.runWriteCommandAction(getProject(),
+                () -> right.getDocument().setText(records(Map.of(10, "changed again"))));
+        PlatformTestUtil.waitWithEventsDispatching("Refreshed CSV values displayed",
+                () -> "changed again".equals(tables.getLast().getValueAt(10, 1)), 10);
+        assertEquals("Expanded rows stay expanded", 16, tables.getLast().getRowCount());
+    }
+
+    public void testNavigationApplyingAndEditingUseTheRecordsBehindCollapsedRows() {
+        textDiffSettings().setExpandByDefault(false);
+        DocumentContent right = editable(records(Map.of(3, "x", 17, "y")));
+        SimpleDiffRequest request = new SimpleDiffRequest("CSV comparison",
+                content(records(Map.of())), right, "Before", "After");
+        FrameDiffTool.DiffViewer viewer = tableTool().createComponent(context, request);
+        Disposer.register(getTestRootDisposable(), viewer);
+        FrameDiffTool.ToolbarComponents toolbar = viewer.init();
+        List<JTable> tables = tables(viewer.getComponent());
+        PlatformTestUtil.waitWithEventsDispatching("Collapsed CSV rows displayed", () -> tables.getLast().getRowCount() == 17, 10);
+        show(viewer, 600, 600);
+        AnAction next = toolbarAction(toolbar, "Next Difference");
+        next.actionPerformed(actionEvent(tables.getLast()));
+        assertEquals(3, tables.getLast().getSelectedRow());
+        next.actionPerformed(actionEvent(tables.getLast()));
+        assertEquals("Records 8-12 are folded into one row", 13, tables.getLast().getSelectedRow());
+        assertEquals("y", tables.getLast().getValueAt(13, 1));
+
+        clickApplyArrow(divider(viewer), 13, 1);
+        PlatformTestUtil.waitWithEventsDispatching("Folded row difference applied",
+                () -> records(Map.of(3, "x")).equals(right.getDocument().getText()), 10);
+        PlatformTestUtil.waitWithEventsDispatching("Collapsed CSV rows refreshed", () -> tables.getLast().getRowCount() == 9, 10);
+        tables.getLast().setValueAt("edited", 5, 1);
+        assertEquals(records(Map.of(3, "x", 5, "edited")), right.getDocument().getText());
+    }
+
+    private TextDiffSettingsHolder.TextDiffSettings textDiffSettings() {
+        TextDiffSettingsHolder.TextDiffSettings settings = new TextDiffSettingsHolder.TextDiffSettings();
+        context.putUserData(TextDiffSettingsHolder.TextDiffSettings.KEY, settings);
+        return settings;
+    }
+
+    private static String records(Map<Integer, String> changes) {
+        StringBuilder text = new StringBuilder("id,v\n");
+        for (int record = 1; record <= 20; record++) {
+            text.append(record).append(',').append(changes.getOrDefault(record, "r" + record)).append('\n');
+        }
+        return text.toString();
+    }
+
+    private static List<String> rowNumbers(CsvTableDiffDivider divider, int side, int rows) {
+        List<String> numbers = new ArrayList<>();
+        for (int row = 0; row < rows; row++) numbers.add(divider.rowNumber(side, row).text());
+        return numbers;
+    }
+
+    /**
+     * Asserts that a line is drawn through (nearly) every pixel column of the row, excluding its bottom grid line.
+     */
+    private static void assertWaveSpansRow(JComponent component, Rectangle row, Color background) {
+        BufferedImage image = new BufferedImage(component.getWidth(), component.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        Graphics2D graphics = image.createGraphics();
+        try {
+            component.paint(graphics);
+        } finally {
+            graphics.dispose();
+        }
+        int left = Math.max(0, row.x);
+        int right = Math.min(component.getWidth(), (int) row.getMaxX()) - 1;
+        int painted = 0;
+        for (int x = left; x < right; x++) {
+            for (int y = row.y; y < row.getMaxY() - 1; y++) {
+                int pixel = image.getRGB(x, y);
+                if (background == null ? pixel >>> 24 != 0 : pixel != background.getRGB()) {
+                    painted++;
+                    break;
+                }
+            }
+        }
+        assertTrue("A wave must cross the row, painted " + painted + " of " + (right - left) + " columns",
+                painted >= (right - left) * 9 / 10);
     }
 
     private static void assertChangedCellRevealed(List<JTable> tables, int row, int column) {
