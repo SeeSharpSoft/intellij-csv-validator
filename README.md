@@ -23,7 +23,7 @@ This plugin adds support for CSV (Comma-Separated Values) and related file types
 - quick-fix inspections
 - intentions (Alt+Enter), such as Quote/Unquote (all) and Shift Column Left/Right
 - spell checking for field values
-- an optional information tooltip showing the current value, column header, and column number
+- an optional information tooltip showing the current value, column header, and column number (quick documentation)
 - comma, semicolon, colon, pipe, tab, and record-separator value separators
 - custom value separators
 - line comments (# by default, customizable)
@@ -219,7 +219,7 @@ The current caret row can be highlighted in CSV, TSV, and PSV files. Disable thi
 
 ###### Highlight tab separator
 
-Enable or disable highlighting of tab characters when they are used as the value separator in TSV files, and choose the highlight color. Tabs inside a value are not highlighted.
+Enable or disable highlighting of tab characters when they are used as the value separator in TSV files, and choose the highlight color. Tabs inside a value are not highlighted. This option is independent of **Show info balloon**.
 
 ###### Highlight active column
 
@@ -231,7 +231,7 @@ Set **Maximum rows** beside the checkbox to **-1** (the default) for no limit, *
 
 ###### Show info balloon
 
-Enable or disable the information tooltip that appears at the caret position in the text editor. It shows the current value, its header, and its column number.
+Enable or disable the field information in the text editor. It shows the current value, its header, and its column number when hovering over a value (if the IDE's **Show quick documentation on hover** option is enabled) or via **Quick Documentation** (Ctrl+Q / F1). The information is computed only for the requested value, so it remains cheap for large files.
 
 ###### Use soft wraps
 

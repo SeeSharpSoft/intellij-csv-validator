@@ -84,7 +84,8 @@
         <fileEditorProvider implementation="net.seesharpsoft.intellij.plugins.csv.editor.CsvFileEditorProvider"/>
         <fileEditorProvider implementation="net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditorProvider"/>
 
-        <annotator language="csv" implementationClass="net.seesharpsoft.intellij.plugins.csv.editor.CsvAnnotator"/>
+        <lang.documentationProvider language="csv"
+                                    implementationClass="net.seesharpsoft.intellij.plugins.csv.editor.CsvFieldDocumentationProvider"/>
 
         <lang.formatter language="csv"
                         implementationClass="net.seesharpsoft.intellij.plugins.csv.formatter.CsvFormattingModelBuilder"/>
