@@ -18,6 +18,7 @@
 ### Fixed
 
 - Quoted values keep their quotes when edited or replaced in the table editor, and leaving a cell unchanged no longer rewrites it (#209)
+- Computing file icons no longer loads the syntax tree of non-CSV files, which caused "Outdated stub in index" errors in other languages such as PHP (#1124)
 - Fixed IDE freezes and high memory use when editing large CSV/TSV/PSV files, caused by one highlight per field for the info balloon and per tab separator
 
 ## 252.53.0 - Oct 30, 2026

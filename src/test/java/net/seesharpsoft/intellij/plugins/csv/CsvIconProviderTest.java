@@ -2,18 +2,14 @@ package net.seesharpsoft.intellij.plugins.csv;
 
 import com.intellij.openapi.fileTypes.LanguageFileType;
 import com.intellij.openapi.util.IconLoader;
-import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
+import com.intellij.psi.impl.source.PsiFileImpl;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.IconUtil;
-import net.seesharpsoft.intellij.plugins.csv.components.CsvValueSeparator;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvField;
-import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvColorSettings;
-import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import net.seesharpsoft.intellij.plugins.psv.PsvFileType;
 import net.seesharpsoft.intellij.plugins.tsv.TsvFileType;
-import net.seesharpsoft.intellij.psi.PsiHelper;
 
 import javax.swing.Icon;
 import java.awt.Graphics2D;
@@ -55,45 +51,13 @@ public class CsvIconProviderTest extends CsvBasePlatformTestCase {
         assertThemedScalableIcon("Field", CsvIconProvider.FIELD);
     }
 
-    public void testValueSeparatorsUseThemedScalableChangeSeparatorIcon() {
-        assertValueSeparatorIcon(CsvFileType.INSTANCE, ",");
-        assertValueSeparatorIcon(TsvFileType.INSTANCE, "\t");
-        assertValueSeparatorIcon(PsvFileType.INSTANCE, "|");
-        assertThemedScalableIcon("Separator",
-                IconLoader.getIcon("/media/icons/actions/change-separator.svg", CsvIconProvider.class));
-    }
+    public void testIconOfNonCsvStubBasedFileDoesNotLoadSyntaxTree() {
+        PsiFileImpl file = (PsiFileImpl) myFixture.addFileToProject("Sample.java", "class Sample {}");
+        assertNull("precondition: syntax tree must not be loaded yet", file.getTreeElement());
 
-    public void testCustomMultiCharacterValueSeparatorUsesChangeSeparatorIcon() {
-        CsvEditorSettings settings = CsvEditorSettings.getInstance();
-        CsvValueSeparator previousSeparator = settings.getDefaultValueSeparator();
-        boolean previousAutoDetect = settings.isAutoDetectValueSeparator();
-        try {
-            settings.setDefaultValueSeparator(new CsvValueSeparator("||"));
-            settings.setAutoDetectValueSeparator(false);
-            assertValueSeparatorIcon(CsvFileType.INSTANCE, "||");
-        } finally {
-            settings.setDefaultValueSeparator(previousSeparator);
-            settings.setAutoDetectValueSeparator(previousAutoDetect);
-        }
-    }
+        assertNull(new CsvIconProvider().getIcon(file, 0));
 
-    private void assertValueSeparatorIcon(LanguageFileType type, String separator) {
-        String quotedField = "\"first" + separator + "value\"";
-        PsiFile file = myFixture.configureByText(
-                getTestName(true) + "." + type.getDefaultExtension(), quotedField + separator + "second");
-        assertSame(type, file.getFileType());
-        PsiElement separatorElement = file.findElementAt(quotedField.length());
-        assertNotNull(separatorElement);
-        assertSame(CsvTypes.COMMA, PsiHelper.getElementType(separatorElement));
-        assertEquals(separator, separatorElement.getText());
-        CsvIconProvider provider = new CsvIconProvider();
-        assertSame(type.getName(),
-                IconLoader.getIcon("/media/icons/actions/change-separator.svg", CsvIconProvider.class),
-                provider.getIcon(separatorElement, 0));
-
-        PsiElement quotedSeparator = file.findElementAt("\"first".length());
-        assertNotNull(quotedSeparator);
-        assertNull(provider.getIcon(quotedSeparator, 0));
+        assertNull("icon lookup must not load the syntax tree of foreign files", file.getTreeElement());
     }
 
     private void assertThemedScalableIcon(String name, Icon icon) {
