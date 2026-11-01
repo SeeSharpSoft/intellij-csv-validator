@@ -344,8 +344,16 @@ final class CsvTableDiffViewer implements FrameDiffTool.DiffViewer {
         int displayRow = folding.displayRow(row);
         for (JTable table : tables) {
             table.changeSelection(displayRow, column, false, false);
-            table.scrollRectToVisible(table.getCellRect(displayRow, column, true));
+            table.scrollRectToVisible(verticallyCentered(table, table.getCellRect(displayRow, column, true)));
         }
+    }
+
+    private static Rectangle verticallyCentered(JTable table, Rectangle cell) {
+        int extent = table.getVisibleRect().height;
+        if (extent <= cell.height) return cell;
+        int maxY = Math.max(0, table.getHeight() - extent);
+        int y = Math.clamp(cell.y - (extent - cell.height) / 2, 0, maxY);
+        return new Rectangle(cell.x, y, cell.width, extent);
     }
 
     private Document document(int side) {

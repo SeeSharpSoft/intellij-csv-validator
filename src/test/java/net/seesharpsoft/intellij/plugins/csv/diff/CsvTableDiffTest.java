@@ -620,6 +620,31 @@ public class CsvTableDiffTest extends CsvBasePlatformTestCase {
         assertChangedCellRevealed(tables, 42, 1);
     }
 
+    public void testDifferenceNavigationCentersTheChangedRowVertically() {
+        String unchanged = "a,b\n";
+        String before = "c1,c2\n" + unchanged.repeat(80);
+        String after = "c1,c2\n" + unchanged.repeat(39) + "a,X\n" + unchanged.repeat(40);
+        SimpleDiffRequest request = new SimpleDiffRequest("CSV comparison", content(before), content(after), "Before", "After");
+        FrameDiffTool.DiffViewer viewer = tableTool().createComponent(context, request);
+        Disposer.register(getTestRootDisposable(), viewer);
+        FrameDiffTool.ToolbarComponents toolbar = viewer.init();
+        List<JTable> tables = tables(viewer.getComponent());
+        PlatformTestUtil.waitWithEventsDispatching("CSV differences displayed", () -> tables.getLast().getRowCount() == 81, 10);
+        viewer.getComponent().setBounds(0, 0, 600, 240);
+        layout(viewer.getComponent());
+
+        toolbarAction(toolbar, "Next Difference").actionPerformed(actionEvent(tables.getLast()));
+
+        for (JTable table : tables) {
+            assertEquals(40, table.getSelectedRow());
+            Rectangle cell = table.getCellRect(40, 1, true);
+            Rectangle visible = table.getVisibleRect();
+            assertTrue("Changed cell " + cell + " must be inside " + visible, visible.contains(cell));
+            assertEquals("Changed row must be vertically centered in " + visible,
+                    visible.getCenterY(), cell.getCenterY(), 1.0);
+        }
+    }
+
     public void testCollapsingUnchangedFragmentsShowsOneWavyRowPerHiddenRangeAndSkipsItsRowNumbers() {
         TextDiffSettingsHolder.TextDiffSettings settings = textDiffSettings();
         SimpleDiffRequest request = new SimpleDiffRequest("CSV comparison",
