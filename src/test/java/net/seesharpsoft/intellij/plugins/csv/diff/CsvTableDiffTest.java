@@ -4,10 +4,16 @@ import com.intellij.diff.DiffContentFactory;
 import com.intellij.diff.DiffContext;
 import com.intellij.diff.DiffTool;
 import com.intellij.diff.FrameDiffTool;
+import com.intellij.diff.actions.BaseShowDiffAction;
+import com.intellij.diff.actions.impl.MutableDiffRequestChain;
+import com.intellij.diff.impl.CacheDiffRequestChainProcessor;
 import com.intellij.diff.contents.DocumentContent;
 import com.intellij.diff.requests.SimpleDiffRequest;
+import com.intellij.diff.requests.ContentDiffRequest;
 import com.intellij.diff.tools.util.base.TextDiffSettingsHolder;
+import com.intellij.diff.tools.util.DiffDataKeys;
 import com.intellij.diff.util.DiffUserDataKeys;
+import com.intellij.diff.util.DiffUserDataKeysEx;
 import com.intellij.diff.util.TextDiffType;
 import com.intellij.ide.DataManager;
 import com.intellij.ide.impl.HeadlessDataManager;
@@ -16,6 +22,10 @@ import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.ActionUiKind;
+import com.intellij.openapi.actionSystem.ActionGroup;
+import com.intellij.openapi.actionSystem.DefaultActionGroup;
+import com.intellij.openapi.actionSystem.Separator;
+import com.intellij.openapi.actionSystem.ActionToolbar;
 import com.intellij.openapi.actionSystem.ToggleAction;
 import com.intellij.openapi.actionSystem.Toggleable;
 import com.intellij.openapi.actionSystem.ex.ActionUtil;
@@ -24,6 +34,8 @@ import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.fileEditor.DocumentsEditor;
+import com.intellij.openapi.fileEditor.FileEditorManager;
+import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.editor.colors.EditorColorsScheme;
 import com.intellij.openapi.editor.markup.TextAttributes;
@@ -33,7 +45,12 @@ import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.swing.CsvTableEditorSwing;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Disposer;
+import com.intellij.openapi.util.UserDataHolderBase;
+import com.intellij.openapi.progress.EmptyProgressIndicator;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.testFramework.PlatformTestUtil;
+import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory;
+import com.intellij.testFramework.fixtures.TempDirTestFixture;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
 import net.seesharpsoft.intellij.plugins.csv.CsvBasePlatformTestCase;
@@ -44,6 +61,8 @@ import net.seesharpsoft.intellij.plugins.csv.components.CsvEscapeCharacter;
 import net.seesharpsoft.intellij.plugins.tsv.TsvFileType;
 import net.seesharpsoft.intellij.plugins.psv.PsvFileType;
 import com.intellij.openapi.fileTypes.PlainTextFileType;
+import com.intellij.psi.PsiFile;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import javax.swing.text.JTextComponent;
@@ -106,6 +125,54 @@ public class CsvTableDiffTest extends CsvBasePlatformTestCase {
         assertEquals("Bob", tables.getLast().getValueAt(1, 1));
         assertEquals("Before", tables.getFirst().getAccessibleContext().getAccessibleName());
         assertEquals("After", tables.getLast().getAccessibleContext().getAccessibleName());
+    }
+
+    public void testSourceTitlesHaveScaledLeftPadding() {
+        SimpleDiffRequest request = new SimpleDiffRequest("CSV comparison", content("a,b"), content("a,c"), "Before", "After");
+        FrameDiffTool.DiffViewer viewer = tableTool().createComponent(context, request);
+        Disposer.register(getTestRootDisposable(), viewer);
+        show(viewer);
+        List<JLabel> titles = UIUtil.findComponentsOfType(viewer.getComponent(), JLabel.class).stream()
+                .filter(label -> "Before".equals(label.getText()) || "After".equals(label.getText())).toList();
+        assertEquals(2, titles.size());
+        List<JTable> tables = tables(viewer.getComponent());
+        for (int side = 0; side < tables.size(); side++) {
+            JLabel title = titles.get(side);
+            JScrollPane scrollPane = (JScrollPane) SwingUtilities.getAncestorOfClass(JScrollPane.class, tables.get(side));
+            Container pane = scrollPane.getParent();
+            JComponent header = (JComponent) ((BorderLayout) pane.getLayout()).getLayoutComponent(BorderLayout.NORTH);
+            assertEquals("Source headers need an outer margin from the left edge", JBUI.scale(8), header.getInsets().left);
+            Point textPosition = SwingUtilities.convertPoint(title, title.getInsets().left, 0, pane);
+            assertTrue("Source text must retain the outer margin and any native padding", textPosition.x >= JBUI.scale(8));
+        }
+    }
+
+    public void testFileComparisonShowsFileNamesSuppliedByNativeTitleCustomizers() throws Exception {
+        TempDirTestFixture files = IdeaTestFixtureFactory.getFixtureFactory().createTempDirTestFixture();
+        files.setUp();
+        try {
+            VirtualFile selected = files.createFile("selected.csv", "id,name\n1,Alice\n");
+            VirtualFile current = files.createFile("current.csv", "id,name\n1,Bob\n");
+            MutableDiffRequestChain chain = BaseShowDiffAction.createMutableChainFromFiles(null, selected, current);
+            ContentDiffRequest request = (ContentDiffRequest) chain.getRequests().getFirst()
+                    .process(new UserDataHolderBase(), new EmptyProgressIndicator());
+            assertEquals(Arrays.asList(null, null), request.getContentTitles());
+            assertNotNull(request.getUserData(DiffUserDataKeysEx.EDITORS_TITLE_CUSTOMIZER));
+            FrameDiffTool.DiffViewer viewer = tableTool().createComponent(context, request);
+            try {
+                show(viewer, 1000, 300);
+                List<String> titles = UIUtil.findComponentsOfType(viewer.getComponent(), JLabel.class).stream()
+                        .map(JLabel::getText).filter(text -> text != null).toList();
+                assertTrue("The selected file's name must appear above its table: " + titles,
+                        titles.stream().anyMatch(text -> text.contains("selected.csv")));
+                assertTrue("The editor file's name must appear above its table: " + titles,
+                        titles.stream().anyMatch(text -> text.contains("current.csv")));
+            } finally {
+                Disposer.dispose(viewer);
+            }
+        } finally {
+            files.tearDown();
+        }
     }
 
     private DocumentContent content(String text) {
@@ -372,6 +439,221 @@ public class CsvTableDiffTest extends CsvBasePlatformTestCase {
         assertSame(file.getVirtualFile(), rightEditor.getFile());
     }
 
+    public void testJumpToSourceOpensTheSelectedCellWhenComparingWithClipboard() {
+        PsiFile file = myFixture.addFileToProject("source.csv", "id,value\n1,\"two\nlines\"\n2,target\n");
+        DocumentContent source = DiffContentFactory.getInstance().createDocument(getProject(), file.getVirtualFile());
+        assertNotNull(source);
+        SimpleDiffRequest request = new SimpleDiffRequest("Clipboard comparison",
+                content("id,value\n1,\"two\nlines\"\n2,clipboard\n"), source, "Clipboard", "Source");
+        FrameDiffTool.DiffViewer viewer = tableTool().createComponent(context, request);
+        Disposer.register(getTestRootDisposable(), viewer);
+        viewer.init();
+        JTable table = tables(viewer.getComponent()).getLast();
+        PlatformTestUtil.waitWithEventsDispatching("CSV source cells displayed", () -> table.getRowCount() == 3, 10);
+        table.changeSelection(2, 1, false, false);
+        assertJumpToSource(table, source, source.getDocument().getText().indexOf("target"));
+    }
+
+    public void testJumpToSourceFromClipboardUsesAlignedRecordsBehindCollapsedRows() {
+        textDiffSettings().setExpandByDefault(false);
+        PsiFile file = myFixture.addFileToProject("source.csv", records(Map.of()));
+        DocumentContent source = DiffContentFactory.getInstance().createDocument(getProject(), file.getVirtualFile());
+        assertNotNull(source);
+        String clipboard = records(Map.of(17, "clipboard")).replace("15,r15\n", "15,r15\n99,inserted\n");
+        SimpleDiffRequest request = new SimpleDiffRequest("Clipboard comparison",
+                content(clipboard), source, "Clipboard", "Source");
+        FrameDiffTool.DiffViewer viewer = tableTool().createComponent(context, request);
+        Disposer.register(getTestRootDisposable(), viewer);
+        viewer.init();
+        JTable table = tables(viewer.getComponent()).getFirst();
+        PlatformTestUtil.waitWithEventsDispatching("Collapsed CSV source displayed", () -> table.getRowCount() > 0, 10);
+        int selected = -1;
+        int inserted = -1;
+        for (int row = 0; row < table.getRowCount(); row++) {
+            if ("clipboard".equals(table.getValueAt(row, 1))) selected = row;
+            if ("inserted".equals(table.getValueAt(row, 1))) inserted = row;
+        }
+        assertTrue("The selected record must be displayed after a collapsed range", selected > 0 && selected < 17);
+        table.changeSelection(selected, 1, false, false);
+        assertJumpToSource(table, source, source.getDocument().getText().indexOf("r17"));
+        assertTrue(inserted >= 0);
+        table.changeSelection(inserted, 1, false, false);
+        assertJumpToSource(table, source, source.getDocument().getText().indexOf("r16"));
+    }
+
+    private void assertJumpToSource(JComponent component, DocumentContent source, int expectedOffset) {
+        AnAction jump = ActionManager.getInstance().getAction("Diff.OpenInEditor");
+        AnActionEvent event = actionEvent(component);
+        jump.update(event);
+        assertTrue("Jump to Source must be enabled for a file-backed CSV comparison", event.getPresentation().isEnabled());
+        assertNotNull(event.getData(DiffDataKeys.NAVIGATABLE_ARRAY));
+        jump.actionPerformed(event);
+        FileEditorManager manager = FileEditorManager.getInstance(getProject());
+        PlatformTestUtil.waitWithEventsDispatching("CSV source opened",
+                () -> manager.getSelectedTextEditor() != null
+                        && manager.getSelectedTextEditor().getDocument() == source.getDocument(), 10);
+        Editor editor = manager.getSelectedTextEditor();
+        assertNotNull(editor);
+        assertEquals(expectedOffset, editor.getCaretModel().getOffset());
+    }
+
+    public void testJumpToSourceIsBetweenDifferenceNavigationAndFoldingWithoutADuplicateButton() {
+        assertJumpToSourceToolbarPlacement(false);
+    }
+
+    public void testJumpToSourceHasTheSamePlacementInTheNewDiffToolbar() {
+        assertJumpToSourceToolbarPlacement(true);
+    }
+
+    public void testJumpToSourceRelocationSupportsUnregisteredNavigationGroupsWithoutChangingSharedActions() {
+        ActionManager manager = ActionManager.getInstance();
+        AnAction jump = manager.getAction("Diff.OpenInEditor");
+        DefaultActionGroup sharedNavigation = new DefaultActionGroup(jump);
+        assertJumpToSourceRelocation(new DefaultActionGroup(sharedNavigation));
+        assertArrayEquals("Shared IDE action groups must remain unchanged",
+                new AnAction[]{jump}, sharedNavigation.getChildren(manager));
+    }
+
+    public void testJumpToSourceRelocationSupportsFlatNavigationWithoutRemovingTheViewerButton() {
+        assertJumpToSourceRelocation(new DefaultActionGroup(ActionManager.getInstance().getAction("Diff.OpenInEditor")));
+    }
+
+    private void assertJumpToSourceRelocation(DefaultActionGroup group) {
+        ActionManager manager = ActionManager.getInstance();
+        AnAction jump = manager.getAction("Diff.OpenInEditor");
+        ActionToolbar host = manager.createActionToolbar("test", group, true);
+        context.putUserData(DiffUserDataKeysEx.LEFT_TOOLBAR, host);
+        SimpleDiffRequest request = new SimpleDiffRequest("CSV comparison", content("a,b"), content("a,c"), "Before", "After");
+        FrameDiffTool.DiffViewer viewer = tableTool().createComponent(context, request);
+        Disposer.register(getTestRootDisposable(), viewer);
+        host.setTargetComponent(viewer.getComponent());
+        FrameDiffTool.ToolbarComponents toolbar = viewer.init();
+        assertNotNull(toolbar.toolbarActions);
+        group.addAll(toolbar.toolbarActions);
+        PlatformTestUtil.dispatchAllEventsInIdeEventQueue();
+
+        List<AnAction> actions = new ArrayList<>();
+        collectToolbarActions(group, actions);
+        int index = actions.indexOf(jump);
+        assertEquals("Only the viewer's Jump to Source button must remain", 1,
+                actions.stream().filter(action -> action == jump).count());
+        assertTrue(index >= 3);
+        assertEquals("Previous Difference", actions.get(index - 3).getTemplatePresentation().getText());
+        assertEquals("Next Difference", actions.get(index - 2).getTemplatePresentation().getText());
+    }
+
+    private void assertJumpToSourceToolbarPlacement(boolean newToolbar) {
+        MutableDiffRequestChain chain = new MutableDiffRequestChain(content("id,value\n1,a\n"), content("id,value\n1,b\n"));
+        chain.putUserData(DiffUserDataKeysEx.DIFF_NEW_TOOLBAR, newToolbar);
+        CacheDiffRequestChainProcessor processor = tableDiffProcessor(chain);
+        PlatformTestUtil.waitWithEventsDispatching("CSV diff toolbar displayed",
+                () -> tables(processor.getComponent()).size() == 2, 10);
+        PlatformTestUtil.dispatchAllEventsInIdeEventQueue();
+        List<AnAction> actions = new ArrayList<>();
+        collectToolbarActions(processor.getComponent(), actions);
+        AnAction jump = ActionManager.getInstance().getAction("Diff.OpenInEditor");
+        int index = actions.indexOf(jump);
+        assertTrue("Jump to Source must follow the table's navigation actions", index >= 3);
+        assertEquals("Previous Difference", actions.get(index - 3).getTemplatePresentation().getText());
+        assertEquals("Next Difference", actions.get(index - 2).getTemplatePresentation().getText());
+        assertInstanceOf(actions.get(index - 1), Separator.class);
+        assertInstanceOf(actions.get(index + 1), Separator.class);
+        assertEquals("Collapse Unchanged Fragments", actions.get(index + 2).getTemplatePresentation().getText());
+        assertEquals("Only one Jump to Source button may be offered", 1,
+                actions.stream().filter(action -> action == jump).count());
+    }
+
+    public void testNativeSwapSidesSwapsContentsTitlesAndSourceNavigation() {
+        PsiFile file = myFixture.addFileToProject("source.csv", "id,name\n1,Bob\n");
+        DocumentContent source = DiffContentFactory.getInstance().createDocument(getProject(), file.getVirtualFile());
+        assertNotNull(source);
+        DocumentContent clipboard = content("id,name\n1,Alice\n");
+        MutableDiffRequestChain chain = new MutableDiffRequestChain(clipboard, source);
+        chain.setTitle1("Clipboard");
+        chain.setTitle2("Source");
+        chain.putUserData(DiffUserDataKeysEx.DIFF_NEW_TOOLBAR, false);
+        CacheDiffRequestChainProcessor processor = tableDiffProcessor(chain);
+        PlatformTestUtil.waitWithEventsDispatching("CSV diff populated", () -> {
+            List<JTable> tables = tables(processor.getComponent());
+            return tables.size() == 2 && tables.getLast().getRowCount() == 2;
+        }, 10);
+        List<AnAction> actions = new ArrayList<>();
+        collectToolbarActions(processor.getToolbar().getActionGroup(), actions);
+        AnAction swap = swapSidesAction(actions);
+        AnActionEvent event = actionEvent(tables(processor.getComponent()).getLast());
+        swap.update(event);
+        assertTrue(event.getPresentation().isEnabledAndVisible());
+        swap.actionPerformed(event);
+        PlatformTestUtil.waitWithEventsDispatching("CSV sides swapped", () -> {
+            List<JTable> tables = tables(processor.getComponent());
+            return tables.size() == 2 && tables.getFirst().getRowCount() == 2
+                    && "Bob".equals(tables.getFirst().getValueAt(1, 1));
+        }, 10);
+        List<JTable> tables = tables(processor.getComponent());
+        assertEquals("Source", tables.getFirst().getAccessibleContext().getAccessibleName());
+        assertEquals("Clipboard", tables.getLast().getAccessibleContext().getAccessibleName());
+        assertEquals("Alice", tables.getLast().getValueAt(1, 1));
+        assertSame(source, chain.getContent1());
+        assertSame(clipboard, chain.getContent2());
+        assertTrue(tables.getFirst().isCellEditable(1, 1));
+        assertFalse(tables.getLast().isCellEditable(1, 1));
+        AnActionEvent jump = actionEvent(tables.getFirst());
+        ActionManager.getInstance().getAction("Diff.OpenInEditor").update(jump);
+        assertTrue("Source navigation must follow the swapped file", jump.getPresentation().isEnabled());
+    }
+
+    public void testSwappingSidesCommitsTheActiveCell() {
+        DocumentContent source = editable("id,name\n1,Bob\n");
+        MutableDiffRequestChain chain = new MutableDiffRequestChain(content("id,name\n1,Alice\n"), source);
+        chain.putUserData(DiffUserDataKeysEx.DIFF_NEW_TOOLBAR, false);
+        CacheDiffRequestChainProcessor processor = tableDiffProcessor(chain);
+        PlatformTestUtil.waitWithEventsDispatching("Editable CSV diff displayed", () -> {
+            List<JTable> tables = tables(processor.getComponent());
+            return tables.size() == 2 && tables.getLast().getRowCount() == 2;
+        }, 10);
+        JTable table = tables(processor.getComponent()).getLast();
+        assertTrue(table.editCellAt(1, 1));
+        textComponent(table.getEditorComponent()).setText("Carol");
+        List<AnAction> actions = new ArrayList<>();
+        collectToolbarActions(processor.getToolbar().getActionGroup(), actions);
+        swapSidesAction(actions).actionPerformed(actionEvent(table));
+        assertEquals("Swapping must not discard the active cell's value", "id,name\n1,Carol\n", source.getDocument().getText());
+    }
+
+    private static AnAction swapSidesAction(List<AnAction> actions) {
+        String name = ActionManager.getInstance().getAction("SwapSidesInDiffWindow").getTemplatePresentation().getText();
+        return actions.stream().filter(action -> name.equals(action.getTemplatePresentation().getText()))
+                .findFirst().orElseThrow(() -> new AssertionError("The table diff must offer the native Swap Sides action"));
+    }
+
+    private CacheDiffRequestChainProcessor tableDiffProcessor(MutableDiffRequestChain chain) {
+        CacheDiffRequestChainProcessor processor = new CacheDiffRequestChainProcessor(getProject(), chain) {
+            @Override
+            protected @NotNull List<DiffTool> getToolOrderFromSettings(@NotNull List<? extends DiffTool> availableTools) {
+                return List.of(tableTool());
+            }
+        };
+        Disposer.register(getTestRootDisposable(), processor);
+        processor.updateRequest();
+        return processor;
+    }
+
+    private static void collectToolbarActions(Container component, List<AnAction> actions) {
+        for (Component child : component.getComponents()) {
+            if (child instanceof ActionToolbar toolbar) collectToolbarActions(toolbar.getActionGroup(), actions);
+            else if (child instanceof Container container) collectToolbarActions(container, actions);
+        }
+    }
+
+    private static void collectToolbarActions(ActionGroup group, List<AnAction> actions) {
+        AnAction[] children = group instanceof DefaultActionGroup standard
+                ? standard.getChildren(ActionManager.getInstance()) : group.getChildren(null);
+        for (AnAction action : children) {
+            if (action instanceof ActionGroup nested && !nested.isPopup()) collectToolbarActions(nested, actions);
+            else actions.add(action);
+        }
+    }
+
     public void testFilelessDiffDocumentsHaveStableTypedFilesAndSupportUndo() {
         var factory = DiffContentFactory.getInstance();
         DocumentContent left = factory.create(null, "id\tname\n1\tAlice\n", TsvFileType.INSTANCE);
@@ -518,7 +800,8 @@ public class CsvTableDiffTest extends CsvBasePlatformTestCase {
         FrameDiffTool.DiffViewer viewer = tableTool().createComponent(context, request);
         Disposer.register(getTestRootDisposable(), viewer);
         FrameDiffTool.ToolbarComponents toolbar = viewer.init();
-        assertEquals(Arrays.asList("Previous Difference", "Next Difference", null, "Collapse Unchanged Fragments"),
+        assertEquals(Arrays.asList("Previous Difference", "Next Difference", null, "Jump to Source", null,
+                        "Collapse Unchanged Fragments", null, "Swap Sides"),
                 toolbar.toolbarActions.stream().map(action -> action.getTemplatePresentation().getText()).toList());
         ActionManager actions = ActionManager.getInstance();
         assertArrayEquals(actions.getAction("Diff.ApplyLeftSide").getShortcutSet().getShortcuts(),

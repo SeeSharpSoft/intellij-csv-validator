@@ -94,6 +94,10 @@ The normal side-by-side and unified text diffs remain available.
 The table diff aligns inserted and deleted records, highlights changed cells using the
 IDE's diff colors, and synchronizes horizontal and vertical scrolling. Use the diff
 toolbar's previous/next difference actions to select and reveal changed records.
+**Jump to Source** opens the selected cell in its source file. When the selected side has no
+source file, as with clipboard contents, it opens the corresponding position on the other side.
+**Swap Sides** uses the same action as the text diff and is available for comparisons that
+support it, including clipboard comparisons. An active cell edit is committed before swapping.
 Like the text diff, the **Collapse Unchanged Fragments** toolbar toggle replaces unchanged records
 farther from a change than the diff's context range with a single row showing a wavy line, skipping
 their record numbers; click such a row to expand it. The toggle shares its state and context range
@@ -105,6 +109,8 @@ a record exists only on the other side. Numbers of changed records use the edito
 stay readable on the change colors. A thin, fixed-width row header beside each table marks changed rows;
 click it to select entire rows. Drag the empty middle of the divider to change the width of both tables.
 Diff backgrounds overlay the column colors, and comment rows span all data columns.
+The headers use the IDE's native file paths and revision titles, including comparisons
+started with **Compare File with Editor** from the Project context menu.
 
 Double-click a cell on a writable side to edit its value. Enter commits the edit,
 Ctrl+Enter inserts a line break, and Escape cancels. Colored bands in the divider connect

@@ -2,10 +2,15 @@ package net.seesharpsoft.intellij.plugins.csv.diff;
 
 import com.intellij.diff.DiffContext;
 import com.intellij.diff.FrameDiffTool;
+import com.intellij.diff.contents.DiffContent;
 import com.intellij.diff.contents.DocumentContent;
 import com.intellij.diff.contents.FileContent;
 import com.intellij.diff.requests.ContentDiffRequest;
 import com.intellij.diff.tools.util.base.TextDiffSettingsHolder;
+import com.intellij.diff.tools.util.DiffDataKeys;
+import com.intellij.diff.util.LineCol;
+import com.intellij.diff.util.Range;
+import com.intellij.diff.util.DiffUtil;
 import com.intellij.openapi.diff.DiffColors;
 import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.editor.colors.EditorFontType;
@@ -22,8 +27,10 @@ import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.project.DumbAwareToggleAction;
+import com.intellij.pom.Navigatable;
 import com.intellij.icons.AllIcons;
 import com.intellij.diff.util.DiffUserDataKeys;
+import com.intellij.diff.util.DiffUserDataKeysEx;
 import com.intellij.util.Alarm;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.JBColor;
@@ -49,6 +56,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 final class CsvTableDiffViewer implements FrameDiffTool.DiffViewer {
     private static final int ROW_MARKER_WIDTH = 5;
@@ -82,6 +90,7 @@ final class CsvTableDiffViewer implements FrameDiffTool.DiffViewer {
         this.request = request;
         this.settings = textSettings(context);
         JPanel[] panes = new JPanel[2];
+        List<JComponent> titles = DiffUtil.createSimpleTitles(this, request);
         for (int side = 0; side < 2; side++) {
             models[side] = new Model(side);
             CsvTableBase table = new DiffTable(side, models[side]);
@@ -106,7 +115,13 @@ final class CsvTableDiffViewer implements FrameDiffTool.DiffViewer {
             String title = request.getContentTitles().get(side);
             table.getAccessibleContext().setAccessibleName(title);
             JPanel pane = new JPanel(new BorderLayout());
-            pane.add(new JLabel(title), BorderLayout.NORTH);
+            JComponent titleComponent = titles.get(side);
+            if (titleComponent != null) {
+                JPanel titlePanel = new JPanel(new BorderLayout());
+                titlePanel.setBorder(JBUI.Borders.emptyLeft(8));
+                titlePanel.add(titleComponent, BorderLayout.CENTER);
+                pane.add(titlePanel, BorderLayout.NORTH);
+            }
             scrollPanes[side] = new JBScrollPane(table);
             scrollPanes[side].getViewport().setScrollMode(JViewport.SIMPLE_SCROLL_MODE);
             rowHeaders[side] = CsvTableRowUtilities.addRowMarkerColumn(table, JBUI.scale(ROW_MARKER_WIDTH), this::rowMarker);
@@ -254,8 +269,56 @@ final class CsvTableDiffViewer implements FrameDiffTool.DiffViewer {
         FrameDiffTool.ToolbarComponents toolbar = new FrameDiffTool.ToolbarComponents();
         toolbar.statusPanel = status;
         toolbar.toolbarActions = List.of(new NavigationAction(false), new NavigationAction(true),
-                Separator.getInstance(), new CollapseUnchangedAction());
+                Separator.getInstance(), createJumpToSourceActionGroup(),
+                Separator.getInstance(), new CollapseUnchangedAction(),
+                Separator.getInstance(), createSwapSidesAction());
+        relocateJumpToSource();
         return toolbar;
+    }
+
+    private ActionGroup createJumpToSourceActionGroup() {
+        AnAction jump = ActionManager.getInstance().getAction("Diff.OpenInEditor");
+        // A separate group prevents the processor from deduplicating this action against its common button.
+        DefaultActionGroup group = new DefaultActionGroup(jump);
+        group.copyFrom(jump);
+        return group;
+    }
+
+    private AnAction createSwapSidesAction() {
+        AnAction action = new AnActionWrapper(ActionManager.getInstance().getAction("SwapSidesInDiffWindow")) {
+            @Override
+            public void actionPerformed(@NotNull AnActionEvent event) {
+                finishEditing();
+                super.actionPerformed(event);
+            }
+        };
+        action.registerCustomShortcutSet(action.getShortcutSet(), component, this);
+        return action;
+    }
+
+    private void relocateJumpToSource() {
+        ActionToolbar toolbar = context.getUserData(DiffUserDataKeysEx.LEFT_TOOLBAR);
+        if (toolbar == null) return;
+        // The processor builds its common navigation group after init; remove only this toolbar's duplicate.
+        ApplicationManager.getApplication().invokeLater(() -> {
+            DefaultActionGroup group = (DefaultActionGroup) toolbar.getActionGroup();
+            ActionManager manager = ActionManager.getInstance();
+            AnAction jump = manager.getAction("Diff.OpenInEditor");
+            if (removeCommonJumpToSource(group, jump, manager)) toolbar.updateActionsAsync();
+        }, ModalityState.any(), ignored -> disposed);
+    }
+
+    private boolean removeCommonJumpToSource(DefaultActionGroup group, AnAction jump, ActionManager manager) {
+        for (AnAction action : group.getChildren(manager)) {
+            if (action instanceof NavigationAction) return false;
+            if (action == jump) return group.replaceAction(action, new DefaultActionGroup());
+            if (action instanceof DefaultActionGroup nested && !nested.isPopup()) {
+                DefaultActionGroup copy = new DefaultActionGroup();
+                copy.copyFromGroup(nested);
+                if (removeCommonJumpToSource(copy, jump, manager)) return group.replaceAction(nested, copy);
+            }
+        }
+        return false;
     }
 
     private void registerApplyShortcuts() {
@@ -273,8 +336,7 @@ final class CsvTableDiffViewer implements FrameDiffTool.DiffViewer {
 
         @Override
         public void uiDataSnapshot(@NotNull DataSink sink) {
-            sink.set(CommonDataKeys.PROJECT, context.getProject());
-            sink.set(PlatformDataKeys.FILE_EDITOR, fileEditors[focusedSide]);
+            provideData(sink, focusedSide);
         }
     }
 
@@ -298,9 +360,51 @@ final class CsvTableDiffViewer implements FrameDiffTool.DiffViewer {
 
         @Override
         public void uiDataSnapshot(@NotNull DataSink sink) {
-            sink.set(CommonDataKeys.PROJECT, context.getProject());
-            sink.set(PlatformDataKeys.FILE_EDITOR, fileEditors[side]);
+            provideData(sink, side);
         }
+    }
+
+    private void provideData(DataSink sink, int side) {
+        sink.set(CommonDataKeys.PROJECT, context.getProject());
+        sink.set(PlatformDataKeys.FILE_EDITOR, fileEditors[side]);
+        sink.set(DiffDataKeys.DIFF_CONTEXT, context);
+        sink.set(DiffDataKeys.DIFF_REQUEST, request);
+        sink.set(DiffDataKeys.CURRENT_CONTENT, request.getContents().get(side));
+        sink.set(DiffDataKeys.NAVIGATABLE, ReadAction.compute(() -> getNavigatable(side)));
+    }
+
+    private Navigatable getNavigatable(int side) {
+        if (disposed) return null;
+        int row = tables[side].getSelectionModel().getLeadSelectionIndex();
+        int column = tables[side].getColumnModel().getSelectionModel().getLeadSelectionIndex();
+        int alignedRow = comparison != null && isCurrent(comparison) && row >= 0 && row < folding.displayRowCount()
+                ? folding.firstRow(row) : -1;
+        Navigatable navigatable = getNavigatable(side, alignedRow, column);
+        return navigatable != null ? navigatable : getNavigatable(1 - side, alignedRow, column);
+    }
+
+    private Navigatable getNavigatable(int side, int alignedRow, int column) {
+        DiffContent content = request.getContents().get(side);
+        if (!(content instanceof DocumentContent documentContent)) return content.getNavigatable();
+        Document document = documentContent.getDocument();
+        int offset = 0;
+        if (alignedRow >= 0) {
+            CsvDiffData data = comparison.sides().get(side);
+            int record = comparison.rows().get(alignedRow).index(side);
+            if (record < 0) {
+                Range range = Objects.requireNonNull(comparison.changeAt(alignedRow),
+                        "A missing record must belong to a difference").records();
+                record = side == 0 ? range.end1 : range.end2;
+            }
+            if (record >= data.rows().size()) {
+                offset = document.getTextLength();
+            } else {
+                CsvDiffData.Row row = data.rows().get(record);
+                offset = !row.comment() && column >= 0 && column < row.cells().size()
+                        ? row.cells().get(column).range().getStartOffset() : row.range().getStartOffset();
+            }
+        }
+        return documentContent.getNavigatable(LineCol.fromOffset(document, offset));
     }
 
     private final class DividerHost implements CsvTableDiffDivider.Host {
