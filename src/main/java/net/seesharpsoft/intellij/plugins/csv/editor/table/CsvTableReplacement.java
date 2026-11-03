@@ -38,6 +38,7 @@ final class CsvTableReplacement {
     private int changeStart = -1;
     private int changeEnd;
     private boolean comment;
+    private boolean quoted;
 
     record Change(TextRange range, String text) {
     }
@@ -56,7 +57,7 @@ final class CsvTableReplacement {
                     && comment.equals(current.comment) && quoting == current.quoting;
         }
 
-        private String serialize(String value, boolean isComment, int column) {
+        private String serialize(String value, boolean isComment, boolean quoted, int column) {
             if (isComment) {
                 String text = comment + value;
                 Lexer lexer = CsvLexerFactory.getInstance().createLexer(separator, escape, comment);
@@ -69,7 +70,7 @@ final class CsvTableReplacement {
                 return null;
             }
             return CsvHelper.quoteCsvField(value, escape, separator,
-                    quoting || column == 0 && value.trim().startsWith(comment));
+                    quoted || quoting || column == 0 && value.trim().startsWith(comment));
         }
     }
 
@@ -126,6 +127,8 @@ final class CsvTableReplacement {
         if (type == CsvTypes.COMMENT) {
             value.append(snapshot, lexer.getTokenStart() + settings.comment.length(), lexer.getTokenEnd());
             comment = true;
+        } else if (type == CsvTypes.QUOTE) {
+            quoted = true;
         } else if (type == CsvTypes.TEXT || type == CsvTypes.ESCAPED_TEXT) {
             String token = lexer.getTokenText();
             value.append(type == CsvTypes.ESCAPED_TEXT && settings.escape.isEscapedQuote(token) ? "\"" : token);
@@ -142,12 +145,13 @@ final class CsvTableReplacement {
         }
         value.setLength(0);
         comment = false;
+        quoted = false;
     }
 
     private void replaceField(int fieldEnd) throws FindManager.MalformedReplacementStringException {
         List<Match> cellMatches = targets.get(new Cell(getViewRow(), getViewColumn()));
         if (cellMatches == null) return;
-        String replacement = settings.serialize(replaceMatches(value.toString(), cellMatches), comment, column);
+        String replacement = settings.serialize(replaceMatches(value.toString(), cellMatches), comment, quoted, column);
         if (replacement == null || replacement.contentEquals(snapshot.subSequence(fieldStart, fieldEnd))) return;
         if (changeStart < 0) changeStart = fieldStart;
         else result.append(snapshot, changeEnd, fieldStart);

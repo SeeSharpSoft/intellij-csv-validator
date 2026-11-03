@@ -44,6 +44,7 @@ public class CsvEditorSettingsProvider implements EditorOptionsProvider, Searcha
     private JCheckBox cbShowInfoBalloonCheckBox;
     private JComboBox<CsvEditorSettings.EditorPrio> cbEditorUsage;
     private JCheckBox cbSyncSelectedField;
+    private JCheckBox cbHideOtherEditors;
     private JCheckBox cbQuotingEnforced;
     private JCheckBox cbZeroBasedColumnNumbering;
     private JFormattedTextField tfMaxColumnWidth;
@@ -103,6 +104,7 @@ public class CsvEditorSettingsProvider implements EditorOptionsProvider, Searcha
                 Configurable.isCheckboxModified(cbQuotingEnforced, csvEditorSettings.isQuotingEnforced()) ||
                 !Objects.equals(cbEditorUsage.getSelectedItem(), csvEditorSettings.getEditorPrio()) ||
                 Configurable.isCheckboxModified(cbSyncSelectedField, csvEditorSettings.isSyncSelectedField()) ||
+                Configurable.isCheckboxModified(cbHideOtherEditors, csvEditorSettings.isHideOtherEditors()) ||
                 Configurable.isCheckboxModified(cbZeroBasedColumnNumbering, csvEditorSettings.isZeroBasedColumnNumbering()) ||
                 !tfMaxColumnWidth.getValue().equals(csvEditorSettings.getTableAutoMaxColumnWidth()) ||
                 !tfDefaultColumnWidth.getValue().equals(csvEditorSettings.getTableDefaultColumnWidth()) ||
@@ -136,6 +138,7 @@ public class CsvEditorSettingsProvider implements EditorOptionsProvider, Searcha
         tfDefaultRowHeight.setValue(csvEditorSettings.getTableEditorRowHeight());
         cbEditorUsage.setSelectedItem(csvEditorSettings.getEditorPrio());
         cbSyncSelectedField.setSelected(csvEditorSettings.isSyncSelectedField());
+        cbHideOtherEditors.setSelected(csvEditorSettings.isHideOtherEditors());
         cbQuotingEnforced.setSelected(csvEditorSettings.isQuotingEnforced());
         cbZeroBasedColumnNumbering.setSelected(csvEditorSettings.isZeroBasedColumnNumbering());
         tfMaxColumnWidth.setValue(csvEditorSettings.getTableAutoMaxColumnWidth());
@@ -166,6 +169,7 @@ public class CsvEditorSettingsProvider implements EditorOptionsProvider, Searcha
         csvEditorSettings.setTableEditorRowHeight((int) tfDefaultRowHeight.getValue());
         csvEditorSettings.setEditorPrio((CsvEditorSettings.EditorPrio) cbEditorUsage.getSelectedItem());
         csvEditorSettings.setSyncSelectedField(cbSyncSelectedField.isSelected());
+        csvEditorSettings.setHideOtherEditors(cbHideOtherEditors.isSelected());
         csvEditorSettings.setQuotingEnforced(cbQuotingEnforced.isSelected());
         csvEditorSettings.setZeroBasedColumnNumbering(cbZeroBasedColumnNumbering.isSelected());
         csvEditorSettings.setTableAutoMaxColumnWidth((int) tfMaxColumnWidth.getValue());

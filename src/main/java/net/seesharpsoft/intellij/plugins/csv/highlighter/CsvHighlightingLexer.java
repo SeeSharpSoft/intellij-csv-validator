@@ -13,10 +13,16 @@ import org.jetbrains.annotations.Nullable;
 public class CsvHighlightingLexer extends DelegateLexer {
 
     private final CsvEditorSettings mySettings = CsvEditorSettings.getInstance();
+    private final IElementType mySeparatorElement;
     private int myCurrentColumnIndex = 0;
 
     public CsvHighlightingLexer(@NotNull Lexer delegate) {
+        this(delegate, CsvHighlightingElement.TokenBased.COMMA);
+    }
+
+    public CsvHighlightingLexer(@NotNull Lexer delegate, @NotNull IElementType separatorElement) {
         super(delegate);
+        mySeparatorElement = separatorElement;
     }
 
     @NotNull
@@ -46,7 +52,7 @@ public class CsvHighlightingLexer extends DelegateLexer {
         if (TokenType.BAD_CHARACTER.equals(tokenType)) {
             return CsvHighlightingElement.TokenBased.BAD_CHARACTER;
         } else if (CsvTypes.COMMA.equals(tokenType)) {
-            return CsvHighlightingElement.TokenBased.COMMA;
+            return mySeparatorElement;
         } else if (CsvTypes.COMMENT.equals(tokenType)) {
             return CsvHighlightingElement.TokenBased.COMMENT;
         } else if (CsvTypes.QUOTE.equals(tokenType)) {

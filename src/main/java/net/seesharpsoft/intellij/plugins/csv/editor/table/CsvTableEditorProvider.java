@@ -1,19 +1,17 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table;
 
-import com.intellij.openapi.fileEditor.AsyncFileEditorProvider;
 import com.intellij.openapi.fileEditor.FileEditor;
-import com.intellij.openapi.fileEditor.FileEditorPolicy;
 import com.intellij.openapi.fileEditor.FileEditorState;
-import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import net.seesharpsoft.intellij.plugins.csv.editor.CsvFileEditorProvider;
+import net.seesharpsoft.intellij.plugins.csv.editor.CsvFileEditorProviderBase;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.swing.CsvTableEditorSwing;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
 
-public class CsvTableEditorProvider implements AsyncFileEditorProvider, DumbAware {
+public class CsvTableEditorProvider extends CsvFileEditorProviderBase {
 
     public static final String EDITOR_TYPE_ID = "csv-table-editor";
 
@@ -23,12 +21,11 @@ public class CsvTableEditorProvider implements AsyncFileEditorProvider, DumbAwar
     }
 
     @Override
-    public @NotNull FileEditorPolicy getPolicy() {
-        return switch (CsvEditorSettings.getInstance().getEditorPrio()) {
-            case TEXT_FIRST, TEXT_ONLY -> FileEditorPolicy.PLACE_AFTER_DEFAULT_EDITOR;
-            case TABLE_FIRST -> FileEditorPolicy.HIDE_DEFAULT_EDITOR;
-            default ->
-                    throw new IllegalArgumentException("unhandled EditorPrio: " + CsvEditorSettings.getInstance().getEditorPrio());
+    protected boolean isPrimaryEditor(@NotNull CsvEditorSettings.EditorPrio editorPrio) {
+        return switch (editorPrio) {
+            case TEXT_FIRST, TEXT_ONLY -> false;
+            case TABLE_FIRST -> true;
+            default -> throw new IllegalArgumentException("unhandled EditorPrio: " + editorPrio);
         };
     }
 

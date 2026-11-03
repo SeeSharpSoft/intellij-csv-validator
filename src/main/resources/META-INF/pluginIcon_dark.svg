@@ -1,25 +1,9 @@
-<svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect x="5" y="44" width="70" height="31" fill="#8C6E8C"/>
-<rect x="9" y="66" width="4" height="4" fill="white"/>
-<rect x="18" y="53" width="4" height="13" fill="white"/>
-<rect x="36" y="50" width="4" height="11" fill="white"/>
-<rect x="45" y="58" width="4" height="11" fill="white"/>
-<rect x="54" y="49" width="4" height="17" fill="white"/>
-<rect x="62" y="49" width="4" height="17" fill="white"/>
-<rect x="58" y="66" width="4" height="5" fill="white"/>
-<rect x="22" y="49" width="10" height="4" fill="white"/>
-<path fill-rule="evenodd" clip-rule="evenodd" d="M23 9H66V44H14V18H18V13H23V9Z" fill="white" stroke="#8C6E8C"/>
-<rect x="22" y="66" width="10" height="4" fill="white"/>
-<rect x="36" y="58" width="13" height="4" fill="white"/>
-<rect x="36" y="49" width="13" height="4" fill="white"/>
-<rect x="36" y="66" width="13" height="4" fill="white"/>
-<rect x="53" y="36" width="9" height="4" fill="#8C6E8C"/>
-<rect x="36" y="36" width="13" height="4" fill="#8C6E8C"/>
-<rect x="22" y="36" width="9" height="4" fill="#8C6E8C"/>
-<rect x="53" y="27" width="9" height="4" fill="#8C6E8C"/>
-<rect x="36" y="27" width="13" height="4" fill="#8C6E8C"/>
-<rect x="22" y="27" width="9" height="4" fill="#8C6E8C"/>
-<rect x="53" y="18" width="9" height="4" fill="#8C6E8C"/>
-<rect x="36" y="18" width="13" height="4" fill="#8C6E8C"/>
-<rect x="22" y="18" width="9" height="4" fill="#8C6E8C"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+    <path d="M5.5 1.5h8v13h-11v-10l3-3Z" fill="#352F3C" stroke="#B59CC5" stroke-linejoin="round"/>
+    <g fill="#B59CC5">
+        <path d="M4 4h2v1H4Zm3 0h2v1H7Zm3 0h2v1h-2ZM4 6h2v1H4Zm3 0h2v1H7Zm3 0h2v1h-2ZM4 8h2v1H4Zm3 0h2v1H7Zm3 0h2v1h-2Z"/>
+        <rect x=".5" y="9.5" width="15" height="6" rx="1"/>
+    </g>
+    <circle cx="2.3" cy="13.4" r=".4" fill="#25212B"/>
+    <path d="M6.2 11H4.4v2.8h1.8m3.5-2.8H7.8v1.4h1.9v1.4H7.8m3.6-2.8 1 2.8 1-2.8" stroke="#25212B" stroke-width=".8" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

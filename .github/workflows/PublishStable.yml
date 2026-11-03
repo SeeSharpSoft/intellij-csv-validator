@@ -1,5 +1,4 @@
-# This workflow will build a Java project with Gradle
-# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-gradle
+# Publish the plugin to JetBrains Marketplace and GitHub Releases.
 
 name: Publish
 
@@ -12,6 +11,9 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write
+
     strategy:
       fail-fast: false
       matrix:
@@ -20,6 +22,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v7.0.1
+      with:
+        persist-credentials: false
     - name: Set up JDK 21
       uses: actions/setup-java@v6.1.0
       with:
@@ -35,3 +39,14 @@ jobs:
         JI_CHANNELS: Stable
         JI_TOKEN: ${{ secrets.JI_TOKEN }}
       run: xvfb-run ./gradlew publishPlugin
+
+    - name: Create GitHub release
+      env:
+        GH_TOKEN: ${{ github.token }}
+        GH_REPO: ${{ github.repository }}
+      run: |
+        VERSION=$(sed -n 's/^pluginVersion=//p' gradle.properties)
+        gh release create "$VERSION" build/distributions/*.zip \
+          --target "$GITHUB_SHA" \
+          --title "Release $VERSION" \
+          --generate-notes

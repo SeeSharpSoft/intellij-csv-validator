@@ -1,4 +1,5 @@
 import org.jetbrains.changelog.Changelog
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.intellij.platform.gradle.extensions.intellijPlatform
 
@@ -125,6 +126,17 @@ intellijPlatform {
                 environment("VERIFY_IDEA_PLATFORM", platform),
                 environment("VERIFY_IDEA_VERSION", platformVersion)
             )
+        }
+    }
+}
+
+intellijPlatformTesting {
+    // Manual compatibility check with Big Data Tools (#937), which requires IntelliJ IDEA Ultimate 2025.2.6 or newer.
+    runIde.register("runIdeWithBigDataTools") {
+        type = IntelliJPlatformType.IntellijIdeaUltimate
+        version = environment("BIG_DATA_TOOLS_IDEA_VERSION", "2025.2.6.4")
+        plugins {
+            compatiblePlugin("com.intellij.bigdatatools.core")
         }
     }
 }

@@ -42,3 +42,16 @@ gradle runIdea
 ```
  
 All of the gradle tasks can be connected to the IntelliJ debugger.
+
+### Publishing a stable release
+
+Every push to `Stable`, including a merged pull request, runs the **Publish** workflow.
+After publishing to JetBrains Marketplace succeeds, it creates a GitHub release and tag
+using `pluginVersion` from `gradle.properties` (for example, `252.54.0`). The tag points
+to the commit that triggered the workflow. The release includes the built plugin ZIP
+and automatically generated GitHub release notes.
+
+Prepare a new plugin version and its changelog entry before each push to `Stable`;
+an existing release tag cannot be reused for a different version or commit. The workflow
+uses the built-in `GITHUB_TOKEN` with `contents: write` permission for GitHub Releases
+and the existing `JI_TOKEN` secret for JetBrains Marketplace.
