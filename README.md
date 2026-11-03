@@ -451,6 +451,8 @@ Make sure the file is assigned to the plugin's file type in _Settings/Preference
 
 If another CSV plugin, such as [Rainbow CSV](https://plugins.jetbrains.com/plugin/12896-rainbow-csv), is enabled, the IDE may assign the file to that plugin instead. Check the file type mapping in _Settings/Preferences > Editor > File Types_ and disable the competing plugin for the affected file type if necessary.
 
+Some plugins, such as [Big Data Tools](https://plugins.jetbrains.com/plugin/12494-big-data-tools), hide all other editors for CSV/TSV files. If the CSV text and table editors are missing, enable [**Hide editors of other plugins**](#hide-editors-of-other-plugins) under _Settings/Preferences > Editor > General > CSV/TSV Editor > General_. This setting is **disabled by default**; enabling it keeps the CSV text and table editors available and places them first according to [Editor Usage](#editor-usage). Close and reopen the affected files for the change to take effect ([#937](https://github.com/SeeSharpSoft/intellij-csv-validator/issues/937)).
+
 If the **Table Editor** tab or the **Show Table Editor** button is missing, check the [table editor](#table-editor) settings and make sure **Text Editor only** is not selected. The table editor is also unavailable for files the IDE cannot load because they exceed the configured file-size limits.
 
 #### The CSV editor causes the IDE to stop working properly
