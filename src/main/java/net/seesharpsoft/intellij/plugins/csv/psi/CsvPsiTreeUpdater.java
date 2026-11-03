@@ -94,8 +94,12 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
     }
 
     private @Nullable CsvField createFieldInternal(@NotNull String text, boolean enquoteCommentIndicator) {
-        boolean enforceQuoting = CsvEditorSettings.getInstance().isQuotingEnforced();
-        if (enquoteCommentIndicator && isIndicatingComment(text)) enforceQuoting = true;
+        return createFieldInternal(text, enquoteCommentIndicator, false);
+    }
+
+    private @Nullable CsvField createFieldInternal(@NotNull String text, boolean enquoteCommentIndicator, boolean quoted) {
+        boolean enforceQuoting = quoted || CsvEditorSettings.getInstance().isQuotingEnforced()
+                || enquoteCommentIndicator && isIndicatingComment(text);
 
         PsiFile psiFile = getPsiFile();
         String sanitizedValue = CsvHelper.quoteCsvField(text, CsvHelper.getEscapeCharacter(psiFile), CsvHelper.getValueSeparator(psiFile), enforceQuoting);
@@ -417,10 +421,13 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
     private void replaceFieldInternal(@NotNull PsiElement toReplace, @Nullable String textArg, boolean enquoteCommentIndicator) {
         assert toReplace instanceof CsvField;
         String text = textArg == null ? "" : textArg;
-        // do not replace if not necessary
-        if (toReplace.getText().equals(text)) return;
+        if (text.equals(CsvHelper.getFieldValue(toReplace, CsvHelper.getEscapeCharacter(getPsiFile())))) return;
 
-        doAction(new ReplacePsiAction(toReplace, createFieldInternal(text, enquoteCommentIndicator)));
+        doAction(new ReplacePsiAction(toReplace, createFieldInternal(text, enquoteCommentIndicator, isQuoted(toReplace))));
+    }
+
+    private static boolean isQuoted(@NotNull PsiElement field) {
+        return field.getNode().findChildByType(CsvTypes.QUOTE) != null;
     }
 
     public void delete(@NotNull PsiElement... toRemove) {

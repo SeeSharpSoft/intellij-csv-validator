@@ -292,6 +292,49 @@ public class CsvTableModelBaseTest extends CsvBasePlatformTestCase implements Ps
         }
     }
 
+    public void testEditingOtherRowKeepsQuotedValuesUntouched() throws Exception {
+        assertTextAfterSetValue("\"Not available\",\"Nicht verfügbar\"\nfoo,bar\n", "baz", 1, 0,
+                "\"Not available\",\"Nicht verfügbar\"\nbaz,bar\n");
+    }
+
+    public void testCommittingUnchangedQuotedValueKeepsQuotes() throws Exception {
+        assertTextAfterSetValue("\"Not available\",\"Nicht verfügbar\"\n", "Not available", 0, 0,
+                "\"Not available\",\"Nicht verfügbar\"\n");
+    }
+
+    public void testCommittingUnchangedValueKeepsSurroundingWhitespaceAndEscapes() throws Exception {
+        assertTextAfterSetValue(" \"say \"\"hi\"\"\"  ,b\n", "say \"hi\"", 0, 0, " \"say \"\"hi\"\"\"  ,b\n");
+    }
+
+    public void testEditingQuotedValueKeepsQuotes() throws Exception {
+        assertTextAfterSetValue("\"Not available\",\"Nicht verfügbar\"\n", "Not yet available", 0, 0,
+                "\"Not yet available\",\"Nicht verfügbar\"\n");
+    }
+
+    public void testEditingUnquotedValueStaysUnquoted() throws Exception {
+        assertTextAfterSetValue("\"Not available\",unknown\n", "still unknown", 0, 1,
+                "\"Not available\",still unknown\n");
+    }
+
+    private void assertTextAfterSetValue(String template, String value, int row, int column, String expected) throws Exception {
+        myFixture.configureByText(CsvFileType.INSTANCE, toCsv(template));
+        CsvTableModel model = new CsvTableModelBase<>(this);
+        try {
+            runOnEdt(model, tableModel -> tableModel.setValue(value, row, column));
+            assertEquals(toCsv(expected), getPsiFile().getText());
+            assertEquals(value, model.getValue(row, column));
+        } finally {
+            model.dispose();
+        }
+    }
+
+    /** Adapts a comma-separated, quote-escaped template to the separator and escape character under test. */
+    private static String toCsv(String template) {
+        CsvEditorSettings settings = CsvEditorSettings.getInstance();
+        return template.replace("\"\"", settings.getDefaultEscapeCharacter().getCharacter() + "\"")
+                .replace(",", settings.getDefaultValueSeparator().getCharacter());
+    }
+
     public void testSetValueExtendingRowFromEdt() throws Exception {
         myFixture.configureByText(CsvFileType.INSTANCE, "one,two\n");
         CsvTableModel model = new CsvTableModelBase<>(this);

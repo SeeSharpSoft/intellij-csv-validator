@@ -150,6 +150,15 @@ public class CsvTableSearchSessionBaseTest extends CsvBasePlatformTestCase {
         assertFalse(search.hasMatches());
     }
 
+    public void testReplacementKeepsQuotedValuesQuoted() {
+        configure("\"Not available\",not available\n");
+        query("available");
+        replacement("present");
+        search.replaceAll();
+        awaitSearch();
+        assertEquals("\"Not present\",not present\n", myFixture.getFile().getText());
+    }
+
     public void testSearchAndReplacementRespectFilteredRowsAndReorderedColumns() {
         configure("cat,cat\ncat,other\nother,cat\n");
         search.viewRows = new int[]{-1, 1, 0, 2};

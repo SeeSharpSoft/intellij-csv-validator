@@ -10,6 +10,26 @@
 
 ### Fixed
 
+## 252.54.0 - Nov 03, 2026
+
+### Added
+
+- Added the general setting "Hide editors of other plugins", disabled by default, which keeps the CSV text and table editors available and first when other plugins, such as Big Data Tools, hide all other editors of CSV/TSV files (#937)
+
+### Changed
+
+- Modernized the plugin icon shown in the IDE's plugin list and on JetBrains Marketplace, with light and dark theme variants
+- The text editor's field information (value, header, and column number) is now shown on hover and via Quick Documentation (Ctrl+Q / F1), computed only for the requested value
+- Tab-separator highlighting depends only on the "Highlight tab separator" setting and no longer requires "Show info balloon"
+
+### Removed
+
+### Fixed
+
+- Quoted values keep their quotes when edited or replaced in the table editor, and leaving a cell unchanged no longer rewrites it (#209)
+- Computing file icons no longer loads the syntax tree of non-CSV files, which caused "Outdated stub in index" errors in other languages such as PHP (#1124)
+- Fixed IDE freezes and high memory use when editing large CSV/TSV/PSV files, caused by one highlight per field for the info balloon and per tab separator
+
 ## 252.53.0 - Oct 30, 2026
 
 ### Added

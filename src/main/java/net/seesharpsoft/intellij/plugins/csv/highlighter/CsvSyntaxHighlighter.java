@@ -6,7 +6,10 @@ import com.intellij.openapi.fileTypes.SyntaxHighlighterBase;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.tree.IElementType;
+import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.CsvLexerFactory;
+import net.seesharpsoft.intellij.plugins.csv.components.CsvValueSeparator;
+import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import org.jetbrains.annotations.NotNull;
 
 public class CsvSyntaxHighlighter extends SyntaxHighlighterBase {
@@ -21,7 +24,18 @@ public class CsvSyntaxHighlighter extends SyntaxHighlighterBase {
     @NotNull
     @Override
     public Lexer getHighlightingLexer() {
-        return new CsvHighlightingLexer(CsvLexerFactory.getInstance().createLexer(myProject, myVirtualFile));
+        CsvValueSeparator separator = CsvHelper.getValueSeparator(myProject, myVirtualFile);
+        Lexer lexer = CsvLexerFactory.getInstance().createLexer(separator, CsvHelper.getEscapeCharacter(myProject, myVirtualFile));
+        return new CsvHighlightingLexer(lexer, getSeparatorElement(separator));
+    }
+
+    /**
+     * Resolved once per lexer, as the lexer already fixes the file's separator; settings changes reparse open files.
+     */
+    private static IElementType getSeparatorElement(@NotNull CsvValueSeparator separator) {
+        return separator.equals(CsvValueSeparator.TAB) && CsvEditorSettings.getInstance().isHighlightTabSeparator() ?
+                CsvHighlightingElement.TabSeparator.INSTANCE :
+                CsvHighlightingElement.TokenBased.COMMA;
     }
 
     @NotNull

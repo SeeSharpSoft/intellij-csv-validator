@@ -23,7 +23,7 @@ This plugin adds support for CSV (Comma-Separated Values) and related file types
 - quick-fix inspections
 - intentions (Alt+Enter), such as Quote/Unquote (all) and Shift Column Left/Right
 - spell checking for field values
-- an optional information tooltip showing the current value, column header, and column number
+- an optional information tooltip showing the current value, column header, and column number (quick documentation)
 - comma, semicolon, colon, pipe, tab, and record-separator value separators
 - custom value separators
 - line comments (# by default, customizable)
@@ -162,6 +162,10 @@ Changes to Text Editor and Table Editor settings do not update already-open edit
 
 You can choose **Text Editor first**, **Table Editor first**, or **Text Editor only**. This controls the order of the editor tabs and whether the table editor is shown. A **Table Editor only** option is not available because the table editor cannot edit files with syntax errors.
 
+##### Hide editors of other plugins
+
+Some plugins, such as [Big Data Tools](https://plugins.jetbrains.com/plugin/12494-big-data-tools), provide their own editors for CSV and TSV files and hide all other editors, including the CSV text and table editors. Enable this option to keep the CSV text and table editors available: they are shown first, ordered according to [Editor Usage](#editor-usage), followed by editors of other plugins that hide all other editors as well. Editors of other plugins that do not hide other editors are not shown. This option is **disabled by default** to keep the editors of other plugins as they are. Close and reopen files that are already open for the change to take effect.
+
 ##### Keep selected field when switching editors
 
 When switching between the text editor and the table editor, the newly shown editor selects the field that was selected in the other one (see [Table Editor](#table-editor)). This option is **enabled by default**. Disable it to keep independent positions in both editors, e.g. to preserve a multi-cell table selection or multiple text carets while checking something in the other editor. Changes apply to already-open editors.
@@ -215,7 +219,7 @@ The current caret row can be highlighted in CSV, TSV, and PSV files. Disable thi
 
 ###### Highlight tab separator
 
-Enable or disable highlighting of tab characters when they are used as the value separator in TSV files, and choose the highlight color. Tabs inside a value are not highlighted.
+Enable or disable highlighting of tab characters when they are used as the value separator in TSV files, and choose the highlight color. Tabs inside a value are not highlighted. This option is independent of **Show info balloon**.
 
 ###### Highlight active column
 
@@ -227,7 +231,7 @@ Set **Maximum rows** beside the checkbox to **-1** (the default) for no limit, *
 
 ###### Show info balloon
 
-Enable or disable the information tooltip that appears at the caret position in the text editor. It shows the current value, its header, and its column number.
+Enable or disable the field information in the text editor. It shows the current value, its header, and its column number when hovering over a value (if the IDE's **Show quick documentation on hover** option is enabled) or via **Quick Documentation** (Ctrl+Q / F1). The information is computed only for the requested value, so it remains cheap for large files.
 
 ###### Use soft wraps
 
@@ -262,6 +266,8 @@ If the file ends with a completely empty line (without spaces or tabs), the tabl
 ##### Enforce value quoting
 
 When a value is created or edited in the table editor, always quote it, even when quoting is not required.
+
+Without this setting, editing or replacing a value in the table editor keeps its quotes if it was quoted before, while other values are quoted only when required.
 
 ### Color Scheme
 
@@ -444,6 +450,8 @@ Make sure the file is assigned to the plugin's file type in _Settings/Preference
 #### CSV editor features are not available
 
 If another CSV plugin, such as [Rainbow CSV](https://plugins.jetbrains.com/plugin/12896-rainbow-csv), is enabled, the IDE may assign the file to that plugin instead. Check the file type mapping in _Settings/Preferences > Editor > File Types_ and disable the competing plugin for the affected file type if necessary.
+
+Some plugins, such as [Big Data Tools](https://plugins.jetbrains.com/plugin/12494-big-data-tools), hide all other editors for CSV/TSV files. If the CSV text and table editors are missing, enable [**Hide editors of other plugins**](#hide-editors-of-other-plugins) under _Settings/Preferences > Editor > General > CSV/TSV Editor > General_. This setting is **disabled by default**; enabling it keeps the CSV text and table editors available and places them first according to [Editor Usage](#editor-usage). Close and reopen the affected files for the change to take effect ([#937](https://github.com/SeeSharpSoft/intellij-csv-validator/issues/937)).
 
 If the **Table Editor** tab or the **Show Table Editor** button is missing, check the [table editor](#table-editor) settings and make sure **Text Editor only** is not selected. The table editor is also unavailable for files the IDE cannot load because they exceed the configured file-size limits.
 

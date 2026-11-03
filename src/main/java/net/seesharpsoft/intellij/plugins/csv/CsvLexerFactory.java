@@ -16,7 +16,7 @@ public class CsvLexerFactory {
         return INSTANCE;
     }
 
-    protected Lexer createLexer(@NotNull CsvValueSeparator separator, @NotNull CsvEscapeCharacter escapeCharacter) {
+    public Lexer createLexer(@NotNull CsvValueSeparator separator, @NotNull CsvEscapeCharacter escapeCharacter) {
         return createLexer(separator, escapeCharacter, CsvEditorSettings.getInstance().getCommentIndicator());
     }
 
