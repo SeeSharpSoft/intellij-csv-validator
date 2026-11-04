@@ -77,6 +77,10 @@ public class CsvMultiLineCellRenderer extends JBScrollPane implements TableCellR
         return CsvTextAttributeKeys.getTextAttributesOfColumn(column, myUserDataHolder);
     }
 
+    protected final JTextArea getTextArea() {
+        return myTextArea;
+    }
+
     @Override
     public boolean contains(int x, int y) {
         if (getParent() instanceof CsvTableBase table && table.getFrozenColumnCount() > 0 &&

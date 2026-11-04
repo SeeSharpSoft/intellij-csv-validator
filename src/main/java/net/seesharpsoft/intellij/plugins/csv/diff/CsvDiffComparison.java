@@ -2,6 +2,8 @@ package net.seesharpsoft.intellij.plugins.csv.diff;
 
 import com.intellij.diff.util.Range;
 import com.intellij.diff.util.TextDiffType;
+import com.intellij.diff.comparison.DiffTooBigException;
+import com.intellij.diff.fragments.DiffFragment;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.util.diff.Diff;
 import com.intellij.util.diff.FilesTooBigForDiffException;
@@ -9,9 +11,12 @@ import net.seesharpsoft.intellij.plugins.csv.CsvPluginManager;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 record CsvDiffComparison(List<CsvDiffData> sides, List<AlignedRow> rows, List<Change> differences,
-                         int columns, List<Integer> rowLines, String error) {
+                         int columns, List<Integer> rowLines, String error, CsvDiffOptions options,
+                         Map<Long, List<DiffFragment>> cellDifferences) {
     record AlignedRow(int left, int right) {
         int index(int side) {
             return side == 0 ? left : right;
@@ -27,22 +32,29 @@ record CsvDiffComparison(List<CsvDiffData> sides, List<AlignedRow> rows, List<Ch
         }
     }
 
-    static CsvDiffComparison compare(List<CsvDiffData> sides) {
+    @SuppressWarnings("IncorrectCancellationExceptionHandling")
+    // DiffTooBigException reports a size limit, not cancellation.
+    static CsvDiffComparison compare(List<CsvDiffData> sides, CsvDiffOptions options) {
         if (sides.stream().anyMatch(side -> !side.valid())) {
-            return new CsvDiffComparison(sides, List.of(), List.of(), 0, List.of(), "table.diff.invalid");
+            return error(sides, options, "table.diff.invalid");
         }
         try {
-            return align(sides);
-        } catch (FilesTooBigForDiffException exception) {
-            return new CsvDiffComparison(sides, List.of(), List.of(), 0, List.of(), "table.diff.too.big");
+            return align(sides, options);
+        } catch (FilesTooBigForDiffException | DiffTooBigException exception) {
+            return error(sides, options, "table.diff.too.big");
         }
     }
 
-    private static CsvDiffComparison align(List<CsvDiffData> sides) throws FilesTooBigForDiffException {
+    private static CsvDiffComparison error(List<CsvDiffData> sides, CsvDiffOptions options, String error) {
+        return new CsvDiffComparison(sides, List.of(), List.of(), 0, List.of(), error, options, Map.of());
+    }
+
+    private static CsvDiffComparison align(List<CsvDiffData> sides, CsvDiffOptions options)
+            throws FilesTooBigForDiffException, DiffTooBigException {
         CsvDiffData left = sides.getFirst();
         CsvDiffData right = sides.getLast();
         ProgressManager.checkCanceled();
-        Diff.Change diff = Diff.buildChanges(keys(left).toArray(String[]::new), keys(right).toArray(String[]::new));
+        Diff.Change diff = Diff.buildChanges(keys(left, options), keys(right, options));
         List<AlignedRow> rows = new ArrayList<>();
         List<Change> differences = new ArrayList<>();
         int first = 0;
@@ -69,7 +81,45 @@ record CsvDiffComparison(List<CsvDiffData> sides, List<AlignedRow> rows, List<Ch
                 .mapToInt(row -> row.cells().size()).max().orElse(0);
         List<Integer> rowLines = rows.stream()
                 .map(row -> Math.max(lines(left, row.left()), lines(right, row.right()))).toList();
-        return new CsvDiffComparison(sides, List.copyOf(rows), List.copyOf(differences), columns, rowLines, null);
+        Map<Long, List<DiffFragment>> cells = compareCells(sides, rows, differences, options);
+        return new CsvDiffComparison(sides, List.copyOf(rows), List.copyOf(differences), columns, rowLines, null,
+                options, Map.copyOf(cells));
+    }
+
+    private static Map<Long, List<DiffFragment>> compareCells(List<CsvDiffData> sides, List<AlignedRow> rows,
+                                                              List<Change> differences, CsvDiffOptions options)
+            throws DiffTooBigException {
+        Map<Long, List<DiffFragment>> result = new HashMap<>();
+        CsvDiffData left = sides.getFirst();
+        CsvDiffData right = sides.getLast();
+        for (Change change : differences) {
+            if (change.finalLineBreak()) continue;
+            for (int row = change.startRow(); row < change.endRow(); row++) {
+                ProgressManager.checkCanceled();
+                AlignedRow aligned = rows.get(row);
+                if (aligned.left() < 0 || aligned.right() < 0) continue;
+                CsvDiffData.Row first = left.rows().get(aligned.left());
+                CsvDiffData.Row second = right.rows().get(aligned.right());
+                int columns = Math.min(first.cells().size(), second.cells().size());
+                for (int column = 0; column < columns; column++) {
+                    ProgressManager.checkCanceled();
+                    CsvDiffData.Cell a = first.cells().get(column);
+                    CsvDiffData.Cell b = second.cells().get(column);
+                    if (first.comment() != second.comment() || !options.cellKey(left, a).equals(options.cellKey(right, b))) {
+                        result.put(cellKey(row, column), List.copyOf(options.fragments(a.value(), b.value())));
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    private static long cellKey(int row, int column) {
+        return ((long) row << 32) | (column & 0xffffffffL);
+    }
+
+    List<DiffFragment> fragments(int row, int column) {
+        return cellDifferences.getOrDefault(cellKey(row, column), List.of());
     }
 
     Change changeAt(int row) {
@@ -91,8 +141,8 @@ record CsvDiffComparison(List<CsvDiffData> sides, List<AlignedRow> rows, List<Ch
         return low;
     }
 
-    private static List<String> keys(CsvDiffData data) {
-        return data.rows().stream().map(row -> row.range().substring(data.text())).toList();
+    private static Object[] keys(CsvDiffData data, CsvDiffOptions options) {
+        return data.rows().stream().map(row -> options.rowKey(data, row)).toArray();
     }
 
     private static int lines(CsvDiffData data, int row) {
@@ -132,8 +182,7 @@ record CsvDiffComparison(List<CsvDiffData> sides, List<AlignedRow> rows, List<Ch
         if (column >= first.cells().size() || column >= second.cells().size()) {
             return (column < first.cells().size()) != (column < second.cells().size());
         }
-        return !first.cells().get(column).range().substring(left.text())
-                .equals(second.cells().get(column).range().substring(right.text()));
+        return cellDifferences.containsKey(cellKey(row, column));
     }
 
     int firstChangedColumn(int row) {

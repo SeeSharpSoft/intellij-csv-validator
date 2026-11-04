@@ -11,6 +11,8 @@ import com.intellij.diff.contents.DocumentContent;
 import com.intellij.diff.requests.SimpleDiffRequest;
 import com.intellij.diff.requests.ContentDiffRequest;
 import com.intellij.diff.tools.util.base.TextDiffSettingsHolder;
+import com.intellij.diff.tools.util.base.HighlightPolicy;
+import com.intellij.diff.tools.util.base.IgnorePolicy;
 import com.intellij.diff.tools.util.DiffDataKeys;
 import com.intellij.diff.util.DiffUserDataKeys;
 import com.intellij.diff.util.DiffUserDataKeysEx;
@@ -29,6 +31,9 @@ import com.intellij.openapi.actionSystem.ActionToolbar;
 import com.intellij.openapi.actionSystem.ToggleAction;
 import com.intellij.openapi.actionSystem.Toggleable;
 import com.intellij.openapi.actionSystem.ex.ActionUtil;
+import com.intellij.openapi.actionSystem.ex.CustomComponentAction;
+import com.intellij.openapi.actionSystem.impl.ActionButton;
+import com.intellij.openapi.actionSystem.impl.ActionToolbarImpl;
 import com.intellij.openapi.command.undo.UndoManager;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.fileEditor.FileEditor;
@@ -51,6 +56,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.testFramework.PlatformTestUtil;
 import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory;
 import com.intellij.testFramework.fixtures.TempDirTestFixture;
+import com.intellij.ui.dsl.builder.components.SegmentedButtonComponent;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
 import net.seesharpsoft.intellij.plugins.csv.CsvBasePlatformTestCase;
@@ -65,6 +71,7 @@ import com.intellij.psi.PsiFile;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
+import javax.swing.text.DefaultHighlighter;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.awt.event.InputEvent;
@@ -794,15 +801,16 @@ public class CsvTableDiffTest extends CsvBasePlatformTestCase {
                 () -> "id,v\n1,b\n2,same\n3,c\n".equals(right.getDocument().getText()), 10);
     }
 
-    public void testApplyShortcutsReplaceTheToolbarButtonsAndUseTheIdeDiffKeymap() {
+    public void testApplyShortcutsReplaceTheToolbarButtonsAndUseTheIdeDiffKeymap() throws IllegalAccessException {
         SimpleDiffRequest request = new SimpleDiffRequest("CSV comparison",
                 content("id,v\n1,a\n"), content("id,v\n1,b\n"), "Before", "After");
         FrameDiffTool.DiffViewer viewer = tableTool().createComponent(context, request);
         Disposer.register(getTestRootDisposable(), viewer);
         FrameDiffTool.ToolbarComponents toolbar = viewer.init();
-        assertEquals(Arrays.asList("Previous Difference", "Next Difference", null, "Jump to Source", null,
-                        "Collapse Unchanged Fragments", null, "Swap Sides"),
-                toolbar.toolbarActions.stream().map(action -> action.getTemplatePresentation().getText()).toList());
+        assertEquals(List.of("Previous Difference", "Next Difference", "Jump to Source",
+                        "Collapse Unchanged Fragments", "Swap Sides", "Options"),
+                viewerToolbarActions(toolbar).stream().filter(action -> !(action instanceof Separator))
+                        .map(action -> action.getTemplatePresentation().getText()).toList());
         ActionManager actions = ActionManager.getInstance();
         assertArrayEquals(actions.getAction("Diff.ApplyLeftSide").getShortcutSet().getShortcuts(),
                 shortcutAction(viewer, "Apply Difference to Right").getShortcutSet().getShortcuts());
@@ -1263,6 +1271,280 @@ public class CsvTableDiffTest extends CsvBasePlatformTestCase {
         assertEquals(new Point(30, 140), left.getViewport().getViewPosition());
     }
 
+    private static List<AnAction> viewerToolbarActions(FrameDiffTool.ToolbarComponents toolbar) throws IllegalAccessException {
+        assertNotNull(toolbar.toolbarActions);
+        List<AnAction> actions = new ArrayList<>(toolbar.toolbarActions);
+        for (var field : FrameDiffTool.ToolbarComponents.class.getFields()) {
+            if (!field.getName().equals("rightToolbarActions")) continue;
+            for (Object action : assertInstanceOf(field.get(toolbar), List.class)) {
+                actions.add(assertInstanceOf(action, AnAction.class));
+            }
+        }
+        return actions;
+    }
+
+    public void testOptionsMenuUsesNativeSectionsAndOmitsTextOnlyOptions() throws IllegalAccessException {
+        textDiffSettings();
+        FrameDiffTool.DiffViewer viewer = tableTool().createComponent(context,
+                new SimpleDiffRequest("CSV comparison", content("a,b"), content("a,c"), "Before", "After"));
+        Disposer.register(getTestRootDisposable(), viewer);
+        FrameDiffTool.ToolbarComponents toolbar = viewer.init();
+        assertNotNull("Diff options are also available in the viewer popup", toolbar.popupActions);
+        AnAction options = viewerToolbarActions(toolbar).getLast();
+        assertTrue("The rightmost action must be a popup cogwheel", options instanceof ActionGroup);
+        assertTrue(((ActionGroup) options).isPopup());
+        assertSame(com.intellij.icons.AllIcons.General.GearPlain, options.getTemplatePresentation().getIcon());
+        assertEquals(toolbar.popupActions, Arrays.asList(((ActionGroup) options).getChildren(actionEvent(viewer.getComponent()))));
+        assertEquals(Arrays.asList("Synchronize Scrolling", "Ignore differences", "None", "Trim Whitespaces",
+                        "Ignore Whitespaces", "Ignore Formatting", "Highlight Differences", "Lines", "Words",
+                        "Characters", "None", null, "Help"),
+                toolbar.popupActions.stream().map(action -> action instanceof Separator separator
+                        ? separator.getText() : action.getTemplatePresentation().getText()).toList());
+        assertTrue(toolbar.popupActions.get(1) instanceof Separator);
+        assertTrue(toolbar.popupActions.get(6) instanceof Separator);
+    }
+
+    public void testOptionsCanDisableScrollingSyncAndResynchronizeWhenEnabled() {
+        TextDiffSettingsHolder.TextDiffSettings settings = textDiffSettings();
+        FrameDiffTool.DiffViewer viewer = tableTool().createComponent(context,
+                new SimpleDiffRequest("CSV comparison", content(records(Map.of())), content(records(Map.of())), "Before", "After"));
+        Disposer.register(getTestRootDisposable(), viewer);
+        FrameDiffTool.ToolbarComponents toolbar = viewer.init();
+        List<JTable> tables = tables(viewer.getComponent());
+        PlatformTestUtil.waitWithEventsDispatching("CSV rows displayed", () -> tables.getLast().getRowCount() == 21, 10);
+        show(viewer);
+        JViewport left = ((JScrollPane) SwingUtilities.getAncestorOfClass(JScrollPane.class, tables.getFirst())).getViewport();
+        JViewport right = ((JScrollPane) SwingUtilities.getAncestorOfClass(JScrollPane.class, tables.getLast())).getViewport();
+        ToggleAction sync = (ToggleAction) toolbar.popupActions.getFirst();
+        AnActionEvent event = actionEvent(tables.getLast());
+        sync.setSelected(event, false);
+        assertFalse(settings.isEnableSyncScroll());
+        right.setViewPosition(new Point(0, 100));
+        assertEquals(0, left.getViewPosition().y);
+        sync.setSelected(event, true);
+        assertEquals(right.getViewPosition(), left.getViewPosition());
+        left.setViewPosition(new Point(0, 150));
+        assertEquals(left.getViewPosition(), right.getViewPosition());
+    }
+
+    public void testOptionsCogwheelAppearsAfterSwapSidesInBothNativeToolbarLayouts() {
+        for (boolean newToolbar : List.of(false, true)) {
+            MutableDiffRequestChain chain = new MutableDiffRequestChain(content("id,value\n1,a\n"), content("id,value\n1,b\n"));
+            chain.putUserData(DiffUserDataKeysEx.DIFF_NEW_TOOLBAR, newToolbar);
+            CacheDiffRequestChainProcessor processor = tableDiffProcessor(chain);
+            PlatformTestUtil.waitWithEventsDispatching("CSV diff toolbar displayed",
+                    () -> tables(processor.getComponent()).size() == 2, 10);
+            PlatformTestUtil.dispatchAllEventsInIdeEventQueue();
+            List<AnAction> actions = new ArrayList<>();
+            collectToolbarActions(processor.getComponent(), actions);
+            AnAction options = actions.stream().filter(action -> "Options".equals(action.getTemplatePresentation().getText()))
+                    .findFirst().orElseThrow(() -> new AssertionError("Missing cogwheel in toolbar layout " + newToolbar));
+            int index = actions.indexOf(options);
+            assertTrue("Options must follow Swap Sides, without requiring the same toolbar",
+                    actions.subList(0, index).stream()
+                            .anyMatch(action -> "Swap Sides".equals(action.getTemplatePresentation().getText())));
+            assertEquals("The toolbar must contain exactly one Options cogwheel", 1L,
+                    actions.stream().filter(action -> "Options".equals(action.getTemplatePresentation().getText())).count());
+            assertSame(com.intellij.icons.AllIcons.General.GearPlain, options.getTemplatePresentation().getIcon());
+        }
+    }
+
+    public void testOptionsCogwheelIsRightOfTheDiffViewSelectorInBothNativeToolbarLayouts() {
+        for (boolean newToolbar : List.of(false, true)) {
+            MutableDiffRequestChain chain = new MutableDiffRequestChain(content("a"), content("b"));
+            chain.putUserData(DiffUserDataKeysEx.DIFF_NEW_TOOLBAR, newToolbar);
+            CacheDiffRequestChainProcessor processor = tableDiffProcessor(chain);
+            PlatformTestUtil.waitWithEventsDispatching("CSV diff displayed",
+                    () -> tables(processor.getComponent()).size() == 2, 10);
+            JPanel root = new JPanel(new BorderLayout());
+            root.add(processor.getComponent());
+            root.setSize(1200, 400);
+            root.addNotify();
+            Disposer.register(getTestRootDisposable(), root::removeNotify);
+            List<ActionToolbarImpl> toolbars = UIUtil.findComponentsOfType(root, ActionToolbarImpl.class);
+            for (ActionToolbarImpl toolbar : toolbars) toolbar.updateActionsImmediately();
+            layout(root);
+            ActionButton options = UIUtil.findComponentsOfType(root, ActionButton.class).stream()
+                    .filter(button -> "Options".equals(button.getAction().getTemplatePresentation().getText()))
+                    .findFirst().orElseThrow(() -> new AssertionError("Missing rendered cogwheel"));
+            int optionsX = SwingUtilities.convertPoint(options, 0, 0, root).x;
+            int viewSelectors = 0;
+            for (ActionToolbarImpl toolbar : toolbars) {
+                for (Component button : toolbar.getComponents()) {
+                    if (!button.isVisible() || button.getWidth() == 0 || button == options) continue;
+                    AnAction action;
+                    if (button instanceof ActionButton actionButton) action = actionButton.getAction();
+                    else if (button instanceof JComponent component
+                            && component.getClientProperty(CustomComponentAction.ACTION_KEY) instanceof AnAction custom) action = custom;
+                    else continue;
+                    if (action instanceof CustomComponentAction) viewSelectors++;
+                    int buttonX = SwingUtilities.convertPoint(button, 0, 0, root).x;
+                    assertTrue("The cogwheel must be rightmost in toolbar layout " + newToolbar
+                                    + ", but " + action.getClass().getSimpleName() + " is at " + buttonX
+                                    + " and the cogwheel is at " + optionsX,
+                            optionsX >= buttonX + button.getWidth());
+                }
+            }
+            for (Component selector : UIUtil.findComponentsOfType(root, SegmentedButtonComponent.class)) {
+                if (!selector.isVisible() || selector.getWidth() == 0) continue;
+                viewSelectors++;
+                int selectorRight = SwingUtilities.convertPoint(selector, selector.getWidth(), 0, root).x;
+                assertTrue("The cogwheel must be right of the native view selector in toolbar layout " + newToolbar
+                                + ", but the selector ends at " + selectorRight + " and the cogwheel is at " + optionsX,
+                        optionsX >= selectorRight);
+            }
+            assertTrue("The native view selector must be included in the geometry check", viewSelectors > 0);
+        }
+    }
+
+    public void testIgnoreOptionsRefreshCountsHighlightsAndApplyWithoutChangingIgnoredRecords() {
+        textDiffSettings();
+        DocumentContent right = editable("id,value\n1, same \n2,after\n");
+        FrameDiffTool.DiffViewer viewer = tableTool().createComponent(context,
+                new SimpleDiffRequest("CSV comparison", content("id,value\n1,same\n2,before\n"), right, "Before", "After"));
+        Disposer.register(getTestRootDisposable(), viewer);
+        FrameDiffTool.ToolbarComponents toolbar = viewer.init();
+        JTable table = tables(viewer.getComponent()).getLast();
+        JLabel status = (JLabel) toolbar.statusPanel;
+        PlatformTestUtil.waitWithEventsDispatching("CSV differences displayed", () -> table.getRowCount() == 3, 10);
+        selectOption(toolbar, "Trim Whitespaces", table);
+        PlatformTestUtil.waitWithEventsDispatching("Whitespace difference ignored",
+                () -> "1 differences".equals(status.getText())
+                        && renderedText(table, 0, 1).getBackground().equals(renderedText(table, 1, 1).getBackground()), 10);
+        assertEquals(renderedText(table, 0, 1).getBackground(), renderedText(table, 1, 1).getBackground());
+        toolbarAction(toolbar, "Next Difference").actionPerformed(actionEvent(table));
+        assertEquals(2, table.getSelectedRow());
+        shortcutAction(viewer, "Apply Difference to Right").actionPerformed(actionEvent(table));
+        PlatformTestUtil.waitWithEventsDispatching("Only meaningful change applied",
+                () -> "id,value\n1, same \n2,before\n".equals(right.getDocument().getText()), 10);
+        PlatformTestUtil.waitWithEventsDispatching("Comparison refreshed", () -> "0 differences".equals(status.getText()), 10);
+        selectOption(toolbar, "None", table);
+        PlatformTestUtil.waitWithEventsDispatching("Exact comparison restored", () -> "1 differences".equals(status.getText()), 10);
+    }
+
+    public void testIgnoreFormattingComparesDecodedFieldsButPreservesWhitespaceAndStructure() {
+        TextDiffSettingsHolder.TextDiffSettings settings = textDiffSettings();
+        settings.setIgnorePolicy(IgnorePolicy.FORMATTING);
+        DocumentContent right = DiffContentFactory.getInstance().create(getProject(),
+                "id|value\n1|\"same\"\n2|a b\n3|\"x,y\"\n#comment\n\n", PsvFileType.INSTANCE);
+        FrameDiffTool.DiffViewer viewer = tableTool().createComponent(context,
+                new SimpleDiffRequest("CSV comparison",
+                        content("id,value\n1,same\n2,ab\n3,x,y\n\"#comment\"\n"), right, "Before", "After"));
+        Disposer.register(getTestRootDisposable(), viewer);
+        FrameDiffTool.ToolbarComponents toolbar = viewer.init();
+        JTable table = tables(viewer.getComponent()).getLast();
+        PlatformTestUtil.waitWithEventsDispatching("CSV values displayed", () -> table.getRowCount() >= 6, 10);
+        assertEquals(renderedText(table, 0, 1).getBackground(), renderedText(table, 1, 1).getBackground());
+        assertFalse(renderedText(table, 0, 1).getBackground().equals(renderedText(table, 2, 1).getBackground()));
+        assertFalse("Different field boundaries must not compare equal",
+                renderedText(table, 0, 1).getBackground().equals(renderedText(table, 3, 1).getBackground()));
+        assertFalse("Blank records and comments are data", "0 differences".equals(((JLabel) toolbar.statusPanel).getText()));
+    }
+
+    public void testWhitespaceIgnoringKeepsFieldBoundariesAndBlankRecords() {
+        TextDiffSettingsHolder.TextDiffSettings settings = textDiffSettings();
+        settings.setIgnorePolicy(IgnorePolicy.IGNORE_WHITESPACES);
+        FrameDiffTool.DiffViewer viewer = tableTool().createComponent(context,
+                new SimpleDiffRequest("CSV comparison",
+                        content("id,value\n1,a b\n2,a,b\n"),
+                        content("id,value\n1,ab\n2,ab\n\n"), "Before", "After"));
+        Disposer.register(getTestRootDisposable(), viewer);
+        FrameDiffTool.ToolbarComponents toolbar = viewer.init();
+        JTable table = tables(viewer.getComponent()).getLast();
+        PlatformTestUtil.waitWithEventsDispatching("CSV rows displayed", () -> table.getRowCount() == 4, 10);
+        assertEquals(renderedText(table, 0, 1).getBackground(), renderedText(table, 1, 1).getBackground());
+        assertFalse(renderedText(table, 0, 1).getBackground().equals(renderedText(table, 2, 1).getBackground()));
+        assertFalse("Blank records must not disappear", "0 differences".equals(((JLabel) toolbar.statusPanel).getText()));
+    }
+
+    public void testHighlightOptionsChangeInlineRangesAndClearReusedRenderer() {
+        TextDiffSettingsHolder.TextDiffSettings settings = textDiffSettings();
+        settings.setHighlightPolicy(HighlightPolicy.BY_WORD);
+        FrameDiffTool.DiffViewer viewer = tableTool().createComponent(context,
+                new SimpleDiffRequest("CSV comparison", content("id,value\n1,hello cat\n2,same\n"),
+                        editable("id,value\n1,hello cut\n2,same\n"), "Before", "After"));
+        Disposer.register(getTestRootDisposable(), viewer);
+        FrameDiffTool.ToolbarComponents toolbar = viewer.init();
+        JTable table = tables(viewer.getComponent()).getLast();
+        PlatformTestUtil.waitWithEventsDispatching("CSV rows displayed", () -> table.getRowCount() == 3, 10);
+        show(viewer);
+        assertInlineRange(table, 1, 6, 9);
+        assertEquals(0, renderedText(table, 2, 1).getHighlighter().getHighlights().length);
+        selectOption(toolbar, "Characters", table);
+        PlatformTestUtil.waitWithEventsDispatching("Character highlights displayed",
+                () -> inlineRangeMatches(table, 1, 7, 8), 10);
+        selectOption(toolbar, "Lines", table);
+        PlatformTestUtil.waitWithEventsDispatching("Cell highlights displayed",
+                () -> renderedText(table, 1, 1).getHighlighter().getHighlights().length == 0, 10);
+        assertFalse(renderedText(table, 0, 1).getBackground().equals(renderedText(table, 1, 1).getBackground()));
+        AnAction none = toolbar.popupActions.get(toolbar.popupActions.size() - 3);
+        none.actionPerformed(actionEvent(table));
+        PlatformTestUtil.waitWithEventsDispatching("Highlights disabled",
+                () -> renderedText(table, 0, 1).getBackground().equals(renderedText(table, 1, 1).getBackground()), 10);
+        assertEquals("Navigation and apply remain available", "1 differences", ((JLabel) toolbar.statusPanel).getText());
+        assertNotNull(divider(viewer).applyArrowBounds(1, 1));
+    }
+
+    private static void selectOption(FrameDiffTool.ToolbarComponents toolbar, String name, JTable table) {
+        assertNotNull("The settings menu is required", toolbar.popupActions);
+        toolbar.popupActions.stream().filter(action -> name.equals(action.getTemplatePresentation().getText()))
+                .findFirst().orElseThrow(() -> new AssertionError("Missing diff option: " + name))
+                .actionPerformed(actionEvent(table));
+    }
+
+    private static boolean inlineRangeMatches(JTable table, int row, int start, int end) {
+        var highlights = renderedText(table, row, 1).getHighlighter().getHighlights();
+        return highlights.length == 1 && highlights[0].getStartOffset() == start && highlights[0].getEndOffset() == end;
+    }
+
+    private static void assertInlineRange(JTable table, int row, int start, int end) {
+        assertTrue("Expected highlighted range " + start + "-" + end, inlineRangeMatches(table, row, start, end));
+    }
+
+    public void testChangingDiffOptionsCommitsTheActiveCellAndUsesTheLatestSettings() {
+        TextDiffSettingsHolder.TextDiffSettings settings = textDiffSettings();
+        DocumentContent right = editable("id,value\n1,after\n");
+        FrameDiffTool.DiffViewer viewer = tableTool().createComponent(context,
+                new SimpleDiffRequest("CSV comparison", content("id,value\n1,before\n"), right, "Before", "After"));
+        Disposer.register(getTestRootDisposable(), viewer);
+        FrameDiffTool.ToolbarComponents toolbar = viewer.init();
+        JTable table = tables(viewer.getComponent()).getLast();
+        PlatformTestUtil.waitWithEventsDispatching("CSV cells displayed", () -> table.getRowCount() == 2, 10);
+        assertTrue(table.editCellAt(1, 1));
+        textComponent(table.getEditorComponent()).setText("before");
+        selectOption(toolbar, "Ignore Whitespaces", table);
+        settings.setHighlightPolicy(HighlightPolicy.BY_CHAR);
+        settings.setIgnorePolicy(IgnorePolicy.FORMATTING);
+        assertFalse(table.isEditing());
+        assertEquals("id,value\n1,before\n", right.getDocument().getText());
+        PlatformTestUtil.waitWithEventsDispatching("Latest diff options applied",
+                () -> "0 differences".equals(((JLabel) toolbar.statusPanel).getText()), 10);
+        assertEquals(0, renderedText(table, 1, 1).getHighlighter().getHighlights().length);
+    }
+
+    public void testTextOnlyPoliciesUseMeaningfulTableAlternativesWithoutChangingTextPreferences() {
+        TextDiffSettingsHolder.TextDiffSettings settings = textDiffSettings();
+        settings.setIgnorePolicy(IgnorePolicy.IGNORE_WHITESPACES_CHUNKS);
+        settings.setHighlightPolicy(HighlightPolicy.BY_WORD_SPLIT);
+        FrameDiffTool.DiffViewer viewer = tableTool().createComponent(context,
+                new SimpleDiffRequest("CSV comparison", content("id,value\n1,hello cat\n"),
+                        content("id,value\n1,hello cut\n\n"), "Before", "After"));
+        Disposer.register(getTestRootDisposable(), viewer);
+        FrameDiffTool.ToolbarComponents toolbar = viewer.init();
+        JTable table = tables(viewer.getComponent()).getLast();
+        PlatformTestUtil.waitWithEventsDispatching("CSV rows displayed", () -> table.getRowCount() == 3, 10);
+        assertEquals(IgnorePolicy.IGNORE_WHITESPACES_CHUNKS, settings.getIgnorePolicy());
+        assertEquals(HighlightPolicy.BY_WORD_SPLIT, settings.getHighlightPolicy());
+        for (String name : List.of("Ignore Whitespaces", "Words")) {
+            AnAction option = toolbar.popupActions.stream()
+                    .filter(action -> name.equals(action.getTemplatePresentation().getText())).findFirst().orElseThrow();
+            AnActionEvent event = actionEvent(table);
+            option.update(event);
+            assertTrue(name + " is the effective table policy", Toggleable.isSelected(event.getPresentation()));
+        }
+        assertInlineRange(table, 1, 6, 9);
+    }
+
     public void testExternalDocumentChangesRefreshOnlyTheLatestValues() {
         DocumentContent right = DiffContentFactory.getInstance().createEditable(getProject(), "id,name\n1,Bob\n", CsvFileType.INSTANCE);
         SimpleDiffRequest request = new SimpleDiffRequest("CSV comparison", content("id,name\n1,Alice\n"), right, "Before", "After");
@@ -1350,6 +1632,7 @@ public class CsvTableDiffTest extends CsvBasePlatformTestCase {
     }
 
     public void testDiffColorsOverlayTheSharedColumnAndCommentStyles() {
+        textDiffSettings().setHighlightPolicy(HighlightPolicy.BY_WORD);
         EditorColorsManager manager = EditorColorsManager.getInstance();
         var originalScheme = manager.getGlobalScheme();
         var originalColoring = CsvEditorSettings.getInstance().getValueColoring();
@@ -1377,7 +1660,10 @@ public class CsvTableDiffTest extends CsvBasePlatformTestCase {
             assertEquals(Color.PINK, unchanged.getBackground());
             JTextComponent changed = renderedText(table, 2, 1);
             assertEquals(Color.BLUE, changed.getForeground());
-            assertEquals(Color.ORANGE, changed.getBackground());
+            assertEquals(TextDiffType.MODIFIED.getIgnoredColor(null), changed.getBackground());
+            var highlights = changed.getHighlighter().getHighlights();
+            assertEquals(1, highlights.length);
+            assertEquals(Color.ORANGE, ((DefaultHighlighter.DefaultHighlightPainter) highlights[0].getPainter()).getColor());
             JTextComponent comment = renderedText(table, 1, 0);
             assertEquals(Color.GRAY, comment.getForeground());
             assertEquals(Color.LIGHT_GRAY, comment.getBackground());

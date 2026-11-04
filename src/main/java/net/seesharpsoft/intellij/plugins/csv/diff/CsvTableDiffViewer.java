@@ -7,11 +7,15 @@ import com.intellij.diff.contents.DocumentContent;
 import com.intellij.diff.contents.FileContent;
 import com.intellij.diff.requests.ContentDiffRequest;
 import com.intellij.diff.tools.util.base.TextDiffSettingsHolder;
+import com.intellij.diff.tools.util.base.HighlightPolicy;
+import com.intellij.diff.tools.util.base.IgnorePolicy;
 import com.intellij.diff.tools.util.DiffDataKeys;
 import com.intellij.diff.util.LineCol;
 import com.intellij.diff.util.Range;
 import com.intellij.diff.util.DiffUtil;
 import com.intellij.openapi.diff.DiffColors;
+import com.intellij.ide.BrowserUtil;
+import com.intellij.diff.util.TextDiffType;
 import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.editor.colors.EditorFontType;
 import com.intellij.openapi.editor.colors.EditorColorsListener;
@@ -51,12 +55,17 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DefaultHighlighter;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.ArrayList;
+import java.util.function.Supplier;
+import java.util.function.Consumer;
 
 final class CsvTableDiffViewer implements FrameDiffTool.DiffViewer {
     private static final int ROW_MARKER_WIDTH = 5;
@@ -148,11 +157,32 @@ final class CsvTableDiffViewer implements FrameDiffTool.DiffViewer {
                 revealed = List.of();
                 updateFolding();
             }
+
+            @Override
+            public void ignorePolicyChanged() {
+                refreshOptions();
+            }
+
+            @Override
+            public void highlightPolicyChanged() {
+                refreshOptions();
+            }
+
+            @Override
+            public void scrollingChanged() {
+                synchronizeScrolling(focusedSide);
+            }
         }, this);
     }
 
+    private void refreshOptions() {
+        finishEditing();
+        revealed = List.of();
+        scheduleRefresh();
+    }
+
     /**
-     * Shares the text diff settings of the diff place, so collapsing unchanged fragments applies to both viewers.
+     * Shares the diff place's text preferences with the table viewer.
      */
     private static TextDiffSettingsHolder.TextDiffSettings textSettings(DiffContext context) {
         TextDiffSettingsHolder.TextDiffSettings settings = context.getUserData(TextDiffSettingsHolder.TextDiffSettings.KEY);
@@ -268,12 +298,111 @@ final class CsvTableDiffViewer implements FrameDiffTool.DiffViewer {
         registerApplyShortcuts();
         FrameDiffTool.ToolbarComponents toolbar = new FrameDiffTool.ToolbarComponents();
         toolbar.statusPanel = status;
-        toolbar.toolbarActions = List.of(new NavigationAction(false), new NavigationAction(true),
+        toolbar.popupActions = createOptionsActions();
+        toolbar.toolbarActions = new ArrayList<>(List.of(new NavigationAction(false), new NavigationAction(true),
                 Separator.getInstance(), createJumpToSourceActionGroup(),
                 Separator.getInstance(), new CollapseUnchangedAction(),
-                Separator.getInstance(), createSwapSidesAction());
+                Separator.getInstance(), createSwapSidesAction()));
+        addOptionsToolbarAction(toolbar, new OptionsActionGroup(toolbar.popupActions));
         relocateJumpToSource();
         return toolbar;
+    }
+
+    @SuppressWarnings("JavaReflectionMemberAccess")
+    private static void addOptionsToolbarAction(FrameDiffTool.ToolbarComponents toolbar, AnAction options) {
+        try {
+            // Newer IDEs provide a separate trailing toolbar, absent from the minimum supported SDK.
+            FrameDiffTool.ToolbarComponents.class.getField("rightToolbarActions").set(toolbar, List.of(options));
+        } catch (NoSuchFieldException exception) {
+            List<AnAction> actions = Objects.requireNonNull(toolbar.toolbarActions);
+            actions.add(Separator.getInstance());
+            actions.add(options);
+        } catch (IllegalAccessException exception) {
+            throw new IllegalStateException("Cannot configure the CSV diff options toolbar", exception);
+        }
+    }
+
+    private static final class OptionsActionGroup extends DefaultActionGroup implements RightAlignedToolbarAction {
+        OptionsActionGroup(List<AnAction> actions) {
+            super(CsvPluginManager.getLocalizedText("table.diff.options"), true);
+            getTemplatePresentation().setIcon(AllIcons.General.GearPlain);
+            addAll(actions);
+        }
+    }
+
+    private List<AnAction> createOptionsActions() {
+        List<AnAction> actions = new ArrayList<>();
+        actions.add(new SynchronizeScrollingAction());
+        actions.add(Separator.create(CsvPluginManager.getLocalizedText("table.diff.ignore.differences")));
+        for (IgnorePolicy policy : List.of(IgnorePolicy.DEFAULT, IgnorePolicy.TRIM_WHITESPACES,
+                IgnorePolicy.IGNORE_WHITESPACES, IgnorePolicy.FORMATTING)) {
+            actions.add(new OptionAction<>(CsvPluginManager.getLocalizedText("table.diff.ignore." + policy.name()), policy,
+                    () -> CsvDiffOptions.capture(settings).ignore(), settings::setIgnorePolicy));
+        }
+        actions.add(Separator.create(CsvPluginManager.getLocalizedText("table.diff.highlight.differences")));
+        for (HighlightPolicy policy : List.of(HighlightPolicy.BY_LINE, HighlightPolicy.BY_WORD,
+                HighlightPolicy.BY_CHAR, HighlightPolicy.DO_NOT_HIGHLIGHT)) {
+            actions.add(new OptionAction<>(CsvPluginManager.getLocalizedText("table.diff.highlight." + policy.name()), policy,
+                    () -> CsvDiffOptions.capture(settings).highlight(), settings::setHighlightPolicy));
+        }
+        actions.add(Separator.getInstance());
+        actions.add(new DumbAwareAction(CsvPluginManager.getLocalizedText("table.diff.help"), null, AllIcons.Actions.Help) {
+            @Override
+            public void actionPerformed(@NotNull AnActionEvent event) {
+                BrowserUtil.browse("https://github.com/SeeSharpSoft/intellij-csv-validator/blob/main/README.md#table-diffs");
+            }
+        });
+        return List.copyOf(actions);
+    }
+
+    private static final class OptionAction<T> extends DumbAwareAction implements Toggleable {
+        private final T value;
+        private final Supplier<T> selected;
+        private final Consumer<T> select;
+
+        OptionAction(String text, T value, Supplier<T> selected, Consumer<T> select) {
+            super(text);
+            this.value = value;
+            this.selected = selected;
+            this.select = select;
+        }
+
+        @Override
+        public @NotNull ActionUpdateThread getActionUpdateThread() {
+            return ActionUpdateThread.EDT;
+        }
+
+        @Override
+        public void update(@NotNull AnActionEvent event) {
+            Toggleable.setSelected(event.getPresentation(), value.equals(selected.get()));
+        }
+
+        @Override
+        public void actionPerformed(@NotNull AnActionEvent event) {
+            select.accept(value);
+        }
+    }
+
+    private final class SynchronizeScrollingAction extends DumbAwareToggleAction {
+        SynchronizeScrollingAction() {
+            super(CsvPluginManager.getLocalizedText("table.diff.synchronize.scrolling"));
+        }
+
+        @Override
+        public @NotNull ActionUpdateThread getActionUpdateThread() {
+            return ActionUpdateThread.EDT;
+        }
+
+        @Override
+        public boolean isSelected(@NotNull AnActionEvent event) {
+            return settings.isEnableSyncScroll();
+        }
+
+        @Override
+        public void setSelected(@NotNull AnActionEvent event, boolean state) {
+            focusedSide = sideFor(event);
+            settings.setEnableSyncScroll(state);
+        }
     }
 
     private ActionGroup createJumpToSourceActionGroup() {
@@ -485,7 +614,8 @@ final class CsvTableDiffViewer implements FrameDiffTool.DiffViewer {
     private void refresh() {
         refreshing = true;
         status.setText(CsvPluginManager.getLocalizedText("table.diff.comparing"));
-        pending = ReadAction.nonBlocking(() -> CsvDiffComparison.compare(readSides()))
+        CsvDiffOptions options = CsvDiffOptions.capture(settings);
+        pending = ReadAction.nonBlocking(() -> CsvDiffComparison.compare(readSides(), options))
                 .expireWith(this)
                 .expireWhen(() -> disposed || context.getProject() != null && context.getProject().isDisposed())
                 .finishOnUiThread(ModalityState.any(), this::showComparison)
@@ -499,7 +629,7 @@ final class CsvTableDiffViewer implements FrameDiffTool.DiffViewer {
     }
 
     private void showComparison(CsvDiffComparison result) {
-        if (!isCurrent(result)) {
+        if (!result.options().equals(CsvDiffOptions.capture(settings)) || !isCurrent(result)) {
             scheduleRefresh();
             return;
         }
@@ -572,7 +702,7 @@ final class CsvTableDiffViewer implements FrameDiffTool.DiffViewer {
     }
 
     private void synchronizeScrolling(int side) {
-        if (scrolling) return;
+        if (scrolling || !settings.isEnableSyncScroll()) return;
         scrolling = true;
         try {
             JViewport source = scrollPanes[side].getViewport();
@@ -912,17 +1042,40 @@ final class CsvTableDiffViewer implements FrameDiffTool.DiffViewer {
         }
 
         @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean selected, boolean focus,
+                                                       int row, int column) {
+            getTextArea().getHighlighter().removeAllHighlights();
+            Component renderer = super.getTableCellRendererComponent(table, value, selected, focus, row, column);
+            var fragments = comparison.fragments(folding.firstRow(row), column);
+            if (selected || fragments.isEmpty()) return renderer;
+            var painter = new DefaultHighlighter.DefaultHighlightPainter(TextDiffType.MODIFIED.getColor(null));
+            for (var fragment : fragments) {
+                int start = side == 0 ? fragment.getStartOffset1() : fragment.getStartOffset2();
+                int end = side == 0 ? fragment.getEndOffset1() : fragment.getEndOffset2();
+                try {
+                    getTextArea().getHighlighter().addHighlight(start, end, painter);
+                } catch (BadLocationException exception) {
+                    throw new IllegalStateException("CSV diff fragment outside its cell", exception);
+                }
+            }
+            return renderer;
+        }
+
+        @Override
         protected Color getCellBackgroundColor(JTable table, int row, int column) {
             var scheme = EditorColorsManager.getInstance().getGlobalScheme();
             Color background = super.getCellBackgroundColor(table, row, column);
             int alignedRow = folding.firstRow(row);
-            if (comparison.changed(alignedRow, column)) {
+            if (comparison.options().highlight() != HighlightPolicy.DO_NOT_HIGHLIGHT && comparison.changed(alignedRow, column)) {
                 var aligned = comparison.rows().get(alignedRow);
                 var key = aligned.index(side) < 0 ? DiffColors.DIFF_ABSENT
                         : aligned.index(1 - side) < 0 ? side == 0 ? DiffColors.DIFF_DELETED : DiffColors.DIFF_INSERTED
                         : DiffColors.DIFF_MODIFIED;
                 var attributes = scheme.getAttributes(key);
                 Color diffBackground = attributes == null ? null : attributes.getBackgroundColor();
+                if (!comparison.fragments(alignedRow, column).isEmpty()) {
+                    diffBackground = TextDiffType.MODIFIED.getIgnoredColor(null);
+                }
                 background = diffBackground == null ? JBColor.LIGHT_GRAY : diffBackground;
             }
             return background;

@@ -127,6 +127,27 @@ between different formats uses the destination's separator and escape character.
 A difference in the final line break is displayed separately and can also be applied.
 Comparison is based on record order, not a key column.
 
+The **Options** cogwheel at the far right of the diff toolbar, after the diff-view selector,
+offers, in the same order as the text diff:
+
+- **Synchronize Scrolling**: link horizontal and vertical scrolling, or scroll each table independently.
+  Turning it back on aligns both viewports with the focused side.
+- **Ignore differences**: **None** compares exact record text; **Trim Whitespaces** ignores leading
+  and trailing whitespace on each line of a raw field; **Ignore Whitespaces** ignores whitespace
+  within raw fields. Field boundaries and blank records remain significant. **Ignore Formatting**
+  compares decoded cell values, ignoring separators, quoting, escaping, and padding outside quotes,
+  but preserving whitespace inside values, field boundaries, and the distinction between comments and records.
+- **Highlight Differences**: **Lines** colors entire changed cells; **Words** and **Characters** additionally
+  emphasize the changed portions inside cells. **None** hides cell highlighting without disabling difference
+  navigation, divider markers, or change application.
+- **Help** opens this section of the README.
+
+These settings share the text diff's preferences. Text-only settings are omitted: records always remain
+aligned; ignoring empty lines could hide actual CSV records; and **Split Changes** splits text-line
+changes rather than table records. If selected in the text diff, **Ignore Whitespaces and Empty Lines**
+acts as **Ignore Whitespaces** in the table diff, and **Split Changes** acts as **Words**.
+The **Appearance** submenu is not included.
+
 Comparisons refresh in the background when either document changes. Malformed CSV or
 comparisons too large to compute show an explicit message; use the text diff to inspect
 them. Three-way comparisons and merge-conflict resolution continue to use IntelliJ's
