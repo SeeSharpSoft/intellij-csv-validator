@@ -58,7 +58,7 @@ public class CsvGithubIssueSubmitterProgressTest extends CsvBasePlatformTestCase
         GithubResponsePage<GithubSearchedIssue> searchResult = new GithubResponsePage<>(
                 duplicate ? List.of(foundIssue) : List.of(), null, null, null, null);
 
-        when(executor.execute(any(), any())).thenAnswer(invocation -> {
+        when(executor.execute(any(ProgressIndicator.class), any())).thenAnswer(invocation -> {
             ProgressIndicator requestIndicator = invocation.getArgument(0);
             assertNotSame(taskIndicator, requestIndicator);
             assertFalse(requestIndicator.isRunning());
@@ -105,7 +105,7 @@ public class CsvGithubIssueSubmitterProgressTest extends CsvBasePlatformTestCase
         GithubApiRequestExecutor executor = mock(GithubApiRequestExecutor.WithTokenAuth.class);
         List<SubmittedReportInfo> reports = new ArrayList<>();
 
-        when(executor.execute(any(), any())).thenAnswer(invocation -> {
+        when(executor.execute(any(ProgressIndicator.class), any())).thenAnswer(invocation -> {
             ProgressIndicator requestIndicator = invocation.getArgument(0);
             return progressManager.runProcess((Computable<Object>) () -> {
                 taskIndicator.cancel();

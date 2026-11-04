@@ -25,6 +25,6 @@ jobs:
     - name: Build with Gradle
       env:
         IDEA_PLATFORM: IU
-        IDEA_VERSION: LATEST-EAP-SNAPSHOT
+        IDEA_VERSION: latest
         IDEA_SOURCES: false
       run: xvfb-run ./gradlew verifyPlugin

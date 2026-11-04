@@ -57,6 +57,15 @@ update instructions. Missing or different plugin metadata does not fall through
 to AI. Only matching reports proceed to duplicate detection against the five
 most recently opened issues that are still open, excluding the report itself and pull requests.
 
+### Automated EAP compatibility checks
+
+The **EAP** workflow (`.github\workflows\CronEAP.yml`) runs on a schedule or manually
+with `IDEA_PLATFORM=IU`, `IDEA_VERSION=latest`, and Java 25. The Gradle plugin's
+[installer version selector](https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html#latest-version)
+chooses the newest published IDEA build across all channels, including EAP, Beta,
+and release candidates. Between EAP cycles, it can select the latest stable release.
+`IU` also identifies the unified IntelliJ IDEA distribution from 2025.3 onward.
+
 ### Publishing a stable release
 
 Every push to `Stable`, including a merged pull request, runs the **Publish** workflow.

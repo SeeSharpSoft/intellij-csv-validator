@@ -75,7 +75,7 @@ public class CsvGithubIssueSubmitterTest extends UsefulTestCase {
         when(duplicateIssue.getNumber()).thenReturn(1078L);
         GithubApiRequestExecutor executor = mock(GithubApiRequestExecutor.WithTokenAuth.class);
         ProgressIndicator indicator = new EmptyProgressIndicator();
-        when(executor.execute(any(), any())).thenAnswer(invocation -> {
+        when(executor.execute(any(ProgressIndicator.class), any())).thenAnswer(invocation -> {
             GithubApiRequest<?> request = invocation.getArgument(1);
             String url = URLDecoder.decode(request.getUrl(), StandardCharsets.UTF_8);
             assertTrue(url.contains("repo:SeeSharpSoft/intellij-csv-validator"));
@@ -91,7 +91,7 @@ public class CsvGithubIssueSubmitterTest extends UsefulTestCase {
         GithubSearchedIssue otherIssue = mock(GithubSearchedIssue.class);
         when(otherIssue.getTitle()).thenReturn("[Automated Report] Unexpected \"other token\"");
         GithubApiRequestExecutor executor = mock(GithubApiRequestExecutor.WithTokenAuth.class);
-        when(executor.execute(any(), any())).thenAnswer(invocation ->
+        when(executor.execute(any(ProgressIndicator.class), any())).thenAnswer(invocation ->
                 new GithubResponsePage<>(List.of(otherIssue), null, null, null, null));
 
         assertNull(classUnderTest.searchExistingIssues(executor, "[Automated Report] Unexpected \"token\"", new EmptyProgressIndicator()));
