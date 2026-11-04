@@ -45,21 +45,17 @@ All of the gradle tasks can be connected to the IntelliJ debugger.
 
 ### Automated issue triage
 
-The **AI Changelog Bug Validator** workflow runs only when an issue is first opened
-with a title starting with `[Automated Report]`. It never runs for `reopened` events.
-It uses GitHub Models to compare the report with recent `Fixed` changelog entries;
-entries under `Unreleased` or newer than the latest published GitHub release are excluded.
+The **Opened Issue Validator** workflow (`.github\workflows\opened-issue-validator.yaml`)
+runs only when an issue is first opened with a title starting with `[Automated Report]`.
+It never runs for `reopened` events and does not check the changelog.
 
-Automatic closure requires a high-confidence match and an unambiguous stable CSV
-plugin version in the report that is older than the matched fix. Reports on the
-fixed or newer version, manual reports, and issues edited, closed, or reopened since
-creation are left unchanged. A closure comment links to the exact changelog entry
-and asks the reporter to update or reopen if the problem persists. Invalid model
-responses or API failures fail the workflow rather than closing an issue.
-
-The inference action is pinned to its GitHub Models implementation; review its
-authentication requirements before upgrading it. Run the offline triage tests with
-`node --test .github\scripts\ai-changelog-validator.test.cjs`.
+Before any AI step, the issue body must contain the exact string
+`id=net.seesharpsoft.intellij.plugins.csv, version=<latest_release_version>,`
+using the latest published GitHub release version (without a leading `v` on the tag).
+If this string is absent, the report is closed as an outdated-plugin report with
+update instructions. Missing or different plugin metadata does not fall through
+to AI. Only matching reports proceed to duplicate detection against the five
+most recently opened issues that are still open, excluding the report itself and pull requests.
 
 ### Publishing a stable release
 

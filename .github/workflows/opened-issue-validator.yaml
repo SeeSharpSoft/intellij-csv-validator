@@ -1,0 +1,97 @@
+name: Opened Issue Validator
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: opened-issue-validator-${{ github.event.issue.number }}
+  cancel-in-progress: false
+
+jobs:
+  validate-opened-issue:
+    if: github.event.action == 'opened' && startsWith(github.event.issue.title, '[Automated Report]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Check plugin version and prepare duplicate candidates
+        id: prepare
+        uses: actions/github-script@v9.0.0
+        env:
+          COPILOT_PAT: ${{ secrets.COPILOT_PAT }}
+        with:
+          script: |
+            const fs = require('node:fs');
+            const path = require('node:path');
+            const validator = require('./.github/scripts/opened-issue-validator.cjs');
+            const state = await validator.prepareTriage({github, context, core});
+            if (!state) return;
+            if (!process.env.COPILOT_PAT) {
+              throw new Error('The COPILOT_PAT repository secret is required for duplicate detection.');
+            }
+
+            const promptFile = path.join(process.env.RUNNER_TEMP, 'opened-issue-prompt.txt');
+            const systemFile = path.join(process.env.RUNNER_TEMP, 'opened-issue-system.txt');
+            const stateFile = path.join(process.env.RUNNER_TEMP, 'opened-issue-state.json');
+            fs.writeFileSync(promptFile, state.prompt);
+            fs.writeFileSync(systemFile, validator.SYSTEM_PROMPT);
+            fs.writeFileSync(stateFile, JSON.stringify(state));
+            core.setOutput('prompt-file', promptFile);
+            core.setOutput('system-file', systemFile);
+            core.setOutput('state-file', stateFile);
+
+      - name: Set up Node.js for Copilot
+        if: steps.prepare.outputs.state-file != ''
+        uses: actions/setup-node@v7.1.0
+        with:
+          node-version: '24'
+
+      - name: Install restricted Copilot inference
+        if: steps.prepare.outputs.state-file != ''
+        id: copilot
+        run: |
+          npm install --global @github/copilot@1.0.103
+          printf '%s\n' \
+            '#!/usr/bin/env bash' \
+            'exec copilot --no-custom-instructions --disable-builtin-mcps --available-tools= "$@"' \
+            > "$RUNNER_TEMP/opened-issue-inference"
+          chmod +x "$RUNNER_TEMP/opened-issue-inference"
+          echo "cli-path=$RUNNER_TEMP/opened-issue-inference" >> "$GITHUB_OUTPUT"
+
+      - name: Compare report with the five most recent open issues
+        if: steps.prepare.outputs.state-file != ''
+        id: inference
+        uses: actions/ai-inference@v3
+        env:
+          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_PAT }}
+        with:
+          provider: copilot
+          model: auto
+          copilot-cli-path: ${{ steps.copilot.outputs.cli-path }}
+          prompt-file: ${{ steps.prepare.outputs.prompt-file }}
+          system-prompt-file: ${{ steps.prepare.outputs.system-file }}
+
+      - name: Apply guarded duplicate verdict
+        if: steps.prepare.outputs.state-file != ''
+        uses: actions/github-script@v9.0.0
+        env:
+          VALIDATION_STATE_FILE: ${{ steps.prepare.outputs.state-file }}
+          VALIDATION_RESPONSE_FILE: ${{ steps.inference.outputs.response-file }}
+        with:
+          script: |
+            const fs = require('node:fs');
+            const validator = require('./.github/scripts/opened-issue-validator.cjs');
+            await validator.applyVerdict(
+              {github, context, core},
+              JSON.parse(fs.readFileSync(process.env.VALIDATION_STATE_FILE, 'utf8')),
+              fs.readFileSync(process.env.VALIDATION_RESPONSE_FILE, 'utf8')
+            );

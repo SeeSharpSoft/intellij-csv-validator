@@ -40,8 +40,8 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v7.0.1
 
-    - name: Test issue triage
-      run: node --test .github/scripts/ai-changelog-validator.test.cjs
+    - name: Test opened-issue validation
+      run: node --test .github/scripts/opened-issue-validator.test.cjs
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
