@@ -296,35 +296,9 @@ final class CsvTableDiffViewer implements FrameDiffTool.DiffViewer {
         refresh();
         registerApplyShortcuts();
         installNavigationActions();
-        FrameDiffTool.ToolbarComponents toolbar = new FrameDiffTool.ToolbarComponents();
-        toolbar.statusPanel = status;
-        toolbar.popupActions = createOptionsActions();
-        toolbar.toolbarActions = new ArrayList<>(List.of(new CollapseUnchangedAction(),
-                Separator.getInstance(), createSwapSidesAction()));
-        addOptionsToolbarAction(toolbar, new OptionsActionGroup(toolbar.popupActions));
-        return toolbar;
-    }
-
-    @SuppressWarnings("JavaReflectionMemberAccess")
-    private static void addOptionsToolbarAction(FrameDiffTool.ToolbarComponents toolbar, AnAction options) {
-        try {
-            // Newer IDEs provide a separate trailing toolbar, absent from the minimum supported SDK.
-            FrameDiffTool.ToolbarComponents.class.getField("rightToolbarActions").set(toolbar, List.of(options));
-        } catch (NoSuchFieldException exception) {
-            List<AnAction> actions = Objects.requireNonNull(toolbar.toolbarActions);
-            actions.add(Separator.getInstance());
-            actions.add(options);
-        } catch (IllegalAccessException exception) {
-            throw new IllegalStateException("Cannot configure the CSV diff options toolbar", exception);
-        }
-    }
-
-    private static final class OptionsActionGroup extends DefaultActionGroup implements RightAlignedToolbarAction {
-        OptionsActionGroup(List<AnAction> actions) {
-            super(CsvPluginManager.getLocalizedText("table.diff.options"), true);
-            getTemplatePresentation().setIcon(AllIcons.General.GearPlain);
-            addAll(actions);
-        }
+        return CsvTableDiffToolbar.create(status,
+                List.of(new CollapseUnchangedAction(), Separator.getInstance(), createSwapSidesAction()),
+                createOptionsActions());
     }
 
     private List<AnAction> createOptionsActions() {

@@ -1333,6 +1333,37 @@ public class CsvTableDiffTest extends CsvBasePlatformTestCase {
         return actions;
     }
 
+    public void testToolbarCompatibilityPreservesInputsAndUsesTheNativeOptionsPlacement() throws IllegalAccessException {
+        JLabel status = new JLabel();
+        List<AnAction> viewerActions = List.of(new DefaultActionGroup("First", false),
+                new DefaultActionGroup("Second", false));
+        List<AnAction> popupActions = List.of(new DefaultActionGroup("Setting", false));
+        FrameDiffTool.ToolbarComponents toolbar = CsvTableDiffToolbar.create(status, viewerActions, popupActions);
+        assertSame(status, toolbar.statusPanel);
+        assertSame(popupActions, toolbar.popupActions);
+        assertNotNull(toolbar.toolbarActions);
+        assertEquals(viewerActions, toolbar.toolbarActions.subList(0, viewerActions.size()));
+        assertEquals("Toolbar construction must not append to the caller's actions", 2, viewerActions.size());
+
+        ActionGroup options = assertInstanceOf(viewerToolbarActions(toolbar).getLast(), ActionGroup.class);
+        assertTrue(options.isPopup());
+        assertEquals(popupActions, Arrays.asList(options.getChildren(null)));
+        var rightToolbar = Arrays.stream(FrameDiffTool.ToolbarComponents.class.getFields())
+                .filter(field -> field.getName().equals("rightToolbarActions")).findFirst();
+        if (rightToolbar.isPresent()) {
+            assertEquals("Split toolbars must keep Options out of the main toolbar", viewerActions, toolbar.toolbarActions);
+            assertEquals(List.of(options), rightToolbar.get().get(toolbar));
+        } else {
+            assertInstanceOf(options, com.intellij.openapi.actionSystem.RightAlignedToolbarAction.class);
+            assertEquals(List.of(viewerActions.getFirst(), viewerActions.getLast(), Separator.getInstance(), options),
+                    toolbar.toolbarActions);
+        }
+
+        FrameDiffTool.ToolbarComponents other = CsvTableDiffToolbar.create(new JLabel(), viewerActions, popupActions);
+        assertNotSame("Each viewer must own its toolbar actions", toolbar.toolbarActions, other.toolbarActions);
+        assertNotSame("Each viewer must own its Options menu", options, viewerToolbarActions(other).getLast());
+    }
+
     public void testOptionsMenuUsesNativeSectionsAndOmitsTextOnlyOptions() throws IllegalAccessException {
         textDiffSettings();
         FrameDiffTool.DiffViewer viewer = tableTool().createComponent(context,
