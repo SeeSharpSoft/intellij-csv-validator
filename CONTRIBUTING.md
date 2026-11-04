@@ -43,6 +43,24 @@ gradle runIdea
  
 All of the gradle tasks can be connected to the IntelliJ debugger.
 
+### Automated issue triage
+
+The **AI Changelog Bug Validator** workflow runs only when an issue is first opened
+with a title starting with `[Automated Report]`. It never runs for `reopened` events.
+It uses GitHub Models to compare the report with recent `Fixed` changelog entries;
+entries under `Unreleased` or newer than the latest published GitHub release are excluded.
+
+Automatic closure requires a high-confidence match and an unambiguous stable CSV
+plugin version in the report that is older than the matched fix. Reports on the
+fixed or newer version, manual reports, and issues edited, closed, or reopened since
+creation are left unchanged. A closure comment links to the exact changelog entry
+and asks the reporter to update or reopen if the problem persists. Invalid model
+responses or API failures fail the workflow rather than closing an issue.
+
+The inference action is pinned to its GitHub Models implementation; review its
+authentication requirements before upgrading it. Run the offline triage tests with
+`node --test .github\scripts\ai-changelog-validator.test.cjs`.
+
 ### Publishing a stable release
 
 Every push to `Stable`, including a merged pull request, runs the **Publish** workflow.
@@ -50,8 +68,3 @@ After publishing to JetBrains Marketplace succeeds, it creates a GitHub release 
 using `pluginVersion` from `gradle.properties` (for example, `252.54.0`). The tag points
 to the commit that triggered the workflow. The release includes the built plugin ZIP
 and automatically generated GitHub release notes.
-
-Prepare a new plugin version and its changelog entry before each push to `Stable`;
-an existing release tag cannot be reused for a different version or commit. The workflow
-uses the built-in `GITHUB_TOKEN` with `contents: write` permission for GitHub Releases
-and the existing `JI_TOKEN` secret for JetBrains Marketplace.
