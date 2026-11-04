@@ -159,6 +159,14 @@
     </projectListeners>
 
     <actions resource-bundle="localization.CsvEditorActions">
+        <group id="CsvTableDiffNavigation">
+            <action id="CsvTableDiff.PreviousDifference"
+                    class="net.seesharpsoft.intellij.plugins.csv.diff.CsvTableDiffNavigationActions$Previous"
+                    use-shortcut-of="PreviousDiff" />
+            <action id="CsvTableDiff.NextDifference"
+                    class="net.seesharpsoft.intellij.plugins.csv.diff.CsvTableDiffNavigationActions$Next"
+                    use-shortcut-of="NextDiff" />
+        </group>
         <group id="CsvTableEditorColumnContextMenu"
                popup="true"
         >

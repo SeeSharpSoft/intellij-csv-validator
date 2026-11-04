@@ -93,7 +93,8 @@ viewer's view selector; in IDEs showing icons there, it is the icon with two sid
 The normal side-by-side and unified text diffs remain available.
 The table diff aligns inserted and deleted records, highlights changed cells using the
 IDE's diff colors, and synchronizes horizontal and vertical scrolling. Use the diff
-toolbar's previous/next difference actions to select and reveal changed records.
+toolbar's previous/next difference actions at the start of the common navigation toolbar
+to select and reveal changed records.
 **Jump to Source** opens the selected cell in its source file. When the selected side has no
 source file, as with clipboard contents, it opens the corresponding position on the other side.
 **Swap Sides** uses the same action as the text diff and is available for comparisons that

@@ -6,6 +6,8 @@ import com.intellij.diff.DiffTool;
 import com.intellij.diff.FrameDiffTool;
 import com.intellij.diff.actions.BaseShowDiffAction;
 import com.intellij.diff.actions.impl.MutableDiffRequestChain;
+import com.intellij.diff.chains.DiffRequestChain;
+import com.intellij.diff.chains.SimpleDiffRequestChain;
 import com.intellij.diff.impl.CacheDiffRequestChainProcessor;
 import com.intellij.diff.contents.DocumentContent;
 import com.intellij.diff.requests.SimpleDiffRequest;
@@ -14,6 +16,7 @@ import com.intellij.diff.tools.util.base.TextDiffSettingsHolder;
 import com.intellij.diff.tools.util.base.HighlightPolicy;
 import com.intellij.diff.tools.util.base.IgnorePolicy;
 import com.intellij.diff.tools.util.DiffDataKeys;
+import com.intellij.diff.tools.simple.SimpleDiffTool;
 import com.intellij.diff.util.DiffUserDataKeys;
 import com.intellij.diff.util.DiffUserDataKeysEx;
 import com.intellij.diff.util.TextDiffType;
@@ -41,6 +44,7 @@ import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.fileEditor.DocumentsEditor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.editor.EditorFactory;
 import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.editor.colors.EditorColorsScheme;
 import com.intellij.openapi.editor.markup.TextAttributes;
@@ -489,7 +493,10 @@ public class CsvTableDiffTest extends CsvBasePlatformTestCase {
     }
 
     private void assertJumpToSource(JComponent component, DocumentContent source, int expectedOffset) {
-        AnAction jump = ActionManager.getInstance().getAction("Diff.OpenInEditor");
+        assertJumpToSource(ActionManager.getInstance().getAction("Diff.OpenInEditor"), component, source, expectedOffset);
+    }
+
+    private void assertJumpToSource(AnAction jump, JComponent component, DocumentContent source, int expectedOffset) {
         AnActionEvent event = actionEvent(component);
         jump.update(event);
         assertTrue("Jump to Source must be enabled for a file-backed CSV comparison", event.getPresentation().isEnabled());
@@ -504,70 +511,108 @@ public class CsvTableDiffTest extends CsvBasePlatformTestCase {
         assertEquals(expectedOffset, editor.getCaretModel().getOffset());
     }
 
-    public void testJumpToSourceIsBetweenDifferenceNavigationAndFoldingWithoutADuplicateButton() {
-        assertJumpToSourceToolbarPlacement(false);
+    public void testTableDifferenceButtonsLeadTheCommonToolbarInBothLayouts() throws Exception {
+        for (boolean newToolbar : List.of(false, true)) {
+            PsiFile file = myFixture.addFileToProject("source-" + newToolbar + ".csv", "id,value\n1,b\n2,same\n3,d\n");
+            DocumentContent source = DiffContentFactory.getInstance().createDocument(getProject(), file.getVirtualFile());
+            assertNotNull(source);
+            MutableDiffRequestChain chain = new MutableDiffRequestChain(
+                    content("id,value\n1,a\n2,same\n3,c\n"), source);
+            chain.putUserData(DiffUserDataKeysEx.DIFF_NEW_TOOLBAR, newToolbar);
+            CacheDiffRequestChainProcessor processor = tableDiffProcessor(chain);
+            PlatformTestUtil.waitWithEventsDispatching("CSV differences displayed", () -> {
+                List<JTable> tables = tables(processor.getComponent());
+                return tables.size() == 2 && tables.getLast().getRowCount() == 4;
+            }, 10);
+            List<AnAction> actions = toolbarButtons(processor);
+            assertEquals("CSV navigation must lead the common toolbar in layout " + newToolbar,
+                    List.of("Previous Difference", "Next Difference", "Jump to Source"),
+                    actions.stream().limit(3).map(action -> action.getTemplatePresentation().getText()).toList());
+            assertEquals("Jump to Source must not be duplicated across the toolbars", 1,
+                    UIUtil.findComponentsOfType(processor.getComponent(), ActionButton.class).stream()
+                            .filter(Component::isVisible)
+                            .filter(button -> "Jump to Source".equals(button.getAction().getTemplatePresentation().getText()))
+                            .count());
+            JTable table = tables(processor.getComponent()).getLast();
+            actions.get(1).actionPerformed(actionEvent(table));
+            assertEquals(1, table.getSelectedRow());
+            actions.get(1).actionPerformed(actionEvent(table));
+            assertEquals(3, table.getSelectedRow());
+            actions.getFirst().actionPerformed(actionEvent(table));
+            assertEquals(1, table.getSelectedRow());
+            assertJumpToSource(actions.get(2), table, source, source.getDocument().getText().indexOf("b\n"));
+        }
     }
 
-    public void testJumpToSourceHasTheSamePlacementInTheNewDiffToolbar() {
-        assertJumpToSourceToolbarPlacement(true);
+    public void testTextDiffStillHasOneWorkingNavigationPairInBothLayouts() throws Exception {
+        for (boolean newToolbar : List.of(false, true)) {
+            DocumentContent right = content("id,value\n1,b\n2,same\n3,d\n");
+            MutableDiffRequestChain chain = new MutableDiffRequestChain(
+                    content("id,value\n1,a\n2,same\n3,c\n"), right);
+            chain.putUserData(DiffUserDataKeysEx.DIFF_NEW_TOOLBAR, newToolbar);
+            CacheDiffRequestChainProcessor processor = diffProcessor(chain, SimpleDiffTool.INSTANCE);
+            PlatformTestUtil.waitWithEventsDispatching("Text diff displayed",
+                    () -> EditorFactory.getInstance().getEditors(right.getDocument(), getProject()).length > 0, 10);
+            Editor editor = EditorFactory.getInstance().getEditors(right.getDocument(), getProject())[0];
+            List<AnAction> actions = toolbarButtons(processor);
+            assertEquals(List.of("Previous Difference", "Next Difference", "Jump to Source"),
+                    actions.stream().limit(3).map(action -> action.getTemplatePresentation().getText()).toList());
+            for (String name : List.of("Previous Difference", "Next Difference", "Jump to Source")) {
+                assertEquals("Text diff must not acquire duplicate " + name + " buttons", 1,
+                        actions.stream().filter(action -> name.equals(action.getTemplatePresentation().getText())).count());
+            }
+            editor.getCaretModel().moveToOffset(0);
+            PlatformTestUtil.waitWithEventsDispatching("Text differences ready", () -> {
+                AnActionEvent event = actionEvent(editor.getContentComponent());
+                actions.get(1).update(event);
+                return event.getPresentation().isEnabled();
+            }, 10);
+            actions.get(1).actionPerformed(actionEvent(editor.getContentComponent()));
+            assertEquals(1, editor.getCaretModel().getLogicalPosition().line);
+            actions.get(1).actionPerformed(actionEvent(editor.getContentComponent()));
+            assertEquals(3, editor.getCaretModel().getLogicalPosition().line);
+            actions.getFirst().actionPerformed(actionEvent(editor.getContentComponent()));
+            assertEquals(1, editor.getCaretModel().getLogicalPosition().line);
+        }
     }
 
-    public void testJumpToSourceRelocationSupportsUnregisteredNavigationGroupsWithoutChangingSharedActions() {
-        ActionManager manager = ActionManager.getInstance();
-        AnAction jump = manager.getAction("Diff.OpenInEditor");
-        DefaultActionGroup sharedNavigation = new DefaultActionGroup(jump);
-        assertJumpToSourceRelocation(new DefaultActionGroup(sharedNavigation));
-        assertArrayEquals("Shared IDE action groups must remain unchanged",
-                new AnAction[]{jump}, sharedNavigation.getChildren(manager));
-    }
-
-    public void testJumpToSourceRelocationSupportsFlatNavigationWithoutRemovingTheViewerButton() {
-        assertJumpToSourceRelocation(new DefaultActionGroup(ActionManager.getInstance().getAction("Diff.OpenInEditor")));
-    }
-
-    private void assertJumpToSourceRelocation(DefaultActionGroup group) {
-        ActionManager manager = ActionManager.getInstance();
-        AnAction jump = manager.getAction("Diff.OpenInEditor");
-        ActionToolbar host = manager.createActionToolbar("test", group, true);
-        context.putUserData(DiffUserDataKeysEx.LEFT_TOOLBAR, host);
-        SimpleDiffRequest request = new SimpleDiffRequest("CSV comparison", content("a,b"), content("a,c"), "Before", "After");
-        FrameDiffTool.DiffViewer viewer = tableTool().createComponent(context, request);
-        Disposer.register(getTestRootDisposable(), viewer);
-        host.setTargetComponent(viewer.getComponent());
-        FrameDiffTool.ToolbarComponents toolbar = viewer.init();
-        assertNotNull(toolbar.toolbarActions);
-        group.addAll(toolbar.toolbarActions);
-        PlatformTestUtil.dispatchAllEventsInIdeEventQueue();
-
-        List<AnAction> actions = new ArrayList<>();
-        collectToolbarActions(group, actions);
-        int index = actions.indexOf(jump);
-        assertEquals("Only the viewer's Jump to Source button must remain", 1,
-                actions.stream().filter(action -> action == jump).count());
-        assertTrue(index >= 3);
-        assertEquals("Previous Difference", actions.get(index - 3).getTemplatePresentation().getText());
-        assertEquals("Next Difference", actions.get(index - 2).getTemplatePresentation().getText());
-    }
-
-    private void assertJumpToSourceToolbarPlacement(boolean newToolbar) {
-        MutableDiffRequestChain chain = new MutableDiffRequestChain(content("id,value\n1,a\n"), content("id,value\n1,b\n"));
-        chain.putUserData(DiffUserDataKeysEx.DIFF_NEW_TOOLBAR, newToolbar);
-        CacheDiffRequestChainProcessor processor = tableDiffProcessor(chain);
-        PlatformTestUtil.waitWithEventsDispatching("CSV diff toolbar displayed",
-                () -> tables(processor.getComponent()).size() == 2, 10);
-        PlatformTestUtil.dispatchAllEventsInIdeEventQueue();
-        List<AnAction> actions = new ArrayList<>();
-        collectToolbarActions(processor.getComponent(), actions);
-        AnAction jump = ActionManager.getInstance().getAction("Diff.OpenInEditor");
-        int index = actions.indexOf(jump);
-        assertTrue("Jump to Source must follow the table's navigation actions", index >= 3);
-        assertEquals("Previous Difference", actions.get(index - 3).getTemplatePresentation().getText());
-        assertEquals("Next Difference", actions.get(index - 2).getTemplatePresentation().getText());
-        assertInstanceOf(actions.get(index - 1), Separator.class);
-        assertInstanceOf(actions.get(index + 1), Separator.class);
-        assertEquals("Collapse Unchanged Fragments", actions.get(index + 2).getTemplatePresentation().getText());
-        assertEquals("Only one Jump to Source button may be offered", 1,
-                actions.stream().filter(action -> action == jump).count());
+    public void testTableNavigationTargetsTheCurrentFileAfterNativeFileNavigation() throws Exception {
+        SimpleDiffRequest first = new SimpleDiffRequest("First file",
+                content("first,v\n1,a\n2,same\n3,c\n"), content("first,v\n1,b\n2,same\n3,d\n"), "Before", "After");
+        SimpleDiffRequest second = new SimpleDiffRequest("Second file",
+                content("second,v\n1,e\n2,same\n3,g\n"), content("second,v\n1,f\n2,same\n3,h\n"), "Before", "After");
+        CacheDiffRequestChainProcessor processor = tableDiffProcessor(new SimpleDiffRequestChain(new ArrayList<>(List.of(first, second))));
+        PlatformTestUtil.waitWithEventsDispatching("First CSV diff displayed", () -> {
+            List<JTable> tables = tables(processor.getComponent());
+            return tables.size() == 2 && tables.getLast().getRowCount() == 4;
+        }, 10);
+        List<AnAction> actions = toolbarButtons(processor);
+        assertEquals(List.of("Previous Difference", "Next Difference"),
+                actions.stream().limit(2).map(action -> action.getTemplatePresentation().getText()).toList());
+        JTable table = tables(processor.getComponent()).getLast();
+        actions.get(1).actionPerformed(actionEvent(table));
+        assertEquals(1, table.getSelectedRow());
+        AnAction nextFile = ActionManager.getInstance().getAction("Diff.NextChange");
+        AnActionEvent event = actionEvent(table);
+        nextFile.update(event);
+        assertTrue("Native next-file navigation must remain available", event.getPresentation().isEnabled());
+        nextFile.actionPerformed(event);
+        PlatformTestUtil.waitWithEventsDispatching("Second CSV diff displayed", () -> {
+            List<JTable> tables = tables(processor.getComponent());
+            return tables.size() == 2 && tables.getLast().getRowCount() == 4
+                    && "second".equals(tables.getLast().getValueAt(0, 0));
+        }, 10);
+        table = tables(processor.getComponent()).getLast();
+        actions = toolbarButtons(processor);
+        assertEquals("CSV navigation must still lead the toolbar after switching files",
+                List.of("Previous Difference", "Next Difference"),
+                actions.stream().limit(2).map(action -> action.getTemplatePresentation().getText()).toList());
+        actions.get(1).actionPerformed(actionEvent(table));
+        assertEquals(1, table.getSelectedRow());
+        actions.get(1).actionPerformed(actionEvent(table));
+        assertEquals(3, table.getSelectedRow());
+        actions.getFirst().actionPerformed(actionEvent(table));
+        assertEquals(1, table.getSelectedRow());
     }
 
     public void testNativeSwapSidesSwapsContentsTitlesAndSourceNavigation() {
@@ -633,16 +678,38 @@ public class CsvTableDiffTest extends CsvBasePlatformTestCase {
                 .findFirst().orElseThrow(() -> new AssertionError("The table diff must offer the native Swap Sides action"));
     }
 
-    private CacheDiffRequestChainProcessor tableDiffProcessor(MutableDiffRequestChain chain) {
+    private CacheDiffRequestChainProcessor tableDiffProcessor(DiffRequestChain chain) {
+        return diffProcessor(chain, tableTool());
+    }
+
+    private CacheDiffRequestChainProcessor diffProcessor(DiffRequestChain chain, DiffTool tool) {
         CacheDiffRequestChainProcessor processor = new CacheDiffRequestChainProcessor(getProject(), chain) {
             @Override
             protected @NotNull List<DiffTool> getToolOrderFromSettings(@NotNull List<? extends DiffTool> availableTools) {
-                return List.of(tableTool());
+                return List.of(tool);
             }
         };
         Disposer.register(getTestRootDisposable(), processor);
         processor.updateRequest();
         return processor;
+    }
+
+    private List<AnAction> toolbarButtons(CacheDiffRequestChainProcessor processor) throws Exception {
+        JPanel root = new JPanel(new BorderLayout());
+        root.add(processor.getComponent());
+        root.setSize(1200, 400);
+        root.addNotify();
+        Disposer.register(getTestRootDisposable(), root::removeNotify);
+        for (JComponent child : UIUtil.findComponentsOfType(root, JComponent.class)) {
+            if (child instanceof ActionToolbar toolbar) {
+                var update = toolbar.updateActionsAsync();
+                PlatformTestUtil.waitWithEventsDispatching("Diff toolbar updated", update::isDone, 10);
+                update.get();
+            }
+        }
+        layout(root);
+        return UIUtil.findComponentsOfType(processor.getToolbar().getComponent(), ActionButton.class)
+                .stream().filter(Component::isVisible).map(ActionButton::getAction).toList();
     }
 
     private static void collectToolbarActions(Container component, List<AnAction> actions) {
@@ -801,23 +868,6 @@ public class CsvTableDiffTest extends CsvBasePlatformTestCase {
                 () -> "id,v\n1,b\n2,same\n3,c\n".equals(right.getDocument().getText()), 10);
     }
 
-    public void testApplyShortcutsReplaceTheToolbarButtonsAndUseTheIdeDiffKeymap() throws IllegalAccessException {
-        SimpleDiffRequest request = new SimpleDiffRequest("CSV comparison",
-                content("id,v\n1,a\n"), content("id,v\n1,b\n"), "Before", "After");
-        FrameDiffTool.DiffViewer viewer = tableTool().createComponent(context, request);
-        Disposer.register(getTestRootDisposable(), viewer);
-        FrameDiffTool.ToolbarComponents toolbar = viewer.init();
-        assertEquals(List.of("Previous Difference", "Next Difference", "Jump to Source",
-                        "Collapse Unchanged Fragments", "Swap Sides", "Options"),
-                viewerToolbarActions(toolbar).stream().filter(action -> !(action instanceof Separator))
-                        .map(action -> action.getTemplatePresentation().getText()).toList());
-        ActionManager actions = ActionManager.getInstance();
-        assertArrayEquals(actions.getAction("Diff.ApplyLeftSide").getShortcutSet().getShortcuts(),
-                shortcutAction(viewer, "Apply Difference to Right").getShortcutSet().getShortcuts());
-        assertArrayEquals(actions.getAction("Diff.ApplyRightSide").getShortcutSet().getShortcuts(),
-                shortcutAction(viewer, "Apply Difference to Left").getShortcutSet().getShortcuts());
-    }
-
     public void testMalformedCsvShowsAnExplicitErrorInsteadOfAnIncompleteDiff() {
         DocumentContent right = DiffContentFactory.getInstance().createEditable(getProject(), "id,name\n1,Bob\n", CsvFileType.INSTANCE);
         SimpleDiffRequest request = new SimpleDiffRequest("CSV comparison", content("id,name\n1,Alice\n"), right, "Before", "After");
@@ -866,11 +916,11 @@ public class CsvTableDiffTest extends CsvBasePlatformTestCase {
                 content("id,value\n1,a\n2,same\n3,c\n"), content("id,value\n1,b\n2,same\n3,d\n"), "Before", "After");
         FrameDiffTool.DiffViewer viewer = tableTool().createComponent(context, request);
         Disposer.register(getTestRootDisposable(), viewer);
-        FrameDiffTool.ToolbarComponents toolbar = viewer.init();
+        viewer.init();
         List<JTable> tables = tables(viewer.getComponent());
         PlatformTestUtil.waitWithEventsDispatching("CSV differences displayed", () -> tables.getLast().getRowCount() == 4, 10);
-        AnAction next = toolbarAction(toolbar, "Next Difference");
-        AnAction previous = toolbarAction(toolbar, "Previous Difference");
+        AnAction next = ActionManager.getInstance().getAction("CsvTableDiff.NextDifference");
+        AnAction previous = ActionManager.getInstance().getAction("CsvTableDiff.PreviousDifference");
         next.actionPerformed(actionEvent(tables.getLast()));
         assertEquals(1, tables.getFirst().getSelectedRow());
         assertEquals(1, tables.getLast().getSelectedRow());
@@ -891,7 +941,7 @@ public class CsvTableDiffTest extends CsvBasePlatformTestCase {
         SimpleDiffRequest request = new SimpleDiffRequest("CSV comparison", content(before), content(after), "Before", "After");
         FrameDiffTool.DiffViewer viewer = tableTool().createComponent(context, request);
         Disposer.register(getTestRootDisposable(), viewer);
-        FrameDiffTool.ToolbarComponents toolbar = viewer.init();
+        viewer.init();
         List<JTable> tables = tables(viewer.getComponent());
         PlatformTestUtil.waitWithEventsDispatching("CSV differences displayed", () -> tables.getLast().getRowCount() == 43, 10);
         for (JTable table : tables) {
@@ -902,7 +952,7 @@ public class CsvTableDiffTest extends CsvBasePlatformTestCase {
         }
         viewer.getComponent().setBounds(0, 0, 600, 240);
         layout(viewer.getComponent());
-        AnAction next = toolbarAction(toolbar, "Next Difference");
+        AnAction next = ActionManager.getInstance().getAction("CsvTableDiff.NextDifference");
 
         next.actionPerformed(actionEvent(tables.getLast()));
         assertChangedCellRevealed(tables, 1, 8);
@@ -918,13 +968,13 @@ public class CsvTableDiffTest extends CsvBasePlatformTestCase {
         SimpleDiffRequest request = new SimpleDiffRequest("CSV comparison", content(before), content(after), "Before", "After");
         FrameDiffTool.DiffViewer viewer = tableTool().createComponent(context, request);
         Disposer.register(getTestRootDisposable(), viewer);
-        FrameDiffTool.ToolbarComponents toolbar = viewer.init();
+        viewer.init();
         List<JTable> tables = tables(viewer.getComponent());
         PlatformTestUtil.waitWithEventsDispatching("CSV differences displayed", () -> tables.getLast().getRowCount() == 81, 10);
         viewer.getComponent().setBounds(0, 0, 600, 240);
         layout(viewer.getComponent());
 
-        toolbarAction(toolbar, "Next Difference").actionPerformed(actionEvent(tables.getLast()));
+        ActionManager.getInstance().getAction("CsvTableDiff.NextDifference").actionPerformed(actionEvent(tables.getLast()));
 
         for (JTable table : tables) {
             assertEquals(40, table.getSelectedRow());
@@ -1021,11 +1071,11 @@ public class CsvTableDiffTest extends CsvBasePlatformTestCase {
                 content(records(Map.of())), right, "Before", "After");
         FrameDiffTool.DiffViewer viewer = tableTool().createComponent(context, request);
         Disposer.register(getTestRootDisposable(), viewer);
-        FrameDiffTool.ToolbarComponents toolbar = viewer.init();
+        viewer.init();
         List<JTable> tables = tables(viewer.getComponent());
         PlatformTestUtil.waitWithEventsDispatching("Collapsed CSV rows displayed", () -> tables.getLast().getRowCount() == 17, 10);
         show(viewer, 600, 600);
-        AnAction next = toolbarAction(toolbar, "Next Difference");
+        AnAction next = ActionManager.getInstance().getAction("CsvTableDiff.NextDifference");
         next.actionPerformed(actionEvent(tables.getLast()));
         assertEquals(3, tables.getLast().getSelectedRow());
         next.actionPerformed(actionEvent(tables.getLast()));
@@ -1412,7 +1462,7 @@ public class CsvTableDiffTest extends CsvBasePlatformTestCase {
                 () -> "1 differences".equals(status.getText())
                         && renderedText(table, 0, 1).getBackground().equals(renderedText(table, 1, 1).getBackground()), 10);
         assertEquals(renderedText(table, 0, 1).getBackground(), renderedText(table, 1, 1).getBackground());
-        toolbarAction(toolbar, "Next Difference").actionPerformed(actionEvent(table));
+        ActionManager.getInstance().getAction("CsvTableDiff.NextDifference").actionPerformed(actionEvent(table));
         assertEquals(2, table.getSelectedRow());
         shortcutAction(viewer, "Apply Difference to Right").actionPerformed(actionEvent(table));
         PlatformTestUtil.waitWithEventsDispatching("Only meaningful change applied",

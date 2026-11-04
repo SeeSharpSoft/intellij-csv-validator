@@ -34,7 +34,6 @@ import com.intellij.openapi.project.DumbAwareToggleAction;
 import com.intellij.pom.Navigatable;
 import com.intellij.icons.AllIcons;
 import com.intellij.diff.util.DiffUserDataKeys;
-import com.intellij.diff.util.DiffUserDataKeysEx;
 import com.intellij.util.Alarm;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.JBColor;
@@ -296,15 +295,13 @@ final class CsvTableDiffViewer implements FrameDiffTool.DiffViewer {
         }
         refresh();
         registerApplyShortcuts();
+        installNavigationActions();
         FrameDiffTool.ToolbarComponents toolbar = new FrameDiffTool.ToolbarComponents();
         toolbar.statusPanel = status;
         toolbar.popupActions = createOptionsActions();
-        toolbar.toolbarActions = new ArrayList<>(List.of(new NavigationAction(false), new NavigationAction(true),
-                Separator.getInstance(), createJumpToSourceActionGroup(),
-                Separator.getInstance(), new CollapseUnchangedAction(),
+        toolbar.toolbarActions = new ArrayList<>(List.of(new CollapseUnchangedAction(),
                 Separator.getInstance(), createSwapSidesAction()));
         addOptionsToolbarAction(toolbar, new OptionsActionGroup(toolbar.popupActions));
-        relocateJumpToSource();
         return toolbar;
     }
 
@@ -405,14 +402,6 @@ final class CsvTableDiffViewer implements FrameDiffTool.DiffViewer {
         }
     }
 
-    private ActionGroup createJumpToSourceActionGroup() {
-        AnAction jump = ActionManager.getInstance().getAction("Diff.OpenInEditor");
-        // A separate group prevents the processor from deduplicating this action against its common button.
-        DefaultActionGroup group = new DefaultActionGroup(jump);
-        group.copyFrom(jump);
-        return group;
-    }
-
     private AnAction createSwapSidesAction() {
         AnAction action = new AnActionWrapper(ActionManager.getInstance().getAction("SwapSidesInDiffWindow")) {
             @Override
@@ -425,29 +414,17 @@ final class CsvTableDiffViewer implements FrameDiffTool.DiffViewer {
         return action;
     }
 
-    private void relocateJumpToSource() {
-        ActionToolbar toolbar = context.getUserData(DiffUserDataKeysEx.LEFT_TOOLBAR);
-        if (toolbar == null) return;
-        // The processor builds its common navigation group after init; remove only this toolbar's duplicate.
-        ApplicationManager.getApplication().invokeLater(() -> {
-            DefaultActionGroup group = (DefaultActionGroup) toolbar.getActionGroup();
-            ActionManager manager = ActionManager.getInstance();
-            AnAction jump = manager.getAction("Diff.OpenInEditor");
-            if (removeCommonJumpToSource(group, jump, manager)) toolbar.updateActionsAsync();
-        }, ModalityState.any(), ignored -> disposed);
-    }
-
-    private boolean removeCommonJumpToSource(DefaultActionGroup group, AnAction jump, ActionManager manager) {
+    private void installNavigationActions() {
+        ActionManager manager = ActionManager.getInstance();
+        DefaultActionGroup group = (DefaultActionGroup) manager.getAction(CsvTableDiffNavigationActions.GROUP_ID);
         for (AnAction action : group.getChildren(manager)) {
-            if (action instanceof NavigationAction) return false;
-            if (action == jump) return group.replaceAction(action, new DefaultActionGroup());
-            if (action instanceof DefaultActionGroup nested && !nested.isPopup()) {
-                DefaultActionGroup copy = new DefaultActionGroup();
-                copy.copyFromGroup(nested);
-                if (removeCommonJumpToSource(copy, jump, manager)) return group.replaceAction(nested, copy);
-            }
+            action.registerCustomShortcutSet(component, this);
         }
-        return false;
+        // The host builds its common toolbar after DiffViewer.init() returns.
+        ApplicationManager.getApplication().invokeLater(
+                () -> CsvTableDiffNavigationActions.prependToToolbar(this),
+                ModalityState.any(),
+                ignored -> disposed || context.getProject() != null && context.getProject().isDisposed());
     }
 
     private void registerApplyShortcuts() {
@@ -494,6 +471,7 @@ final class CsvTableDiffViewer implements FrameDiffTool.DiffViewer {
     }
 
     private void provideData(DataSink sink, int side) {
+        sink.set(CsvTableDiffNavigationActions.VIEWER, disposed ? null : this);
         sink.set(CommonDataKeys.PROJECT, context.getProject());
         sink.set(PlatformDataKeys.FILE_EDITOR, fileEditors[side]);
         sink.set(DiffDataKeys.DIFF_CONTEXT, context);
@@ -822,33 +800,15 @@ final class CsvTableDiffViewer implements FrameDiffTool.DiffViewer {
         }
     }
 
-    private final class NavigationAction extends DumbAwareAction {
-        private final boolean forward;
+    boolean canNavigate(boolean forward, AnActionEvent event) {
+        return !disposed && nextDifference(forward, sideFor(event)) >= 0;
+    }
 
-        NavigationAction(boolean forward) {
-            super(CsvPluginManager.getLocalizedText(forward ? "table.diff.next" : "table.diff.previous"));
-            this.forward = forward;
-            AnAction nativeAction = ActionManager.getInstance().getAction(forward ? IdeActions.ACTION_NEXT_DIFF : IdeActions.ACTION_PREVIOUS_DIFF);
-            getTemplatePresentation().setIcon(nativeAction.getTemplatePresentation().getIcon());
-            registerCustomShortcutSet(nativeAction.getShortcutSet(), component, CsvTableDiffViewer.this);
-        }
-
-        @Override
-        public @NotNull ActionUpdateThread getActionUpdateThread() {
-            return ActionUpdateThread.EDT;
-        }
-
-        @Override
-        public void update(@NotNull AnActionEvent event) {
-            event.getPresentation().setEnabled(nextDifference(forward, sideFor(event)) >= 0);
-        }
-
-        @Override
-        public void actionPerformed(@NotNull AnActionEvent event) {
-            focusedSide = sideFor(event);
-            revealDifference(nextDifference(forward, focusedSide));
-            tables[focusedSide].requestFocusInWindow();
-        }
+    void navigate(boolean forward, AnActionEvent event) {
+        if (!canNavigate(forward, event)) return;
+        focusedSide = sideFor(event);
+        revealDifference(nextDifference(forward, focusedSide));
+        tables[focusedSide].requestFocusInWindow();
     }
 
     private final class CollapseUnchangedAction extends DumbAwareToggleAction {
