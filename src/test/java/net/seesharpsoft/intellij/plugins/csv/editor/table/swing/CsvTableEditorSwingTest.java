@@ -33,7 +33,10 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.Shape;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -214,6 +217,62 @@ public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
         }
     }
 
+    public void testFractionalClipRefreshesSnapshotsAfterResizingAndScrolling() {
+        WriteCommandAction.runWriteCommandAction(getProject(), () -> myFixture.getEditor().getDocument()
+                .setText("First,Second\none,first value\ntwo,second value\nthree,third value\nfour,fourth value\n"));
+        PsiDocumentManager.getInstance(getProject()).commitAllDocuments();
+        try (DeferredPaintProbe probe = new DeferredPaintProbe()) {
+            probe.paintScale = 1.5;
+            probe.surface.setSize(300, 180);
+            probe.layout(probe.surface);
+            probe.paint(false, 1, probe.surface);
+
+            probe.surface.setSize(450, 180);
+            probe.layout(probe.surface);
+            probe.surface.getViewport().setViewPosition(new Point(0, fileEditor.getTable().getRowHeight()));
+            assertTrue(fileEditor.getTable().getVisibleRect().y > 0);
+
+            for (JComponent component : new JComponent[]{fileEditor.getTable(), fileEditor.getTable().getTableHeader()}) {
+                Rectangle visible = component.getVisibleRect();
+                probe.paintClip = new Rectangle2D.Double(visible.x, visible.y,
+                        Math.nextDown((double) visible.width), visible.height);
+                probe.paint(false, 1, component);
+                probe.paintClip = null;
+
+                probe.assertRestoresPixels(component);
+            }
+        }
+    }
+
+    public void testPartialClipAfterResizingKeepsPreviousCompleteSnapshot() {
+        try (DeferredPaintProbe probe = new DeferredPaintProbe()) {
+            probe.paintScale = 1.5;
+            probe.surface.setSize(300, 180);
+            probe.layout(probe.surface);
+            CsvTable table = fileEditor.getTable();
+            probe.paint(false, 1, table);
+            Rectangle originalVisible = table.getVisibleRect();
+            int width = (int) (originalVisible.width * probe.paintScale);
+            int height = (int) (originalVisible.height * probe.paintScale);
+            int[] original = probe.image.getRGB(0, 0, width, height, null, 0, width);
+
+            WriteCommandAction.runWriteCommandAction(getProject(), () -> myFixture.getEditor().getDocument()
+                    .setText("Changed,Second\nnew,value\n"));
+            PsiDocumentManager.getInstance(getProject()).commitAllDocuments();
+            probe.surface.setSize(450, 180);
+            probe.layout(probe.surface);
+            Rectangle visible = table.getVisibleRect();
+            probe.paintClip = new Rectangle2D.Double(visible.x, visible.y,
+                    visible.width - 0.25 / probe.paintScale, visible.height);
+            probe.paint(false, 1, table);
+            probe.paintClip = null;
+            probe.paint(true, 1, table);
+
+            assertArrayEquals("A genuinely partial paint must not replace the previous complete frame",
+                    original, probe.image.getRGB(0, 0, width, height, null, 0, width));
+        }
+    }
+
     public void testPaintRecoversAfterRendererFailure() {
         try (DeferredPaintProbe probe = new DeferredPaintProbe()) {
             CsvTable table = fileEditor.getTable();
@@ -297,7 +356,7 @@ public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
         private int queuedPaints;
         private int immediatePaints;
         private double paintScale = 1;
-        private Rectangle paintClip;
+        private Shape paintClip;
 
         // Adapt the native display seam so the real table/renderers can also run headlessly.
         private final JScrollPane surface = new JScrollPane(table) {

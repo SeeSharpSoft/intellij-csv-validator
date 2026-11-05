@@ -42,7 +42,7 @@ final class CsvTablePaintSnapshot {
         boolean resized = image == null || bounds.width != visible.width || bounds.height != visible.height ||
                 Double.compare(scale, currentScale) != 0;
         Shape clip = graphics.getClip();
-        if ((resized || !visible.equals(bounds)) && clip != null && !clip.contains(visible)) {
+        if ((resized || !visible.equals(bounds)) && !coversViewport(clip, visible, currentScale)) {
             // Row-drag previews and partial repaints must keep their original clipping.
             painter.accept(graphics);
             return false;
@@ -74,6 +74,14 @@ final class CsvTablePaintSnapshot {
         bounds = visible;
         scale = currentScale;
         return true;
+    }
+
+    private static boolean coversViewport(Shape clip, Rectangle visible, double scale) {
+        if (clip == null || clip.contains(visible)) return true;
+        // Inverse HiDPI transforms can leave a full clip short by numerical round-off.
+        double tolerance = 1e-6 / scale;
+        return clip.contains(visible.x + tolerance, visible.y + tolerance,
+                visible.width - 2 * tolerance, visible.height - 2 * tolerance);
     }
 
     void clear() {
