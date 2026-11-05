@@ -10,6 +10,8 @@
 
 ### Fixed
 
+- Fixed GitHub error reporting compatibility with IntelliJ Platform 2026.3 by using public authentication APIs while retaining support for 2025.2 and newer
+
 ## 252.54.0 - Nov 03, 2026
 
 ### Added

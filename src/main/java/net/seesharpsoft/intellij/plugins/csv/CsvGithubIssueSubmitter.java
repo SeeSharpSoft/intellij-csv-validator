@@ -20,10 +20,9 @@ import org.jetbrains.plugins.github.api.data.GithubIssueState;
 import org.jetbrains.plugins.github.api.data.GithubResponsePage;
 import org.jetbrains.plugins.github.api.data.GithubSearchedIssue;
 import org.jetbrains.plugins.github.api.data.request.GithubRequestPagination;
-import org.jetbrains.plugins.github.authentication.GHAccountAuthData;
 import org.jetbrains.plugins.github.authentication.GHAccountsUtil;
 import org.jetbrains.plugins.github.authentication.accounts.GithubAccount;
-import org.jetbrains.plugins.github.util.GHCompatibilityUtil;
+import org.jetbrains.plugins.github.exceptions.GithubMissingTokenException;
 
 import java.awt.*;
 import java.io.IOException;
@@ -83,23 +82,27 @@ public class CsvGithubIssueSubmitter extends ErrorReportSubmitter {
     }
 
     protected boolean submit(IdeaLoggingEvent event, String additionalInfo, Project project, Consumer<? super SubmittedReportInfo> consumer) {
-        GithubAccount account = GHAccountsUtil.getSingleOrDefaultAccount(project);
-        if (account == null) {
-            GHAccountAuthData accountData = GHAccountsUtil.requestNewAccount(project);
-            if (accountData == null) {
-                return false;
-            }
-            account = accountData.getAccount();
-        }
-        String token = GHCompatibilityUtil.getOrRequestToken(account, project);
-        if (token == null) return false;
-        
-        GithubApiRequestExecutor githubExecutor = GithubApiRequestExecutor.Factory.getInstance().create(account.getServer(), token);
+        GithubAccount existingAccount = GHAccountsUtil.getSingleOrDefaultAccount(project);
+        GithubAccount account = existingAccount == null ? CsvGithubAuthentication.logIn(project) : existingAccount;
+        if (account == null) return false;
+
+        GithubApiRequestExecutor githubExecutor = CsvGithubAuthentication.createExecutor(account, project);
+        if (githubExecutor == null) return false;
 
         Task submitTask = new Task.Backgroundable(project, REPORT_ACTION_TEXT) {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
-                submitToGithub(event, additionalInfo, githubExecutor, consumer, indicator);
+                try {
+                    submitToGithub(event, additionalInfo, githubExecutor, consumer, indicator);
+                } catch (CsvGithubSubmitException exception) {
+                    if (!(exception.getCause() instanceof GithubMissingTokenException)) {
+                        throw exception;
+                    }
+                    if (!CsvGithubAuthentication.reLogIn(account, project)) {
+                        throw new ProcessCanceledException();
+                    }
+                    submitToGithub(event, additionalInfo, githubExecutor, consumer, indicator);
+                }
             }
         };
 
