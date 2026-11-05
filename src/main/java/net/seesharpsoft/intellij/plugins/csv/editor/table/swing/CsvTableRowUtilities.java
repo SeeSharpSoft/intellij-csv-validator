@@ -35,6 +35,7 @@ import javax.swing.plaf.UIResource;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.Objects;
@@ -113,8 +114,8 @@ public final class CsvTableRowUtilities {
             }
         };
 
-        // this is where you set the width of the row headers
         rowHeadersTable.createDefaultColumnsFromModel();
+        rowHeadersTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 
         // make the rows look and behave like headers
         rowHeadersTable.setRowHeight(userTable.getRowHeight());
@@ -146,15 +147,11 @@ public final class CsvTableRowUtilities {
                 BorderFactory.createMatteBorder(0, 0, 0, 1, JBColor.border()),
                 JBUI.Borders.empty(3, ROW_NUMBER_CELL_PADDING)));
 
-        scrollPane.getVerticalScrollBar().addAdjustmentListener(new AdjustmentListener() {
-            public void adjustmentValueChanged(AdjustmentEvent e) {
-                int scrollBarValue = e.getValue();
+        scrollPane.getVerticalScrollBar().addAdjustmentListener(
+                event -> adjustColumnWidth(tableEditor, rowHeadersTable, event.getValue()));
 
-                adjustColumnWidth(rowHeadersTable, label, scrollBarValue);
-            }
-        });
-
-        rowHeadersTable.getColumnModel().getColumn(0).setCellRenderer(new TableCellRenderer() {
+        TableColumn numberColumn = rowHeadersTable.getColumnModel().getColumn(0);
+        numberColumn.setCellRenderer(new TableCellRenderer() {
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
                                                            boolean hasFocus, int row, int column) {
                 label.setText("" + value);
@@ -170,6 +167,14 @@ public final class CsvTableRowUtilities {
                 return label;
             }
         });
+        numberColumn.addPropertyChangeListener(event -> {
+            if ("width".equals(event.getPropertyName()) &&
+                    rowHeadersTable.getTableHeader().getResizingColumn() == numberColumn) {
+                int width = numberColumn.getWidth();
+                tableEditor.getTableEditorState().setRowNumberColumnWidth(width);
+                rowHeadersTable.setPreferredScrollableViewportSize(new Dimension(width, 0));
+            }
+        });
 
         scrollPane.addComponentListener(new ComponentAdapter() {
             /**
@@ -178,7 +183,7 @@ public final class CsvTableRowUtilities {
              * when the screen is first layed out.
              */
             public void componentResized(ComponentEvent e) {
-                adjustColumnWidth(rowHeadersTable, label, scrollPane.getVerticalScrollBar().getValue());
+                adjustColumnWidth(tableEditor, rowHeadersTable, scrollPane.getVerticalScrollBar().getValue());
             }
         });
 
@@ -279,48 +284,28 @@ public final class CsvTableRowUtilities {
     }
 
     /**
-     * Adjusts the column width of the row headers table containing the number
-     * column. The font metrics are extracted from the label of the row at the
-     * bottom of the viewport and used to determining the appropriate width.
-     * <p>
-     * The reason why this method is important, is that when the row number increases by an extra digit
-     * the column needs to get wider. It also needs to shrink when scrolling to smaller digit numbers.
+     * Uses the saved width, or fits the last visible row number until the user resizes the column.
      *
+     * @param tableEditor     - editor storing the per-file width
      * @param rowHeadersTable - single column table in the row header
-     * @param label           - label used to get font metrics
-     * @param scrollBarValue  - int value for determining point of lowest row
+     * @param scrollBarValue  - vertical position, before the row-header viewport is synchronized
      */
-    private static void adjustColumnWidth(final JTable rowHeadersTable, final JLabel label, int scrollBarValue) {
-
-        label.setFont(rowHeadersTable.getFont());
-        label.setOpaque(true);
-        label.setHorizontalAlignment(JLabel.CENTER);
-
-        int v = rowHeadersTable.getVisibleRect().height;
-
-        int row = rowHeadersTable.rowAtPoint(new Point(0, v + scrollBarValue));
-
-        Integer modelValue = null;
-        if (row != -1) {
-            modelValue = (Integer) rowHeadersTable.getModel().getValueAt(row, 0);
-        } else {
-            RowHeadersTableModel tm = (RowHeadersTableModel) rowHeadersTable.getModel();
-            modelValue = tm.getMaxIntValue();
+    static void adjustColumnWidth(final CsvTableEditor tableEditor, final JTable rowHeadersTable, int scrollBarValue) {
+        TableColumn column = rowHeadersTable.getColumnModel().getColumn(0);
+        int width = tableEditor.getTableEditorState().getRowNumberColumnWidth();
+        if (width == 0) {
+            int height = rowHeadersTable.getVisibleRect().height;
+            int row = rowHeadersTable.rowAtPoint(new Point(0, scrollBarValue + height));
+            RowHeadersTableModel model = (RowHeadersTableModel) rowHeadersTable.getModel();
+            Object value = row == -1 ? model.getMaxIntValue() : model.getValueAt(row, 0);
+            Component renderer = column.getCellRenderer().getTableCellRendererComponent(
+                    rowHeadersTable, value, false, false, row, 0);
+            width = renderer.getPreferredSize().width;
         }
-
-        label.setText("" + modelValue);
-        FontMetrics fontMetrics = label.getFontMetrics(label.getFont());
-
-        int widthFactor;
-        Insets insets = label.getInsets();
-        int totalPadding = insets.left + insets.right;
-
-        if (fontMetrics != null && label.getText() != null) {
-            widthFactor = fontMetrics.stringWidth(label.getText());
-
-            rowHeadersTable.setPreferredScrollableViewportSize(new Dimension(widthFactor + totalPadding, 0)); // height is ignored
-            rowHeadersTable.repaint();
-        }
+        width = Math.max(column.getMinWidth(), width);
+        column.setPreferredWidth(width);
+        column.setWidth(width);
+        rowHeadersTable.setPreferredScrollableViewportSize(new Dimension(width, 0));
     }
 
     /**

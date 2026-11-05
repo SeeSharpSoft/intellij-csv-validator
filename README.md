@@ -113,6 +113,10 @@ Small moves complete immediately. Large moves use IntelliJ's standard cancellabl
 
 Cancel during preparation to leave the file unchanged. If the file or its CSV settings change before the move is applied, the prepared result is discarded rather than overwriting newer edits. Once application begins, the update finishes as one undoable change; use Undo to reverse it. Expensive preparation and model calculations run off the UI thread, while the document mutation uses the IDE's required write thread.
 
+#### Row-number column width
+
+Drag the right edge of the blank header above the row numbers to resize the row-number column. Its width is saved for each file and does not change the data-column widths. Until you resize it, the row-number column automatically fits the visible row numbers.
+
 #### Frozen columns
 
 Select a column header, then right-click the header and choose **Freeze Columns Through Selection** to keep that column and all columns to its left visible while scrolling horizontally. If multiple columns are selected, the rightmost selected column determines the frozen area. Choose **Unfreeze Columns** in the same menu to restore normal scrolling.

@@ -4,6 +4,8 @@
 
 ### Added
 
+- Added a resizable row-number column in the table editor, with the chosen width saved per file and existing automatic sizing preserved until manually resized
+
 ### Changed
 
 - Replaced scheduled-for-removal IntelliJ Platform APIs for table-editor action data and CSV file references while retaining support for 2025.2 and newer

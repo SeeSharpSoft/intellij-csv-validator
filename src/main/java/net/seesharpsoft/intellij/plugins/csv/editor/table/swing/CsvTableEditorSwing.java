@@ -254,6 +254,9 @@ public class CsvTableEditorSwing extends CsvTableEditor implements CsvFieldView 
         tblEditor.setRowHeight(editorState.getRowHeight());
         if (rowHeadersTable != null) {
             rowHeadersTable.setRowHeight(tblEditor.getRowHeight());
+            if (editorState.getRowNumberColumnWidth() > 0) {
+                CsvTableRowUtilities.adjustColumnWidth(this, rowHeadersTable, tableScrollPane.getVerticalScrollBar().getValue());
+            }
         }
         getTable().setFrozenColumnCount(editorState.getFrozenColumnCount());
     }
