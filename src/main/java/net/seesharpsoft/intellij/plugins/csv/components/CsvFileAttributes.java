@@ -8,6 +8,7 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.fileTypes.FileType;
+import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
@@ -24,6 +25,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 @State(
         name = "CsvFileAttributes",
@@ -57,15 +59,24 @@ public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttrib
         XmlSerializerUtil.copyBean(state, this);
     }
 
-    public synchronized void cleanupAttributeMap(@NotNull Project project) {
-        List<String> faultyFiles = new ArrayList<>();
-        attributeMap.forEach((fileName, attribute) -> {
-            if (!CsvStorageHelper.csvFileExists(project, fileName)) {
+    public void cleanupAttributeMap(@NotNull Project project) {
+        ProgressManager.checkCanceled();
+        Map<String, Attribute> attributesToCheck;
+        synchronized (this) {
+            attributesToCheck = new HashMap<>(attributeMap);
+        }
+        // Lexer readers hold IDE read access, so filesystem I/O must not hold this monitor.
+        attributesToCheck.forEach((fileName, attribute) -> {
+            ProgressManager.checkCanceled();
+            boolean exists = CsvStorageHelper.csvFileExists(project, fileName);
+            ProgressManager.checkCanceled();
+            if (!exists) {
+                synchronized (this) {
+                    attributeMap.remove(fileName, attribute);
+                }
                 LOG.debug(fileName + " not found or not CSV file");
-                faultyFiles.add(fileName);
             }
         });
-        faultyFiles.forEach(attributeMap::remove);
     }
 
     public void reset() {
@@ -77,26 +88,29 @@ public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttrib
     }
 
     @Nullable
-    private synchronized Attribute getFileAttribute(@NotNull Project project, @NotNull VirtualFile virtualFile, boolean createIfMissing) {
+    private synchronized Attribute getFileAttribute(@NotNull Project project, @NotNull VirtualFile virtualFile) {
         String key = generateMapKey(project, virtualFile);
-        if (key == null) {
-            return null;
-        }
-        Attribute attribute = attributeMap.get(key);
-        if (attribute == null && createIfMissing) {
-            attribute = new Attribute();
-            if (!CsvHelper.isCsvFile(virtualFile)) {
-                LOG.error("CSV file attribute requested for non CSV file: " + virtualFile.toString());
-            } else {
-                attributeMap.put(key, attribute);
-            }
-        }
-        return attribute;
+        return key == null ? null : attributeMap.get(key);
     }
 
-    @Nullable
-    private Attribute getFileAttribute(@NotNull Project project, @NotNull VirtualFile virtualFile) {
-        return getFileAttribute(project, virtualFile, false);
+    private synchronized void updateFileAttribute(@NotNull Project project, @NotNull VirtualFile virtualFile,
+                                                   boolean createIfMissing, @NotNull Consumer<Attribute> update) {
+        String key = generateMapKey(project, virtualFile);
+        if (key == null) return;
+        Attribute attribute = attributeMap.get(key);
+        if (attribute == null && !createIfMissing) return;
+        if (attribute == null && !CsvHelper.isCsvFile(virtualFile)) {
+            LOG.error("CSV file attribute requested for non CSV file: " + virtualFile);
+            return;
+        }
+        // Replace the entry so an in-flight cleanup cannot remove newly changed settings.
+        Attribute updated = new Attribute();
+        if (attribute != null) {
+            updated.separator = attribute.separator;
+            updated.escapeCharacter = attribute.escapeCharacter;
+        }
+        update.accept(updated);
+        attributeMap.put(key, updated);
     }
 
     public static boolean canChangeValueSeparator(@Nullable PsiFile psiFile) {
@@ -106,10 +120,7 @@ public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttrib
     }
 
     private void setFileSeparator(@NotNull Project project, @NotNull VirtualFile virtualFile, @NotNull CsvValueSeparator separator) {
-        Attribute attribute = getFileAttribute(project, virtualFile, true);
-        if (attribute != null) {
-            attribute.separator = separator;
-        }
+        updateFileAttribute(project, virtualFile, true, attribute -> attribute.separator = separator);
     }
 
     public void setFileSeparator(@NotNull PsiFile psiFile, @NotNull CsvValueSeparator separator) {
@@ -123,10 +134,8 @@ public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttrib
         if (!canChangeValueSeparator(psiFile)) {
             return;
         }
-        Attribute attribute = getFileAttribute(psiFile.getProject(), psiFile.getOriginalFile().getVirtualFile());
-        if (attribute != null) {
-            attribute.separator = null;
-        }
+        updateFileAttribute(psiFile.getProject(), psiFile.getOriginalFile().getVirtualFile(),
+                false, attribute -> attribute.separator = null);
     }
 
     @NotNull
@@ -191,20 +200,16 @@ public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttrib
         if (!canChangeValueSeparator(psiFile)) {
             return;
         }
-        Attribute attribute = getFileAttribute(psiFile.getProject(), psiFile.getOriginalFile().getVirtualFile(), true);
-        if (attribute != null) {
-            attribute.escapeCharacter = escapeCharacter;
-        }
+        updateFileAttribute(psiFile.getProject(), psiFile.getOriginalFile().getVirtualFile(),
+                true, attribute -> attribute.escapeCharacter = escapeCharacter);
     }
 
     public void resetEscapeSeparator(@NotNull PsiFile psiFile) {
         if (!canChangeValueSeparator(psiFile)) {
             return;
         }
-        Attribute attribute = getFileAttribute(psiFile.getProject(), psiFile.getOriginalFile().getVirtualFile());
-        if (attribute != null) {
-            attribute.escapeCharacter = null;
-        }
+        updateFileAttribute(psiFile.getProject(), psiFile.getOriginalFile().getVirtualFile(),
+                false, attribute -> attribute.escapeCharacter = null);
     }
 
     @NotNull
