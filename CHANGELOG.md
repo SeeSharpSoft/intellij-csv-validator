@@ -13,6 +13,7 @@
 ### Fixed
 
 - Fixed GitHub error reporting compatibility with IntelliJ Platform 2026.3 by using public authentication APIs while retaining support for 2025.2 and newer
+- Fixed IDE startup freezes when opening CSV files by loading saved separator and escape settings in the background before constructing the text or table editor
 
 ## 252.54.0 - Nov 03, 2026
 
