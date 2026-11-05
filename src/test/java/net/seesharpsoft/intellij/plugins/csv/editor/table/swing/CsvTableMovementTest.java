@@ -1,6 +1,7 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
 import com.intellij.openapi.actionSystem.*;
+import com.intellij.openapi.actionSystem.impl.SimpleDataContext;
 import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.command.undo.UndoManager;
@@ -700,8 +701,8 @@ public class CsvTableMovementTest extends CsvTableEditorSwingTestBase {
             select(1, 1);
             AnAction action = ActionManager.getInstance().getAction(CsvTableEditorActions.class.getName() + "$" + name);
             assertNotNull(action);
-            AnActionEvent event = AnActionEvent.createFromAnAction(action, null, ActionPlaces.UNKNOWN,
-                    id -> PlatformDataKeys.FILE_EDITOR.is(id) ? fileEditor : null);
+            DataContext context = SimpleDataContext.getSimpleContext(PlatformDataKeys.FILE_EDITOR, fileEditor);
+            AnActionEvent event = AnActionEvent.createEvent(action, context, null, ActionPlaces.UNKNOWN, ActionUiKind.NONE, null);
             action.update(event);
             assertTrue(event.getPresentation().isEnabled());
             assertEquals(ActionUpdateThread.EDT, action.getActionUpdateThread());
@@ -709,6 +710,7 @@ public class CsvTableMovementTest extends CsvTableEditorSwingTestBase {
             assertFalse(ORIGINAL.equals(myFixture.getFile().getText()));
             configure(ORIGINAL);
             select(name.equals("MoveRowsUp") ? 0 : 3, name.equals("MoveColumnsLeft") ? 0 : 3);
+            event = event.withDataContext(SimpleDataContext.getSimpleContext(PlatformDataKeys.FILE_EDITOR, fileEditor));
             action.update(event);
             assertFalse(event.getPresentation().isEnabled());
         }
