@@ -1,5 +1,9 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
+import com.intellij.ide.DataManager;
+import com.intellij.openapi.actionSystem.CommonDataKeys;
+import com.intellij.openapi.actionSystem.DataContext;
+import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.application.Application;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
@@ -47,6 +51,23 @@ import static org.mockito.Mockito.*;
 import static org.junit.Assert.assertArrayEquals;
 
 public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
+
+    public void testEditorDataContextIdentifiesEditorFromNestedComponents() {
+        assertEditorDataContext(fileEditor.getComponent());
+        assertEditorDataContext(fileEditor.getTable());
+        assertEditorDataContext(fileEditor.getTable().getTableHeader());
+
+        assertTrue(fileEditor.getTable().editCellAt(1, 1));
+        JScrollPane cell = (JScrollPane) fileEditor.getTable().getEditorComponent();
+        assertEditorDataContext(cell.getViewport().getView());
+    }
+
+    private void assertEditorDataContext(Component component) {
+        DataContext context = DataManager.getInstance().getDataContext(component);
+        assertSame(fileEditor, PlatformDataKeys.FILE_EDITOR.getData(context));
+        assertSame(getProject(), CommonDataKeys.PROJECT.getData(context));
+        assertSame(fileEditor.getFile(), CommonDataKeys.VIRTUAL_FILE.getData(context));
+    }
 
     public void testMultilineCellEditUpdatesCsv() {
         JTable table = fileEditor.getTable();

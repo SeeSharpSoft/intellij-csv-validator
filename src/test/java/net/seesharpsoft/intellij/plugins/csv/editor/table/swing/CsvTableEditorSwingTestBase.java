@@ -1,6 +1,7 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
 import com.intellij.ide.DataManager;
+import com.intellij.ide.impl.HeadlessDataManager;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.actionSystem.KeyboardShortcut;
@@ -46,6 +47,8 @@ public abstract class CsvTableEditorSwingTestBase extends CsvBasePlatformTestCas
         activateDefaultKeymap();
         initializeEditorSettings(CsvEditorSettings.getInstance());
         myFixture.configureByFiles(getTestFile());
+        HeadlessDataManager.fallbackToProductionDataManager(getTestRootDisposable());
+        ((HeadlessDataManager) DataManager.getInstance()).setTestDataProvider(null, getTestRootDisposable());
 
         fileEditor = createEditor();
         fileEditor.selectNotify();
@@ -81,7 +84,7 @@ public abstract class CsvTableEditorSwingTestBase extends CsvBasePlatformTestCas
         // Supply focus explicitly because these editors have no native window in fixture tests.
         IdeKeyEventDispatcher dispatcher = new IdeKeyEventDispatcher(null);
         Component source = event.getComponent();
-        DataContext editorContext = DataManager.getDataProvider(fileEditor.getComponent())::getData;
+        DataContext editorContext = DataManager.getInstance().getDataContext(source);
         dispatcher.getContext().setDataContext(SimpleDataContext.builder()
                 .add(PlatformCoreDataKeys.CONTEXT_COMPONENT, source)
                 .add(PlatformDataKeys.FILE_EDITOR, PlatformDataKeys.FILE_EDITOR.getData(editorContext))

@@ -1,10 +1,10 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
-import com.intellij.ide.DataManager;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
+import com.intellij.openapi.actionSystem.UiDataProvider;
 import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.editor.colors.EditorColorsScheme;
 import com.intellij.openapi.editor.colors.EditorColorsListener;
@@ -66,7 +66,7 @@ public class CsvTableEditorSwing extends CsvTableEditor implements CsvFieldView 
     private JScrollPane tableScrollPane;
     private JPanel panelTop;
     private JTable rowHeadersTable;
-    private final JPanel editorComponent;
+    private final JComponent editorComponent;
     private CsvTableSearchSession searchSession;
 
     private int baseFontHeight;
@@ -105,8 +105,11 @@ public class CsvTableEditorSwing extends CsvTableEditor implements CsvFieldView 
         boolean initialized = false;
         try {
             initializedUIComponents();
-            editorComponent = new JPanel(new BorderLayout());
-            editorComponent.add(panelMain, BorderLayout.CENTER);
+            editorComponent = UiDataProvider.wrapComponent(panelMain, sink -> {
+                sink.set(PlatformDataKeys.FILE_EDITOR, this);
+                sink.set(CommonDataKeys.PROJECT, project);
+                sink.set(CommonDataKeys.VIRTUAL_FILE, file);
+            });
             editorComponent.setBorder(JBUI.Borders.empty(8));
             tableScrollPane.setBorder(JBUI.Borders.customLine(JBColor.border()));
             tableScrollPane.getViewport().setBackground(tblEditor.getBackground());
@@ -116,12 +119,6 @@ public class CsvTableEditorSwing extends CsvTableEditor implements CsvFieldView 
             styleScrollBar(tableScrollPane.getHorizontalScrollBar());
             ApplicationManager.getApplication().getMessageBus().connect(this)
                     .subscribe(EditorColorsManager.TOPIC, (EditorColorsListener) scheme -> tblEditor.updateUI());
-            DataManager.registerDataProvider(editorComponent, dataId -> {
-                if (PlatformDataKeys.FILE_EDITOR.is(dataId)) return this;
-                if (CommonDataKeys.PROJECT.is(dataId)) return project;
-                if (CommonDataKeys.VIRTUAL_FILE.is(dataId)) return file;
-                return null;
-            });
             registerTableShortcuts();
             registerSearchShortcut(IdeActions.ACTION_FIND, false);
             registerSearchShortcut(IdeActions.ACTION_REPLACE, true);

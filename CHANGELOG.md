@@ -6,6 +6,8 @@
 
 ### Changed
 
+- Replaced scheduled-for-removal IntelliJ Platform APIs for table-editor action data and CSV file references while retaining support for 2025.2 and newer
+
 ### Removed
 
 ### Fixed

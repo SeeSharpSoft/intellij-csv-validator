@@ -177,7 +177,8 @@ public class CsvTableKeymapTest extends CsvTableEditorSwingTestBase {
         String actionId = CsvTableEditorActions.AddRowAfter.class.getName();
         AnAction action = ActionManager.getInstance().getAction(actionId);
         assertTrue(ActionUtil.getActions(fileEditor.getTable()).contains(action));
-        assertSame(fileEditor, DataManager.getDataProvider(fileEditor.getComponent()).getData(PlatformDataKeys.FILE_EDITOR.getName()));
+        assertSame(fileEditor, PlatformDataKeys.FILE_EDITOR.getData(
+                DataManager.getInstance().getDataContext(fileEditor.getTable())));
         Keymap keymap = KeymapManagerEx.getInstanceEx().getActiveKeymap();
         keymap.removeAllActionShortcuts(actionId);
         KeyboardShortcut shortcut = new KeyboardShortcut(KeyStroke.getKeyStroke("alt F8"), null);
