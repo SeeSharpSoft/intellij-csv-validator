@@ -19,6 +19,9 @@ import com.intellij.openapi.util.ThrowableComputable;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiDocumentManager;
+import com.intellij.psi.impl.DebugUtil;
+import com.intellij.psi.impl.PsiManagerEx;
+import com.intellij.psi.impl.file.impl.FileManagerImpl;
 import com.intellij.util.ui.UIUtil;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditor;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditorState;
@@ -487,6 +490,22 @@ public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
         assertInstanceOf(table.getParent(), JViewport.class);
 
         assertFalse(table.getExpandableItemsHandler().isEnabled());
+    }
+
+    @SuppressWarnings({"UnstableApiUsage", "InternalApiUsage"})
+    public void testHoverHitTestingRevalidatesPsiWithoutExistingReadAccess() {
+        CsvTable table = fileEditor.getTable();
+        table.setSize(800, 400);
+        FileManagerImpl fileManager = (FileManagerImpl) PsiManagerEx.getInstanceEx(getProject()).getFileManager();
+        WriteAction.run(() -> DebugUtil.performPsiModification("Invalidate CSV view providers",
+                fileManager::possiblyInvalidatePhysicalPsi));
+
+        ApplicationImpl application = (ApplicationImpl) ApplicationManager.getApplication();
+        application.getThreadingSupport().releaseTheAcquiredWriteIntentLockThenExecuteActionAndTakeWriteIntentLockBack(() -> {
+            assertFalse("Hover events do not carry IDE read access", application.isReadAccessAllowed());
+            assertEquals(1, table.rowAtPoint(new Point(5, table.getRowHeight() + 5)));
+            return null;
+        });
     }
 
     public void testSelectedCellColorsRemainVisibleOutsideEditMode() {

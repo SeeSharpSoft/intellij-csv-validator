@@ -232,6 +232,11 @@ public abstract class CsvTableEditor implements FileEditor, PsiFileHolder {
 
     @Nullable
     public final CsvFile getCsvFile() {
+        return CsvTableModelBase.computeWithReadAccess(this::getCsvFileWithReadAccess);
+    }
+
+    @Nullable
+    private CsvFile getCsvFileWithReadAccess() {
         if (!isEditorAvailable()) {
             return null;
         }
