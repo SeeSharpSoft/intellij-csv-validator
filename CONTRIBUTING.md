@@ -43,6 +43,23 @@ gradle runIdea
  
 All of the gradle tasks can be connected to the IntelliJ debugger.
 
+### Shared CSV document editing
+
+Text intentions and table actions use `CsvPsiTreeUpdater` in the `csv.psi` package.
+Use `CsvPsiTreeUpdater.edit(file, operation)` for a one-shot edit, or queue operations
+on an existing updater and call `commit()`. Both paths use the same undoable command
+and batch document replacements into a single document event.
+
+`setQuoted(quoted)` targets all fields; `setQuoted(fields, quoted)` targets one or
+several fields. Quoting preserves existing field text, and unquoting skips fields
+containing escaped quotes, separators, or line breaks. Syntax-repair quick fixes
+can insert quotes at specific offsets with `addQuotes(positions)`.
+
+`CsvDocumentReorder` prepares row and column moves from an immutable document snapshot
+without traversing PSI. Its `moveOrder` helper is shared by text column shifts and
+table selection moves. Keep table layout, selection, progress, cancellation, and
+source/settings freshness checks in the editor; do not duplicate CSV transformations there.
+
 ### Automated issue triage
 
 The **Opened Issue Validator** workflow (`.github\workflows\opened-issue-validator.yaml`)

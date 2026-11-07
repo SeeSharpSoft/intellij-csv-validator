@@ -9,7 +9,6 @@ import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvField;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvRecord;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
-import net.seesharpsoft.intellij.plugins.csv.psi.CsvVisitor;
 import net.seesharpsoft.intellij.psi.PsiFileHolder;
 import net.seesharpsoft.intellij.psi.PsiHelper;
 import net.seesharpsoft.intellij.util.Suspendable;
@@ -18,21 +17,11 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public interface CsvTableModel extends PsiFileHolder, Suspendable {
 
     static int getColumnCount(PsiFile psiFile) {
-        final AtomicInteger maxColumnCount = new AtomicInteger(0);
-        if (psiFile != null) {
-            psiFile.acceptChildren(new CsvVisitor() {
-                @Override
-                public void visitRecord(@NotNull CsvRecord csvRecord) {
-                    maxColumnCount.set(Math.max(maxColumnCount.get(), PsiTreeUtil.countChildrenOfType(csvRecord, CsvField.class)));
-                }
-            });
-        }
-        return maxColumnCount.get();
+        return CsvHelper.getColumnCount(psiFile);
     }
 
     static int getRowCount(PsiFile psiFile) {

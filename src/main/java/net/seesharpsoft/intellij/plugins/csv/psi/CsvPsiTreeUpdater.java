@@ -5,6 +5,7 @@ import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.command.CommandProcessor;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.fileTypes.FileType;
+import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.TextRange;
@@ -14,8 +15,6 @@ import com.intellij.util.DocumentUtil;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.CsvLexerFactory;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
-import net.seesharpsoft.intellij.plugins.csv.table.CsvTableModel;
-import net.seesharpsoft.intellij.plugins.csv.table.CsvTableReorder;
 import net.seesharpsoft.intellij.psi.PsiFileHolder;
 import net.seesharpsoft.intellij.psi.PsiHelper;
 import net.seesharpsoft.intellij.util.Suspendable;
@@ -24,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -55,6 +55,16 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
                 // Intentionally left empty
             }
         });
+    }
+
+    public static void edit(@NotNull PsiFile file, @NotNull Consumer<CsvPsiTreeUpdater> operation) {
+        CsvPsiTreeUpdater updater = new CsvPsiTreeUpdater(file);
+        try {
+            operation.accept(updater);
+            updater.commit();
+        } finally {
+            updater.dispose();
+        }
     }
 
     private FileType getFileType() {
@@ -183,6 +193,64 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
         doAction(new DocumentPsiAction(getPsiFile(), replacements));
     }
 
+    public void setQuoted(boolean quoted) {
+        ReadAction.run(() -> {
+            List<Pair<TextRange, String>> replacements = new ArrayList<>();
+            PsiTreeUtil.processElements(getPsiFile(), CsvField.class, field -> {
+                collectQuotingReplacements(field, quoted, replacements);
+                return true;
+            });
+            replaceTexts(replacements);
+        });
+    }
+
+    public void setQuoted(@NotNull Collection<? extends CsvField> fields, boolean quoted) {
+        ReadAction.run(() -> {
+            List<Pair<TextRange, String>> replacements = new ArrayList<>();
+            PsiFile file = getPsiFile();
+            for (CsvField field : new LinkedHashSet<>(fields)) {
+                if (!field.isValid() || field.getContainingFile() != file) {
+                    throw new IllegalArgumentException("Quoted fields must belong to the edited CSV file");
+                }
+                collectQuotingReplacements(field, quoted, replacements);
+            }
+            replaceTexts(replacements);
+        });
+    }
+
+    public static boolean canUnquote(@NotNull CsvField field) {
+        if (PsiHelper.getElementType(field.getFirstChild()) != CsvTypes.QUOTE ||
+                PsiHelper.getElementType(field.getLastChild()) != CsvTypes.QUOTE) return false;
+        for (PsiElement child = field.getFirstChild(); child != null; child = child.getNextSibling()) {
+            if (PsiHelper.getElementType(child) == CsvTypes.ESCAPED_TEXT) return false;
+        }
+        return true;
+    }
+
+    private static void collectQuotingReplacements(CsvField field, boolean quoted,
+                                                   List<Pair<TextRange, String>> replacements) {
+        ProgressManager.checkCanceled();
+        if (quoted) {
+            if (PsiHelper.getElementType(field.getFirstChild()) != CsvTypes.QUOTE) {
+                replacements.add(Pair.create(TextRange.from(field.getTextRange().getStartOffset(), 0), "\""));
+            }
+            if (PsiHelper.getElementType(field.getLastChild()) != CsvTypes.QUOTE) {
+                replacements.add(Pair.create(TextRange.from(field.getTextRange().getEndOffset(), 0), "\""));
+            }
+        } else if (canUnquote(field)) {
+            replacements.add(Pair.create(field.getFirstChild().getTextRange(), ""));
+            replacements.add(Pair.create(field.getLastChild().getTextRange(), ""));
+        }
+    }
+
+    public void addQuotes(@NotNull Collection<Integer> positions) {
+        List<Pair<TextRange, String>> replacements = new ArrayList<>();
+        for (int position : positions) {
+            replacements.add(Pair.create(TextRange.from(position, 0), "\""));
+        }
+        replaceTexts(replacements);
+    }
+
     public void appendEmptyFields(@NotNull PsiElement anchor, int no) {
         if (no < 1) return;
         ReadAction.run(() -> {
@@ -290,7 +358,7 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
             PsiFile file = getPsiFile();
             Document document = getDocumentInternal();
             if (file == null || document == null) return;
-            CsvTableReorder.Change change = CsvTableReorder.prepare(document.getImmutableCharSequence(),
+            CsvDocumentReorder.Change change = CsvDocumentReorder.prepare(document.getImmutableCharSequence(),
                     CsvLexerFactory.getInstance().createLexer(file), order, columns, CsvHelper.getValueSeparator(file),
                     CsvHelper.getEscapeCharacter(file), CsvEditorSettings.getInstance().getCommentIndicator());
             if (change != null) {
@@ -301,7 +369,7 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
 
     private void deleteColumnsInternal(Collection<Integer> indices) {
         PsiFile psiFile = getPsiFile();
-        int columnCount = CsvTableModel.getColumnCount(psiFile);
+        int columnCount = CsvHelper.getColumnCount(psiFile);
         List<Integer> distinctIndices = indices.stream().distinct().collect(Collectors.toList());
         if (distinctIndices.size() == columnCount) {
             deleteContentInternal();

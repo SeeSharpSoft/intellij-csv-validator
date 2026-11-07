@@ -1,4 +1,4 @@
-package net.seesharpsoft.intellij.plugins.csv.table;
+package net.seesharpsoft.intellij.plugins.csv.psi;
 
 import com.intellij.lexer.Lexer;
 import com.intellij.openapi.progress.ProgressManager;
@@ -8,15 +8,15 @@ import com.intellij.psi.tree.IElementType;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvEscapeCharacter;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvValueSeparator;
-import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.IntStream;
 
 /**
  * Prepares a single document edit from an immutable snapshot, without building or traversing PSI.
  */
-public final class CsvTableReorder {
+public final class CsvDocumentReorder {
     public record Change(TextRange range, String text) {
     }
 
@@ -172,7 +172,31 @@ public final class CsvTableReorder {
         }
     }
 
-    private CsvTableReorder() {
+    private CsvDocumentReorder() {
+    }
+
+    /**
+     * Maps each new position to its source index after moving selected indices one place.
+     */
+    public static int[] moveOrder(int count, int[] selected, int offset) {
+        if (count < 0) throw new IllegalArgumentException("Index count must not be negative");
+        if (offset != -1 && offset != 1) throw new IllegalArgumentException("Move offset must be -1 or 1");
+        int previous = -1;
+        for (int index : selected) {
+            if (index <= previous || index >= count || index + offset < 0 || index + offset >= count) {
+                throw new IllegalArgumentException("Selected indices must be ordered and movable");
+            }
+            previous = index;
+        }
+        int[] order = IntStream.range(0, count).toArray();
+        // Move the nearest selected index first so adjacent selections move as a block.
+        for (int i = 0; i < selected.length; i++) {
+            int index = selected[offset < 0 ? i : selected.length - 1 - i];
+            int adjacent = order[index + offset];
+            order[index + offset] = order[index];
+            order[index] = adjacent;
+        }
+        return order;
     }
 
     public static Change prepare(CharSequence text, Lexer lexer, int[] order, boolean columns,

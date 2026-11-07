@@ -41,7 +41,7 @@ import net.seesharpsoft.intellij.plugins.csv.highlighter.CsvTextAttributeKeys;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import net.seesharpsoft.intellij.plugins.csv.table.CsvTableModel;
 import net.seesharpsoft.intellij.plugins.csv.table.CsvTableModelBase.ModelState;
-import net.seesharpsoft.intellij.plugins.csv.table.CsvTableReorder;
+import net.seesharpsoft.intellij.plugins.csv.psi.CsvDocumentReorder;
 import net.seesharpsoft.intellij.plugins.csv.table.ui.CsvMultiLineCellRenderer;
 import net.seesharpsoft.intellij.plugins.csv.table.ui.CsvTableHeader;
 import net.seesharpsoft.intellij.plugins.csv.table.ui.CsvTableRowUtilities;
@@ -393,22 +393,10 @@ public class CsvTableEditorSwing extends CsvTableEditor implements CsvFieldView 
         int[] cols = tblEditor.getSelectedColumns();
         int offset = backwards ? -1 : 1;
         if (columns) {
-            applyOrder(true, orderAfterMove(tblEditor.getColumnCount(), cols, offset), rows, shift(cols, offset));
+            applyOrder(true, CsvDocumentReorder.moveOrder(tblEditor.getColumnCount(), cols, offset), rows, shift(cols, offset));
         } else {
-            applyOrder(false, orderAfterMove(tblEditor.getRowCount(), rows, offset), shift(rows, offset), cols);
+            applyOrder(false, CsvDocumentReorder.moveOrder(tblEditor.getRowCount(), rows, offset), shift(rows, offset), cols);
         }
-    }
-
-    private static int[] orderAfterMove(int count, int[] selected, int offset) {
-        int[] order = IntStream.range(0, count).toArray();
-        // Start with the selected index nearest the move direction so adjacent selections move as a block.
-        for (int i = 0; i < selected.length; i++) {
-            int index = selected[offset < 0 ? i : selected.length - 1 - i];
-            int adjacent = order[index + offset];
-            order[index + offset] = order[index];
-            order[index] = adjacent;
-        }
-        return order;
     }
 
     private static int[] shift(int[] indices, int offset) {
@@ -527,7 +515,7 @@ public class CsvTableEditorSwing extends CsvTableEditor implements CsvFieldView 
         boolean completed;
         try {
             completed = runReorderWithProgress(() -> {
-                CsvTableReorder.Change change = CsvTableReorder.prepare(snapshot, lexer, order, columns, separator, escape, comment);
+                CsvDocumentReorder.Change change = CsvDocumentReorder.prepare(snapshot, lexer, order, columns, separator, escape, comment);
                 ProgressManager.checkCanceled();
                 ModalityState modality = ModalityState.defaultModalityState();
                 // Once written, finish refreshing the model even if Cancel is pressed.

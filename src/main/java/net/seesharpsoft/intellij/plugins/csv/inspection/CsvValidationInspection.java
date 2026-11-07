@@ -18,6 +18,7 @@ import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvValueSeparator;
 import net.seesharpsoft.intellij.plugins.csv.intention.CsvIntentionHelper;
+import net.seesharpsoft.intellij.plugins.csv.psi.CsvPsiTreeUpdater;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
 import net.seesharpsoft.intellij.psi.PsiHelper;
 import org.jetbrains.annotations.NonNls;
@@ -140,7 +141,7 @@ public class CsvValidationInspection extends LocalInspectionTool {
             } else {
                 quotePositions.add(endSeparatorElement.getTextOffset());
             }
-            CsvIntentionHelper.addQuotes(psiFile, quotePositions);
+            CsvPsiTreeUpdater.edit(psiFile, updater -> updater.addQuotes(quotePositions));
         }
     }
 

@@ -1,33 +1,8 @@
 package net.seesharpsoft.intellij.plugins.csv.intention;
 
-import com.intellij.openapi.editor.Editor;
-import com.intellij.openapi.project.Project;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiFile;
-import com.intellij.util.IncorrectOperationException;
-import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
-import net.seesharpsoft.intellij.plugins.csv.psi.CsvFile;
-import org.jetbrains.annotations.NotNull;
-
 public class CsvShiftColumnRightIntentionAction extends CsvShiftColumnIntentionAction {
 
     public CsvShiftColumnRightIntentionAction() {
-        super("Shift Column Right");
-    }
-
-    @Override
-    public void invoke(@NotNull Project project, Editor editor, @NotNull PsiElement psiElement)
-            throws IncorrectOperationException {
-        PsiFile containingFile = psiElement.getContainingFile();
-        if (!(containingFile instanceof CsvFile csvFile)) {
-            return;
-        }
-        if (!csvFile.isValid()) {
-            return;
-        }
-
-        PsiElement element = CsvHelper.getParentFieldElement(psiElement);
-
-        changeColumnOrder(project, csvFile, element, false);
+        super("Shift Column Right", 1);
     }
 }

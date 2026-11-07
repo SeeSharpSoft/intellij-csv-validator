@@ -222,6 +222,17 @@ public final class CsvHelper {
         return createColumnInfoMap(csvFile, CsvHelper::getMaxTextLineLength);
     }
 
+    public static int getColumnCount(PsiFile csvFile) {
+        int columns = 0;
+        for (PsiElement child = csvFile == null ? null : csvFile.getFirstChild();
+             child != null; child = child.getNextSibling()) {
+            if (child instanceof CsvRecord) {
+                columns = Math.max(columns, PsiTreeUtil.countChildrenOfType(child, CsvField.class));
+            }
+        }
+        return columns;
+    }
+
     public static CsvColumnInfoMap<PsiElement> createColumnInfoMap(PsiFile csvFile, Function<CsvField, Integer> fnMaxTextLength) {
         Map<Integer, CsvColumnInfo<PsiElement>> columnInfoMap = new HashMap<>();
         int row = 0;

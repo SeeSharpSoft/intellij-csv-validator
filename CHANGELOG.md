@@ -9,6 +9,7 @@
 
 ### Changed
 
+- Unified column reordering and quoting/unquoting behind shared document-editing operations for the text and table editors
 - Reorganized shared table models, editing/search support, and Swing rendering into neutral packages, keeping file-editor and diff-specific adapters separate
 - Replaced scheduled-for-removal IntelliJ Platform APIs for table-editor action data and CSV file references while retaining support for 2025.2 and newer
 - Improved README clarity by shortening table-editor documentation and focusing on key behavior
@@ -19,6 +20,7 @@
 
 ### Fixed
 
+- Fixed text-editor column shifts to preserve final line breaks and quote comment-like values moved into the first column
 - Fixed IDE read-access errors when hovering over the table editor after PSI cache invalidation (#1140)
 - Fixed table-editor flickering and misplaced content at fractional display scaling by refreshing stale table and header snapshots after scrolling or resizing
 - Fixed GitHub error reporting compatibility with IntelliJ Platform 2026.3 by using public authentication APIs while retaining support for 2025.2 and newer

@@ -6,10 +6,13 @@ import com.intellij.psi.PsiElement;
 import com.intellij.util.IncorrectOperationException;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
+import net.seesharpsoft.intellij.plugins.csv.psi.CsvPsiTreeUpdater;
 import net.seesharpsoft.intellij.psi.PsiHelper;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 @NonNls
 public class CsvQuoteValueIntentionAction extends CsvIntentionAction {
@@ -33,7 +36,8 @@ public class CsvQuoteValueIntentionAction extends CsvIntentionAction {
 
     @Override
     public void invoke(@NotNull Project project, Editor editor, @NotNull PsiElement element) throws IncorrectOperationException {
-        CsvIntentionHelper.quoteValue(CsvHelper.getParentFieldElement(element));
+        CsvPsiTreeUpdater.edit(element.getContainingFile(),
+                updater -> updater.setQuoted(List.of(CsvHelper.getParentFieldElement(element)), true));
     }
 
 }
