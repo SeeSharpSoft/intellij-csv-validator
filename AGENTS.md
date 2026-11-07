@@ -9,6 +9,10 @@ Read [README.md](README.md) before changing user-facing behavior: it documents s
 formats, editor features, settings, and limitations. Read [CONTRIBUTING.md](CONTRIBUTING.md)
 before preparing a pull request for contribution requirements and plugin-metadata restrictions.
 
+Do not change `CONTRIBUTING.md` automatically. When a topic is relevant to other
+contributors, propose the specific documentation change and ask for explicit user
+confirmation. Wait for that confirmation before editing the file.
+
 ## Code map
 
 The main plugin packages are under `src\main\java\net\seesharpsoft\intellij\plugins`.
