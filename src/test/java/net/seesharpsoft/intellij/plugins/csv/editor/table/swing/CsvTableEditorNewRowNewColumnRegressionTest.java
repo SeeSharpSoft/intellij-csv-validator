@@ -34,13 +34,13 @@ public class CsvTableEditorNewRowNewColumnRegressionTest extends CsvBasePlatform
         editor.getTable().setRowSelectionInterval(1, 1);
         editor.getTable().setColumnSelectionInterval(0, 0);
 
-        editor.tableEditorActions.addRowBefore.actionPerformed(null);
+        editor.getActions().addRow(editor, true);
         assertEquals("Date,Time,Virtual Memory Committed [MB]\n" +
                 "\n" +
                 "31.1.2026,11:11:56.690,12447\n" +
                 "31.1.2026,11:12:0.686,12418\n", myFixture.getFile().getText());
 
-        editor.tableEditorActions.addColumnAfter.actionPerformed(null);
+        editor.getActions().addColumn(editor, false);
 
         assertEquals("Date,,Time,Virtual Memory Committed [MB]\n" +
                 ",\n" +
@@ -52,13 +52,13 @@ public class CsvTableEditorNewRowNewColumnRegressionTest extends CsvBasePlatform
         editor.getTable().setRowSelectionInterval(0, 0);
         editor.getTable().setColumnSelectionInterval(0, 0);
 
-        editor.tableEditorActions.addRowBefore.actionPerformed(null);
+        editor.getActions().addRow(editor, true);
         assertEquals("\n" +
                 "Date,Time,Virtual Memory Committed [MB]\n" +
                 "31.1.2026,11:11:56.690,12447\n" +
                 "31.1.2026,11:12:0.686,12418\n", myFixture.getFile().getText());
 
-        editor.tableEditorActions.addColumnAfter.actionPerformed(null);
+        editor.getActions().addColumn(editor, false);
 
         assertEquals(",\n" +
                 "Date,,Time,Virtual Memory Committed [MB]\n" +
@@ -77,8 +77,8 @@ public class CsvTableEditorNewRowNewColumnRegressionTest extends CsvBasePlatform
         editor.getTable().setRowSelectionInterval(0, 0);
         editor.getTable().setColumnSelectionInterval(0, 0);
 
-        editor.tableEditorActions.addRowBefore.actionPerformed(null);
-        editor.tableEditorActions.addColumnAfter.actionPerformed(null);
+        editor.getActions().addRow(editor, true);
+        editor.getActions().addColumn(editor, false);
 
         assertEquals(",\n" +
                 "Date,,Time,Virtual Memory Committed [MB]\n" +
@@ -97,8 +97,8 @@ public class CsvTableEditorNewRowNewColumnRegressionTest extends CsvBasePlatform
         editor.getTable().setRowSelectionInterval(0, 0);
         editor.getTable().setColumnSelectionInterval(0, 0);
 
-        editor.tableEditorActions.addRowBefore.actionPerformed(null);
-        editor.tableEditorActions.addColumnAfter.actionPerformed(null);
+        editor.getActions().addRow(editor, true);
+        editor.getActions().addColumn(editor, false);
 
         assertEquals(",\n" +
                 "Date,,Time,Virtual Memory Committed [MB]\n" +
@@ -114,8 +114,8 @@ public class CsvTableEditorNewRowNewColumnRegressionTest extends CsvBasePlatform
         editor.getTable().setRowSelectionInterval(0, 0);
         editor.getTable().setColumnSelectionInterval(0, 0);
 
-        editor.tableEditorActions.addRowBefore.actionPerformed(null);
-        editor.tableEditorActions.addColumnAfter.actionPerformed(null);
+        editor.getActions().addRow(editor, true);
+        editor.getActions().addColumn(editor, false);
 
         assertEquals(",\n" +
                 "Header1,, header 2\n" +

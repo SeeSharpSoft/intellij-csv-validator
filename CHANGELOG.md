@@ -11,12 +11,14 @@
 
 - Unified column reordering and quoting/unquoting behind shared document-editing operations for the text and table editors
 - Reorganized shared table models, editing/search support, and Swing rendering into neutral packages, keeping file-editor and diff-specific adapters separate
+- Simplified tabular formatting and unified table context-menu creation without changing editor behavior
 - Replaced scheduled-for-removal IntelliJ Platform APIs for table-editor action data and CSV file references while retaining support for 2025.2 and newer
 - Improved README clarity by shortening table-editor documentation and focusing on key behavior
 
 ### Removed
 
 - Removed duplicate searching and commenting on existing GitHub issues when submitting error reports
+- Removed unused helpers, obsolete formatter metadata, inactive settings notifications, and production APIs used only by tests
 
 ### Fixed
 

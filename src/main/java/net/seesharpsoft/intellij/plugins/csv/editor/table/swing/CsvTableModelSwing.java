@@ -6,7 +6,6 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.util.Alarm;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditor;
-import net.seesharpsoft.intellij.plugins.csv.psi.CsvPsiTreeUpdater;
 import net.seesharpsoft.intellij.plugins.csv.table.CsvTableModel;
 import net.seesharpsoft.intellij.plugins.csv.table.CsvTableModelBase;
 import net.seesharpsoft.intellij.plugins.csv.table.CsvTableModelBase.ModelState;
@@ -191,10 +190,6 @@ public class CsvTableModelSwing extends CsvTableModelSwingBase implements CsvTab
         dataModel.setValue(value, row, column);
     }
 
-    public void setValueAt(String value, int row, int column, boolean commitImmediately) {
-        dataModel.setValueAt(value, row, column, commitImmediately);
-    }
-
     public void setValuesAt(List<List<String>> values, Set<Integer> comments, int row, int column) {
         dataModel.setValuesAt(values, comments, row, column);
     }
@@ -247,10 +242,6 @@ public class CsvTableModelSwing extends CsvTableModelSwingBase implements CsvTab
         return dataModel.applySnapshot(state);
     }
 
-    protected CsvPsiTreeUpdater getPsiTreeUpdater() {
-        return dataModel.updater();
-    }
-
     private final class PsiModel extends CsvTableModelBase<CsvTableEditor> {
         PsiModel(CsvTableEditor holder) {
             super(holder);
@@ -275,10 +266,6 @@ public class CsvTableModelSwing extends CsvTableModelSwingBase implements CsvTab
 
         <T> T read(Computable<T> computation) {
             return computeWithReadAccess(computation);
-        }
-
-        CsvPsiTreeUpdater updater() {
-            return getPsiTreeUpdater();
         }
     }
 }

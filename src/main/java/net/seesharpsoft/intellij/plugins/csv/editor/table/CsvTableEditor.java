@@ -330,21 +330,8 @@ public abstract class CsvTableEditor implements FileEditor, CsvTableSearchHost {
         return candidateFile != null && candidateFile.equals(this.file);
     }
 
-    public CsvValueSeparator getValueSeparator() {
-        return this.currentSeparator;
-    }
-
-    public CsvEscapeCharacter getEscapeCharacter() {
-        return this.currentEscapeCharacter;
-    }
-
     public Font getEditorFont() {
         return UIUtil.getFontWithFallback(EditorColorsManager.getInstance().getGlobalScheme().getFont(EditorFontType.PLAIN));
-    }
-
-    protected int getStringWidth(String text) {
-        int fontSize = getEditorFont().getSize();
-        return CsvHelper.getMaxTextLineLength(text, input -> fontSize * input.length());
     }
 
     public final void resetAllColumnWidths() {

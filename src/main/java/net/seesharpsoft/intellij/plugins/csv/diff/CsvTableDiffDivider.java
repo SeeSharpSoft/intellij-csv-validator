@@ -46,7 +46,7 @@ final class CsvTableDiffDivider extends JComponent {
     private static final int MIN_TABLE_WIDTH = 50;
 
     private final JTable[] tables;
-    private final Host host;
+    final Host host;
     private double proportion = 0.5;
     private int dragOffset = -1;
 
@@ -129,26 +129,10 @@ final class CsvTableDiffDivider extends JComponent {
     }
 
     /**
-     * Returns the bounds of the arrow applying the change at the given table row to the target side,
-     * or {@code null} if the row is unchanged or the target side cannot receive changes.
-     */
-    Rectangle applyArrowBounds(int row, int targetSide) {
-        CsvDiffComparison comparison = host.comparison();
-        CsvDiffFolding folding = host.folding();
-        CsvDiffComparison.Change change = comparison == null || folding.isFold(row) ? null
-                : comparison.changeAt(folding.firstRow(row));
-        return change == null ? null : arrowBounds(change, targetSide, columns());
-    }
-
-    /**
      * Returns the record number shown for the given side's table row and the area it is drawn in,
      * or {@code null} if the row is not displayed. Fold rows skip the numbers of their hidden records.
      */
-    RowNumber rowNumber(int side, int row) {
-        return rowNumber(side, row, columns());
-    }
-
-    private RowNumber rowNumber(int side, int row, Columns columns) {
+    RowNumber rowNumber(int side, int row, Columns columns) {
         CsvDiffComparison comparison = host.comparison();
         CsvDiffFolding folding = host.folding();
         if (comparison == null || row < 0 || row >= folding.displayRowCount() || row >= tables[side].getRowCount()) {
@@ -261,7 +245,7 @@ final class CsvTableDiffDivider extends JComponent {
     /**
      * Places the arrow beside the row numbers of the side providing the change: {@code >>} on the left, {@code <<} on the right.
      */
-    private Rectangle arrowBounds(CsvDiffComparison.Change change, int targetSide, Columns columns) {
+    Rectangle arrowBounds(CsvDiffComparison.Change change, int targetSide, Columns columns) {
         if (!host.isWritable(targetSide)) return null;
         Icon icon = arrow(targetSide);
         int sourceSide = 1 - targetSide;
@@ -294,7 +278,7 @@ final class CsvTableDiffDivider extends JComponent {
     /**
      * Horizontal layout of the divider: {@code [>>] [left row numbers] [splitter with curve] [right row numbers] [<<]}.
      */
-    private record Columns(int leftArrowX, int leftNumbersX, int leftNumbersWidth,
+    record Columns(int leftArrowX, int leftNumbersX, int leftNumbersWidth,
                            int rightNumbersX, int rightNumbersWidth, int rightArrowX, int width) {
         int arrowX(int side) {
             return side == 0 ? leftArrowX : rightArrowX;
@@ -317,7 +301,7 @@ final class CsvTableDiffDivider extends JComponent {
         }
     }
 
-    private Columns columns() {
+    Columns columns() {
         int gap = JBUI.scale(GAP);
         FontMetrics metrics = getFontMetrics(numberFont());
         int leftNumbersWidth = numbersWidth(metrics, 0);

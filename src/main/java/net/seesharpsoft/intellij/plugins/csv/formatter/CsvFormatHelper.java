@@ -188,10 +188,6 @@ public final class CsvFormatHelper {
         return node != null && node.getElementType() == CsvTypes.QUOTE;
     }
 
-    public static boolean isTextNode(@Nullable ASTNode node) {
-        return node != null && (node.getElementType() == CsvTypes.TEXT || node.getElementType() == CsvTypes.ESCAPED_TEXT);
-    }
-
     public static boolean isCRLFNode(@Nullable ASTNode node) {
         return node != null && node.getElementType() == CsvTypes.CRLF;
     }

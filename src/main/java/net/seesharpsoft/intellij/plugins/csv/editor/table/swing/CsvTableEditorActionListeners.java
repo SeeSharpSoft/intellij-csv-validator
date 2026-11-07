@@ -7,22 +7,10 @@ import com.intellij.ui.components.labels.LinkListener;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableActions;
 
 import javax.swing.*;
-import java.awt.event.ActionListener;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
 public class CsvTableEditorActionListeners extends CsvTableEditorUtilBase implements CsvTableActions<CsvTableEditorSwing> {
-
-    protected ActionListener addRow = event -> addRow(csvTableEditor, false);
-    protected ActionListener addRowBefore = event -> addRow(csvTableEditor, true);
-    protected ActionListener addRowAfter = event -> addRow(csvTableEditor, false);
-    protected ActionListener addColumnBefore = event -> addColumn(csvTableEditor, true);
-    protected ActionListener addColumnAfter = event -> addColumn(csvTableEditor, false);
-    protected ActionListener deleteRow = event -> deleteSelectedRows(csvTableEditor);
-    protected ActionListener deleteColumn = event -> deleteSelectedColumns(csvTableEditor);
-    protected ActionListener clearCells = event -> clearSelectedCells(csvTableEditor);
-    protected ActionListener adjustColumnWidthAction = event -> adjustColumnWidths(csvTableEditor);
-    protected ActionListener resetColumnWidthAction = event -> resetColumnWidths(csvTableEditor);
 
     protected LinkListener<Object> openTextEditor = new OpenTextEditor();
 

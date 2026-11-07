@@ -20,7 +20,7 @@ public abstract class CsvActionTestBase extends CsvBasePlatformTestCase {
 
     @Override
     protected void tearDown() throws Exception {
-        CsvFileAttributes.getInstance(this.getProject()).reset();
+        CsvFileAttributes.getInstance(this.getProject()).attributeMap.clear();
         super.tearDown();
     }
 

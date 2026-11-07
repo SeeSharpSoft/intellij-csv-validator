@@ -45,7 +45,7 @@ public class CsvDocumentEditingTest extends CsvBasePlatformTestCase implements P
 
     private void resetFileAttributes() {
         CsvFileAttributes attributes = getProject().getServiceIfCreated(CsvFileAttributes.class);
-        if (attributes != null) attributes.reset();
+        if (attributes != null) attributes.attributeMap.clear();
     }
 
     @Override

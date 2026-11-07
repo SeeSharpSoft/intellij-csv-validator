@@ -5,8 +5,6 @@ import com.intellij.lang.ASTNode;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.formatter.common.AbstractBlock;
-import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfo;
-import net.seesharpsoft.intellij.plugins.csv.CsvColumnInfoMap;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvCodeStyleSettings;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -61,13 +59,11 @@ public class CsvFormattingBlock extends AbstractBlock {
     }
 
     protected int getRequiredTabularizationSpacing(PsiElement psiElement) {
-        CsvColumnInfoMap<PsiElement> columnInfoMap = myFormattingInfo.getCsvColumnInfoMap();
-        CsvColumnInfo<PsiElement> columnInfo = columnInfoMap.getColumnInfo(psiElement);
-        if (columnInfo == null) {
+        Integer targetLength = myFormattingInfo.getColumnWidth(psiElement);
+        if (targetLength == null) {
             return -1;
         }
 
-        int targetLength = columnInfo.getMaxLength();
         int currentLength = CsvFormatHelper.getTextLength(psiElement, myFormattingInfo.getCsvCodeStyleSettings());
 
         if (currentLength == 0 && psiElement.getNextSibling() == null) {

@@ -28,6 +28,7 @@ import org.mockito.MockedStatic;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -75,7 +76,7 @@ public class CsvTableModelBaseTest extends CsvBasePlatformTestCase implements Ps
 
     private void resetFileAttributes() {
         CsvFileAttributes attributes = getProject().getServiceIfCreated(CsvFileAttributes.class);
-        if (attributes != null) attributes.reset();
+        if (attributes != null) attributes.attributeMap.clear();
     }
 
     protected void autoCheck(Consumer<CsvTableModel> runnable) {
@@ -519,27 +520,27 @@ public class CsvTableModelBaseTest extends CsvBasePlatformTestCase implements Ps
     }
 
     public void testDeleteCommentRow() {
-        autoCheck((csvTableModel -> csvTableModel.removeRow(5)));
+        autoCheck((csvTableModel -> csvTableModel.removeRows(List.of(5))));
     }
 
     public void testDeleteEmptyRow() {
-        autoCheck((csvTableModel -> csvTableModel.removeRow(4)));
+        autoCheck((csvTableModel -> csvTableModel.removeRows(List.of(4))));
     }
 
     public void testDeleteFirstColumn() {
-        autoCheck((csvTableModel -> csvTableModel.removeColumn(0)));
+        autoCheck((csvTableModel -> csvTableModel.removeColumns(List.of(0))));
     }
 
     public void testDeleteFirstRow() {
-        autoCheck((csvTableModel -> csvTableModel.removeRow(0)));
+        autoCheck((csvTableModel -> csvTableModel.removeRows(List.of(0))));
     }
 
     public void testDeleteLastColumn() {
-        autoCheck((csvTableModel -> csvTableModel.removeColumn(csvTableModel.getColumnCount() - 1)));
+        autoCheck((csvTableModel -> csvTableModel.removeColumns(List.of(csvTableModel.getColumnCount() - 1))));
     }
 
     public void testDeleteLastRow() {
-        autoCheck((csvTableModel -> csvTableModel.removeRow(csvTableModel.getRowCount() - 1)));
+        autoCheck((csvTableModel -> csvTableModel.removeRows(List.of(csvTableModel.getRowCount() - 1))));
     }
 
     public void testDeleteMultipleConnectedColumns() {

@@ -79,10 +79,6 @@ public class CsvFileAttributes implements PersistentStateComponent<CsvFileAttrib
         });
     }
 
-    public void reset() {
-        attributeMap.clear();
-    }
-
     protected String generateMapKey(@NotNull Project project, @NotNull VirtualFile virtualFile) {
         return CsvStorageHelper.getRelativeFilePath(project, virtualFile);
     }

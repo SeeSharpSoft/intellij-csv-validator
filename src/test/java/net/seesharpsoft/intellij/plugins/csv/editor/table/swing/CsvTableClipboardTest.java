@@ -295,8 +295,8 @@ public class CsvTableClipboardTest extends CsvTableEditorSwingTestBase {
             performShortcut(
                     new KeyEvent(table, KeyEvent.KEY_PRESSED, 0, modifiers, KeyEvent.VK_DELETE, KeyEvent.CHAR_UNDEFINED));
         }
-        fileEditor.tableEditorActions.addRowBefore.actionPerformed(null);
-        fileEditor.tableEditorActions.addColumnAfter.actionPerformed(null);
+        fileEditor.getActions().addRow(fileEditor, true);
+        fileEditor.getActions().addColumn(fileEditor, false);
         assertEquals("a,b\n1,2", myFixture.getFile().getText());
         fileEditor.setEditable(true);
         getTableModel().setValue("x", 1, 0);

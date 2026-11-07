@@ -16,7 +16,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
-import java.util.Collections;
 
 public interface CsvTableModel extends PsiFileHolder, Suspendable {
 
@@ -78,17 +77,9 @@ public interface CsvTableModel extends PsiFileHolder, Suspendable {
 
     void addRow(int anchorRowIndex, boolean before);
 
-    default void removeRow(int rowIndex) {
-        removeRows(Collections.singletonList(rowIndex));
-    }
-
     void removeRows(Collection<Integer> indices);
 
     void addColumn(int anchorColumnIndex, boolean before);
-
-    default void removeColumn(int columnIndex) {
-        removeColumns(Collections.singletonList(columnIndex));
-    }
 
     void removeColumns(Collection<Integer> indices);
 

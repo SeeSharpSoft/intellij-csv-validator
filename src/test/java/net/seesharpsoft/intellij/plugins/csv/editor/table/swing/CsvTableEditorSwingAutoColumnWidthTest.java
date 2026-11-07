@@ -30,7 +30,7 @@ public class CsvTableEditorSwingAutoColumnWidthTest extends CsvTableEditorSwingT
     }
 
     private void assertAutoFitIncludesHeaderTextAndPadding() {
-        fileEditor.tableEditorActions.adjustColumnWidthAction.actionPerformed(null);
+        fileEditor.getActions().adjustColumnWidths(fileEditor);
 
         JTable table = fileEditor.getTable();
         TableColumn column = table.getColumnModel().getColumn(0);
@@ -56,7 +56,7 @@ public class CsvTableEditorSwingAutoColumnWidthTest extends CsvTableEditorSwingT
 
     public void testAutoFitRespectsMaximumColumnWidth() {
         CsvEditorSettings.getInstance().setTableAutoMaxColumnWidth(60);
-        fileEditor.tableEditorActions.adjustColumnWidthAction.actionPerformed(null);
+        fileEditor.getActions().adjustColumnWidths(fileEditor);
 
         for (int column = 0; column < fileEditor.getTable().getColumnCount(); column++) {
             assertEquals(60, fileEditor.getTable().getColumnModel().getColumn(column).getWidth());
@@ -64,7 +64,7 @@ public class CsvTableEditorSwingAutoColumnWidthTest extends CsvTableEditorSwingT
     }
 
     public void testAutoFitKeepsMultilineRenderingEnabled() {
-        fileEditor.tableEditorActions.adjustColumnWidthAction.actionPerformed(null);
+        fileEditor.getActions().adjustColumnWidths(fileEditor);
 
         JTable table = fileEditor.getTable();
         JScrollPane cell = (JScrollPane) table.prepareRenderer(table.getCellRenderer(1, 1), 1, 1);
@@ -72,7 +72,7 @@ public class CsvTableEditorSwingAutoColumnWidthTest extends CsvTableEditorSwingT
     }
 
     private void assertAutoFitIncludesCellPadding() {
-        fileEditor.tableEditorActions.adjustColumnWidthAction.actionPerformed(null);
+        fileEditor.getActions().adjustColumnWidths(fileEditor);
 
         JTable table = fileEditor.getTable();
         JScrollPane cell = (JScrollPane) table.prepareRenderer(table.getCellRenderer(1, 1), 1, 1);

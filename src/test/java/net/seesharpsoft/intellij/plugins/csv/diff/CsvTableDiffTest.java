@@ -240,19 +240,19 @@ public class CsvTableDiffTest extends CsvBasePlatformTestCase {
         PlatformTestUtil.waitWithEventsDispatching("CSV rows displayed", () -> tables.getLast().getRowCount() == 4, 10);
         show(viewer, 600, 480);
         CsvTableDiffDivider divider = divider(viewer);
-        Rectangle applyToRight = divider.applyArrowBounds(1, 1);
-        Rectangle applyToLeft = divider.applyArrowBounds(1, 0);
+        Rectangle applyToRight = applyArrowBounds(divider, 1, 1);
+        Rectangle applyToLeft = applyArrowBounds(divider, 1, 0);
         List<List<String>> expectedRowNumbers = List.of(List.of("1", "", "2", "3"), List.of("1", "2", "3", "4"));
         for (int side = 0; side < 2; side++) {
             JTable table = tables.get(side);
             List<String> labels = new ArrayList<>();
             for (int row = 0; row < table.getRowCount(); row++) {
-                CsvTableDiffDivider.RowNumber number = divider.rowNumber(side, row);
+                CsvTableDiffDivider.RowNumber number = rowNumber(divider, side, row);
                 labels.add(number.text());
                 Rectangle cell = SwingUtilities.convertRectangle(table, table.getCellRect(row, 0, true), divider);
                 assertEquals("Row numbers must align with their rows", cell.y, number.bounds().y);
                 assertEquals("Row numbers must align with their rows", cell.height, number.bounds().height);
-                Rectangle other = divider.rowNumber(1 - side, row).bounds();
+                Rectangle other = rowNumber(divider, 1 - side, row).bounds();
                 if (side == 0) {
                     assertTrue("Left numbers must follow the apply-to-right arrow", applyToRight.getMaxX() <= number.bounds().x);
                     assertTrue("Left numbers must precede the right numbers", number.bounds().getMaxX() <= other.x);
@@ -274,8 +274,8 @@ public class CsvTableDiffTest extends CsvBasePlatformTestCase {
         PlatformTestUtil.waitWithEventsDispatching("CSV rows displayed", () -> tables.getLast().getRowCount() == 2, 10);
         show(viewer, 800, 240);
         CsvTableDiffDivider divider = divider(viewer);
-        int handleStart = (int) divider.rowNumber(0, 1).bounds().getMaxX();
-        int handleEnd = divider.rowNumber(1, 1).bounds().x;
+        int handleStart = (int) rowNumber(divider, 0, 1).bounds().getMaxX();
+        int handleEnd = rowNumber(divider, 1, 1).bounds().x;
         assertTrue("The middle of the divider must be an empty area of about 20px, was " + (handleEnd - handleStart),
                 Math.abs(handleEnd - handleStart - JBUI.scale(20)) <= JBUI.scale(2));
         int middle = (handleStart + handleEnd) / 2;
@@ -379,7 +379,7 @@ public class CsvTableDiffTest extends CsvBasePlatformTestCase {
         Map<Integer, TextDiffType> changedRows = Map.of(1, TextDiffType.INSERTED, 3, TextDiffType.MODIFIED, 5, TextDiffType.DELETED);
         changedRows.forEach((row, type) -> {
             for (int side = 0; side < 2; side++) {
-                CsvTableDiffDivider.RowNumber number = divider.rowNumber(side, row);
+                CsvTableDiffDivider.RowNumber number = rowNumber(divider, side, row);
                 if (number.text().isEmpty()) continue;
                 double contrast = contrast(number.color(), type.getColor(null));
                 assertTrue("Row number " + number.text() + " must be readable on its " + type + " band, contrast " + contrast,
@@ -852,10 +852,10 @@ public class CsvTableDiffTest extends CsvBasePlatformTestCase {
         PlatformTestUtil.waitWithEventsDispatching("CSV differences displayed", () -> tables.getLast().getRowCount() == 4, 10);
         show(viewer);
         CsvTableDiffDivider divider = divider(viewer);
-        assertNull("Unchanged rows must not offer apply arrows", divider.applyArrowBounds(2, 1));
-        assertNull("The read-only left side must not offer an apply arrow", divider.applyArrowBounds(3, 0));
+        assertNull("Unchanged rows must not offer apply arrows", applyArrowBounds(divider, 2, 1));
+        assertNull("The read-only left side must not offer an apply arrow", applyArrowBounds(divider, 3, 0));
 
-        Rectangle arrow = divider.applyArrowBounds(3, 1);
+        Rectangle arrow = applyArrowBounds(divider, 3, 1);
         assertNotNull(arrow);
         Rectangle row = SwingUtilities.convertRectangle(tables.getFirst(), tables.getFirst().getCellRect(3, 0, true), divider);
         assertTrue("The arrow " + arrow + " must be at its changed row " + row,
@@ -1020,12 +1020,12 @@ public class CsvTableDiffTest extends CsvBasePlatformTestCase {
                 assertWaveSpansRow(divider, new Rectangle(0, row.y, divider.getWidth(), row.height), null);
             }
         }
-        assertNotNull("Changed rows still offer apply arrows", divider.applyArrowBounds(5, 1));
-        assertNull("Fold rows offer no apply arrows", divider.applyArrowBounds(10, 1));
+        assertNotNull("Changed rows still offer apply arrows", applyArrowBounds(divider, 5, 1));
+        assertNull("Fold rows offer no apply arrows", applyArrowBounds(divider, 10, 1));
 
         collapse.setSelected(event, false);
         assertEquals(21, tables.getLast().getRowCount());
-        assertEquals("21", divider.rowNumber(0, 20).text());
+        assertEquals("21", rowNumber(divider, 0, 20).text());
 
         collapse.setSelected(event, true);
         settings.setContextRange(-1);
@@ -1055,7 +1055,7 @@ public class CsvTableDiffTest extends CsvBasePlatformTestCase {
             assertEquals("id", table.getValueAt(0, 0));
             assertEquals("5", table.getValueAt(5, 0));
         }
-        assertEquals("1", divider(viewer).rowNumber(1, 0).text());
+        assertEquals("1", rowNumber(divider(viewer), 1, 0).text());
 
         WriteCommandAction.runWriteCommandAction(getProject(),
                 () -> right.getDocument().setText(records(Map.of(10, "changed again"))));
@@ -1106,7 +1106,7 @@ public class CsvTableDiffTest extends CsvBasePlatformTestCase {
 
     private static List<String> rowNumbers(CsvTableDiffDivider divider, int side, int rows) {
         List<String> numbers = new ArrayList<>();
-        for (int row = 0; row < rows; row++) numbers.add(divider.rowNumber(side, row).text());
+        for (int row = 0; row < rows; row++) numbers.add(rowNumber(divider, side, row).text());
         return numbers;
     }
 
@@ -1168,7 +1168,7 @@ public class CsvTableDiffTest extends CsvBasePlatformTestCase {
         }
         show(viewer);
         for (int side = 0; side < 2; side++) {
-            assertNull("Read-only sides must not offer apply arrows", divider(viewer).applyArrowBounds(0, side));
+            assertNull("Read-only sides must not offer apply arrows", applyArrowBounds(divider(viewer), 0, side));
         }
         FileEditor editor = DataManager.getInstance().getDataContext(table).getData(PlatformDataKeys.FILE_EDITOR);
         assertFalse("Native undo must not mutate a forced read-only diff", UndoManager.getInstance(getProject()).isUndoAvailable(editor));
@@ -1563,7 +1563,7 @@ public class CsvTableDiffTest extends CsvBasePlatformTestCase {
         PlatformTestUtil.waitWithEventsDispatching("Highlights disabled",
                 () -> renderedText(table, 0, 1).getBackground().equals(renderedText(table, 1, 1).getBackground()), 10);
         assertEquals("Navigation and apply remain available", "1 differences", ((JLabel) toolbar.statusPanel).getText());
-        assertNotNull(divider(viewer).applyArrowBounds(1, 1));
+        assertNotNull(applyArrowBounds(divider(viewer), 1, 1));
     }
 
     private static void selectOption(FrameDiffTool.ToolbarComponents toolbar, String name, JTable table) {
@@ -1904,8 +1904,20 @@ public class CsvTableDiffTest extends CsvBasePlatformTestCase {
         return UIUtil.findComponentOfType(viewer.getComponent(), CsvTableDiffDivider.class);
     }
 
+    private static CsvTableDiffDivider.RowNumber rowNumber(CsvTableDiffDivider divider, int side, int row) {
+        return divider.rowNumber(side, row, divider.columns());
+    }
+
+    private static Rectangle applyArrowBounds(CsvTableDiffDivider divider, int row, int targetSide) {
+        CsvDiffComparison comparison = divider.host.comparison();
+        CsvDiffFolding folding = divider.host.folding();
+        CsvDiffComparison.Change change = comparison == null || folding.isFold(row) ? null
+                : comparison.changeAt(folding.firstRow(row));
+        return change == null ? null : divider.arrowBounds(change, targetSide, divider.columns());
+    }
+
     private static void clickApplyArrow(CsvTableDiffDivider divider, int row, int targetSide) {
-        Rectangle arrow = divider.applyArrowBounds(row, targetSide);
+        Rectangle arrow = applyArrowBounds(divider, row, targetSide);
         assertNotNull("Row " + row + " must offer an apply arrow", arrow);
         divider.dispatchEvent(mouseEvent(divider, MouseEvent.MOUSE_CLICKED, arrow));
     }

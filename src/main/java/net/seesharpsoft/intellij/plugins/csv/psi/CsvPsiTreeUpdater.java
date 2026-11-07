@@ -118,10 +118,6 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
         return SyntaxTraverser.psiTraverser(createFile(sanitizedValue)).filter(CsvField.class).first();
     }
 
-    public @Nullable CsvRecord createRecord() {
-        return ReadAction.compute(this::createRecordInternal);
-    }
-
     private @Nullable CsvRecord createRecordInternal() {
         return SyntaxTraverser.psiTraverser(createFile("\n")).filter(CsvRecord.class).first();
     }
@@ -165,16 +161,8 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
         Suspendable.super.dispose();
     }
 
-    public @Nullable PsiElement createValueSeparator() {
-        return ReadAction.compute(this::createValueSeparatorInternal);
-    }
-
     private @Nullable PsiElement createValueSeparatorInternal() {
         return PsiHelper.findFirst(createFile(CsvHelper.getValueSeparator(getPsiFile()).getCharacter()), CsvTypes.COMMA);
-    }
-
-    public @Nullable PsiElement createLineBreak() {
-        return ReadAction.compute(this::createLineBreakInternal);
     }
 
     private @Nullable PsiElement createLineBreakInternal() {
@@ -260,14 +248,6 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
         });
     }
 
-    public void appendField(@NotNull PsiElement anchor) {
-        appendField(anchor, "", false, false);
-    }
-
-    public void appendField(@NotNull PsiElement anchor, boolean before) {
-        appendField(anchor, "", false, before);
-    }
-
     public void appendField(@NotNull PsiElement anchor, String text, boolean enquoteCommentIndicator) {
         appendField(anchor, text, enquoteCommentIndicator, false);
     }
@@ -286,22 +266,6 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
         assert commentOrField instanceof CsvField;
         doAddField(commentOrField, text, enquoteCommentIndicator, before);
         doAddValueSeparator(commentOrField, before);
-    }
-
-    public void removeField(@NotNull PsiElement field) {
-        ReadAction.run(() -> removeFieldInternal(field));
-    }
-
-    private void removeFieldInternal(@NotNull PsiElement field) {
-        assert field instanceof CsvField;
-        PsiElement separator = PsiTreeUtil.findSiblingBackward(field, CsvTypes.COMMA, null);
-        if (separator == null) separator = PsiTreeUtil.findSiblingForward(field, CsvTypes.COMMA, null);
-        // no separator means it is the only field in the row
-        if (separator == null) {
-            doAction(new DeleteChildrenPsiAction(field));
-            return;
-        }
-        delete(field, separator);
     }
 
     /**
@@ -422,22 +386,6 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
         doAddLineBreak(record, before);
     }
 
-    public void deleteRow(@NotNull PsiElement row) {
-        ReadAction.run(() -> deleteRowInternal(row));
-    }
-
-    private void deleteRowInternal(@NotNull PsiElement row) {
-        assert row instanceof CsvRecord;
-        PsiElement lf = PsiTreeUtil.findSiblingBackward(row, CsvTypes.CRLF, null);
-        if (lf == null) lf = PsiTreeUtil.findSiblingForward(row, CsvTypes.CRLF, null);
-        // no lf means only one record exists - this is a must, so don't delete it
-        if (lf == null) doAction(new ReplacePsiAction(row, createRecordInternal()));
-        else {
-            doAction(new DeletePsiAction(row));
-            doAction(new DeletePsiAction(lf));
-        }
-    }
-
     public void deleteRows(Collection<Integer> indices) {
         ReadAction.run(() -> deleteRowsInternal(indices));
     }
@@ -507,10 +455,6 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
 
     public void deleteAllChildren(@NotNull PsiElement anchor) {
         doAction(new DeleteChildrenPsiAction(anchor));
-    }
-
-    public void deleteContent() {
-        ReadAction.run(this::deleteContentInternal);
     }
 
     private void deleteContentInternal() {
@@ -593,10 +537,6 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
         if (l != null) myCommitListeners.add(l);
     }
 
-    public void removeCommitListener(CommitListener l) {
-        myCommitListeners.remove(l);
-    }
-
     protected void fireCommitted() {
         for (CommitListener listener : myCommitListeners) {
             listener.committed();
@@ -625,10 +565,6 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
 
         private final PsiElement myElementToAdd;
         private final boolean myBefore;
-
-        AddSiblingPsiAction(@NotNull PsiElement anchor, @Nullable PsiElement elementToAdd) {
-            this(anchor, elementToAdd, false);
-        }
 
         AddSiblingPsiAction(@NotNull PsiElement anchor, @Nullable PsiElement elementToAdd, boolean before) {
             super(anchor);

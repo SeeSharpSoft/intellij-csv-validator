@@ -324,7 +324,8 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
 
     @Override
     public void setValue(String value, int rowIndex, int columnIndex) {
-        setValueAt(value, rowIndex, columnIndex, true);
+        ReadAction.run(() -> prepareSetValueAt(value, rowIndex, columnIndex));
+        getPsiTreeUpdater().commit();
     }
 
     private int getColumnCount(int rowIndex) {
@@ -336,11 +337,6 @@ public class CsvTableModelBase<T extends PsiFileHolder> implements CsvTableModel
     private int getColumnCount(PsiElement record) {
         if (record == null) return -1;
         return PsiTreeUtil.countChildrenOfType(record, CsvField.class);
-    }
-
-    public void setValueAt(String value, int rowIndex, int columnIndex, boolean commitImmediately) {
-        ReadAction.run(() -> prepareSetValueAt(value, rowIndex, columnIndex));
-        if (commitImmediately) getPsiTreeUpdater().commit();
     }
 
     public void setValuesAt(List<List<String>> values, Set<Integer> commentRows, int rowIndex, int columnIndex) {

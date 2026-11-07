@@ -39,7 +39,7 @@ public class CsvIntentionTest extends CsvBasePlatformTestCase {
 
     private void resetFileAttributes() {
         CsvFileAttributes attributes = getProject().getServiceIfCreated(CsvFileAttributes.class);
-        if (attributes != null) attributes.reset();
+        if (attributes != null) attributes.attributeMap.clear();
     }
 
     protected void doTestIntention(String testName, String hint) throws Throwable {

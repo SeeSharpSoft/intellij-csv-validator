@@ -23,11 +23,8 @@ public class CsvPsiTreeUpdaterTest extends CsvBasePlatformTestCase {
         try {
             runOnEdt(() -> {
                 assertNotNull(updater.createField("value", false));
-                assertNotNull(updater.createRecord());
                 assertNotNull(updater.createComment("comment"));
                 assertNotNull(updater.createCommentFromContent("#comment"));
-                assertNotNull(updater.createValueSeparator());
-                assertNotNull(updater.createLineBreak());
                 assertNotNull(updater.getDocument());
             });
         } finally {
@@ -89,9 +86,7 @@ public class CsvPsiTreeUpdaterTest extends CsvBasePlatformTestCase {
                 updater.appendField(field, "three", false);
                 updater.commit();
 
-                PsiElement appendedField = ReadAction.compute(() ->
-                        PsiHelper.getNthChildOfType(file, 0, CsvRecord.class).getFirstChild().getNextSibling().getNextSibling());
-                updater.removeField(appendedField);
+                updater.deleteColumns(Collections.singletonList(1));
                 updater.commit();
             });
             assertEquals("one,two\n", file.getText());
@@ -282,7 +277,7 @@ public class CsvPsiTreeUpdaterTest extends CsvBasePlatformTestCase {
         CsvPsiTreeUpdater updater = new CsvPsiTreeUpdater(file);
         try {
             runOnEdt(() -> {
-                updater.deleteContent();
+                updater.deleteColumns(List.of(0, 1));
                 updater.commit();
             });
             assertEquals("", file.getText());

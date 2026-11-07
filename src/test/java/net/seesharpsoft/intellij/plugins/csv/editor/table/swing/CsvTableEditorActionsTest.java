@@ -14,7 +14,7 @@ public class CsvTableEditorActionsTest extends CsvTableEditorSwingTestBase {
     public void testAddRowActionWithoutSelectedRow() {
         int initialRowCount = fileEditor.getTableModel().getRowCount();
 
-        fileEditor.tableEditorActions.addRow.actionPerformed(null);
+        fileEditor.getActions().addRow(fileEditor, false);
 
         assertEquals(initialRowCount, fileEditor.getTableModel().getRowCount());
     }
@@ -22,7 +22,7 @@ public class CsvTableEditorActionsTest extends CsvTableEditorSwingTestBase {
     public void testAddRowBeforeAction() {
         fileEditor.getTable().setRowSelectionInterval(1, 1);
         fileEditor.getTable().setColumnSelectionInterval(1, 1);
-        fileEditor.tableEditorActions.addRowBefore.actionPerformed(null);
+        fileEditor.getActions().addRow(fileEditor, true);
         CsvTableModel tableModel = getTableModel();
         assertEquals(myInitialRowCount + 1, tableModel.getRowCount());
         assertEquals("", tableModel.getValue(1, 0));
@@ -34,7 +34,7 @@ public class CsvTableEditorActionsTest extends CsvTableEditorSwingTestBase {
     public void testAddRowAfterAction() {
         fileEditor.getTable().setRowSelectionInterval(1, 1);
         fileEditor.getTable().setColumnSelectionInterval(1, 1);
-        fileEditor.tableEditorActions.addRowAfter.actionPerformed(null);
+        fileEditor.getActions().addRow(fileEditor, false);
         CsvTableModel tableModel = getTableModel();
         assertEquals(myInitialRowCount + 1, tableModel.getRowCount());
         assertEquals("", tableModel.getValue(2, 0));
@@ -46,7 +46,7 @@ public class CsvTableEditorActionsTest extends CsvTableEditorSwingTestBase {
     public void testAddColumnBeforeAction() {
         fileEditor.getTable().setRowSelectionInterval(1, 1);
         fileEditor.getTable().setColumnSelectionInterval(1, 1);
-        fileEditor.tableEditorActions.addColumnBefore.actionPerformed(null);
+        fileEditor.getActions().addColumn(fileEditor, true);
         CsvTableModel tableModel = getTableModel();
         assertEquals(myInitialColumnCount + 1, tableModel.getColumnCount());
         assertEquals("", tableModel.getValue(0, 1));
@@ -58,7 +58,7 @@ public class CsvTableEditorActionsTest extends CsvTableEditorSwingTestBase {
     public void testAddColumnAfterAction() {
         fileEditor.getTable().setRowSelectionInterval(1, 1);
         fileEditor.getTable().setColumnSelectionInterval(1, 1);
-        fileEditor.tableEditorActions.addColumnAfter.actionPerformed(null);
+        fileEditor.getActions().addColumn(fileEditor, false);
         CsvTableModel tableModel = getTableModel();
         assertEquals(myInitialColumnCount + 1, tableModel.getColumnCount());
         assertEquals("", tableModel.getValue(0, 2));
@@ -70,7 +70,7 @@ public class CsvTableEditorActionsTest extends CsvTableEditorSwingTestBase {
     public void testDeleteRowAction() {
         fileEditor.getTable().setRowSelectionInterval(1, 1);
         fileEditor.getTable().setColumnSelectionInterval(1, 1);
-        fileEditor.tableEditorActions.deleteRow.actionPerformed(null);
+        fileEditor.getActions().deleteSelectedRows(fileEditor);
         CsvTableModel tableModel = getTableModel();
         assertEquals(myInitialRowCount - 1, tableModel.getRowCount());
         assertEquals(" just another line with leading and trailing whitespaces  ", tableModel.getValue(1, 0));
@@ -82,7 +82,7 @@ public class CsvTableEditorActionsTest extends CsvTableEditorSwingTestBase {
     public void testDeleteAllRowsAction() {
         fileEditor.getTable().setRowSelectionInterval(0, 3);
         fileEditor.getTable().setColumnSelectionInterval(0, 0);
-        fileEditor.tableEditorActions.deleteRow.actionPerformed(null);
+        fileEditor.getActions().deleteSelectedRows(fileEditor);
         CsvTableModel tableModel = getTableModel();
         assertEquals(1, tableModel.getRowCount());
         assertEquals(1, tableModel.getColumnCount());
@@ -92,7 +92,7 @@ public class CsvTableEditorActionsTest extends CsvTableEditorSwingTestBase {
     public void testDeleteColumnAction() {
         fileEditor.getTable().setRowSelectionInterval(1, 1);
         fileEditor.getTable().setColumnSelectionInterval(1, 1);
-        fileEditor.tableEditorActions.deleteColumn.actionPerformed(null);
+        fileEditor.getActions().deleteSelectedColumns(fileEditor);
         CsvTableModel tableModel = getTableModel();
         assertEquals(myInitialColumnCount - 1, tableModel.getColumnCount());
         assertEquals("Header1", tableModel.getValue(0, 0));
@@ -104,7 +104,7 @@ public class CsvTableEditorActionsTest extends CsvTableEditorSwingTestBase {
     public void testDeleteAllColumnsAction() {
         fileEditor.getTable().setRowSelectionInterval(1, 1);
         fileEditor.getTable().setColumnSelectionInterval(0, 1);
-        fileEditor.tableEditorActions.deleteColumn.actionPerformed(null);
+        fileEditor.getActions().deleteSelectedColumns(fileEditor);
         CsvTableModel tableModel = getTableModel();
         assertEquals(1, tableModel.getRowCount());
         assertEquals(1, tableModel.getColumnCount());
@@ -118,17 +118,17 @@ public class CsvTableEditorActionsTest extends CsvTableEditorSwingTestBase {
     }
 
     public void testAutoColumnWidthAction() {
-        fileEditor.tableEditorActions.adjustColumnWidthAction.actionPerformed(null);
+        fileEditor.getActions().adjustColumnWidths(fileEditor);
 
         assertTrue("first column is bigger than second", fileEditor.getTable().getColumnModel().getColumn(0).getWidth() > fileEditor.getTable().getColumnModel().getColumn(1).getWidth());
     }
 
     public void testResetColumnWidthAction() {
-        fileEditor.tableEditorActions.adjustColumnWidthAction.actionPerformed(null);
+        fileEditor.getActions().adjustColumnWidths(fileEditor);
 
         assertTrue("first column is bigger than second", fileEditor.getTable().getColumnModel().getColumn(0).getWidth() > fileEditor.getTable().getColumnModel().getColumn(1).getWidth());
 
-        fileEditor.tableEditorActions.resetColumnWidthAction.actionPerformed(null);
+        fileEditor.getActions().resetColumnWidths(fileEditor);
 
         Enumeration<TableColumn> tableColumnEnumeration = fileEditor.getTable().getColumnModel().getColumns();
         int expectedWidth = CsvEditorSettings.getInstance().getTableDefaultColumnWidth();

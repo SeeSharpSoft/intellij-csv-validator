@@ -37,14 +37,14 @@ public class CsvFileAttributesCleanupTest extends CsvBasePlatformTestCase {
         super.setUp();
         myFixture.configureByText("cleanup.csv", "name;value\nalpha;1\n");
         attributes = CsvFileAttributes.getInstance(getProject());
-        attributes.reset();
+        attributes.attributeMap.clear();
         attributes.setFileSeparator(myFixture.getFile(), CsvValueSeparator.SEMICOLON);
     }
 
     @Override
     protected void tearDown() throws Exception {
         try {
-            attributes.reset();
+            attributes.attributeMap.clear();
         } finally {
             super.tearDown();
         }
@@ -129,7 +129,7 @@ public class CsvFileAttributesCleanupTest extends CsvBasePlatformTestCase {
     public void testCleanupPreservesSettingsRecreatedAfterReset() throws Exception {
         try (SlowCleanup cleanup = new SlowCleanup()) {
             cleanup.awaitStarted();
-            attributes.reset();
+            attributes.attributeMap.clear();
             attributes.setEscapeCharacter(myFixture.getFile(), CsvEscapeCharacter.BACKSLASH);
             cleanup.finish();
         }
