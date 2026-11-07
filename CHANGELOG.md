@@ -9,6 +9,7 @@
 
 ### Changed
 
+- Reorganized shared table models, editing/search support, and Swing rendering into neutral packages, keeping file-editor and diff-specific adapters separate
 - Replaced scheduled-for-removal IntelliJ Platform APIs for table-editor action data and CSV file references while retaining support for 2025.2 and newer
 - Improved README clarity by shortening table-editor documentation and focusing on key behavior
 

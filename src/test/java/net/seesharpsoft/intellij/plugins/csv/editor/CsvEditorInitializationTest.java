@@ -34,6 +34,7 @@ import net.seesharpsoft.intellij.plugins.csv.components.CsvFileAttributes;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvValueSeparator;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditorProvider;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.swing.CsvTableEditorSwing;
+import net.seesharpsoft.intellij.plugins.csv.editor.table.swing.CsvTableEditorSwingProvider;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
@@ -113,7 +114,7 @@ public class CsvEditorInitializationTest extends CsvBasePlatformTestCase {
     }
 
     private static CsvTableEditorProvider tableProvider() {
-        return new CsvTableEditorProvider() {
+        return new CsvTableEditorSwingProvider() {
             @Override
             public @NotNull Builder createEditorAsync(@NotNull Project project, @NotNull VirtualFile file) {
                 return requireLoadedState(project, super.createEditorAsync(project, file));

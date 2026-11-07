@@ -6,14 +6,16 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.util.Alarm;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditor;
-import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableModel;
-import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableModelBase;
-import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableModelBase.ModelState;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvPsiTreeUpdater;
+import net.seesharpsoft.intellij.plugins.csv.table.CsvTableModel;
+import net.seesharpsoft.intellij.plugins.csv.table.CsvTableModelBase;
+import net.seesharpsoft.intellij.plugins.csv.table.CsvTableModelBase.ModelState;
+import net.seesharpsoft.intellij.plugins.csv.table.ui.CsvTableModelSwingBase;
 import net.seesharpsoft.intellij.util.UpdateScheduler;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.event.TableModelEvent;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -71,6 +73,11 @@ public class CsvTableModelSwing extends CsvTableModelSwingBase implements CsvTab
 
         updateScheduler.cancel();
         updateScheduler.schedule(this::updateTableImmediately, UPDATE_DELAY_MILLIS);
+    }
+
+    @Override
+    public void flushPendingUpdates() {
+        updateTableImmediately();
     }
 
     void updateTableImmediately() {

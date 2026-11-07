@@ -1,4 +1,4 @@
-package net.seesharpsoft.intellij.plugins.csv.editor.table;
+package net.seesharpsoft.intellij.plugins.csv.table;
 
 import com.intellij.find.FindManager;
 import com.intellij.find.FindModel;
@@ -54,6 +54,7 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.concurrency.CancellablePromise;
 
 import javax.swing.*;
+
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -68,7 +69,7 @@ import java.util.regex.PatternSyntaxException;
  * Matches use view coordinates. Subclasses provide selection, editing and highlighting, and override
  * the identity index mappings when their table view reorders or filters model cells.
  */
-public abstract class CsvTableSearchSessionBase<T extends CsvTableEditor>
+public abstract class CsvTableSearchSessionBase<T extends CsvTableSearchHost>
         implements SearchSession, SearchReplaceComponent.Listener, Disposable {
     protected final T editor;
     private final FindModel findModel = new FindModel();
@@ -76,13 +77,13 @@ public abstract class CsvTableSearchSessionBase<T extends CsvTableEditor>
     private final SearchReplaceComponent component;
     private final JLabel statusLabel = new JLabel();
     private final Document document;
-    private List<Match> matches = List.of();
+    private List<CsvTableSearchMatch> matches = List.of();
     private CancellablePromise<SearchResult> searchTask;
     private final AtomicLong searchGeneration = new AtomicLong();
     private long resultsStamp;
     private boolean searching;
     private int current = -1;
-    private Match pendingAnchor;
+    private CsvTableSearchMatch pendingAnchor;
     private FindModel searchedModel;
     private boolean replacing;
     private volatile boolean disposed;
@@ -122,7 +123,7 @@ public abstract class CsvTableSearchSessionBase<T extends CsvTableEditor>
     protected abstract boolean stopEditing();
 
     /** Selects, reveals and highlights the match unless the table is currently being edited. */
-    protected abstract void selectMatch(Match match);
+    protected abstract void selectMatch(CsvTableSearchMatch match);
 
     protected abstract void clearMatchHighlight();
 
@@ -264,11 +265,11 @@ public abstract class CsvTableSearchSessionBase<T extends CsvTableEditor>
 
     private void navigate(boolean forward) {
         if (!hasMatches() || !stopEditing()) return;
-        Match match = currentMatch();
-        if (match != null && match.row == getSelectedRow() && match.column == getSelectedColumn()) {
+        CsvTableSearchMatch match = currentMatch();
+        if (match != null && match.row() == getSelectedRow() && match.column() == getSelectedColumn()) {
             current = Math.floorMod(current + (forward ? 1 : -1), matches.size());
         } else {
-            Match anchor = selectionAnchor();
+            CsvTableSearchMatch anchor = selectionAnchor();
             current = forward ? 0 : matches.size() - 1;
             for (int index = 0; index < matches.size(); index++) {
                 int comparison = matches.get(index).compareTo(anchor);
@@ -304,23 +305,23 @@ public abstract class CsvTableSearchSessionBase<T extends CsvTableEditor>
     /** Refreshes results after the table model has invalidated its cached data. */
     public void tableChanged() {
         if (!disposed && !replacing) {
-            Match anchor = pendingAnchor == null ? currentMatch() : pendingAnchor;
+            CsvTableSearchMatch anchor = pendingAnchor == null ? currentMatch() : pendingAnchor;
             pendingAnchor = null;
             refresh(anchor);
         }
     }
 
-    private Match currentMatch() {
+    private CsvTableSearchMatch currentMatch() {
         return current >= 0 && current < matches.size() ? matches.get(current) : null;
     }
 
-    private Match selectionAnchor() {
-        return new Match(Math.max(0, getSelectedRow()), Math.max(0, getSelectedColumn()), 0, 0);
+    private CsvTableSearchMatch selectionAnchor() {
+        return new CsvTableSearchMatch(Math.max(0, getSelectedRow()), Math.max(0, getSelectedColumn()), 0, 0);
     }
 
-    private void refresh(Match anchor) {
+    private void refresh(CsvTableSearchMatch anchor) {
         if (disposed || pendingAnchor != null || !component.isVisible()) return;
-        Match target = anchor == null ? selectionAnchor() : anchor;
+        CsvTableSearchMatch target = anchor == null ? selectionAnchor() : anchor;
         cancelSearch();
         clearMatchHighlight();
         matches = List.of();
@@ -339,7 +340,7 @@ public abstract class CsvTableSearchSessionBase<T extends CsvTableEditor>
         startSearch(query, target, generation);
     }
 
-    private void startSearch(FindModel query, Match anchor, long generation) {
+    private void startSearch(FindModel query, CsvTableSearchMatch anchor, long generation) {
         if (disposed || generation != searchGeneration.get()) return;
         // Snapshot view indices on the EDT. Background work never reads the table model or its PSI cursor.
         int rowCount = editor.getTableModel().getRowCount();
@@ -355,7 +356,7 @@ public abstract class CsvTableSearchSessionBase<T extends CsvTableEditor>
                 .submit(AppExecutorUtil.getAppExecutorService());
     }
 
-    private void publishResults(SearchResult result, Match anchor, long generation, long stamp) {
+    private void publishResults(SearchResult result, CsvTableSearchMatch anchor, long generation, long stamp) {
         if (disposed || generation != searchGeneration.get() || !component.isVisible()) return;
         searching = false;
         searchTask = null;
@@ -378,7 +379,7 @@ public abstract class CsvTableSearchSessionBase<T extends CsvTableEditor>
     }
 
     private SearchResult collectMatches(FindModel query, int rowCount, int[] rows, int[] columns) {
-        List<Match> found = new ArrayList<>();
+        List<CsvTableSearchMatch> found = new ArrayList<>();
         if (isInvalidPattern(query)) return new SearchResult(found, true);
         PsiFile file = editor.getPsiFile();
         if (file == null) return new SearchResult(found, false);
@@ -392,7 +393,7 @@ public abstract class CsvTableSearchSessionBase<T extends CsvTableEditor>
             row++;
             if (viewRow >= 0) collectRecordMatches(child, viewRow, columns, query, escapeCharacter, found);
         }
-        found.sort(Match::compareTo);
+        found.sort(CsvTableSearchMatch::compareTo);
         return new SearchResult(found, false);
     }
 
@@ -407,7 +408,7 @@ public abstract class CsvTableSearchSessionBase<T extends CsvTableEditor>
     }
 
     private void collectRecordMatches(PsiElement record, int row, int[] columns, FindModel query,
-                                      CsvEscapeCharacter escapeCharacter, List<Match> found) {
+                                      CsvEscapeCharacter escapeCharacter, List<CsvTableSearchMatch> found) {
         int column = 0;
         for (PsiElement field = record.getFirstChild(); field != null && column < columns.length; field = field.getNextSibling()) {
             ProgressManager.checkCanceled();
@@ -419,7 +420,7 @@ public abstract class CsvTableSearchSessionBase<T extends CsvTableEditor>
         }
     }
 
-    private void collectCellMatches(String value, int row, int column, FindModel query, List<Match> found) {
+    private void collectCellMatches(String value, int row, int column, FindModel query, List<CsvTableSearchMatch> found) {
         CharSequence text = new StringUtil.BombedCharSequence(value) {
             @Override
             protected void checkCanceled() {
@@ -431,7 +432,7 @@ public abstract class CsvTableSearchSessionBase<T extends CsvTableEditor>
             ProgressManager.checkCanceled();
             FindResult result = findManager.findString(text, offset, query);
             if (!result.isStringFound()) break;
-            found.add(new Match(row, column, result.getStartOffset(), result.getEndOffset()));
+            found.add(new CsvTableSearchMatch(row, column, result.getStartOffset(), result.getEndOffset()));
             offset = Math.max(result.getEndOffset(), result.getStartOffset() + 1);
         }
     }
@@ -446,7 +447,7 @@ public abstract class CsvTableSearchSessionBase<T extends CsvTableEditor>
     }
 
     private void selectCurrent() {
-        Match match = currentMatch();
+        CsvTableSearchMatch match = currentMatch();
         if (match != null) selectMatch(match);
         if (hasMatches()) {
             setStatusText(String.format(CsvPluginManager.getResourceBundle().getString("table.search.matches"),
@@ -467,7 +468,7 @@ public abstract class CsvTableSearchSessionBase<T extends CsvTableEditor>
         statusLabel.setForeground(component.getStatusColor());
     }
 
-    private @Nullable Match getMatchAnchor() {
+    private @Nullable CsvTableSearchMatch getMatchAnchor() {
         if (disposed || replacing || pendingAnchor != null || !editor.isEditable() || editor.getTableModel().hasErrors() || !stopEditing()) return null;
         // Read the fields directly: their document-change notifications are delivered asynchronously.
         searchFieldDocumentChanged();
@@ -476,9 +477,9 @@ public abstract class CsvTableSearchSessionBase<T extends CsvTableEditor>
     }
 
     public void replaceCurrent() {
-        Match anchor = getMatchAnchor();
+        CsvTableSearchMatch anchor = getMatchAnchor();
         if (anchor == null) return;
-        List<Match> targets = List.of(anchor);
+        List<CsvTableSearchMatch> targets = List.of(anchor);
         CsvPsiTreeUpdater updater = new CsvPsiTreeUpdater(editor);
         PreparedReplacements prepared;
         try {
@@ -497,13 +498,13 @@ public abstract class CsvTableSearchSessionBase<T extends CsvTableEditor>
         component.addTextToRecent(component.getSearchTextComponent());
         component.addTextToRecent(component.getReplaceTextComponent());
         // Skip the inserted text so replacing with a value containing the query still moves forward.
-        pendingAnchor = new Match(anchor.row, anchor.column, prepared.nextOffset, 0);
+        pendingAnchor = new CsvTableSearchMatch(anchor.row(), anchor.column(), prepared.nextOffset, 0);
         // Rebuild matches after the table model has invalidated its cached PSI, including delayed UI updates.
         editor.getTableModel().notifyUpdate();
     }
 
     public void replaceAll() {
-        Match anchor = getMatchAnchor();
+        CsvTableSearchMatch anchor = getMatchAnchor();
         if (anchor == null) return;
         PsiFile file = editor.getPsiFile();
         if (file == null || !document.isWritable()) return;
@@ -511,7 +512,7 @@ public abstract class CsvTableSearchSessionBase<T extends CsvTableEditor>
         long stamp = document.getModificationStamp();
         long generation = searchGeneration.get();
         FindModel query = findModel.clone();
-        List<Match> targets = matches;
+        List<CsvTableSearchMatch> targets = matches;
         int[] rows = getViewRowIndices();
         int[] columns = getViewColumnIndices();
         CsvTableReplacement.Settings settings = CsvTableReplacement.Settings.capture(file);
@@ -585,7 +586,7 @@ public abstract class CsvTableSearchSessionBase<T extends CsvTableEditor>
         return applied.get();
     }
 
-    private void finishReplaceAll(Match anchor, long generation, @Nullable CsvTableModel suspendedModel) {
+    private void finishReplaceAll(CsvTableSearchMatch anchor, long generation, @Nullable CsvTableModel suspendedModel) {
         if (suspendedModel != null && !editor.isDisposed()) suspendedModel.resume();
         if (!isActive()) return;
         if (suspendedModel == null) {
@@ -610,27 +611,27 @@ public abstract class CsvTableSearchSessionBase<T extends CsvTableEditor>
                 operation, CsvPluginManager.getLocalizedText("table.search.replace.progress"), true, editor.getProject());
     }
 
-    private PreparedReplacements prepareReplacements(List<Match> targets, CsvPsiTreeUpdater updater)
+    private PreparedReplacements prepareReplacements(List<CsvTableSearchMatch> targets, CsvPsiTreeUpdater updater)
             throws FindManager.MalformedReplacementStringException {
         List<Pair<TextRange, String>> replacements = new ArrayList<>();
         int nextOffset = 0;
         CsvTableModel model = editor.getTableModel();
         for (int index = 0; index < targets.size();) {
-            Match first = targets.get(index);
-            int row = convertRowIndexToModel(first.row);
-            int column = convertColumnIndexToModel(first.column);
+            CsvTableSearchMatch first = targets.get(index);
+            int row = convertRowIndexToModel(first.row());
+            int column = convertColumnIndexToModel(first.column());
             String value = model.getValue(row, column);
             StringBuilder result = new StringBuilder();
             int offset = 0;
             do {
-                Match match = targets.get(index++);
-                result.append(value, offset, match.start);
-                String replacement = findManager.getStringToReplace(value.substring(match.start, match.end), findModel, match.start, value);
+                CsvTableSearchMatch match = targets.get(index++);
+                result.append(value, offset, match.start());
+                String replacement = findManager.getStringToReplace(value.substring(match.start(), match.end()), findModel, match.start(), value);
                 result.append(replacement);
-                nextOffset = match.start + replacement.length();
-                if (match.start == match.end && replacement.isEmpty()) nextOffset++;
-                offset = match.end;
-            } while (index < targets.size() && targets.get(index).row == first.row && targets.get(index).column == first.column);
+                nextOffset = match.start() + replacement.length();
+                if (match.start() == match.end() && replacement.isEmpty()) nextOffset++;
+                offset = match.end();
+            } while (index < targets.size() && targets.get(index).row() == first.row() && targets.get(index).column() == first.column());
             result.append(value, offset, value.length());
             PsiElement field = model.getFieldAt(row, column);
             PsiElement replacement = model.isCommentRow(row) ? updater.createCommentFromContent(result.toString())
@@ -662,19 +663,10 @@ public abstract class CsvTableSearchSessionBase<T extends CsvTableEditor>
         matches = List.of();
     }
 
-    protected record Match(int row, int column, int start, int end) implements Comparable<Match> {
-        @Override
-        public int compareTo(@NotNull Match other) {
-            int comparison = Integer.compare(row, other.row);
-            if (comparison == 0) comparison = Integer.compare(column, other.column);
-            return comparison == 0 ? Integer.compare(start, other.start) : comparison;
-        }
-    }
-
     private record PreparedReplacements(List<Pair<TextRange, String>> replacements, int nextOffset) {
     }
 
-    private record SearchResult(List<Match> matches, boolean invalidPattern) {
+    private record SearchResult(List<CsvTableSearchMatch> matches, boolean invalidPattern) {
     }
 
     private final class ReplaceAction extends DumbAwareAction implements CustomComponentAction {

@@ -1,9 +1,11 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
 import net.seesharpsoft.intellij.plugins.csv.CsvFileType;
+import net.seesharpsoft.intellij.plugins.csv.table.ui.CsvMultiLineCellRenderer;
 
 import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
+
 import java.awt.*;
 import java.awt.geom.Area;
 import java.awt.image.BufferedImage;

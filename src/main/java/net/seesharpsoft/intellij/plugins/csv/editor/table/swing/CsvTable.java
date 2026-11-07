@@ -3,10 +3,13 @@ package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 import com.intellij.openapi.application.Application;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
+import net.seesharpsoft.intellij.plugins.csv.table.ui.CsvTableBase;
+import net.seesharpsoft.intellij.plugins.csv.table.ui.CsvTablePaintSnapshot;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import javax.swing.table.TableModel;
+
 import java.awt.*;
 
 public class CsvTable extends CsvTableBase {
@@ -20,6 +23,11 @@ public class CsvTable extends CsvTableBase {
     @Override
     public CsvTableModelSwing getModel() {
         return (CsvTableModelSwing) super.getModel();
+    }
+
+    @Override
+    protected boolean usesPaintSnapshot() {
+        return true;
     }
 
     @Override

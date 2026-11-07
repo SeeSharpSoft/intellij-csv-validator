@@ -6,18 +6,15 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import net.seesharpsoft.intellij.plugins.csv.editor.CsvFileEditorProvider;
 import net.seesharpsoft.intellij.plugins.csv.editor.CsvFileEditorProviderBase;
-import net.seesharpsoft.intellij.plugins.csv.editor.table.swing.CsvTableEditorSwing;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
 
-public class CsvTableEditorProvider extends CsvFileEditorProviderBase {
-
-    public static final String EDITOR_TYPE_ID = "csv-table-editor";
+public abstract class CsvTableEditorProvider extends CsvFileEditorProviderBase {
 
     @Override
     public @NotNull String getEditorTypeId() {
-        return EDITOR_TYPE_ID;
+        return TABLE_EDITOR_TYPE_ID;
     }
 
     @Override
@@ -54,14 +51,4 @@ public class CsvTableEditorProvider extends CsvFileEditorProviderBase {
         csvTableEditorState.write(project, targetElement);
     }
 
-    @NotNull
-    @Override
-    public Builder createEditorAsync(@NotNull Project project, @NotNull VirtualFile virtualFile) {
-        return new Builder() {
-            @Override
-            public @NotNull FileEditor build() {
-                return new CsvTableEditorSwing(project, virtualFile);
-            }
-        };
-    }
 }

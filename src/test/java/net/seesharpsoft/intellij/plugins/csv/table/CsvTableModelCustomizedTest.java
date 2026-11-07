@@ -1,4 +1,4 @@
-package net.seesharpsoft.intellij.plugins.csv.editor.table;
+package net.seesharpsoft.intellij.plugins.csv.table;
 
 import net.seesharpsoft.intellij.plugins.csv.components.CsvEscapeCharacter;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvValueSeparator;

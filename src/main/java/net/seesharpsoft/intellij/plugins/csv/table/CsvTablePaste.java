@@ -1,4 +1,4 @@
-package net.seesharpsoft.intellij.plugins.csv.editor.table;
+package net.seesharpsoft.intellij.plugins.csv.table;
 
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.TextRange;

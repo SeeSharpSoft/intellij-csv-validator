@@ -6,8 +6,10 @@ import com.intellij.openapi.actionSystem.impl.Utils;
 import com.intellij.testFramework.PlatformTestUtil;
 import com.intellij.util.ui.UIUtil;
 import net.seesharpsoft.intellij.plugins.csv.CsvFileType;
+import net.seesharpsoft.intellij.plugins.csv.table.ui.CsvTableHeader;
 
 import javax.swing.table.TableColumnModel;
+
 import java.util.Arrays;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;

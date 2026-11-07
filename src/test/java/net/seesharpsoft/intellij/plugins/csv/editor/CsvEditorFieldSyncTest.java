@@ -12,12 +12,12 @@ import com.intellij.psi.PsiDocumentManager;
 import com.intellij.testFramework.PlatformTestUtil;
 import com.intellij.util.ui.UIUtil;
 import net.seesharpsoft.intellij.plugins.csv.CsvFileEditorManagerTestCase;
-import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditorProvider;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.swing.CsvTable;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.swing.CsvTableEditorSwing;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 
 import javax.swing.SwingConstants;
+
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
@@ -49,7 +49,7 @@ public class CsvEditorFieldSyncTest extends CsvFileEditorManagerTestCase {
         CsvEditorTab tab = openCsvFile();
         moveTextCaret(tab, CONTENT.indexOf("2"));
 
-        tab.show(CsvTableEditorProvider.EDITOR_TYPE_ID);
+        tab.show(CsvFileEditorProviderBase.TABLE_EDITOR_TYPE_ID);
 
         awaitSelectedField(() -> tableEditor(tab).getSelectedField(), new CsvFieldPosition(2, 1));
     }
@@ -59,7 +59,7 @@ public class CsvEditorFieldSyncTest extends CsvFileEditorManagerTestCase {
         showTableAndAwait(tab);
         clickTableCell(tab, 1, 0);
 
-        tab.show(CsvFileEditorProvider.EDITOR_TYPE_ID);
+        tab.show(CsvFileEditorProviderBase.TEXT_EDITOR_TYPE_ID);
 
         PlatformTestUtil.waitWithEventsDispatching("text caret must move to the selected table cell",
                 () -> textEditor(tab).getEditor().getCaretModel().getOffset() == CONTENT.indexOf("alpha"), 10);
@@ -69,7 +69,7 @@ public class CsvEditorFieldSyncTest extends CsvFileEditorManagerTestCase {
         CsvEditorTab tab = openCsvFile();
         moveTextCaret(tab, CONTENT.indexOf("beta"));
 
-        tab.composite().setSelectedEditor(CsvTableEditorProvider.EDITOR_TYPE_ID);
+        tab.composite().setSelectedEditor(CsvFileEditorProviderBase.TABLE_EDITOR_TYPE_ID);
 
         awaitSelectedField(() -> tableEditor(tab).getSelectedField(), new CsvFieldPosition(2, 0));
     }
@@ -104,7 +104,7 @@ public class CsvEditorFieldSyncTest extends CsvFileEditorManagerTestCase {
         WriteCommandAction.runWriteCommandAction(getProject(), () -> document.insertString(document.getTextLength(), "gamma,3\n"));
         moveTextCaret(tab, document.getText().indexOf("3"));
 
-        tab.show(CsvTableEditorProvider.EDITOR_TYPE_ID);
+        tab.show(CsvFileEditorProviderBase.TABLE_EDITOR_TYPE_ID);
         PsiDocumentManager.getInstance(getProject()).commitAllDocuments();
 
         awaitSelectedField(() -> tableEditor(tab).getSelectedField(), new CsvFieldPosition(3, 1));
@@ -170,11 +170,11 @@ public class CsvEditorFieldSyncTest extends CsvFileEditorManagerTestCase {
     }
 
     private void showTableAndAwait(CsvEditorTab tab) {
-        runAndAwaitSelectionChange(tableEditor(tab), () -> tab.show(CsvTableEditorProvider.EDITOR_TYPE_ID));
+        runAndAwaitSelectionChange(tableEditor(tab), () -> tab.show(CsvFileEditorProviderBase.TABLE_EDITOR_TYPE_ID));
     }
 
     private void showTextAndAwait(CsvEditorTab tab) {
-        runAndAwaitSelectionChange(textEditor(tab), () -> tab.show(CsvFileEditorProvider.EDITOR_TYPE_ID));
+        runAndAwaitSelectionChange(textEditor(tab), () -> tab.show(CsvFileEditorProviderBase.TEXT_EDITOR_TYPE_ID));
     }
 
     /** Waits until the IDE has notified its listeners, including the field sync, about the newly selected editor. */

@@ -1,4 +1,4 @@
-package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
+package net.seesharpsoft.intellij.plugins.csv.table.ui;
 
 import com.intellij.ui.JBColor;
 import com.intellij.util.ui.JBUI;
@@ -12,6 +12,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+
 import java.awt.*;
 import java.awt.event.MouseEvent;
 
@@ -53,11 +54,11 @@ public class CsvTableHeader extends JTableHeader {
         });
     }
 
-    void setColumnReorderingHandler(Runnable handler) {
+    public void setColumnReorderingHandler(Runnable handler) {
         columnReorderingHandler = handler;
     }
 
-    void cancelColumnReordering() {
+    public void cancelColumnReordering() {
         super.setDraggedColumn(null);
         setDraggedDistance(0);
     }
@@ -75,7 +76,7 @@ public class CsvTableHeader extends JTableHeader {
                 getTable() instanceof CsvTableBase csvTable && csvTable.isEditing()) {
             if (!csvTable.getCellEditor().stopCellEditing()) return;
             // Flush the delayed cell update before the UI captures a dragged TableColumn.
-            if (csvTable.getModel() instanceof CsvTableModelSwing model) model.updateTableImmediately();
+            csvTable.getModel().flushPendingUpdates();
         }
         super.processMouseEvent(event);
     }
@@ -119,7 +120,7 @@ public class CsvTableHeader extends JTableHeader {
 
     @Override
     public void paint(Graphics g) {
-        if (getTable() instanceof CsvTable csvTable) {
+        if (getTable() instanceof CsvTableBase csvTable && csvTable.usesPaintSnapshot()) {
             paintSnapshot.paint(this, g, !csvTable.deferPaintWithoutReadAccess(), super::paint);
         } else {
             super.paint(g);

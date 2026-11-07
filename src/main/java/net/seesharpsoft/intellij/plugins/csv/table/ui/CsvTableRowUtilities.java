@@ -19,13 +19,12 @@
 //        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //        SOFTWARE.
-package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
+package net.seesharpsoft.intellij.plugins.csv.table.ui;
 
-import com.intellij.ui.table.JBTable;
 import com.intellij.ui.JBColor;
+import com.intellij.ui.table.JBTable;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
-import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditor;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -36,11 +35,15 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.util.Objects;
+import java.util.function.BiConsumer;
 import java.util.function.BooleanSupplier;
+import java.util.function.IntConsumer;
 import java.util.function.IntFunction;
+import java.util.function.IntSupplier;
 
 /**
  * TableRowUtilities. Utility for adding a row column to a JTable.
@@ -59,12 +62,16 @@ import java.util.function.IntFunction;
 public final class CsvTableRowUtilities {
 
     public static final int ROW_NUMBER_CELL_PADDING = 8;
+    private static final Object ROW_HEADER_OVERLAY = new Object();
+
+    private record RowHeaderOverlay(BiConsumer<Graphics, JTable> painter) {
+    }
 
     private CsvTableRowUtilities() {
         // static helper
     }
 
-    static void setSelection(ListSelectionModel selection, int[] indices, int count) {
+    public static void setSelection(ListSelectionModel selection, int[] indices, int count) {
         boolean adjusting = selection.getValueIsAdjusting();
         selection.setValueIsAdjusting(true);
         try {
@@ -111,8 +118,8 @@ public final class CsvTableRowUtilities {
             @Override
             public void paint(Graphics graphics) {
                 super.paint(graphics);
-                if (getClientProperty(CsvTableRowDragListener.class) instanceof CsvTableRowDragListener drag) {
-                    drag.paintFeedback(graphics, this);
+                if (getClientProperty(ROW_HEADER_OVERLAY) instanceof RowHeaderOverlay overlay) {
+                    overlay.painter().accept(graphics, this);
                 }
             }
         };
@@ -133,6 +140,10 @@ public final class CsvTableRowUtilities {
         return rowHeadersTable;
     }
 
+    public static void setRowHeaderOverlay(JTable rowHeadersTable, BiConsumer<Graphics, JTable> painter) {
+        rowHeadersTable.putClientProperty(ROW_HEADER_OVERLAY, new RowHeaderOverlay(Objects.requireNonNull(painter)));
+    }
+
     private static void installRowHeader(final JScrollPane scrollPane, final JTable rowHeadersTable) {
         scrollPane.setRowHeaderView(rowHeadersTable);
         // set the row header name into the top left corner
@@ -143,8 +154,9 @@ public final class CsvTableRowUtilities {
         }
     }
 
-    private static void adjustComponents(final JScrollPane scrollPane, final CsvTableEditor tableEditor, final JTable rowHeadersTable,
-                                         final JTable userTable, BooleanSupplier resizing) {
+    private static void adjustComponents(final JScrollPane scrollPane, final JTable rowHeadersTable,
+                                         final JTable userTable, IntSupplier savedWidth, IntConsumer widthChanged,
+                                         BooleanSupplier resizing) {
         installRowHeader(scrollPane, rowHeadersTable);
 
         // label used for rendering
@@ -156,7 +168,7 @@ public final class CsvTableRowUtilities {
                 JBUI.Borders.empty(3, ROW_NUMBER_CELL_PADDING)));
 
         scrollPane.getVerticalScrollBar().addAdjustmentListener(
-                event -> adjustColumnWidth(tableEditor, rowHeadersTable, event.getValue()));
+                event -> adjustColumnWidth(savedWidth.getAsInt(), rowHeadersTable, event.getValue()));
 
         TableColumn numberColumn = rowHeadersTable.getColumnModel().getColumn(0);
         numberColumn.setCellRenderer(new TableCellRenderer() {
@@ -179,7 +191,7 @@ public final class CsvTableRowUtilities {
             if ("width".equals(event.getPropertyName()) &&
                     rowHeadersTable.getTableHeader().getResizingColumn() == numberColumn) {
                 int width = numberColumn.getWidth();
-                tableEditor.getTableEditorState().setRowNumberColumnWidth(width);
+                widthChanged.accept(width);
                 rowHeadersTable.setPreferredScrollableViewportSize(new Dimension(width, 0));
             }
         });
@@ -191,12 +203,12 @@ public final class CsvTableRowUtilities {
              * when the screen is first layed out.
              */
             public void componentResized(ComponentEvent e) {
-                adjustColumnWidth(tableEditor, rowHeadersTable, scrollPane.getVerticalScrollBar().getValue());
+                adjustColumnWidth(savedWidth.getAsInt(), rowHeadersTable, scrollPane.getVerticalScrollBar().getValue());
             }
         });
 
         new TableSynchronizer(rowHeadersTable, userTable,
-                () -> adjustColumnWidth(tableEditor, rowHeadersTable, scrollPane.getVerticalScrollBar().getValue()), resizing);
+                () -> adjustColumnWidth(savedWidth.getAsInt(), rowHeadersTable, scrollPane.getVerticalScrollBar().getValue()), resizing);
     }
 
     /**
@@ -206,13 +218,17 @@ public final class CsvTableRowUtilities {
      *
      * @param userTable      - Table to have column added to (if it is in a scrollpane)
      * @param startingNumber - Number to start number column with, typically 0 or 1.
+     * @param savedWidth     - Current saved width; zero enables automatic sizing.
+     * @param widthChanged   - Persists a user-resized row-number column width.
+     * @param rowsResized    - Persists the layout after row resizing finishes.
      */
-    public static JTable addNumberColumn(final CsvTableEditor tableEditor, final JTable userTable, int startingNumber) {
+    public static JTable addNumberColumn(final JTable userTable, int startingNumber, IntSupplier savedWidth,
+                                         IntConsumer widthChanged, Runnable rowsResized) {
         JScrollPane scrollPane = getScrollPane(userTable);
         if (scrollPane == null) return null;
         JTable rowHeadersTable = createRowHeadersTable(userTable, row -> startingNumber + row);
-        TableRowResizer resizer = new TableRowResizer(rowHeadersTable, userTable, tableEditor);
-        adjustComponents(scrollPane, tableEditor, rowHeadersTable, userTable, resizer::isResizing);
+        TableRowResizer resizer = new TableRowResizer(rowHeadersTable, userTable, rowsResized);
+        adjustComponents(scrollPane, rowHeadersTable, userTable, savedWidth, widthChanged, resizer::isResizing);
         return rowHeadersTable;
     }
 
@@ -304,13 +320,13 @@ public final class CsvTableRowUtilities {
     /**
      * Uses the saved width, or fits the last visible row label until the user resizes the column.
      *
-     * @param tableEditor     - editor storing the per-file width
+     * @param savedWidth      - saved column width, or zero for automatic sizing
      * @param rowHeadersTable - single column table in the row header
      * @param scrollBarValue  - vertical position, before the row-header viewport is synchronized
      */
-    static void adjustColumnWidth(final CsvTableEditor tableEditor, final JTable rowHeadersTable, int scrollBarValue) {
+    public static void adjustColumnWidth(int savedWidth, final JTable rowHeadersTable, int scrollBarValue) {
         TableColumn column = rowHeadersTable.getColumnModel().getColumn(0);
-        int width = tableEditor.getTableEditorState().getRowNumberColumnWidth();
+        int width = savedWidth;
         if (width == 0) {
             int height = rowHeadersTable.getVisibleRect().height;
             int row = rowHeadersTable.rowAtPoint(new Point(0, scrollBarValue + height));
@@ -393,12 +409,12 @@ public final class CsvTableRowUtilities {
         private Cursor otherCursor = RESIZE_CURSOR;
         private final JTable rowHeadersTable;
         private final JTable userTable;
-        private final CsvTableEditor myTableEditor;
+        private final Runnable rowsResized;
 
-        public TableRowResizer(JTable rowHeadersTableArg, JTable userTableArg, CsvTableEditor tableEditor) {
+        public TableRowResizer(JTable rowHeadersTableArg, JTable userTableArg, Runnable rowsResized) {
             this.userTable = userTableArg;
             this.rowHeadersTable = rowHeadersTableArg;
-            this.myTableEditor = tableEditor;
+            this.rowsResized = rowsResized;
             rowHeadersTable.addMouseListener(this);
             rowHeadersTable.addMouseMotionListener(this);
         }
@@ -471,7 +487,7 @@ public final class CsvTableRowUtilities {
                 if (newHeight > 0) {
                     rowHeadersTable.setRowHeight(newHeight);
                     userTable.setRowHeight(newHeight);
-                    myTableEditor.storeCurrentTableLayout();
+                    rowsResized.run();
                 }
             }
             resizingRow = -1;

@@ -1,4 +1,4 @@
-package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
+package net.seesharpsoft.intellij.plugins.csv.table.ui;
 
 import com.intellij.ui.JBColor;
 import com.intellij.util.ui.JBUI;
@@ -6,9 +6,10 @@ import com.intellij.util.ui.UIUtil;
 
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicScrollBarUI;
+
 import java.awt.*;
 
-final class CsvTableScrollBarUI extends BasicScrollBarUI {
+public final class CsvTableScrollBarUI extends BasicScrollBarUI {
     private static final Color THUMB_COLOR = new JBColor(0xB8BCC4, 0x60636B);
 
     @Override

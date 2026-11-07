@@ -1,4 +1,4 @@
-package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
+package net.seesharpsoft.intellij.plugins.csv.table.ui;
 
 import com.intellij.openapi.util.Computable;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
@@ -8,6 +8,7 @@ import javax.swing.event.EventListenerList;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,6 +20,9 @@ public abstract class CsvTableModelSwingBase implements TableModel {
     public abstract void setValue(String value, int row, int column);
 
     public abstract boolean isCommentRow(int row);
+
+    public void flushPendingUpdates() {
+    }
 
     protected <T> T readModel(Computable<T> computation) {
         return computation.compute();

@@ -6,8 +6,7 @@ import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import net.seesharpsoft.intellij.plugins.csv.editor.CsvEditorTab;
-import net.seesharpsoft.intellij.plugins.csv.editor.CsvFileEditorProvider;
-import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditorProvider;
+import net.seesharpsoft.intellij.plugins.csv.editor.CsvFileEditorProviderBase;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -56,13 +55,13 @@ public abstract class CsvEditorViewActions extends ToggleAction implements DumbA
 
     public static final class ShowTextEditor extends CsvEditorViewActions {
         public ShowTextEditor() {
-            super(CsvFileEditorProvider.EDITOR_TYPE_ID);
+            super(CsvFileEditorProviderBase.TEXT_EDITOR_TYPE_ID);
         }
     }
 
     public static final class ShowTableEditor extends CsvEditorViewActions {
         public ShowTableEditor() {
-            super(CsvTableEditorProvider.EDITOR_TYPE_ID);
+            super(CsvFileEditorProviderBase.TABLE_EDITOR_TYPE_ID);
         }
     }
 

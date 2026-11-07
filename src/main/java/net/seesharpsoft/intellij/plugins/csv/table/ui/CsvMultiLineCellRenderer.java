@@ -1,4 +1,4 @@
-package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
+package net.seesharpsoft.intellij.plugins.csv.table.ui;
 
 import com.intellij.openapi.editor.markup.TextAttributes;
 import com.intellij.openapi.util.UserDataHolder;
@@ -17,9 +17,11 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumnModel;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultCaret;
+
 import java.awt.*;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.geom.Rectangle2D;
 import java.util.EventObject;
 import java.util.Set;
@@ -39,7 +41,7 @@ public class CsvMultiLineCellRenderer extends JBScrollPane implements TableCellR
     private final JTextArea myTextArea;
     private final Border cellPadding = JBUI.Borders.empty(CELL_VERTICAL_PADDING, 8);
 
-    public CsvMultiLineCellRenderer(CsvTableEditorKeyListener keyListener, UserDataHolder userDataHolderParam) {
+    public CsvMultiLineCellRenderer(KeyListener keyListener, UserDataHolder userDataHolderParam) {
         this(userDataHolderParam);
         myTextArea.addKeyListener(keyListener);
         myTextArea.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "DO_NOTHING_AT_ALL");
@@ -160,7 +162,7 @@ public class CsvMultiLineCellRenderer extends JBScrollPane implements TableCellR
         if (myTextArea.getCaret() instanceof DefaultCaret caret) caret.setUpdatePolicy(policy);
     }
 
-    int getPreferredUnwrappedWidth() {
+    public int getPreferredUnwrappedWidth() {
         boolean lineWrap = myTextArea.getLineWrap();
         try {
             myTextArea.setLineWrap(false);
@@ -267,7 +269,7 @@ public class CsvMultiLineCellRenderer extends JBScrollPane implements TableCellR
     }
 
     public static class Comment extends CsvMultiLineCellRenderer {
-        public Comment(CsvTableEditorKeyListener keyListener, UserDataHolder userDataHolderParam) {
+        public Comment(KeyListener keyListener, UserDataHolder userDataHolderParam) {
             super(keyListener, userDataHolderParam);
         }
 

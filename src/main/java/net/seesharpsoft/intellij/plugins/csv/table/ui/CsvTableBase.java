@@ -1,4 +1,4 @@
-package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
+package net.seesharpsoft.intellij.plugins.csv.table.ui;
 
 import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.editor.colors.EditorColorsScheme;
@@ -14,9 +14,10 @@ import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.plaf.TableUI;
 import javax.swing.plaf.basic.BasicTableUI;
+import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
-import javax.swing.table.JTableHeader;
+
 import java.awt.*;
 import java.util.function.Consumer;
 
@@ -88,7 +89,7 @@ public class CsvTableBase extends JBTable {
         return getFrozenColumnCount() == 0 ? 0 : getVisibleRect().x;
     }
 
-    int getFrozenColumnWidth() {
+    public int getFrozenColumnWidth() {
         int width = 0;
         for (int column = 0; column < getFrozenColumnCount(); column++) {
             width += getColumnModel().getColumn(column).getWidth();
@@ -117,11 +118,15 @@ public class CsvTableBase extends JBTable {
     protected void paintOverlay(Graphics g) {
     }
 
+    protected boolean usesPaintSnapshot() {
+        return false;
+    }
+
     protected boolean deferPaintWithoutReadAccess() {
         return false;
     }
 
-    void updateFrozenColumnLayout() {
+    public void updateFrozenColumnLayout() {
         positionCellEditor();
         repaint();
         getTableHeader().repaint();
@@ -276,7 +281,7 @@ public class CsvTableBase extends JBTable {
         return super.getCellRenderer(row, column);
     }
 
-    void setSearchMatchRenderer(int row, int column, TableCellRenderer renderer) {
+    public void setSearchMatchRenderer(int row, int column, TableCellRenderer renderer) {
         clearSearchMatchRenderer();
         searchMatchRow = row;
         searchMatchColumn = column;
@@ -284,7 +289,7 @@ public class CsvTableBase extends JBTable {
         repaint(getCellRect(row, column, true));
     }
 
-    void clearSearchMatchRenderer() {
+    public void clearSearchMatchRenderer() {
         if (searchMatchRenderer == null) return;
         searchMatchRenderer = null;
         repaint(getCellRect(searchMatchRow, searchMatchColumn, true));

@@ -6,8 +6,8 @@ import net.seesharpsoft.intellij.plugins.csv.CsvBasePlatformTestCase;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvEscapeCharacter;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvValueSeparator;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditor;
-import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableModelBase.ModelState;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
+import net.seesharpsoft.intellij.plugins.csv.table.CsvTableModelBase.ModelState;
 
 import java.util.ArrayList;
 import java.util.List;

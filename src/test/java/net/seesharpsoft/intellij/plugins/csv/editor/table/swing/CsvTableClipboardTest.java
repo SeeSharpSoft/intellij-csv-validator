@@ -13,10 +13,12 @@ import com.intellij.psi.PsiDocumentManager;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvEscapeCharacter;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvValueSeparator;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
+import net.seesharpsoft.intellij.plugins.csv.table.ui.CsvMultiLineCellRenderer;
 import net.seesharpsoft.intellij.util.ManualUpdateScheduler;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
+
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;

@@ -9,9 +9,10 @@ import com.intellij.openapi.editor.colors.EditorFontType;
 import com.intellij.ui.JBColor;
 import com.intellij.util.ui.JBUI;
 import net.seesharpsoft.intellij.plugins.csv.CsvPluginManager;
-import net.seesharpsoft.intellij.plugins.csv.editor.table.swing.CsvMultiLineCellRenderer;
+import net.seesharpsoft.intellij.plugins.csv.table.ui.CsvMultiLineCellRenderer;
 
 import javax.swing.*;
+
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;

@@ -83,7 +83,7 @@
 
         <editorOptionsProvider instance="net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettingsProvider"/>
         <fileEditorProvider implementation="net.seesharpsoft.intellij.plugins.csv.editor.CsvFileEditorProvider"/>
-        <fileEditorProvider implementation="net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditorProvider"/>
+        <fileEditorProvider implementation="net.seesharpsoft.intellij.plugins.csv.editor.table.swing.CsvTableEditorSwingProvider"/>
         <diff.DiffTool implementation="net.seesharpsoft.intellij.plugins.csv.diff.CsvTableDiffTool"/>
 
         <lang.documentationProvider language="csv"

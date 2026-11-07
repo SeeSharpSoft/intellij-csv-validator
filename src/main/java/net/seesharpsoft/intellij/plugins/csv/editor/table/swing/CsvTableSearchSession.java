@@ -5,7 +5,9 @@ import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.editor.colors.EditorColorsScheme;
 import com.intellij.openapi.editor.markup.TextAttributes;
 import com.intellij.ui.JBColor;
-import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableSearchSessionBase;
+import net.seesharpsoft.intellij.plugins.csv.table.CsvTableSearchMatch;
+import net.seesharpsoft.intellij.plugins.csv.table.CsvTableSearchSessionBase;
+import net.seesharpsoft.intellij.plugins.csv.table.ui.CsvMultiLineCellRenderer;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionListener;
@@ -13,6 +15,7 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumnModel;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultCaret;
+
 import java.awt.*;
 import java.beans.PropertyChangeListener;
 import java.util.Arrays;
@@ -80,7 +83,7 @@ final class CsvTableSearchSession extends CsvTableSearchSessionBase<CsvTableEdit
     }
 
     @Override
-    protected void selectMatch(Match match) {
+    protected void selectMatch(CsvTableSearchMatch match) {
         if (editor.isReordering()) return;
         JTable table = editor.getTable();
         if (table.isEditing()) return;

@@ -21,11 +21,15 @@ The following paths are relative to that directory:
   per-file separator/escape attributes (`CsvFileAttributes`), and editor/code-style settings.
 - `csv\psi`: handwritten PSI support and `CsvPsiTreeUpdater`, which batches document/PSI
   changes into IDE write actions and undoable commands.
-- `csv\editor\table`: Swing-independent PSI model (`CsvTableModelBase`), editor state,
-  search/replace, and reordering logic.
-- `csv\editor\table\swing`: shared `CsvTableBase`, `CsvTableModelSwingBase`, and
-  `CsvMultiLineCellRenderer`; `CsvTableModelSwing` delegates PSI work to `CsvTableModelBase`.
-  Clipboard, selection, movement, and rendering use Swing components and IDE theme colors.
+- `csv\table`: PSI-backed models, paste/reorder/replacement preparation, and search.
+  `CsvTableSearchSessionBase` uses `CsvTableSearchHost` rather than a concrete file editor;
+  `CsvTableSearchMatch` carries matches in view coordinates.
+- `csv\table\ui`: shared Swing table/model foundations, cell/header rendering, row headers,
+  pixel snapshots, and scrollbar styling. Model flush and table paint hooks separate
+  immutable diff data from delayed PSI-backed updates; row headers accept layout/overlay callbacks.
+- `csv\editor\table`: file-editor integration, state, actions, and the abstract table provider.
+- `csv\editor\table\swing`: concrete editor/provider, PSI-backed Swing model, search adapter,
+  clipboard, listeners, and row dragging. `CsvTableModelSwing` delegates PSI work to `CsvTableModelBase`.
 - `csv\diff`: snapshot-backed table comparisons and undoable diff edits; reuse the shared
   Swing table, model, and renderer foundations for common UI behavior.
 - `csv\formatter`, `csv\highlighter`, `csv\inspection`, and `csv\intention`: text-editor
@@ -35,6 +39,13 @@ Plugin extensions and actions are registered in `src\main\resources\META-INF\plu
 UI strings live in `src\main\resources\localization`; update the default and `_zh_CN`
 bundles together. Inspection/intention descriptions have their own resource directories.
 Tests mirror the source packages under `src\test\java`, with fixtures in `src\test\resources`.
+
+When changing table/editor/diff packages, preserve the dependency graph checked by
+`CsvTablePackageDependenciesTest`: `editor.table.swing -> editor.table, table.ui`;
+`editor.table -> editor, table`; `diff -> table.ui`; `table.ui -> table`.
+Transitive dependencies are allowed; dependencies to other plugin packages are outside this rule.
+`CsvFileEditorProviderBase` owns both editor-type IDs so shared editor code can identify
+the table editor without depending on its provider.
 
 ## Build and tests
 

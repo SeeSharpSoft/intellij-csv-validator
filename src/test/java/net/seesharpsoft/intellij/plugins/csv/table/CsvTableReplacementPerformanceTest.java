@@ -1,4 +1,4 @@
-package net.seesharpsoft.intellij.plugins.csv.editor.table;
+package net.seesharpsoft.intellij.plugins.csv.table;
 
 import com.intellij.find.FindManager;
 import com.intellij.find.FindModel;
@@ -6,10 +6,9 @@ import com.intellij.openapi.progress.EmptyProgressIndicator;
 import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.progress.ProgressManager;
 import net.seesharpsoft.intellij.plugins.csv.CsvBasePlatformTestCase;
+import net.seesharpsoft.intellij.plugins.csv.CsvFileType;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvEscapeCharacter;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvValueSeparator;
-import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableSearchSessionBase.Match;
-import net.seesharpsoft.intellij.plugins.csv.CsvFileType;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvPsiTreeUpdater;
 import org.jetbrains.annotations.NotNull;
 
@@ -24,10 +23,10 @@ public class CsvTableReplacementPerformanceTest extends CsvBasePlatformTestCase 
         int rows = 32;
         int columns = 4096;
         String text = ("cat,".repeat(columns - 1) + "cat\n").repeat(rows);
-        List<Match> matches = new ArrayList<>();
+        List<CsvTableSearchMatch> matches = new ArrayList<>();
         for (int row = 0; row < rows; row++) {
             for (int column = 0; column < columns; column++) {
-                matches.add(new Match(row, column, 0, 3));
+                matches.add(new CsvTableSearchMatch(row, column, 0, 3));
             }
         }
         AtomicInteger reads = new AtomicInteger();
@@ -46,7 +45,7 @@ public class CsvTableReplacementPerformanceTest extends CsvBasePlatformTestCase 
     public void testSparseChangesOnlyReplaceTheirEnclosingSpan() {
         String text = "untouched,cat,untouched\nuntouched,cat,untouched\n";
         CsvTableReplacement.Change change = prepare(text,
-                List.of(new Match(0, 1, 0, 3), new Match(1, 1, 0, 3)), 3);
+                List.of(new CsvTableSearchMatch(0, 1, 0, 3), new CsvTableSearchMatch(1, 1, 0, 3)), 3);
         assertNotNull(change);
         assertEquals(10, change.range().getStartOffset());
         assertEquals(text.lastIndexOf("cat") + 3, change.range().getEndOffset());
@@ -65,7 +64,7 @@ public class CsvTableReplacementPerformanceTest extends CsvBasePlatformTestCase 
             }
         };
         assertThrows(ProcessCanceledException.class, () -> ProgressManager.getInstance().runProcess(() -> {
-            prepare(snapshot, List.of(new Match(0, 4096, 0, 3)), 4097);
+            prepare(snapshot, List.of(new CsvTableSearchMatch(0, 4096, 0, 3)), 4097);
             return null;
         }, indicator));
         assertTrue("Cancellation must interrupt source traversal", reads.get() < text.length());
@@ -83,7 +82,7 @@ public class CsvTableReplacementPerformanceTest extends CsvBasePlatformTestCase 
                 var comment = writer.createCommentFromContent(replacement);
                 String expected = comment == null ? "#cat\n" : comment.getText() + "\n";
                 CsvTableReplacement.Change change = CsvTableReplacement.prepare("#cat\n",
-                        List.of(new Match(0, 0, 0, 3)), null, new int[]{0}, query, FindManager.getInstance(getProject()), settings);
+                        List.of(new CsvTableSearchMatch(0, 0, 0, 3)), null, new int[]{0}, query, FindManager.getInstance(getProject()), settings);
                 assertEquals("Replacement: " + replacement, expected, change == null ? "#cat\n" : apply("#cat\n", change));
             }
         } finally {
@@ -97,15 +96,15 @@ public class CsvTableReplacementPerformanceTest extends CsvBasePlatformTestCase 
         query.setStringToFind("cat");
         query.setStringToReplace("dog\"fish");
         CsvTableReplacement.Change change = CsvTableReplacement.prepare(text, List.of(
-                        new Match(0, 0, 0, 3), new Match(1, 0, 0, 3), new Match(1, 0, 4, 7),
-                        new Match(1, 0, 8, 11), new Match(1, 1, 0, 3)),
+                        new CsvTableSearchMatch(0, 0, 0, 3), new CsvTableSearchMatch(1, 0, 0, 3), new CsvTableSearchMatch(1, 0, 4, 7),
+                        new CsvTableSearchMatch(1, 0, 8, 11), new CsvTableSearchMatch(1, 1, 0, 3)),
                 null, new int[]{0, 1}, query, FindManager.getInstance(getProject()),
                 new CsvTableReplacement.Settings(CsvValueSeparator.create("||"), CsvEscapeCharacter.BACKSLASH, "##", false));
         assertNotNull(change);
         assertEquals("##dog\"fish\n\"dog\\\"fish\\\"dog\\\"fish\ndog\\\"fish\"||\"dog\\\"fish\"\n", apply(text, change));
     }
 
-    private CsvTableReplacement.Change prepare(CharSequence text, List<Match> matches, int columns) {
+    private CsvTableReplacement.Change prepare(CharSequence text, List<CsvTableSearchMatch> matches, int columns) {
         FindModel query = new FindModel();
         query.setStringToFind("cat");
         query.setStringToReplace("dog,fish");

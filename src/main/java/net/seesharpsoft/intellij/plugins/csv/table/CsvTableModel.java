@@ -1,4 +1,4 @@
-package net.seesharpsoft.intellij.plugins.csv.editor.table;
+package net.seesharpsoft.intellij.plugins.csv.table;
 
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.psi.PsiElement;

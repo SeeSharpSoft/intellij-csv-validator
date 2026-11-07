@@ -17,17 +17,20 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiFile;
 import com.intellij.util.ui.UIUtil;
+import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.actions.CsvEditorViewActions;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvEscapeCharacter;
-import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvValueSeparator;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvFile;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
-import net.seesharpsoft.intellij.psi.PsiFileHolder;
+import net.seesharpsoft.intellij.plugins.csv.table.CsvTableModel;
+import net.seesharpsoft.intellij.plugins.csv.table.CsvTableModelBase;
+import net.seesharpsoft.intellij.plugins.csv.table.CsvTableSearchHost;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+
 import java.awt.*;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -35,7 +38,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicLong;
 
-public abstract class CsvTableEditor implements FileEditor, PsiFileHolder {
+public abstract class CsvTableEditor implements FileEditor, CsvTableSearchHost {
 
     public static final String EDITOR_NAME = "Table Editor";
 

@@ -1,20 +1,21 @@
-package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
+package net.seesharpsoft.intellij.plugins.csv.table.ui;
 
 import com.intellij.ui.scale.JBUIScale;
 import com.intellij.util.ui.ImageUtil;
 import com.intellij.util.ui.UIUtil;
 
 import javax.swing.*;
+
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.function.Consumer;
 
-final class CsvTablePaintSnapshot {
+public final class CsvTablePaintSnapshot {
     private BufferedImage image;
     private Rectangle bounds;
     private double scale;
 
-    void paint(JComponent component, Graphics graphics, boolean readAccess, Consumer<Graphics> painter) {
+    public void paint(JComponent component, Graphics graphics, boolean readAccess, Consumer<Graphics> painter) {
         Rectangle visible = component.getVisibleRect();
         if (readAccess) {
             if (visible.isEmpty()) {
@@ -84,7 +85,7 @@ final class CsvTablePaintSnapshot {
                 visible.width - 2 * tolerance, visible.height - 2 * tolerance);
     }
 
-    void clear() {
+    public void clear() {
         if (image != null) image.flush();
         image = null;
         bounds = null;

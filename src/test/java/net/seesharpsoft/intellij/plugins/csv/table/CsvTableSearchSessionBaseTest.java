@@ -1,4 +1,4 @@
-package net.seesharpsoft.intellij.plugins.csv.editor.table;
+package net.seesharpsoft.intellij.plugins.csv.table;
 
 import com.intellij.find.FindManager;
 import com.intellij.find.FindModel;
@@ -11,8 +11,8 @@ import com.intellij.openapi.command.undo.UndoManager;
 import com.intellij.openapi.editor.event.DocumentEvent;
 import com.intellij.openapi.editor.event.DocumentListener;
 import com.intellij.openapi.fileEditor.impl.text.TextEditorProvider;
-import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.ProgressIndicator;
+import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiElement;
@@ -26,6 +26,7 @@ import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
+
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -40,7 +41,7 @@ public class CsvTableSearchSessionBaseTest extends CsvBasePlatformTestCase {
     private void configure(String text) {
         CsvEditorSettings.getInstance().loadState(new CsvEditorSettings.OptionSet());
         myFixture.configureByText(CsvFileType.INSTANCE, text);
-        CsvTableEditor editor = mock(CsvTableEditor.class);
+        CsvTableSearchHost editor = mock(CsvTableSearchHost.class);
         JPanel component = new JPanel();
         when(editor.getProject()).thenReturn(getProject());
         when(editor.getPsiFile()).thenReturn(myFixture.getFile());
@@ -389,7 +390,7 @@ public class CsvTableSearchSessionBaseTest extends CsvBasePlatformTestCase {
         assertEquals(row.replace("cat", "dog") + row + row.replace("cat", "dog"), myFixture.getFile().getText());
     }
 
-    private static final class TestSearchSession extends CsvTableSearchSessionBase<CsvTableEditor> {
+    private static final class TestSearchSession extends CsvTableSearchSessionBase<CsvTableSearchHost> {
         private int selectedRow = -1;
         private int selectedColumn = -1;
         private int matchStart;
@@ -402,7 +403,7 @@ public class CsvTableSearchSessionBaseTest extends CsvBasePlatformTestCase {
         private Runnable afterPreparation = () -> {
         };
 
-        private TestSearchSession(CsvTableEditor editor) {
+        private TestSearchSession(CsvTableSearchHost editor) {
             super(editor);
         }
 
@@ -432,7 +433,7 @@ public class CsvTableSearchSessionBaseTest extends CsvBasePlatformTestCase {
         }
 
         @Override
-        protected void selectMatch(Match match) {
+        protected void selectMatch(CsvTableSearchMatch match) {
             selectedRow = match.row();
             selectedColumn = match.column();
             matchStart = match.start();

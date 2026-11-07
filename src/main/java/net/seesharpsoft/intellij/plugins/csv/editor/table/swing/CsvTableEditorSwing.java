@@ -1,18 +1,14 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
-import com.intellij.openapi.actionSystem.DefaultActionGroup;
+import com.intellij.notification.NotificationGroupManager;
+import com.intellij.notification.NotificationType;
+import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
+import com.intellij.openapi.actionSystem.DefaultActionGroup;
+import com.intellij.openapi.actionSystem.IdeActions;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.actionSystem.UiDataProvider;
-import com.intellij.openapi.editor.colors.EditorColorsManager;
-import com.intellij.openapi.editor.colors.EditorColorsScheme;
-import com.intellij.openapi.editor.colors.EditorColorsListener;
-import com.intellij.openapi.actionSystem.ActionManager;
-import com.intellij.openapi.actionSystem.IdeActions;
-import com.intellij.openapi.project.DumbAwareAction;
-import com.intellij.openapi.project.Project;
-import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.application.ReadAction;
@@ -20,36 +16,45 @@ import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.command.undo.BasicUndoableAction;
 import com.intellij.openapi.command.undo.UndoManager;
 import com.intellij.openapi.editor.Document;
+import com.intellij.openapi.editor.colors.EditorColorsListener;
+import com.intellij.openapi.editor.colors.EditorColorsManager;
+import com.intellij.openapi.editor.colors.EditorColorsScheme;
+import com.intellij.openapi.progress.ProgressManager;
+import com.intellij.openapi.project.DumbAwareAction;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Ref;
-import com.intellij.psi.PsiDocumentManager;
-import com.intellij.notification.NotificationGroupManager;
-import com.intellij.notification.NotificationType;
-import com.intellij.util.DocumentUtil;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.ui.components.labels.LinkLabel;
+import com.intellij.psi.PsiDocumentManager;
 import com.intellij.ui.JBColor;
+import com.intellij.ui.components.labels.LinkLabel;
+import com.intellij.util.DocumentUtil;
 import com.intellij.util.ui.JBUI;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.CsvLexerFactory;
 import net.seesharpsoft.intellij.plugins.csv.CsvPluginManager;
 import net.seesharpsoft.intellij.plugins.csv.editor.CsvFieldPosition;
 import net.seesharpsoft.intellij.plugins.csv.editor.CsvFieldView;
-import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableReorder;
-import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
-import net.seesharpsoft.intellij.plugins.csv.highlighter.CsvTextAttributeKeys;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableActions;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditor;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditorState;
-import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableModel;
-import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableModelBase.ModelState;
+import net.seesharpsoft.intellij.plugins.csv.highlighter.CsvTextAttributeKeys;
+import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
+import net.seesharpsoft.intellij.plugins.csv.table.CsvTableModel;
+import net.seesharpsoft.intellij.plugins.csv.table.CsvTableModelBase.ModelState;
+import net.seesharpsoft.intellij.plugins.csv.table.CsvTableReorder;
+import net.seesharpsoft.intellij.plugins.csv.table.ui.CsvMultiLineCellRenderer;
+import net.seesharpsoft.intellij.plugins.csv.table.ui.CsvTableHeader;
+import net.seesharpsoft.intellij.plugins.csv.table.ui.CsvTableRowUtilities;
+import net.seesharpsoft.intellij.plugins.csv.table.ui.CsvTableScrollBarUI;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
-import javax.swing.table.TableCellRenderer;
+
 import java.awt.*;
 import java.util.Arrays;
 import java.util.Objects;
@@ -219,7 +224,10 @@ public class CsvTableEditorSwing extends CsvTableEditor implements CsvFieldView 
         setFontSize(getGlobalFontSize());
         baseFontHeight = getFontHeight();
 
-        rowHeadersTable = CsvTableRowUtilities.addNumberColumn(this, tblEditor, 1);
+        rowHeadersTable = CsvTableRowUtilities.addNumberColumn(tblEditor, 1,
+                () -> getTableEditorState().getRowNumberColumnWidth(),
+                width -> getTableEditorState().setRowNumberColumnWidth(width),
+                this::storeCurrentTableLayout);
         CsvTableRowDragListener rowDragListener = new CsvTableRowDragListener(this, rowHeadersTable);
         rowHeadersTable.addMouseListener(rowDragListener);
         rowHeadersTable.addMouseMotionListener(rowDragListener);
@@ -259,7 +267,8 @@ public class CsvTableEditorSwing extends CsvTableEditor implements CsvFieldView 
         if (rowHeadersTable != null) {
             rowHeadersTable.setRowHeight(tblEditor.getRowHeight());
             if (editorState.getRowNumberColumnWidth() > 0) {
-                CsvTableRowUtilities.adjustColumnWidth(this, rowHeadersTable, tableScrollPane.getVerticalScrollBar().getValue());
+                CsvTableRowUtilities.adjustColumnWidth(editorState.getRowNumberColumnWidth(),
+                        rowHeadersTable, tableScrollPane.getVerticalScrollBar().getValue());
             }
         }
         getTable().setFrozenColumnCount(editorState.getFrozenColumnCount());

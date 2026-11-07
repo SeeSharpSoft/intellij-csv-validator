@@ -1,28 +1,30 @@
-package net.seesharpsoft.intellij.plugins.csv.editor.table;
+package net.seesharpsoft.intellij.plugins.csv.table;
 
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.event.DocumentEvent;
 import com.intellij.openapi.editor.event.DocumentListener;
-import com.intellij.openapi.application.ReadAction;
+import com.intellij.openapi.util.ThrowableComputable;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiFileFactory;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.codeStyle.CodeStyleSettingsManager;
-import com.intellij.openapi.util.ThrowableComputable;
-import com.intellij.util.ThrowableRunnable;
 import com.intellij.testFramework.EdtTestUtil;
 import com.intellij.testFramework.LoggedErrorProcessor;
 import com.intellij.testFramework.PsiTestUtil;
+import com.intellij.util.ThrowableRunnable;
 import net.seesharpsoft.intellij.plugins.csv.CsvBasePlatformTestCase;
 import net.seesharpsoft.intellij.plugins.csv.CsvFileType;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvEscapeCharacter;
+import net.seesharpsoft.intellij.plugins.csv.components.CsvFileAttributes;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvCodeStyleSettings;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import net.seesharpsoft.intellij.psi.PsiFileHolder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.mockito.MockedStatic;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -36,9 +38,8 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.same;
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
-import org.mockito.MockedStatic;
+import static org.mockito.Mockito.when;
 
 public class CsvTableModelBaseTest extends CsvBasePlatformTestCase implements PsiFileHolder {
 
@@ -50,6 +51,7 @@ public class CsvTableModelBaseTest extends CsvBasePlatformTestCase implements Ps
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+        resetFileAttributes();
         CsvEditorSettings.getInstance().setAutoDetectValueSeparator(false);
         CsvCodeStyleSettings csvCodeStyleSettings = CodeStyleSettingsManager.getInstance(getProject()).getTemporarySettings().getCustomSettings(CsvCodeStyleSettings.class);
         csvCodeStyleSettings.SPACE_BEFORE_SEPARATOR = false;
@@ -60,11 +62,20 @@ public class CsvTableModelBaseTest extends CsvBasePlatformTestCase implements Ps
 
     @Override
     protected void tearDown() throws Exception {
-        CsvEditorSettings.getInstance().setAutoDetectValueSeparator(true);
-        CsvEditorSettings.getInstance().setDefaultValueSeparator(CsvEditorSettings.VALUE_SEPARATOR_DEFAULT);
-        CsvEditorSettings.getInstance().setCommentIndicator(COMMENT_INDICATOR_DEFAULT);
-        CsvEditorSettings.getInstance().setDefaultEscapeCharacter(CsvEscapeCharacter.QUOTE);
-        super.tearDown();
+        try {
+            resetFileAttributes();
+            CsvEditorSettings.getInstance().setAutoDetectValueSeparator(true);
+            CsvEditorSettings.getInstance().setDefaultValueSeparator(CsvEditorSettings.VALUE_SEPARATOR_DEFAULT);
+            CsvEditorSettings.getInstance().setCommentIndicator(COMMENT_INDICATOR_DEFAULT);
+            CsvEditorSettings.getInstance().setDefaultEscapeCharacter(CsvEscapeCharacter.QUOTE);
+        } finally {
+            super.tearDown();
+        }
+    }
+
+    private void resetFileAttributes() {
+        CsvFileAttributes attributes = getProject().getServiceIfCreated(CsvFileAttributes.class);
+        if (attributes != null) attributes.reset();
     }
 
     protected void autoCheck(Consumer<CsvTableModel> runnable) {

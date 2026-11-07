@@ -1,31 +1,27 @@
-package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
+package net.seesharpsoft.intellij.plugins.csv.table.ui;
 
 import com.intellij.ui.table.JBTable;
 import net.seesharpsoft.intellij.plugins.csv.CsvBasePlatformTestCase;
-import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditor;
-import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditorState;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 public class CsvTableSelectionPerformanceTest extends CsvBasePlatformTestCase {
-    private static CsvTableEditor createTableEditor() {
-        CsvTableEditor tableEditor = mock(CsvTableEditor.class);
-        when(tableEditor.getTableEditorState()).thenReturn(new CsvTableEditorState());
-        return tableEditor;
+    private static JTable createRowHeaders(JTable table) {
+        AtomicInteger width = new AtomicInteger();
+        return CsvTableRowUtilities.addNumberColumn(table, 1, width::get, width::set, () -> {
+        });
     }
 
     public void testRestoringOneHundredThousandSelectedRowsEmitsBoundedEvents() {
         int count = 100_000;
         JTable table = new JBTable(new DefaultTableModel(count, 4));
         new JScrollPane(table);
-        JTable headers = CsvTableRowUtilities.addNumberColumn(createTableEditor(), table, 1);
+        JTable headers = createRowHeaders(table);
         AtomicInteger tableEvents = new AtomicInteger();
         AtomicInteger headerEvents = new AtomicInteger();
         table.getSelectionModel().addListSelectionListener(event -> tableEvents.incrementAndGet());
@@ -48,7 +44,7 @@ public class CsvTableSelectionPerformanceTest extends CsvBasePlatformTestCase {
         DefaultTableModel model = new DefaultTableModel(1, 4);
         JTable table = new JBTable(model);
         new JScrollPane(table);
-        JTable headers = CsvTableRowUtilities.addNumberColumn(createTableEditor(), table, 1);
+        JTable headers = createRowHeaders(table);
         AtomicInteger events = new AtomicInteger();
         headers.getModel().addTableModelListener(event -> events.incrementAndGet());
         model.setRowCount(100_000);

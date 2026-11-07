@@ -1,4 +1,4 @@
-package net.seesharpsoft.intellij.plugins.csv.editor.table;
+package net.seesharpsoft.intellij.plugins.csv.table;
 
 import com.intellij.find.FindManager;
 import com.intellij.find.FindModel;
@@ -12,7 +12,6 @@ import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.CsvLexerFactory;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvEscapeCharacter;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvValueSeparator;
-import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableSearchSessionBase.Match;
 import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 
@@ -24,7 +23,7 @@ import java.util.Map;
 /** Prepares one document edit in source order, without looking up cells or parsing replacement PSI. */
 final class CsvTableReplacement {
     private final CharSequence snapshot;
-    private final Map<Cell, List<Match>> targets;
+    private final Map<Cell, List<CsvTableSearchMatch>> targets;
     private final int[] rows;
     private final int[] columns;
     private final FindModel query;
@@ -77,7 +76,7 @@ final class CsvTableReplacement {
     private record Cell(int row, int column) {
     }
 
-    private CsvTableReplacement(CharSequence snapshot, Map<Cell, List<Match>> targets, int[] rows, int[] columns,
+    private CsvTableReplacement(CharSequence snapshot, Map<Cell, List<CsvTableSearchMatch>> targets, int[] rows, int[] columns,
                                 FindModel query, FindManager manager, Settings settings) {
         this.snapshot = snapshot;
         this.targets = targets;
@@ -88,15 +87,15 @@ final class CsvTableReplacement {
         this.settings = settings;
     }
 
-    static Change prepare(CharSequence snapshot, List<Match> matches, int[] rows, int[] columns,
+    static Change prepare(CharSequence snapshot, List<CsvTableSearchMatch> matches, int[] rows, int[] columns,
                           FindModel query, FindManager manager, Settings settings)
             throws FindManager.MalformedReplacementStringException {
         return new CsvTableReplacement(snapshot, groupByCell(matches), rows, columns, query, manager, settings).prepare();
     }
 
-    private static Map<Cell, List<Match>> groupByCell(List<Match> matches) {
-        Map<Cell, List<Match>> targets = new HashMap<>();
-        for (Match match : matches) {
+    private static Map<Cell, List<CsvTableSearchMatch>> groupByCell(List<CsvTableSearchMatch> matches) {
+        Map<Cell, List<CsvTableSearchMatch>> targets = new HashMap<>();
+        for (CsvTableSearchMatch match : matches) {
             ProgressManager.checkCanceled();
             targets.computeIfAbsent(new Cell(match.row(), match.column()), cell -> new ArrayList<>()).add(match);
         }
@@ -149,7 +148,7 @@ final class CsvTableReplacement {
     }
 
     private void replaceField(int fieldEnd) throws FindManager.MalformedReplacementStringException {
-        List<Match> cellMatches = targets.get(new Cell(getViewRow(), getViewColumn()));
+        List<CsvTableSearchMatch> cellMatches = targets.get(new Cell(getViewRow(), getViewColumn()));
         if (cellMatches == null) return;
         String replacement = settings.serialize(replaceMatches(value.toString(), cellMatches), comment, quoted, column);
         if (replacement == null || replacement.contentEquals(snapshot.subSequence(fieldStart, fieldEnd))) return;
@@ -168,11 +167,11 @@ final class CsvTableReplacement {
         return column < columns.length ? columns[column] : -1;
     }
 
-    private String replaceMatches(String original, List<Match> cellMatches)
+    private String replaceMatches(String original, List<CsvTableSearchMatch> cellMatches)
             throws FindManager.MalformedReplacementStringException {
         StringBuilder replaced = new StringBuilder();
         int offset = 0;
-        for (Match match : cellMatches) {
+        for (CsvTableSearchMatch match : cellMatches) {
             ProgressManager.checkCanceled();
             replaced.append(original, offset, match.start());
             replaced.append(manager.getStringToReplace(original.substring(match.start(), match.end()),

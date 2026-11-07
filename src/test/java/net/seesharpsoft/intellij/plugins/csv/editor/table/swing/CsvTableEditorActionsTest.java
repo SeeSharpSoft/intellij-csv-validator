@@ -2,10 +2,11 @@ package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.TextEditor;
-import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableModel;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
+import net.seesharpsoft.intellij.plugins.csv.table.CsvTableModel;
 
 import javax.swing.table.TableColumn;
+
 import java.util.Enumeration;
 
 public class CsvTableEditorActionsTest extends CsvTableEditorSwingTestBase {

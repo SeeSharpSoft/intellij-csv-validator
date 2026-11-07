@@ -15,11 +15,12 @@ import com.intellij.openapi.keymap.impl.ActionProcessor;
 import com.intellij.openapi.keymap.impl.IdeKeyEventDispatcher;
 import com.intellij.openapi.util.Disposer;
 import net.seesharpsoft.intellij.plugins.csv.CsvBasePlatformTestCase;
-import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableModel;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
+import net.seesharpsoft.intellij.plugins.csv.table.CsvTableModel;
 import net.seesharpsoft.intellij.util.UpdateScheduler;
 
 import javax.swing.*;
+
 import java.awt.Component;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;

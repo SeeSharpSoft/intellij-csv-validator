@@ -27,6 +27,9 @@ import org.jetbrains.annotations.Nullable;
  */
 public abstract class CsvFileEditorProviderBase extends WeighedFileEditorProvider implements AsyncFileEditorProvider, DumbAware {
 
+    public static final String TEXT_EDITOR_TYPE_ID = "csv-text-editor";
+    public static final String TABLE_EDITOR_TYPE_ID = "csv-table-editor";
+
     private static final double PRIMARY_EDITOR_WEIGHT = 0.1;
     private static final double SECONDARY_EDITOR_WEIGHT = 0.2;
 
