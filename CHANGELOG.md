@@ -14,6 +14,8 @@
 
 ### Removed
 
+- Removed duplicate searching and commenting on existing GitHub issues when submitting error reports
+
 ### Fixed
 
 - Fixed IDE read-access errors when hovering over the table editor after PSI cache invalidation (#1140)

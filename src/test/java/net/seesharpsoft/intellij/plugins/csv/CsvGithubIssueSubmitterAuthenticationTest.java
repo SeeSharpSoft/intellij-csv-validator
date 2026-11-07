@@ -10,7 +10,6 @@ import com.intellij.testFramework.RunAll;
 import org.jetbrains.plugins.github.api.GithubApiRequest;
 import org.jetbrains.plugins.github.api.GithubApiRequestExecutor;
 import org.jetbrains.plugins.github.api.GithubServerPath;
-import org.jetbrains.plugins.github.api.data.GithubResponsePage;
 import org.jetbrains.plugins.github.authentication.GHAccountsUtil;
 import org.jetbrains.plugins.github.authentication.accounts.GithubAccount;
 import org.jetbrains.plugins.github.exceptions.GithubMissingTokenException;
@@ -54,8 +53,7 @@ public class CsvGithubIssueSubmitterAuthenticationTest extends CsvBasePlatformTe
         doAnswer(invocation -> {
             GithubApiRequest<?> request = invocation.getArgument(1);
             requests.add(request);
-            return request.getUrl().contains("/search/issues")
-                    ? new GithubResponsePage<>(List.of(), null, null, null, null) : null;
+            return null;
         }).when(executor).execute(any(ProgressIndicator.class), any());
 
         factory = mock(GithubApiRequestExecutor.Factory.class);
@@ -105,7 +103,7 @@ public class CsvGithubIssueSubmitterAuthenticationTest extends CsvBasePlatformTe
         } else {
             verify(factory).create(GithubServerPath.DEFAULT_SERVER, "test-token");
         }
-        assertCompleted();
+        assertCompleted(1);
     }
 
     public void testNewAccountUsesPublicLoginOnTheEdt() throws Exception {
@@ -119,7 +117,7 @@ public class CsvGithubIssueSubmitterAuthenticationTest extends CsvBasePlatformTe
 
         assertTrue(submit());
 
-        assertCompleted();
+        assertCompleted(1);
     }
 
     public void testCancelledLoginDoesNotSendAReport() {
@@ -173,8 +171,7 @@ public class CsvGithubIssueSubmitterAuthenticationTest extends CsvBasePlatformTe
         assertTrue(submit());
 
         accounts.verify(() -> reLoginMethod.invoke(null, account, getProject()), times(1));
-        assertEquals(3, requests.size());
-        assertCompleted();
+        assertCompleted(2);
     }
 
     public void testCancelledTokenLoginDoesNotSendAReport() throws Exception {
@@ -228,8 +225,7 @@ public class CsvGithubIssueSubmitterAuthenticationTest extends CsvBasePlatformTe
             }
             GithubApiRequest<?> request = invocation.getArgument(1);
             requests.add(request);
-            return request.getUrl().contains("/search/issues")
-                    ? new GithubResponsePage<>(List.of(), null, null, null, null) : null;
+            return null;
         }).when(executor).execute(any(ProgressIndicator.class), any());
     }
 
@@ -242,10 +238,14 @@ public class CsvGithubIssueSubmitterAuthenticationTest extends CsvBasePlatformTe
                 null, getProject(), reports::add);
     }
 
-    private void assertCompleted() {
+    private void assertCompleted(int expectedRequests) {
+        assertEquals(expectedRequests, requests.size());
         assertEquals(1, reports.size());
         assertEquals(SubmittedReportInfo.SubmissionStatus.NEW_ISSUE, reports.getFirst().getStatus());
-        assertTrue(requests.getLast().getUrl().endsWith("/issues"));
+        for (GithubApiRequest<?> request : requests) {
+            assertInstanceOf(request, GithubApiRequest.Post.class);
+            assertEquals("https://api.github.com/repos/SeeSharpSoft/intellij-csv-validator/issues", request.getUrl());
+        }
     }
 
     private static Method findMethod(Class<?> type, String name, Class<?>... parameters) {

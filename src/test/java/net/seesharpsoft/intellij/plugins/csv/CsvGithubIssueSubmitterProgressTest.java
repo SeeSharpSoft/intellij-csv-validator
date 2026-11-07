@@ -10,15 +10,14 @@ import com.intellij.openapi.progress.util.ProgressIndicatorBase;
 import com.intellij.openapi.util.Computable;
 import org.jetbrains.plugins.github.api.GithubApiRequest;
 import org.jetbrains.plugins.github.api.GithubApiRequestExecutor;
-import org.jetbrains.plugins.github.api.data.GithubResponsePage;
-import org.jetbrains.plugins.github.api.data.GithubSearchedIssue;
+import org.jetbrains.plugins.github.api.GithubServerPath;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.spy;
 
 public class CsvGithubIssueSubmitterProgressTest extends CsvBasePlatformTestCase {
 
@@ -27,44 +26,32 @@ public class CsvGithubIssueSubmitterProgressTest extends CsvBasePlatformTestCase
     private final CsvGithubIssueSubmitter classUnderTest = new CsvGithubIssueSubmitter() {
         @Override
         protected String getIssueDetails(IdeaLoggingEvent event, String additionalInfo) {
-            return "Test report details";
+            return additionalInfo == null ? "Test report details" : additionalInfo;
         }
     };
 
-    public void testNewIssueKeepsTaskIndicatorRunning() throws Exception {
-        assertSubmission(false, null, SubmittedReportInfo.SubmissionStatus.NEW_ISSUE, 2);
+    public void testNewIssueWithoutAdditionalDetailsKeepsTaskIndicatorRunning() throws Exception {
+        assertSubmission(null);
     }
 
-    public void testDuplicateCommentKeepsTaskIndicatorRunning() throws Exception {
-        assertSubmission(true, "Additional details", SubmittedReportInfo.SubmissionStatus.DUPLICATE, 2);
+    public void testNewIssueWithAdditionalDetailsKeepsTaskIndicatorRunning() throws Exception {
+        assertSubmission("Additional details");
     }
 
-    public void testDuplicateWithoutDetailsOnlySearches() throws Exception {
-        assertSubmission(true, null, SubmittedReportInfo.SubmissionStatus.DUPLICATE, 1);
-    }
-
-    private void assertSubmission(boolean duplicate, String additionalInfo,
-                                  SubmittedReportInfo.SubmissionStatus expectedStatus, int expectedRequests) throws Exception {
+    private void assertSubmission(String additionalInfo) throws Exception {
         ProgressManager progressManager = ProgressManager.getInstance();
         ProgressIndicator taskIndicator = new ProgressIndicatorBase();
-        GithubApiRequestExecutor executor = mock(GithubApiRequestExecutor.WithTokenAuth.class);
-        List<ProgressIndicator> requestIndicators = new ArrayList<>();
+        GithubApiRequestExecutor executor = spy(GithubApiRequestExecutor.Factory.getInstance()
+                .create(GithubServerPath.DEFAULT_SERVER, "test-token"));
         List<GithubApiRequest<?>> requests = new ArrayList<>();
         List<SubmittedReportInfo> reports = new ArrayList<>();
 
-        GithubSearchedIssue foundIssue = mock(GithubSearchedIssue.class);
-        when(foundIssue.getTitle()).thenReturn(TITLE);
-        when(foundIssue.getNumber()).thenReturn(1080L);
-        GithubResponsePage<GithubSearchedIssue> searchResult = new GithubResponsePage<>(
-                duplicate ? List.of(foundIssue) : List.of(), null, null, null, null);
-
-        when(executor.execute(any(ProgressIndicator.class), any())).thenAnswer(invocation -> {
+        doAnswer(invocation -> {
             ProgressIndicator requestIndicator = invocation.getArgument(0);
             assertNotSame(taskIndicator, requestIndicator);
             assertFalse(requestIndicator.isRunning());
             assertTrue(taskIndicator.isRunning());
             assertSame(taskIndicator, progressManager.getProgressIndicator());
-            requestIndicators.add(requestIndicator);
             requests.add(invocation.getArgument(1));
 
             // Reproduce GithubApiHelperRequestExecutor's nested progress lifecycle without HTTP.
@@ -73,14 +60,14 @@ public class CsvGithubIssueSubmitterProgressTest extends CsvBasePlatformTestCase
                 assertTrue(requestIndicator.isRunning());
                 requestIndicator.setText("Sending report");
                 assertEquals("Sending report", taskIndicator.getText());
-                return requests.size() == 1 ? searchResult : null;
+                return null;
             }, requestIndicator);
 
             assertFalse(requestIndicator.isRunning());
             assertTrue(taskIndicator.isRunning());
             assertSame(taskIndicator, progressManager.getProgressIndicator());
             return result;
-        });
+        }).when(executor).execute(any(ProgressIndicator.class), any());
 
         progressManager.runProcess(() -> {
             classUnderTest.submitToGithub(new IdeaLoggingEvent("Test", new Throwable("Test error")),
@@ -89,23 +76,24 @@ public class CsvGithubIssueSubmitterProgressTest extends CsvBasePlatformTestCase
         }, taskIndicator);
 
         assertFalse(taskIndicator.isRunning());
-        assertEquals(expectedRequests, requests.size());
+        assertEquals(1, requests.size());
         assertEquals(1, reports.size());
-        assertEquals(expectedStatus, reports.get(0).getStatus());
-        assertTrue(requests.get(0).getUrl().contains("/search/issues"));
-        if (expectedRequests == 2) {
-            assertNotSame(requestIndicators.get(0), requestIndicators.get(1));
-            assertTrue(requests.get(1).getUrl().endsWith(duplicate ? "/issues/1080/comments" : "/issues"));
-        }
+        assertEquals(SubmittedReportInfo.SubmissionStatus.NEW_ISSUE, reports.getFirst().getStatus());
+        GithubApiRequest.Post<?> request = assertInstanceOf(requests.getFirst(), GithubApiRequest.Post.class);
+        assertEquals("https://api.github.com/repos/SeeSharpSoft/intellij-csv-validator/issues", request.getUrl());
+        assertNotNull(request.getBody());
+        assertTrue(request.getBody().contains(TITLE));
+        assertTrue(request.getBody().contains(additionalInfo == null ? "Test report details" : additionalInfo));
     }
 
     public void testTaskCancellationReachesRequestIndicator() throws Exception {
         ProgressManager progressManager = ProgressManager.getInstance();
         ProgressIndicator taskIndicator = new EmptyProgressIndicator();
-        GithubApiRequestExecutor executor = mock(GithubApiRequestExecutor.WithTokenAuth.class);
+        GithubApiRequestExecutor executor = spy(GithubApiRequestExecutor.Factory.getInstance()
+                .create(GithubServerPath.DEFAULT_SERVER, "test-token"));
         List<SubmittedReportInfo> reports = new ArrayList<>();
 
-        when(executor.execute(any(ProgressIndicator.class), any())).thenAnswer(invocation -> {
+        doAnswer(invocation -> {
             ProgressIndicator requestIndicator = invocation.getArgument(0);
             return progressManager.runProcess((Computable<Object>) () -> {
                 taskIndicator.cancel();
@@ -114,7 +102,7 @@ public class CsvGithubIssueSubmitterProgressTest extends CsvBasePlatformTestCase
                 fail("The request must honor task cancellation");
                 return null;
             }, requestIndicator);
-        });
+        }).when(executor).execute(any(ProgressIndicator.class), any());
 
         assertThrows(ProcessCanceledException.class, () -> progressManager.runProcess(() ->
                 classUnderTest.submitToGithub(new IdeaLoggingEvent("Test", new Throwable("Test error")),
