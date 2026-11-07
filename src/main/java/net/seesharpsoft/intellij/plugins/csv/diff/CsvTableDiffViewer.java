@@ -603,24 +603,28 @@ final class CsvTableDiffViewer implements FrameDiffTool.DiffViewer {
                 ? String.format(CsvPluginManager.getLocalizedText("table.diff.differences"), result.differences().size())
                 : CsvPluginManager.getLocalizedText(result.error()));
         for (int side = 0; side < 2; side++) {
-            JTable table = tables[side];
-            if (oldColumns != comparison.columns()) {
-                models[side].fireTableStructureChanged();
-                for (int column = 0; column < table.getColumnCount(); column++) {
-                    int width = column < oldColumns ? widths[side][column] : CsvEditorSettings.getInstance().getTableDefaultColumnWidth();
-                    table.getColumnModel().getColumn(column).setPreferredWidth(width);
-                    table.getColumnModel().getColumn(column).setWidth(width);
-                }
-            } else {
-                models[side].fireTableDataChanged();
-            }
-            table.clearSelection();
-            for (int column : selectedColumns[side]) {
-                if (column < table.getColumnCount()) table.addColumnSelectionInterval(column, column);
-            }
+            refreshTable(side, widths[side], selectedColumns[side]);
         }
         restoreSelectedRows(selectedRows);
         updateRowHeights();
+    }
+
+    private void refreshTable(int side, int[] widths, int[] selectedColumns) {
+        JTable table = tables[side];
+        if (widths.length != comparison.columns()) {
+            models[side].fireTableStructureChanged();
+            for (int column = 0; column < table.getColumnCount(); column++) {
+                int width = column < widths.length ? widths[column] : CsvEditorSettings.getInstance().getTableDefaultColumnWidth();
+                table.getColumnModel().getColumn(column).setPreferredWidth(width);
+                table.getColumnModel().getColumn(column).setWidth(width);
+            }
+        } else {
+            models[side].fireTableDataChanged();
+        }
+        table.clearSelection();
+        for (int column : selectedColumns) {
+            if (column < table.getColumnCount()) table.addColumnSelectionInterval(column, column);
+        }
     }
 
     private void updateColors() {
@@ -938,11 +942,15 @@ final class CsvTableDiffViewer implements FrameDiffTool.DiffViewer {
         var documentFile = FileDocumentManager.getInstance().getFile(document);
         if (documentFile != null && !documentFile.isWritable()) return false;
         if (content instanceof FileContent file && !file.getFile().isWritable()) return false;
+        return !isForcedReadOnly(side, content);
+    }
+
+    private boolean isForcedReadOnly(int side, DiffContent content) {
         if (Boolean.TRUE.equals(context.getUserData(DiffUserDataKeys.FORCE_READ_ONLY))
                 || Boolean.TRUE.equals(request.getUserData(DiffUserDataKeys.FORCE_READ_ONLY))
-                || Boolean.TRUE.equals(content.getUserData(DiffUserDataKeys.FORCE_READ_ONLY))) return false;
+                || Boolean.TRUE.equals(content.getUserData(DiffUserDataKeys.FORCE_READ_ONLY))) return true;
         boolean[] forced = request.getUserData(DiffUserDataKeys.FORCE_READ_ONLY_CONTENTS);
-        return forced == null || side >= forced.length || !forced[side];
+        return forced != null && side < forced.length && forced[side];
     }
 
     private boolean isCurrent(CsvDiffComparison result) {

@@ -23,7 +23,7 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-public class CsvGithubIssueSubmitterAuthenticationTest extends CsvBasePlatformTestCase {
+public class CsvGithubIssueSubmitterAuthenticationTest extends CsvGithubIssueSubmitterTestBase {
 
     private final CsvGithubIssueSubmitter submitter = new CsvGithubIssueSubmitter() {
         @Override

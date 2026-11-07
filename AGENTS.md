@@ -234,20 +234,26 @@ When asked to prepare a new version:
    `<idea-version since-build="VVV">` into the packaged `META-INF\plugin.xml`; use this
    mechanism and check the resulting descriptor rather than duplicating metadata in
    `src\main\resources\META-INF\plugin.xml`.
-3. Align the default build target in `gradle.properties` and the compatibility targets
-   in `.github\workflows` with the support baseline. Cover the earliest supported and
-   current stable IDE releases in CI, retaining the existing IDE-product coverage.
-   Review explicit `IDEA_VERSION` overrides, including `PullRequest.yml` and `CronEAP.yml`;
-   EAP checks supplement, rather than replace, official-support coverage.
+3. Validate the GitHub Actions workflows in `.github\workflows` and align their targets
+   and the default build target in `gradle.properties` with the support baseline.
+   In `PullRequest.yml`, cover every supported IDE release train with `ideaPlatform: IU`
+   and pin each `ideaVersion` to that train's latest officially released stable version,
+   including all patch/hotfix components. Resolve versions from
+   [JetBrains' official release feed](https://data.services.jetbrains.com/products/releases?code=IIU&latest=false&type=release);
+   retain a train-only version only when it is the latest published stable version.
+   Confirm workflow syntax, action references, SDK/JDK pairings, and job/step conditions
+   so required checks still run after matrix changes. Review other explicit `IDEA_VERSION`
+   overrides, including `CronEAP.yml`; EAP checks supplement, rather than replace,
+   official-support coverage.
 4. Move all changelog entries from `## Unreleased`, preserving their subsections, into a
    new section immediately below it. Use `## <version> - <Date>` with the release date,
    for example `## 252.8.0 - Oct 30, 2026`. Retain an empty `## Unreleased` section with
    the four subsections listed above.
 5. Run all tests with `.\gradlew.bat test`, without test filters, and run the Gradle
    verification task with `.\gradlew.bat verifyPlugin`.
-6. Summarize the test and plugin-verification findings, including failures, warnings,
-   and any incomplete checks. Recommend whether the version is ready for release;
-   if it is not, state what must be addressed before release.
+6. Summarize the test, plugin-verification, and GitHub Actions validation findings,
+   including failures, warnings, and any incomplete checks. Recommend whether the
+   version is ready for release; if it is not, state what must be addressed before release.
 7. Wait for the user's explicit release approval. Only after approval, create a release
    commit, push it, and open a pull request against `main`. If already on `main`, commit
    and push after approval but skip the pull request.

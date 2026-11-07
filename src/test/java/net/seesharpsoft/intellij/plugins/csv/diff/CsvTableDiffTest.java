@@ -503,9 +503,11 @@ public class CsvTableDiffTest extends CsvBasePlatformTestCase {
         assertNotNull(event.getData(DiffDataKeys.NAVIGATABLE_ARRAY));
         jump.actionPerformed(event);
         FileEditorManager manager = FileEditorManager.getInstance(getProject());
-        PlatformTestUtil.waitWithEventsDispatching("CSV source opened",
-                () -> manager.getSelectedTextEditor() != null
-                        && manager.getSelectedTextEditor().getDocument() == source.getDocument(), 10);
+        PlatformTestUtil.waitWithEventsDispatching("CSV source opened at the selected field", () -> {
+            Editor selected = manager.getSelectedTextEditor();
+            return selected != null && selected.getDocument() == source.getDocument()
+                    && selected.getCaretModel().getOffset() == expectedOffset;
+        }, 10);
         Editor editor = manager.getSelectedTextEditor();
         assertNotNull(editor);
         assertEquals(expectedOffset, editor.getCaretModel().getOffset());

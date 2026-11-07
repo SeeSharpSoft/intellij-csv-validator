@@ -1,5 +1,6 @@
 package net.seesharpsoft.intellij.plugins.csv.diff;
 
+import com.intellij.diff.util.Range;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.util.TextRange;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
@@ -12,21 +13,12 @@ record CsvDiffChange(TextRange range, String text) {
         CsvDiffData target = comparison.sides().get(targetSide);
         CsvDiffData source = comparison.sides().get(1 - targetSide);
         if (change.finalLineBreak()) {
-            int end = target.text().length();
-            return source.text().endsWith("\n")
-                    ? new CsvDiffChange(new TextRange(end, end), "\n")
-                    : new CsvDiffChange(new TextRange(end - 1, end), "");
+            return prepareFinalLineBreak(target, source);
         }
         var records = change.records();
         int targetStart = targetSide == 0 ? records.start1 : records.start2;
         int targetEnd = targetSide == 0 ? records.end1 : records.end2;
-        int sourceStart = targetSide == 0 ? records.start2 : records.start1;
-        int sourceEnd = targetSide == 0 ? records.end2 : records.end1;
-        List<String> rows = new ArrayList<>();
-        for (int row = sourceStart; row < sourceEnd; row++) {
-            ProgressManager.checkCanceled();
-            rows.add(serialize(source, source.rows().get(row), target.format()));
-        }
+        List<String> rows = serializeRows(source, records, targetSide, target.format());
         int start = offset(target, targetStart);
         int end = offset(target, targetEnd);
         boolean finalLineBreak = target.text().endsWith("\n");
@@ -39,6 +31,25 @@ record CsvDiffChange(TextRange range, String text) {
             start--;
         }
         return new CsvDiffChange(new TextRange(start, end), replacement);
+    }
+
+    private static CsvDiffChange prepareFinalLineBreak(CsvDiffData target, CsvDiffData source) {
+        int end = target.text().length();
+        return source.text().endsWith("\n")
+                ? new CsvDiffChange(new TextRange(end, end), "\n")
+                : new CsvDiffChange(new TextRange(end - 1, end), "");
+    }
+
+    private static List<String> serializeRows(CsvDiffData source, Range records, int targetSide,
+                                              CsvDiffData.Format targetFormat) {
+        int start = targetSide == 0 ? records.start2 : records.start1;
+        int end = targetSide == 0 ? records.end2 : records.end1;
+        List<String> rows = new ArrayList<>();
+        for (int row = start; row < end; row++) {
+            ProgressManager.checkCanceled();
+            rows.add(serialize(source, source.rows().get(row), targetFormat));
+        }
+        return rows;
     }
 
     private static int offset(CsvDiffData data, int row) {

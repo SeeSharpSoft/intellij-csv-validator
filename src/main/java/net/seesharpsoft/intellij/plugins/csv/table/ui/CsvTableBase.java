@@ -116,6 +116,7 @@ public class CsvTableBase extends JBTable {
     }
 
     protected void paintOverlay(Graphics g) {
+        // Subclasses may add overlays; the shared table has none.
     }
 
     protected boolean usesPaintSnapshot() {

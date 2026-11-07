@@ -22,6 +22,7 @@ public abstract class CsvTableModelSwingBase implements TableModel {
     public abstract boolean isCommentRow(int row);
 
     public void flushPendingUpdates() {
+        // Models without deferred updates have nothing to flush.
     }
 
     protected <T> T readModel(Computable<T> computation) {

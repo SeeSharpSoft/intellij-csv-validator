@@ -28,6 +28,15 @@ import java.util.function.ToDoubleFunction;
  * changes the width of both tables.
  */
 final class CsvTableDiffDivider extends JComponent {
+    private static final int GAP = 4;
+    private static final int SPLITTER_WIDTH = 20;
+    private static final int MIN_TABLE_WIDTH = 50;
+
+    private final JTable[] tables;
+    final Host host;
+    private double proportion = 0.5;
+    private int dragOffset = -1;
+
     interface Host {
         CsvDiffComparison comparison();
 
@@ -40,15 +49,6 @@ final class CsvTableDiffDivider extends JComponent {
 
     record RowNumber(String text, Rectangle bounds, Color color) {
     }
-
-    private static final int GAP = 4;
-    private static final int SPLITTER_WIDTH = 20;
-    private static final int MIN_TABLE_WIDTH = 50;
-
-    private final JTable[] tables;
-    final Host host;
-    private double proportion = 0.5;
-    private int dragOffset = -1;
 
     CsvTableDiffDivider(JTable left, JTable right, Host host) {
         this.tables = new JTable[]{left, right};
@@ -373,10 +373,12 @@ final class CsvTableDiffDivider extends JComponent {
     static final class Layout implements LayoutManager {
         @Override
         public void addLayoutComponent(String name, Component component) {
+            // Component roles are fixed by their order in the parent.
         }
 
         @Override
         public void removeLayoutComponent(Component component) {
+            // Layout reads the current parent components and retains no component state.
         }
 
         @Override

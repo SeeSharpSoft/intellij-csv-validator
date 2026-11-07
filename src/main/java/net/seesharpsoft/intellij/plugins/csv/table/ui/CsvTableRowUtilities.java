@@ -189,7 +189,7 @@ public final class CsvTableRowUtilities {
         });
         numberColumn.addPropertyChangeListener(event -> {
             if ("width".equals(event.getPropertyName()) &&
-                    rowHeadersTable.getTableHeader().getResizingColumn() == numberColumn) {
+                    numberColumn.equals(rowHeadersTable.getTableHeader().getResizingColumn())) {
                 int width = numberColumn.getWidth();
                 widthChanged.accept(width);
                 rowHeadersTable.setPreferredScrollableViewportSize(new Dimension(width, 0));

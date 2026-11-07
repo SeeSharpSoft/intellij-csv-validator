@@ -74,6 +74,7 @@ final class CsvDiffFileEditor extends UserDataHolderBase implements DocumentsEdi
 
     @Override
     public void setState(@NotNull FileEditorState state) {
+        // The owning diff viewer manages editor state.
     }
 
     @Override
@@ -88,10 +89,12 @@ final class CsvDiffFileEditor extends UserDataHolderBase implements DocumentsEdi
 
     @Override
     public void addPropertyChangeListener(@NotNull PropertyChangeListener listener) {
+        // This document adapter emits no property changes.
     }
 
     @Override
     public void removePropertyChangeListener(@NotNull PropertyChangeListener listener) {
+        // No listeners are retained by this document adapter.
     }
 
     @Override

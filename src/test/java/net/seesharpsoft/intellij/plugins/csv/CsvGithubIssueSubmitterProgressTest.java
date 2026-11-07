@@ -19,7 +19,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.spy;
 
-public class CsvGithubIssueSubmitterProgressTest extends CsvBasePlatformTestCase {
+public class CsvGithubIssueSubmitterProgressTest extends CsvGithubIssueSubmitterTestBase {
 
     private static final String TITLE = "[Automated Report] java.lang.Throwable: Test error";
 

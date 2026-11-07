@@ -53,15 +53,16 @@ public abstract class CsvTableDiffNavigationActions extends DumbAwareAction {
     static void prependToToolbar(CsvTableDiffViewer viewer) {
         for (Container parent = viewer.getComponent().getParent(); parent instanceof JComponent ancestor; parent = parent.getParent()) {
             for (JComponent child : UIUtil.findComponentsOfType(ancestor, JComponent.class)) {
-                if (!(child instanceof ActionToolbar toolbar)
-                        || !ActionPlaces.DIFF_TOOLBAR.equals(toolbar.getPlace())
-                        || toolbar.getToolbarDataContext().getData(VIEWER) != viewer) continue;
-                if (!(toolbar.getActionGroup() instanceof DefaultActionGroup actions)) {
-                    throw new IllegalStateException("Cannot prepend CSV navigation to the diff toolbar");
+                if (child instanceof ActionToolbar toolbar
+                        && ActionPlaces.DIFF_TOOLBAR.equals(toolbar.getPlace())
+                        && toolbar.getToolbarDataContext().getData(VIEWER) == viewer) {
+                    if (!(toolbar.getActionGroup() instanceof DefaultActionGroup actions)) {
+                        throw new IllegalStateException("Cannot prepend CSV navigation to the diff toolbar");
+                    }
+                    actions.add(ActionManager.getInstance().getAction(GROUP_ID), Constraints.FIRST);
+                    toolbar.updateActionsAsync();
+                    return;
                 }
-                actions.add(ActionManager.getInstance().getAction(GROUP_ID), Constraints.FIRST);
-                toolbar.updateActionsAsync();
-                return;
             }
         }
     }
