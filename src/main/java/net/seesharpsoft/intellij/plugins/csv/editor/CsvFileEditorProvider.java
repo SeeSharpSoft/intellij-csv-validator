@@ -15,8 +15,6 @@ import org.jetbrains.annotations.NotNull;
 
 public class CsvFileEditorProvider extends CsvFileEditorProviderBase {
 
-    public static final String EDITOR_TYPE_ID = "csv-text-editor";
-
     public static boolean acceptCsvFile(@NotNull Project project, @NotNull VirtualFile file) {
         try {
             if (file instanceof DiffViewerVirtualFile || !CsvHelper.isCsvFile(file)) {
@@ -32,7 +30,7 @@ public class CsvFileEditorProvider extends CsvFileEditorProviderBase {
 
     @Override
     public @NotNull String getEditorTypeId() {
-        return EDITOR_TYPE_ID;
+        return TEXT_EDITOR_TYPE_ID;
     }
 
     @Override

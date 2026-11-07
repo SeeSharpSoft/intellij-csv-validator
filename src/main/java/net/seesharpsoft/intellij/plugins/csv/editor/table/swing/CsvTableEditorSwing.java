@@ -1,18 +1,14 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
-import com.intellij.ide.DataManager;
-import com.intellij.openapi.actionSystem.DefaultActionGroup;
+import com.intellij.notification.NotificationGroupManager;
+import com.intellij.notification.NotificationType;
+import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
-import com.intellij.openapi.actionSystem.PlatformDataKeys;
-import com.intellij.openapi.editor.colors.EditorColorsManager;
-import com.intellij.openapi.editor.colors.EditorColorsScheme;
-import com.intellij.openapi.editor.colors.EditorColorsListener;
-import com.intellij.openapi.actionSystem.ActionManager;
+import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.actionSystem.IdeActions;
-import com.intellij.openapi.project.DumbAwareAction;
-import com.intellij.openapi.project.Project;
-import com.intellij.openapi.progress.ProgressManager;
+import com.intellij.openapi.actionSystem.PlatformDataKeys;
+import com.intellij.openapi.actionSystem.UiDataProvider;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.application.ReadAction;
@@ -20,35 +16,45 @@ import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.command.undo.BasicUndoableAction;
 import com.intellij.openapi.command.undo.UndoManager;
 import com.intellij.openapi.editor.Document;
+import com.intellij.openapi.editor.colors.EditorColorsListener;
+import com.intellij.openapi.editor.colors.EditorColorsManager;
+import com.intellij.openapi.editor.colors.EditorColorsScheme;
+import com.intellij.openapi.progress.ProgressManager;
+import com.intellij.openapi.project.DumbAwareAction;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Ref;
-import com.intellij.psi.PsiDocumentManager;
-import com.intellij.notification.NotificationGroupManager;
-import com.intellij.notification.NotificationType;
-import com.intellij.util.DocumentUtil;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.ui.components.labels.LinkLabel;
+import com.intellij.psi.PsiDocumentManager;
 import com.intellij.ui.JBColor;
+import com.intellij.ui.components.labels.LinkLabel;
+import com.intellij.util.DocumentUtil;
 import com.intellij.util.ui.JBUI;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.CsvLexerFactory;
 import net.seesharpsoft.intellij.plugins.csv.CsvPluginManager;
 import net.seesharpsoft.intellij.plugins.csv.editor.CsvFieldPosition;
 import net.seesharpsoft.intellij.plugins.csv.editor.CsvFieldView;
-import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableReorder;
-import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableActions;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditor;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditorState;
-import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableModel;
-import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableModelBase.ModelState;
+import net.seesharpsoft.intellij.plugins.csv.highlighter.CsvTextAttributeKeys;
+import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
+import net.seesharpsoft.intellij.plugins.csv.table.CsvTableModel;
+import net.seesharpsoft.intellij.plugins.csv.table.CsvTableModelBase.ModelState;
+import net.seesharpsoft.intellij.plugins.csv.psi.CsvDocumentReorder;
+import net.seesharpsoft.intellij.plugins.csv.table.ui.CsvMultiLineCellRenderer;
+import net.seesharpsoft.intellij.plugins.csv.table.ui.CsvTableHeader;
+import net.seesharpsoft.intellij.plugins.csv.table.ui.CsvTableRowUtilities;
+import net.seesharpsoft.intellij.plugins.csv.table.ui.CsvTableScrollBarUI;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
-import javax.swing.table.TableCellRenderer;
+
 import java.awt.*;
 import java.util.Arrays;
 import java.util.Objects;
@@ -66,7 +72,7 @@ public class CsvTableEditorSwing extends CsvTableEditor implements CsvFieldView 
     private JScrollPane tableScrollPane;
     private JPanel panelTop;
     private JTable rowHeadersTable;
-    private final JPanel editorComponent;
+    private final JComponent editorComponent;
     private CsvTableSearchSession searchSession;
 
     private int baseFontHeight;
@@ -105,8 +111,11 @@ public class CsvTableEditorSwing extends CsvTableEditor implements CsvFieldView 
         boolean initialized = false;
         try {
             initializedUIComponents();
-            editorComponent = new JPanel(new BorderLayout());
-            editorComponent.add(panelMain, BorderLayout.CENTER);
+            editorComponent = UiDataProvider.wrapComponent(panelMain, sink -> {
+                sink.set(PlatformDataKeys.FILE_EDITOR, this);
+                sink.set(CommonDataKeys.PROJECT, project);
+                sink.set(CommonDataKeys.VIRTUAL_FILE, file);
+            });
             editorComponent.setBorder(JBUI.Borders.empty(8));
             tableScrollPane.setBorder(JBUI.Borders.customLine(JBColor.border()));
             tableScrollPane.getViewport().setBackground(tblEditor.getBackground());
@@ -115,13 +124,10 @@ public class CsvTableEditorSwing extends CsvTableEditor implements CsvFieldView 
             styleScrollBar(tableScrollPane.getVerticalScrollBar());
             styleScrollBar(tableScrollPane.getHorizontalScrollBar());
             ApplicationManager.getApplication().getMessageBus().connect(this)
-                    .subscribe(EditorColorsManager.TOPIC, (EditorColorsListener) scheme -> tblEditor.updateUI());
-            DataManager.registerDataProvider(editorComponent, dataId -> {
-                if (PlatformDataKeys.FILE_EDITOR.is(dataId)) return this;
-                if (CommonDataKeys.PROJECT.is(dataId)) return project;
-                if (CommonDataKeys.VIRTUAL_FILE.is(dataId)) return file;
-                return null;
-            });
+                    .subscribe(EditorColorsManager.TOPIC, (EditorColorsListener) scheme -> {
+                        CsvTextAttributeKeys.clearColumnTextAttributes(this);
+                        tblEditor.updateUI();
+                    });
             registerTableShortcuts();
             registerSearchShortcut(IdeActions.ACTION_FIND, false);
             registerSearchShortcut(IdeActions.ACTION_REPLACE, true);
@@ -218,7 +224,10 @@ public class CsvTableEditorSwing extends CsvTableEditor implements CsvFieldView 
         setFontSize(getGlobalFontSize());
         baseFontHeight = getFontHeight();
 
-        rowHeadersTable = CsvTableRowUtilities.addNumberColumn(this, tblEditor, 1);
+        rowHeadersTable = CsvTableRowUtilities.addNumberColumn(tblEditor, 1,
+                () -> getTableEditorState().getRowNumberColumnWidth(),
+                width -> getTableEditorState().setRowNumberColumnWidth(width),
+                this::storeCurrentTableLayout);
         CsvTableRowDragListener rowDragListener = new CsvTableRowDragListener(this, rowHeadersTable);
         rowHeadersTable.addMouseListener(rowDragListener);
         rowHeadersTable.addMouseMotionListener(rowDragListener);
@@ -257,6 +266,10 @@ public class CsvTableEditorSwing extends CsvTableEditor implements CsvFieldView 
         tblEditor.setRowHeight(editorState.getRowHeight());
         if (rowHeadersTable != null) {
             rowHeadersTable.setRowHeight(tblEditor.getRowHeight());
+            if (editorState.getRowNumberColumnWidth() > 0) {
+                CsvTableRowUtilities.adjustColumnWidth(editorState.getRowNumberColumnWidth(),
+                        rowHeadersTable, tableScrollPane.getVerticalScrollBar().getValue());
+            }
         }
         getTable().setFrozenColumnCount(editorState.getFrozenColumnCount());
     }
@@ -380,22 +393,10 @@ public class CsvTableEditorSwing extends CsvTableEditor implements CsvFieldView 
         int[] cols = tblEditor.getSelectedColumns();
         int offset = backwards ? -1 : 1;
         if (columns) {
-            applyOrder(true, orderAfterMove(tblEditor.getColumnCount(), cols, offset), rows, shift(cols, offset));
+            applyOrder(true, CsvDocumentReorder.moveOrder(tblEditor.getColumnCount(), cols, offset), rows, shift(cols, offset));
         } else {
-            applyOrder(false, orderAfterMove(tblEditor.getRowCount(), rows, offset), shift(rows, offset), cols);
+            applyOrder(false, CsvDocumentReorder.moveOrder(tblEditor.getRowCount(), rows, offset), shift(rows, offset), cols);
         }
-    }
-
-    private static int[] orderAfterMove(int count, int[] selected, int offset) {
-        int[] order = IntStream.range(0, count).toArray();
-        // Start with the selected index nearest the move direction so adjacent selections move as a block.
-        for (int i = 0; i < selected.length; i++) {
-            int index = selected[offset < 0 ? i : selected.length - 1 - i];
-            int adjacent = order[index + offset];
-            order[index + offset] = order[index];
-            order[index] = adjacent;
-        }
-        return order;
     }
 
     private static int[] shift(int[] indices, int offset) {
@@ -514,7 +515,7 @@ public class CsvTableEditorSwing extends CsvTableEditor implements CsvFieldView 
         boolean completed;
         try {
             completed = runReorderWithProgress(() -> {
-                CsvTableReorder.Change change = CsvTableReorder.prepare(snapshot, lexer, order, columns, separator, escape, comment);
+                CsvDocumentReorder.Change change = CsvDocumentReorder.prepare(snapshot, lexer, order, columns, separator, escape, comment);
                 ProgressManager.checkCanceled();
                 ModalityState modality = ModalityState.defaultModalityState();
                 // Once written, finish refreshing the model even if Cancel is pressed.

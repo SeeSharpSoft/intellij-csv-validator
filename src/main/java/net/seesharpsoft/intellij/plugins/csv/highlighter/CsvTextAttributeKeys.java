@@ -75,6 +75,10 @@ public final class CsvTextAttributeKeys {
         return editorColorsScheme.getAttributes(CsvTextAttributeKeys.COMMENT);
     }
 
+    public static void clearColumnTextAttributes(UserDataHolder holder) {
+        holder.putUserData(COLUMN_COLORING_TEXT_ATTRIBUTES, null);
+    }
+
     public static TextAttributes getTextAttributesOfColumn(int columnIndex, UserDataHolder userDataHolder) {
         List<TextAttributes> textAttributeList = userDataHolder.getUserData(COLUMN_COLORING_TEXT_ATTRIBUTES);
         if (textAttributeList == null) {

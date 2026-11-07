@@ -5,11 +5,13 @@ import com.intellij.ide.BrowserUtil;
 import com.intellij.notification.*;
 import com.intellij.openapi.actionSystem.impl.SimpleDataContext;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.SearchableConfigurable;
 import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
+import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
@@ -25,6 +27,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class CsvPlugin implements ProjectActivity, DumbAware {
+
+    private static final Logger LOG = Logger.getInstance(CsvPlugin.class);
 
     private static void openLink(Project project, String link) {
         if (project == null || project.isDisposed()) return;
@@ -72,8 +76,10 @@ public class CsvPlugin implements ProjectActivity, DumbAware {
             if (csvFileAttributes != null) {
                 csvFileAttributes.cleanupAttributeMap(project);
             }
+        } catch (ProcessCanceledException exception) {
+            throw exception;
         } catch (Exception exception) {
-            // Cleanup is optional and must not prevent project startup.
+            LOG.warn("Failed to clean up CSV file attributes", exception);
         }
 
         progressIndicator.setFraction(1.0);

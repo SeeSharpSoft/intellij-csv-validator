@@ -9,6 +9,10 @@ Read [README.md](README.md) before changing user-facing behavior: it documents s
 formats, editor features, settings, and limitations. Read [CONTRIBUTING.md](CONTRIBUTING.md)
 before preparing a pull request for contribution requirements and plugin-metadata restrictions.
 
+Do not change `CONTRIBUTING.md` automatically. When a topic is relevant to other
+contributors, propose the specific documentation change and ask for explicit user
+confirmation. Wait for that confirmation before editing the file.
+
 ## Code map
 
 The main plugin packages are under `src\main\java\net\seesharpsoft\intellij\plugins`.
@@ -21,10 +25,17 @@ The following paths are relative to that directory:
   per-file separator/escape attributes (`CsvFileAttributes`), and editor/code-style settings.
 - `csv\psi`: handwritten PSI support and `CsvPsiTreeUpdater`, which batches document/PSI
   changes into IDE write actions and undoable commands.
-- `csv\editor\table`: shared PSI-backed model (`CsvTableModelBase`), editor state,
-  search/replace, and reordering logic.
-- `csv\editor\table\swing`: table UI, Swing model, clipboard, selection, movement, and
-  rendering using Swing components and IDE theme colors.
+- `csv\table`: PSI-backed models, paste/reorder/replacement preparation, and search.
+  `CsvTableSearchSessionBase` uses `CsvTableSearchHost` rather than a concrete file editor;
+  `CsvTableSearchMatch` carries matches in view coordinates.
+- `csv\table\ui`: shared Swing table/model foundations, cell/header rendering, row headers,
+  pixel snapshots, and scrollbar styling. Model flush and table paint hooks separate
+  immutable diff data from delayed PSI-backed updates; row headers accept layout/overlay callbacks.
+- `csv\editor\table`: file-editor integration, state, actions, and the abstract table provider.
+- `csv\editor\table\swing`: concrete editor/provider, PSI-backed Swing model, search adapter,
+  clipboard, listeners, and row dragging. `CsvTableModelSwing` delegates PSI work to `CsvTableModelBase`.
+- `csv\diff`: snapshot-backed table comparisons and undoable diff edits; reuse the shared
+  Swing table, model, and renderer foundations for common UI behavior.
 - `csv\formatter`, `csv\highlighter`, `csv\inspection`, and `csv\intention`: text-editor
   language features. The sibling `tsv` and `psv` packages provide fixed-separator variants.
 
@@ -32,6 +43,13 @@ Plugin extensions and actions are registered in `src\main\resources\META-INF\plu
 UI strings live in `src\main\resources\localization`; update the default and `_zh_CN`
 bundles together. Inspection/intention descriptions have their own resource directories.
 Tests mirror the source packages under `src\test\java`, with fixtures in `src\test\resources`.
+
+When changing table/editor/diff packages, preserve the dependency graph checked by
+`CsvTablePackageDependenciesTest`: `editor.table.swing -> editor.table, table.ui`;
+`editor.table -> editor, table`; `diff -> table.ui`; `table.ui -> table`.
+Transitive dependencies are allowed; dependencies to other plugin packages are outside this rule.
+`CsvFileEditorProviderBase` owns both editor-type IDs so shared editor code can identify
+the table editor without depending on its provider.
 
 ## Build and tests
 
@@ -143,8 +161,8 @@ The default scheduler still refreshes immediately in other unit tests.
 
 ## Table painting and read access
 
-Table reads reuse existing IDE read access without entering another read action, since even redundant
-read-action entry can be prohibited during painting. Table/header paints without read access draw
+PSI-backed table reads reuse existing IDE read access without entering another read action, since even redundant
+read-action entry can be prohibited during painting. Their table/header paints without read access draw
 their last viewport-sized pixel snapshots and coalesce a refresh into one application UI callback per
 table. The callback paints the visible scroll-pane area immediately while it has read access;
 queuing `repaint()` instead would lose that access before rendering. Viewports use simple scrolling
@@ -159,7 +177,9 @@ read-action entry. A test-only scroll pane adapts the native display seam for he
 the real table/header renderers still run, and deferred callbacks use the real application UI queue.
 
 The relevant implementation is in `CsvTableModelBase.computeWithReadAccess`, `CsvTable.paint`,
-`CsvTableHeader.paint`, and `CsvTablePaintSnapshot`; regression coverage is in `CsvTableEditorSwingTest`.
+`CsvTable.deferPaintWithoutReadAccess`, `CsvTableHeader.paint`, and `CsvTablePaintSnapshot`;
+regression coverage is in `CsvTableEditorSwingTest`. Snapshot-backed diff tables share the
+geometry and renderer behavior but render their immutable data without acquiring PSI read access.
 
 ## Updating the changelog
 
@@ -214,20 +234,26 @@ When asked to prepare a new version:
    `<idea-version since-build="VVV">` into the packaged `META-INF\plugin.xml`; use this
    mechanism and check the resulting descriptor rather than duplicating metadata in
    `src\main\resources\META-INF\plugin.xml`.
-3. Align the default build target in `gradle.properties` and the compatibility targets
-   in `.github\workflows` with the support baseline. Cover the earliest supported and
-   current stable IDE releases in CI, retaining the existing IDE-product coverage.
-   Review explicit `IDEA_VERSION` overrides, including `PullRequest.yml` and `CronEAP.yml`;
-   EAP checks supplement, rather than replace, official-support coverage.
+3. Validate the GitHub Actions workflows in `.github\workflows` and align their targets
+   and the default build target in `gradle.properties` with the support baseline.
+   In `PullRequest.yml`, cover every supported IDE release train with `ideaPlatform: IU`
+   and pin each `ideaVersion` to that train's latest officially released stable version,
+   including all patch/hotfix components. Resolve versions from
+   [JetBrains' official release feed](https://data.services.jetbrains.com/products/releases?code=IIU&latest=false&type=release);
+   retain a train-only version only when it is the latest published stable version.
+   Confirm workflow syntax, action references, SDK/JDK pairings, and job/step conditions
+   so required checks still run after matrix changes. Review other explicit `IDEA_VERSION`
+   overrides, including `CronEAP.yml`; EAP checks supplement, rather than replace,
+   official-support coverage.
 4. Move all changelog entries from `## Unreleased`, preserving their subsections, into a
    new section immediately below it. Use `## <version> - <Date>` with the release date,
    for example `## 252.8.0 - Oct 30, 2026`. Retain an empty `## Unreleased` section with
    the four subsections listed above.
 5. Run all tests with `.\gradlew.bat test`, without test filters, and run the Gradle
    verification task with `.\gradlew.bat verifyPlugin`.
-6. Summarize the test and plugin-verification findings, including failures, warnings,
-   and any incomplete checks. Recommend whether the version is ready for release;
-   if it is not, state what must be addressed before release.
+6. Summarize the test, plugin-verification, and GitHub Actions validation findings,
+   including failures, warnings, and any incomplete checks. Recommend whether the
+   version is ready for release; if it is not, state what must be addressed before release.
 7. Wait for the user's explicit release approval. Only after approval, create a release
    commit, push it, and open a pull request against `main`. If already on `main`, commit
    and push after approval but skip the pull request.

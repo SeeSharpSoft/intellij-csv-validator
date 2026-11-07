@@ -13,10 +13,12 @@ import com.intellij.psi.PsiDocumentManager;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvEscapeCharacter;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvValueSeparator;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
+import net.seesharpsoft.intellij.plugins.csv.table.ui.CsvMultiLineCellRenderer;
 import net.seesharpsoft.intellij.util.ManualUpdateScheduler;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
+
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
@@ -293,8 +295,8 @@ public class CsvTableClipboardTest extends CsvTableEditorSwingTestBase {
             performShortcut(
                     new KeyEvent(table, KeyEvent.KEY_PRESSED, 0, modifiers, KeyEvent.VK_DELETE, KeyEvent.CHAR_UNDEFINED));
         }
-        fileEditor.tableEditorActions.addRowBefore.actionPerformed(null);
-        fileEditor.tableEditorActions.addColumnAfter.actionPerformed(null);
+        fileEditor.getActions().addRow(fileEditor, true);
+        fileEditor.getActions().addColumn(fileEditor, false);
         assertEquals("a,b\n1,2", myFixture.getFile().getText());
         fileEditor.setEditable(true);
         getTableModel().setValue("x", 1, 0);

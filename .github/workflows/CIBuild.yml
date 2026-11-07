@@ -40,6 +40,9 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v7.0.1
 
+    - name: Test opened-issue validation
+      run: node --test .github/scripts/opened-issue-validator.test.cjs
+
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v4.39.1

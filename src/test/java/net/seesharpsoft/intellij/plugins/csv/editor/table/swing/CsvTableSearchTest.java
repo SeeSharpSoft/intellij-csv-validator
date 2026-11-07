@@ -352,7 +352,7 @@ public class CsvTableSearchTest extends CsvTableEditorSwingTestBase {
         fileEditor.updateEditorLayout();
         JPanel root = new JPanel(new BorderLayout());
         root.add(fileEditor.getComponent());
-        root.setSize(460, 220);
+        root.setSize(409, 220);
         layoutRecursively(root);
         fileEditor.setFrozenColumnCount(2);
         JViewport viewport = fileEditor.getTableScrollPane().getViewport();

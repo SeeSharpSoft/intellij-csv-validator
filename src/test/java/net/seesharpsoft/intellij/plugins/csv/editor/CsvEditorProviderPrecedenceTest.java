@@ -9,7 +9,6 @@ import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import net.seesharpsoft.intellij.plugins.csv.CsvBasePlatformTestCase;
-import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditorProvider;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import org.jetbrains.annotations.NotNull;
 
@@ -108,7 +107,7 @@ public class CsvEditorProviderPrecedenceTest extends CsvBasePlatformTestCase {
         enableHidingOtherEditors();
         registerOtherPluginEditorHidingOtherEditors();
 
-        assertEquals(List.of(CsvFileEditorProvider.EDITOR_TYPE_ID, CsvTableEditorProvider.EDITOR_TYPE_ID, HIDING_EDITOR_TYPE_ID),
+        assertEquals(List.of(CsvFileEditorProviderBase.TEXT_EDITOR_TYPE_ID, CsvFileEditorProviderBase.TABLE_EDITOR_TYPE_ID, HIDING_EDITOR_TYPE_ID),
                 resolveEditorTypeIds());
     }
 
@@ -117,7 +116,7 @@ public class CsvEditorProviderPrecedenceTest extends CsvBasePlatformTestCase {
         CsvEditorSettings.getInstance().setEditorPrio(CsvEditorSettings.EditorPrio.TABLE_FIRST);
         registerOtherPluginEditorHidingOtherEditors();
 
-        assertEquals(List.of(CsvTableEditorProvider.EDITOR_TYPE_ID, CsvFileEditorProvider.EDITOR_TYPE_ID, HIDING_EDITOR_TYPE_ID),
+        assertEquals(List.of(CsvFileEditorProviderBase.TABLE_EDITOR_TYPE_ID, CsvFileEditorProviderBase.TEXT_EDITOR_TYPE_ID, HIDING_EDITOR_TYPE_ID),
                 resolveEditorTypeIds());
     }
 
@@ -126,7 +125,7 @@ public class CsvEditorProviderPrecedenceTest extends CsvBasePlatformTestCase {
         CsvEditorSettings.getInstance().setEditorPrio(CsvEditorSettings.EditorPrio.TEXT_ONLY);
         registerOtherPluginEditorHidingOtherEditors();
 
-        assertEquals(List.of(CsvFileEditorProvider.EDITOR_TYPE_ID, HIDING_EDITOR_TYPE_ID), resolveEditorTypeIds());
+        assertEquals(List.of(CsvFileEditorProviderBase.TEXT_EDITOR_TYPE_ID, HIDING_EDITOR_TYPE_ID), resolveEditorTypeIds());
     }
 
     public void testOtherPluginHidesCsvEditorsByDefault() {
@@ -139,7 +138,7 @@ public class CsvEditorProviderPrecedenceTest extends CsvBasePlatformTestCase {
         enableHidingOtherEditors();
         registerOtherPluginEditor(ADDITIONAL_EDITOR_TYPE_ID, FileEditorPolicy.PLACE_AFTER_DEFAULT_EDITOR);
 
-        assertEquals(List.of(CsvFileEditorProvider.EDITOR_TYPE_ID, CsvTableEditorProvider.EDITOR_TYPE_ID),
+        assertEquals(List.of(CsvFileEditorProviderBase.TEXT_EDITOR_TYPE_ID, CsvFileEditorProviderBase.TABLE_EDITOR_TYPE_ID),
                 resolveEditorTypeIds());
     }
 

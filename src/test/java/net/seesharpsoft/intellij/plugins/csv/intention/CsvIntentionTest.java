@@ -6,6 +6,9 @@ import com.intellij.openapi.editor.event.DocumentEvent;
 import com.intellij.openapi.editor.event.DocumentListener;
 import net.seesharpsoft.intellij.plugins.csv.CsvBasePlatformTestCase;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvEscapeCharacter;
+import net.seesharpsoft.intellij.plugins.csv.components.CsvFileAttributes;
+import net.seesharpsoft.intellij.plugins.csv.components.CsvValueSeparator;
+import net.seesharpsoft.intellij.plugins.csv.psi.CsvPsiTreeUpdater;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import org.jetbrains.annotations.NotNull;
 
@@ -19,9 +22,24 @@ public class CsvIntentionTest extends CsvBasePlatformTestCase {
     }
 
     @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        resetFileAttributes();
+    }
+
+    @Override
     protected void tearDown() throws Exception {
-        CsvEditorSettings.getInstance().setDefaultEscapeCharacter(CsvEditorSettings.ESCAPE_CHARACTER_DEFAULT);
-        super.tearDown();
+        try {
+            resetFileAttributes();
+            CsvEditorSettings.getInstance().setDefaultEscapeCharacter(CsvEditorSettings.ESCAPE_CHARACTER_DEFAULT);
+        } finally {
+            super.tearDown();
+        }
+    }
+
+    private void resetFileAttributes() {
+        CsvFileAttributes attributes = getProject().getServiceIfCreated(CsvFileAttributes.class);
+        if (attributes != null) attributes.attributeMap.clear();
     }
 
     protected void doTestIntention(String testName, String hint) throws Throwable {
@@ -101,5 +119,61 @@ public class CsvIntentionTest extends CsvBasePlatformTestCase {
         for (int i = 1; i < 5; ++i) {
             doTestIntention(String.format("ShiftColumnRight%02d", i), "Shift Column Right");
         }
+    }
+
+    public void testColumnShiftsPreserveCommentLikeValuesAndTerminalNewlineLikeTableMoves() {
+        checkShiftMatchesTable("data.csv", "a, # <caret>value,b\n# actual comment\n",
+                "Shift Column Left", new int[]{1, 0, 2});
+        checkShiftMatchesTable("data.csv", "a,<caret>b,c\n1\n\n",
+                "Shift Column Left", new int[]{1, 0, 2});
+    }
+
+    public void testColumnShiftsPreserveTsvAndPsvValuesLikeTableMoves() {
+        checkShiftMatchesTable("data.tsv", "a\t<caret>\"multi\nline\"\tc\n1\t2\n",
+                "Shift Column Left", new int[]{1, 0, 2});
+        checkShiftMatchesTable("data.psv", "<caret>a|\"b|c\"|d\n1|2\n",
+                "Shift Column Right", new int[]{1, 0, 2});
+    }
+
+    public void testColumnShiftsPreserveCustomSeparatorAndEscapeLikeTableMoves() {
+        CsvEditorSettings settings = CsvEditorSettings.getInstance();
+        CsvValueSeparator previousSeparator = settings.getDefaultValueSeparator();
+        boolean previousDetection = settings.isAutoDetectValueSeparator();
+        try {
+            settings.setAutoDetectValueSeparator(false);
+            settings.setDefaultValueSeparator(new CsvValueSeparator("$~"));
+            settings.setDefaultEscapeCharacter(CsvEscapeCharacter.BACKSLASH);
+            checkShiftMatchesTable("data.csv", "a$~<caret>\"b\\\"c\"$~d\n1$~2\n",
+                    "Shift Column Right", new int[]{0, 2, 1});
+        } finally {
+            settings.setDefaultValueSeparator(previousSeparator);
+            settings.setAutoDetectValueSeparator(previousDetection);
+        }
+
+    }
+
+    public void testColumnShiftsAreUnavailableOnCommentsAndSyntaxErrors() {
+        for (String text : new String[]{"# <caret>comment\na,b", "a,<caret>\"unclosed"}) {
+            myFixture.configureByText("data.csv", text);
+            assertEmpty(myFixture.filterAvailableIntentions("Shift Column Left"));
+            assertEmpty(myFixture.filterAvailableIntentions("Shift Column Right"));
+        }
+    }
+
+    private void checkShiftMatchesTable(String name, String text, String hint, int[] order) {
+        myFixture.configureByText(name, text);
+        myFixture.launchAction(myFixture.findSingleIntention(hint));
+        String intentionResult = myFixture.getEditor().getDocument().getText();
+
+        myFixture.configureByText(name, text.replace("<caret>", ""));
+        CsvPsiTreeUpdater updater = new CsvPsiTreeUpdater(myFixture.getFile());
+        try {
+            updater.reorderColumns(order);
+            updater.commit();
+        } finally {
+            updater.dispose();
+        }
+        assertEquals("Text and table moves must produce the same CSV document",
+                myFixture.getEditor().getDocument().getText(), intentionResult);
     }
 }

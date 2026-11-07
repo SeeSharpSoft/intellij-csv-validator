@@ -4,6 +4,7 @@
 name: EAP
 
 on:
+  workflow_dispatch:
   schedule:
     - cron:  '0 6 */14 * *'
 
@@ -24,6 +25,6 @@ jobs:
     - name: Build with Gradle
       env:
         IDEA_PLATFORM: IU
-        IDEA_VERSION: LATEST-EAP-SNAPSHOT
+        IDEA_VERSION: latest
         IDEA_SOURCES: false
       run: xvfb-run ./gradlew verifyPlugin

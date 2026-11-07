@@ -1,35 +1,52 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
+import com.intellij.ide.DataManager;
+import com.intellij.openapi.actionSystem.CommonDataKeys;
+import com.intellij.openapi.actionSystem.DataContext;
+import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.application.Application;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
+import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.application.impl.ApplicationImpl;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.fileEditor.FileEditorState;
 import com.intellij.openapi.fileEditor.FileEditorStateLevel;
-import com.intellij.openapi.application.WriteAction;
-import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.util.Condition;
+import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.ThrowableComputable;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiDocumentManager;
+import com.intellij.psi.PsiFile;
+import com.intellij.psi.impl.DebugUtil;
+import com.intellij.psi.impl.PsiManagerEx;
+import com.intellij.psi.impl.file.impl.FileManagerImpl;
 import com.intellij.util.ui.UIUtil;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditor;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditorState;
-import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableModel;
+import net.seesharpsoft.intellij.plugins.csv.table.CsvTableModel;
+import net.seesharpsoft.intellij.plugins.csv.table.ui.CsvMultiLineCellRenderer;
+import net.seesharpsoft.intellij.plugins.csv.table.ui.CsvTableModelSwingBase;
 import org.jetbrains.annotations.NotNull;
 import org.mockito.ArgumentMatchers;
 import org.mockito.MockedStatic;
 
 import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
+
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Cursor;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.Shape;
+import java.awt.event.ComponentEvent;
+import java.awt.event.InputEvent;
+import java.awt.event.MouseEvent;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -42,11 +59,28 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.mockito.AdditionalAnswers.delegatesTo;
 import static org.mockito.Mockito.*;
-import static org.junit.Assert.assertArrayEquals;
 
 public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
+
+    public void testEditorDataContextIdentifiesEditorFromNestedComponents() {
+        assertEditorDataContext(fileEditor.getComponent());
+        assertEditorDataContext(fileEditor.getTable());
+        assertEditorDataContext(fileEditor.getTable().getTableHeader());
+
+        assertTrue(fileEditor.getTable().editCellAt(1, 1));
+        JScrollPane cell = (JScrollPane) fileEditor.getTable().getEditorComponent();
+        assertEditorDataContext(cell.getViewport().getView());
+    }
+
+    private void assertEditorDataContext(Component component) {
+        DataContext context = DataManager.getInstance().getDataContext(component);
+        assertSame(fileEditor, PlatformDataKeys.FILE_EDITOR.getData(context));
+        assertSame(getProject(), CommonDataKeys.PROJECT.getData(context));
+        assertSame(fileEditor.getFile(), CommonDataKeys.VIRTUAL_FILE.getData(context));
+    }
 
     public void testMultilineCellEditUpdatesCsv() {
         JTable table = fileEditor.getTable();
@@ -193,6 +227,62 @@ public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
         }
     }
 
+    public void testFractionalClipRefreshesSnapshotsAfterResizingAndScrolling() {
+        WriteCommandAction.runWriteCommandAction(getProject(), () -> myFixture.getEditor().getDocument()
+                .setText("First,Second\none,first value\ntwo,second value\nthree,third value\nfour,fourth value\n"));
+        PsiDocumentManager.getInstance(getProject()).commitAllDocuments();
+        try (DeferredPaintProbe probe = new DeferredPaintProbe()) {
+            probe.paintScale = 1.5;
+            probe.surface.setSize(300, 180);
+            probe.layout(probe.surface);
+            probe.paint(false, 1, probe.surface);
+
+            probe.surface.setSize(450, 180);
+            probe.layout(probe.surface);
+            probe.surface.getViewport().setViewPosition(new Point(0, fileEditor.getTable().getRowHeight()));
+            assertTrue(fileEditor.getTable().getVisibleRect().y > 0);
+
+            for (JComponent component : new JComponent[]{fileEditor.getTable(), fileEditor.getTable().getTableHeader()}) {
+                Rectangle visible = component.getVisibleRect();
+                probe.paintClip = new Rectangle2D.Double(visible.x, visible.y,
+                        Math.nextDown((double) visible.width), visible.height);
+                probe.paint(false, 1, component);
+                probe.paintClip = null;
+
+                probe.assertRestoresPixels(component);
+            }
+        }
+    }
+
+    public void testPartialClipAfterResizingKeepsPreviousCompleteSnapshot() {
+        try (DeferredPaintProbe probe = new DeferredPaintProbe()) {
+            probe.paintScale = 1.5;
+            probe.surface.setSize(300, 180);
+            probe.layout(probe.surface);
+            CsvTable table = fileEditor.getTable();
+            probe.paint(false, 1, table);
+            Rectangle originalVisible = table.getVisibleRect();
+            int width = (int) (originalVisible.width * probe.paintScale);
+            int height = (int) (originalVisible.height * probe.paintScale);
+            int[] original = probe.image.getRGB(0, 0, width, height, null, 0, width);
+
+            WriteCommandAction.runWriteCommandAction(getProject(), () -> myFixture.getEditor().getDocument()
+                    .setText("Changed,Second\nnew,value\n"));
+            PsiDocumentManager.getInstance(getProject()).commitAllDocuments();
+            probe.surface.setSize(450, 180);
+            probe.layout(probe.surface);
+            Rectangle visible = table.getVisibleRect();
+            probe.paintClip = new Rectangle2D.Double(visible.x, visible.y,
+                    visible.width - 0.25 / probe.paintScale, visible.height);
+            probe.paint(false, 1, table);
+            probe.paintClip = null;
+            probe.paint(true, 1, table);
+
+            assertArrayEquals("A genuinely partial paint must not replace the previous complete frame",
+                    original, probe.image.getRGB(0, 0, width, height, null, 0, width));
+        }
+    }
+
     public void testPaintRecoversAfterRendererFailure() {
         try (DeferredPaintProbe probe = new DeferredPaintProbe()) {
             CsvTable table = fileEditor.getTable();
@@ -276,7 +366,7 @@ public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
         private int queuedPaints;
         private int immediatePaints;
         private double paintScale = 1;
-        private Rectangle paintClip;
+        private Shape paintClip;
 
         // Adapt the native display seam so the real table/renderers can also run headlessly.
         private final JScrollPane surface = new JScrollPane(table) {
@@ -409,6 +499,22 @@ public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
         assertFalse(table.getExpandableItemsHandler().isEnabled());
     }
 
+    @SuppressWarnings({"UnstableApiUsage", "InternalApiUsage"})
+    public void testHoverHitTestingRevalidatesPsiWithoutExistingReadAccess() {
+        CsvTable table = fileEditor.getTable();
+        table.setSize(800, 400);
+        FileManagerImpl fileManager = (FileManagerImpl) PsiManagerEx.getInstanceEx(getProject()).getFileManager();
+        WriteAction.run(() -> DebugUtil.performPsiModification("Invalidate CSV view providers",
+                fileManager::possiblyInvalidatePhysicalPsi));
+
+        ApplicationImpl application = (ApplicationImpl) ApplicationManager.getApplication();
+        application.getThreadingSupport().releaseTheAcquiredWriteIntentLockThenExecuteActionAndTakeWriteIntentLockBack(() -> {
+            assertFalse("Hover events do not carry IDE read access", application.isReadAccessAllowed());
+            assertEquals(1, table.rowAtPoint(new Point(5, table.getRowHeight() + 5)));
+            return null;
+        });
+    }
+
     public void testSelectedCellColorsRemainVisibleOutsideEditMode() {
         JTable table = fileEditor.getTable();
         CsvMultiLineCellRenderer renderer = (CsvMultiLineCellRenderer) table.getCellRenderer(0, 0);
@@ -453,6 +559,41 @@ public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
         fileEditor.changeFontSize(4);
         assertEquals(24, fileEditor.getTable().getRowHeight());
         assertEquals(24, ((JTable) fileEditor.getTableScrollPane().getRowHeader().getView()).getRowHeight());
+    }
+
+    public void testRowNumberColumnKeepsTheWidthDraggedOnItsHeader() {
+        JScrollPane scrollPane = fileEditor.getTableScrollPane();
+        JComponent root = fileEditor.getComponent();
+        root.setBounds(0, 0, 600, 300);
+        layout(root);
+        int initialWidth = scrollPane.getRowHeader().getWidth();
+        JComponent corner = (JComponent) scrollPane.getCorner(JScrollPane.UPPER_LEFT_CORNER);
+        int edge = corner.getWidth() - 1;
+
+        corner.dispatchEvent(mouse(corner, MouseEvent.MOUSE_MOVED, edge, 0));
+        assertEquals("The row number header must offer resizing", Cursor.E_RESIZE_CURSOR, corner.getCursor().getType());
+        corner.dispatchEvent(mouse(corner, MouseEvent.MOUSE_PRESSED, edge, InputEvent.BUTTON1_DOWN_MASK));
+        corner.dispatchEvent(mouse(corner, MouseEvent.MOUSE_DRAGGED, edge + 40, InputEvent.BUTTON1_DOWN_MASK));
+        corner.dispatchEvent(mouse(corner, MouseEvent.MOUSE_RELEASED, edge + 40, 0));
+        layout(root);
+        assertEquals(initialWidth + 40, scrollPane.getRowHeader().getWidth());
+
+        scrollPane.dispatchEvent(new ComponentEvent(scrollPane, ComponentEvent.COMPONENT_RESIZED));
+        ((CsvTableModelSwingBase) fileEditor.getTable().getModel()).fireTableDataChanged();
+        layout(root);
+        assertEquals("Resized row numbers must keep their width", initialWidth + 40, scrollPane.getRowHeader().getWidth());
+    }
+
+    private static MouseEvent mouse(Component component, int id, int x, int modifiers) {
+        return new MouseEvent(component, id, System.currentTimeMillis(), modifiers, x, 5, 1, false,
+                id == MouseEvent.MOUSE_MOVED ? MouseEvent.NOBUTTON : MouseEvent.BUTTON1);
+    }
+
+    private static void layout(Container container) {
+        container.doLayout();
+        for (Component child : container.getComponents()) {
+            if (child instanceof Container nested) layout(nested);
+        }
     }
 
     public void testAddRemovePropertyChangeListener() throws Throwable {

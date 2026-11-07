@@ -6,16 +6,12 @@ import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.util.xmlb.annotations.OptionTag;
-import com.intellij.util.xmlb.annotations.Transient;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvEscapeCharacter;
 import net.seesharpsoft.intellij.plugins.csv.CsvStorageHelper;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvValueSeparator;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
-import java.util.Objects;
 
 import static net.seesharpsoft.intellij.plugins.csv.CsvPluginManager.getLocalizedText;
 
@@ -97,7 +93,6 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
         public int TABLE_DEFAULT_COLUMN_WIDTH = TABLE_DEFAULT_COLUMN_WIDTH_DEFAULT;
         public boolean ZERO_BASED_COLUMN_NUMBERING = false;
 
-        public boolean SHOW_TABLE_EDITOR_INFO_PANEL = true;
         public boolean QUOTING_ENFORCED = false;
         @OptionTag(converter = CsvEscapeCharacter.CsvEscapeCharacterConverter.class)
         public CsvEscapeCharacter DEFAULT_ESCAPE_CHARACTER = ESCAPE_CHARACTER_DEFAULT;
@@ -107,14 +102,10 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
         public String COMMENT_INDICATOR = COMMENT_INDICATOR_DEFAULT;
         public ValueColoring VALUE_COLORING = ValueColoring.RAINBOW;
         public boolean AUTO_DETECT_VALUE_SEPARATOR = true;
-        @Transient
-        private boolean isInitialized = false;
-
         public OptionSet() {}
     }
 
     private OptionSet myOptions = new OptionSet();
-    private final PropertyChangeSupport myPropertyChangeSupport = new PropertyChangeSupport(this);
 
     public CsvEditorSettings() {
     }
@@ -125,14 +116,6 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
             return CsvEditorSettings.STATIC_TEST_INSTANCE;
         }
         return application.isDisposed() ? new CsvEditorSettings() : application.getService(CsvEditorSettings.class);
-    }
-
-    public void addPropertyChangeListener(PropertyChangeListener listener) {
-        this.myPropertyChangeSupport.addPropertyChangeListener(listener);
-    }
-
-    public void removePropertyChangeListener(PropertyChangeListener listener) {
-        this.myPropertyChangeSupport.removePropertyChangeListener(listener);
     }
 
     @Override
@@ -240,14 +223,6 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
         getState().SYNC_SELECTED_FIELD = syncSelectedField;
     }
 
-    public boolean showTableEditorInfoPanel() {
-        return getState().SHOW_TABLE_EDITOR_INFO_PANEL;
-    }
-
-    public void showTableEditorInfoPanel(boolean showInfoPanel) {
-        getState().SHOW_TABLE_EDITOR_INFO_PANEL = showInfoPanel;
-    }
-
     public int getTableEditorRowHeight() {
         int rowHeight = getState().TABLE_EDITOR_ROW_HEIGHT;
         return rowHeight > TABLE_EDITOR_ROW_HEIGHT_MAX || rowHeight < TABLE_EDITOR_ROW_HEIGHT_MIN ? TABLE_EDITOR_ROW_HEIGHT_DEFAULT : rowHeight;
@@ -290,11 +265,7 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
     }
 
     public void setDefaultEscapeCharacter(CsvEscapeCharacter defaultEscapeCharacter) {
-        CsvEscapeCharacter oldValue = getDefaultEscapeCharacter();
         getState().DEFAULT_ESCAPE_CHARACTER = defaultEscapeCharacter;
-        if (!Objects.equals(oldValue, defaultEscapeCharacter)) {
-            myPropertyChangeSupport.firePropertyChange("defaultEscapeCharacter", oldValue, defaultEscapeCharacter);
-        }
     }
 
     public CsvEscapeCharacter getDefaultEscapeCharacter() {
@@ -303,11 +274,7 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
     }
 
     public void setDefaultValueSeparator(CsvValueSeparator defaultValueSeparator) {
-        CsvValueSeparator oldValue = getDefaultValueSeparator();
         getState().DEFAULT_VALUE_SEPARATOR = defaultValueSeparator;
-        if (!Objects.equals(oldValue, defaultValueSeparator)) {
-            myPropertyChangeSupport.firePropertyChange("defaultValueSeparator", oldValue, defaultValueSeparator);
-        }
     }
 
     public CsvValueSeparator getDefaultValueSeparator() {
@@ -324,11 +291,7 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
     }
 
     public void setCommentIndicator(String commentIndicator) {
-        String oldValue = getCommentIndicator();
         getState().COMMENT_INDICATOR = commentIndicator.trim();
-        if (commentIndicator != oldValue) {
-            myPropertyChangeSupport.firePropertyChange("commentIndicator", oldValue, getCommentIndicator());
-        }
     }
 
     public String getCommentIndicator() {
@@ -340,11 +303,7 @@ public class CsvEditorSettings implements PersistentStateComponent<CsvEditorSett
     }
 
     public void setValueColoring(ValueColoring valueColoring) {
-        ValueColoring oldValue = getValueColoring();
         getState().VALUE_COLORING = valueColoring;
-        if (valueColoring != oldValue) {
-            myPropertyChangeSupport.firePropertyChange("valueColoring", oldValue, getValueColoring());
-        }
     }
 
     public boolean isAutoDetectValueSeparator() {

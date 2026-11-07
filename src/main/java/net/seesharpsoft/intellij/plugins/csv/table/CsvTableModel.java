@@ -1,0 +1,114 @@
+package net.seesharpsoft.intellij.plugins.csv.table;
+
+import com.intellij.openapi.application.ReadAction;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiErrorElement;
+import com.intellij.psi.PsiFile;
+import com.intellij.psi.util.PsiTreeUtil;
+import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
+import net.seesharpsoft.intellij.plugins.csv.psi.CsvField;
+import net.seesharpsoft.intellij.plugins.csv.psi.CsvRecord;
+import net.seesharpsoft.intellij.plugins.csv.psi.CsvTypes;
+import net.seesharpsoft.intellij.psi.PsiFileHolder;
+import net.seesharpsoft.intellij.psi.PsiHelper;
+import net.seesharpsoft.intellij.util.Suspendable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Collection;
+
+public interface CsvTableModel extends PsiFileHolder, Suspendable {
+
+    static int getColumnCount(PsiFile psiFile) {
+        return CsvHelper.getColumnCount(psiFile);
+    }
+
+    static int getRowCount(PsiFile psiFile) {
+        if (psiFile == null) return 0;
+
+        int counter = 0;
+        PsiElement rowElement;
+        for (rowElement = psiFile.getFirstChild();
+             rowElement != null && !(rowElement instanceof PsiErrorElement);
+             rowElement = rowElement.getNextSibling()) {
+            if (rowElement instanceof CsvRecord) counter++;
+        }
+
+        // TODO support for showing the error in table editor?!
+//        if (rowElement instanceof PsiErrorElement) counter++;
+
+        return counter;
+    }
+
+    void notifyUpdate();
+
+    default boolean isCommentRow(int rowIndex) {
+        PsiElement field = getFieldAt(rowIndex, 0);
+        return CsvHelper.isCommentElement(field);
+    }
+
+    default boolean hasErrors() {
+        PsiFile psiFile = getPsiFile();
+        return psiFile != null && PsiTreeUtil.hasErrorElements(psiFile);
+    }
+
+    default int getRowCount() {
+        return getRowCount(getPsiFile());
+    }
+
+    default int getColumnCount() {
+        return getColumnCount(getPsiFile());
+    }
+
+    @Nullable
+    default PsiElement getFieldAt(int row, int column) {
+        CsvRecord record = PsiHelper.getNextNthSiblingOfType(getPsiFile(), row, CsvRecord.class);
+        if (record == null) return null;
+
+        if (PsiHelper.getElementType(record.getFirstChild()) == CsvTypes.COMMENT) return record.getFirstChild();
+
+        return PsiHelper.getNthChildOfType(record, column, CsvField.class);
+    }
+
+    @NotNull
+    String getValue(int rowIndex, int columnIndex);
+
+    void setValue(String value, int rowIndex, int columnIndex);
+
+    void addRow(int anchorRowIndex, boolean before);
+
+    void removeRows(Collection<Integer> indices);
+
+    void addColumn(int anchorColumnIndex, boolean before);
+
+    void removeColumns(Collection<Integer> indices);
+
+    /** Maps each new position to its original row index. */
+    void reorderRows(int[] order);
+
+    /** Maps each new position to its original column index. */
+    void reorderColumns(int[] order);
+
+    default int getMovableRowCount() {
+        return ReadAction.compute(() -> {
+            int count = getRowCount();
+            if (count <= 1) return count;
+            PsiFile file = getPsiFile();
+            PsiElement last = file == null ? null : file.getLastChild();
+            while (last != null && !(last instanceof CsvRecord)) last = last.getPrevSibling();
+            return last != null && last.getTextLength() == 0 ? count - 1 : count;
+        });
+    }
+
+    void clearCells(Collection<Integer> rows, Collection<Integer> columns);
+
+    @Override
+    default void dispose() {
+        Suspendable.super.dispose();
+    }
+
+    default void resume() {
+        Suspendable.super.resume();
+        notifyUpdate();
+    }
+}

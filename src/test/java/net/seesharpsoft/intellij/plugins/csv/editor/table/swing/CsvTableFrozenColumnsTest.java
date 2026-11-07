@@ -7,11 +7,13 @@ import com.intellij.util.ui.JBUI;
 import net.seesharpsoft.intellij.plugins.csv.CsvFileType;
 import net.seesharpsoft.intellij.plugins.csv.actions.CsvTableEditorActions;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditorState;
+import net.seesharpsoft.intellij.plugins.csv.table.ui.CsvMultiLineCellRenderer;
 import org.jdom.Element;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
+
 import java.awt.*;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
@@ -36,7 +38,7 @@ public class CsvTableFrozenColumnsTest extends CsvTableEditorSwingTestBase {
         fileEditor.updateEditorLayout();
         JPanel root = new JPanel(new BorderLayout());
         root.add(fileEditor.getTableScrollPane());
-        root.setSize(450, 180);
+        root.setSize(399, 180);
         layoutRecursively(root);
     }
 

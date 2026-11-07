@@ -16,17 +16,20 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - ideaVersion: 2025.2
-            ideaPlatform: IC
+          - ideaVersion: '2025.2.6.4'
+            ideaPlatform: IU
             javaVersion: '21'
-          - ideaVersion: 2025.2
-            ideaPlatform: PY
+          - ideaVersion: '2025.3.6.2'
+            ideaPlatform: IU
             javaVersion: '21'
-          - ideaVersion: 2026.2.4
+          - ideaVersion: '2026.1.5.1'
+            ideaPlatform: IU
+            javaVersion: '21'
+          - ideaVersion: '2026.2.4'
             ideaPlatform: IU
             javaVersion: '25'
-          - ideaVersion: 2026.2.4
-            ideaPlatform: PY
+          - ideaVersion: '2026.3'
+            ideaPlatform: IU
             javaVersion: '25'
 
     steps:
