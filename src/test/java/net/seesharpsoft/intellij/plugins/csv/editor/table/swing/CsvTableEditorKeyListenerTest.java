@@ -1,8 +1,9 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
-import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableModel;
+import net.seesharpsoft.intellij.plugins.csv.table.CsvTableModel;
 
 import javax.swing.*;
+
 import java.awt.event.KeyEvent;
 
 public class CsvTableEditorKeyListenerTest extends CsvTableEditorSwingTestBase {

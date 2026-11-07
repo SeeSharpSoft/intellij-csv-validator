@@ -23,7 +23,7 @@ public class CsvHighlightingLexerTest extends CsvBasePlatformTestCase {
 
     private CsvHighlightingLexer lexer() {
         return new CsvHighlightingLexer(CsvLexerFactory.getInstance().createLexer(
-                CsvValueSeparator.COMMA, CsvEscapeCharacter.QUOTE, "#"));
+                CsvValueSeparator.COMMA, CsvEscapeCharacter.QUOTE, "#"), CsvHighlightingElement.TokenBased.COMMA);
     }
 
     public void testSettingsServiceIsNotLookedUpForEveryToken() {

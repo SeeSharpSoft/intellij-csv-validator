@@ -2,7 +2,6 @@ package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
 import com.intellij.openapi.actionSystem.ActionGroup;
 import com.intellij.openapi.actionSystem.ActionManager;
-import com.intellij.openapi.actionSystem.ActionPopupMenu;
 
 import javax.swing.*;
 import javax.swing.table.JTableHeader;
@@ -29,24 +28,22 @@ public class CsvTableEditorMouseListener extends CsvTableEditorUtilBase implemen
 
     protected JPopupMenu getRowPopupMenu() {
         if (rowPopupMenu == null) {
-            ActionManager actionManager = ActionManager.getInstance();
-            ActionGroup rowContextMenu = (ActionGroup) actionManager.getAction(ROW_CONTEXT_MENU_ID);
-            ActionPopupMenu popupMenu = actionManager.createActionPopupMenu(ROW_CONTEXT_MENU_ID, rowContextMenu);
-            // popupMenu.setTargetComponent(csvTableEditor.getComponent());
-            rowPopupMenu = popupMenu.getComponent();
+            rowPopupMenu = createPopupMenu(ROW_CONTEXT_MENU_ID);
         }
         return rowPopupMenu;
     }
 
     protected JPopupMenu getColumnPopupMenu() {
         if (columnPopupMenu == null) {
-            ActionManager actionManager = ActionManager.getInstance();
-            ActionGroup columnContextMenu = (ActionGroup) actionManager.getAction(COLUMN_CONTEXT_MENU_ID);
-            ActionPopupMenu popupMenu = actionManager.createActionPopupMenu(COLUMN_CONTEXT_MENU_ID, columnContextMenu);
-            // popupMenu.setTargetComponent(csvTableEditor.getComponent());
-            columnPopupMenu = popupMenu.getComponent();
+            columnPopupMenu = createPopupMenu(COLUMN_CONTEXT_MENU_ID);
         }
         return columnPopupMenu;
+    }
+
+    private static JPopupMenu createPopupMenu(String id) {
+        ActionManager actionManager = ActionManager.getInstance();
+        ActionGroup contextMenu = (ActionGroup) actionManager.getAction(id);
+        return actionManager.createActionPopupMenu(id, contextMenu).getComponent();
     }
 
     protected void showPopupMenu(JPopupMenu popupMenu, Component component, int x, int y) {

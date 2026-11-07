@@ -4,9 +4,11 @@ import com.intellij.util.ui.ImageUtil;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
 import net.seesharpsoft.intellij.plugins.csv.CsvPluginManager;
+import net.seesharpsoft.intellij.plugins.csv.table.ui.CsvTableRowUtilities;
 
 import javax.swing.*;
 import javax.swing.event.MouseInputAdapter;
+
 import java.awt.*;
 import java.awt.dnd.DragSource;
 import java.awt.event.MouseEvent;
@@ -27,7 +29,7 @@ final class CsvTableRowDragListener extends MouseInputAdapter {
         this.editor = editor;
         this.rowHeaders = rowHeaders;
         editor.getTable().putClientProperty(CsvTableRowDragListener.class, this);
-        rowHeaders.putClientProperty(CsvTableRowDragListener.class, this);
+        CsvTableRowUtilities.setRowHeaderOverlay(rowHeaders, this::paintFeedback);
         rowHeaders.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke("ESCAPE"), "csv.cancel.row.drag");
         rowHeaders.getActionMap().put("csv.cancel.row.drag", new AbstractAction() {
             @Override

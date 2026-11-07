@@ -2,9 +2,11 @@ package net.seesharpsoft.intellij.plugins.csv.psi;
 
 import com.intellij.extapi.psi.PsiFileBase;
 import com.intellij.openapi.fileTypes.FileType;
+import com.intellij.openapi.vfs.NonPhysicalFileSystem;
 import com.intellij.psi.FileViewProvider;
 import com.intellij.psi.PsiReference;
 import com.intellij.psi.impl.source.resolve.reference.ReferenceProvidersRegistry;
+import com.intellij.testFramework.LightVirtualFile;
 import net.seesharpsoft.intellij.plugins.csv.CsvLanguage;
 import org.jetbrains.annotations.NotNull;
 
@@ -53,8 +55,9 @@ public class CsvFile extends PsiFileBase {
             return PsiReference.EMPTY_ARRAY;
         }
 
-        // Skip non-physical files (light or in-memory) to avoid unexpected pointer creation
-        if (!getViewProvider().isPhysical()) {
+        // PSI event participation alone does not make light or in-memory files physical.
+        if (!isPhysical() || virtualFile instanceof LightVirtualFile ||
+                virtualFile.getFileSystem() instanceof NonPhysicalFileSystem) {
             return PsiReference.EMPTY_ARRAY;
         }
 

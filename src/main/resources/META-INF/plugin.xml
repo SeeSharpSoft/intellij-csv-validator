@@ -29,6 +29,7 @@
         <h3>Everything you need for tabular data</h3>
         <ul>
             <li><b>Text and table editor</b> &ndash; choose which editor opens first, or use the text editor only.</li>
+            <li><b>Table diff view</b> &ndash; compare CSV, TSV, and PSV files side by side, highlight changed cells, and edit or apply changes with Undo/Redo.</li>
             <li><b>Rainbow column coloring</b> &ndash; spot columns instantly with 10 configurable column colors, or use plain text coloring instead.</li>
             <li><b>Syntax validation &amp; highlighting</b> &ndash; RFC 4180-based validation that tolerates common real-world variations.</li>
             <li><b>Quick fixes &amp; intentions</b> (Alt+Enter) &ndash; add missing quotes or separators, quote/unquote values or the whole file, and shift columns left or right.</li>
@@ -82,7 +83,8 @@
 
         <editorOptionsProvider instance="net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettingsProvider"/>
         <fileEditorProvider implementation="net.seesharpsoft.intellij.plugins.csv.editor.CsvFileEditorProvider"/>
-        <fileEditorProvider implementation="net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditorProvider"/>
+        <fileEditorProvider implementation="net.seesharpsoft.intellij.plugins.csv.editor.table.swing.CsvTableEditorSwingProvider"/>
+        <diff.DiffTool implementation="net.seesharpsoft.intellij.plugins.csv.diff.CsvTableDiffTool"/>
 
         <lang.documentationProvider language="csv"
                                     implementationClass="net.seesharpsoft.intellij.plugins.csv.editor.CsvFieldDocumentationProvider"/>
@@ -158,6 +160,14 @@
     </projectListeners>
 
     <actions resource-bundle="localization.CsvEditorActions">
+        <group id="CsvTableDiffNavigation">
+            <action id="CsvTableDiff.PreviousDifference"
+                    class="net.seesharpsoft.intellij.plugins.csv.diff.CsvTableDiffNavigationActions$Previous"
+                    use-shortcut-of="PreviousDiff" />
+            <action id="CsvTableDiff.NextDifference"
+                    class="net.seesharpsoft.intellij.plugins.csv.diff.CsvTableDiffNavigationActions$Next"
+                    use-shortcut-of="NextDiff" />
+        </group>
         <group id="CsvTableEditorColumnContextMenu"
                popup="true"
         >

@@ -1,13 +1,17 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
-import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.ui.JBColor;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
+import net.seesharpsoft.intellij.plugins.csv.table.ui.CsvMultiLineCellRenderer;
+import net.seesharpsoft.intellij.plugins.csv.table.ui.CsvTableHeader;
+import net.seesharpsoft.intellij.plugins.csv.table.ui.CsvTableScrollBarUI;
 
 import javax.swing.*;
 import javax.swing.table.JTableHeader;
+
 import java.awt.*;
 import java.awt.image.BufferedImage;
 

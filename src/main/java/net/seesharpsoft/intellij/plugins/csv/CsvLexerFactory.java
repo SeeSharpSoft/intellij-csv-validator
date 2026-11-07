@@ -1,8 +1,6 @@
 package net.seesharpsoft.intellij.plugins.csv;
 
 import com.intellij.lexer.Lexer;
-import com.intellij.openapi.project.Project;
-import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvEscapeCharacter;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvValueSeparator;
@@ -33,10 +31,6 @@ public class CsvLexerFactory {
                     commentIndicator));
         }
         return new CsvLexerAdapter(separator, escapeCharacter, !commentIndicator.isEmpty());
-    }
-
-    public Lexer createLexer(Project project, VirtualFile file) {
-        return createLexer(CsvHelper.getValueSeparator(project, file), CsvHelper.getEscapeCharacter(project, file));
     }
 
     public Lexer createLexer(@NotNull PsiFile file) {

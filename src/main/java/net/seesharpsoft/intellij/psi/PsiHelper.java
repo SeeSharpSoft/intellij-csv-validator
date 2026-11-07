@@ -32,11 +32,6 @@ public class PsiHelper {
     }
 
     @Nullable
-    public static <T extends PsiElement> T getPrevNthSiblingOfType(@NotNull final PsiElement element, int n, @NotNull Class<T> aClass) {
-        return getNthSiblingOfType(element, n, aClass, false);
-    }
-
-    @Nullable
     public static <T extends PsiElement> T getNextNthSiblingOfType(@NotNull final PsiElement element, int n, @NotNull Class<T> aClass) {
         return getNthSiblingOfType(element, n, aClass, false);
     }
@@ -66,14 +61,6 @@ public class PsiHelper {
         return -1;
     }
 
-    public static PsiElement getNextSiblingOfType(@NotNull final PsiElement element, @NotNull IElementType type) {
-        return getSiblingOfType(element, type, false);
-    }
-
-    public static PsiElement getPrevSiblingOfType(@NotNull final PsiElement element, @NotNull IElementType type) {
-        return getSiblingOfType(element, type, true);
-    }
-
     public static PsiElement getSiblingOfType(@NotNull final PsiElement element, @NotNull IElementType type, boolean backwards) {
         for (PsiElement sibling = backwards ? element.getPrevSibling() : element.getNextSibling();
              sibling != null;
@@ -84,29 +71,6 @@ public class PsiHelper {
             }
         }
         return null;
-    }
-
-    public static PsiElement getLastChildOfType(@NotNull final PsiElement parent, @NotNull IElementType type) {
-        if (parent.getFirstChild() == null) return null;
-        return getLastSiblingOfType(parent.getFirstChild(), type, false);
-    }
-
-    public static PsiElement getFirstSiblingOfType(@NotNull final PsiElement element, @NotNull IElementType type) {
-        return getLastSiblingOfType(element, type, true);
-    }
-
-    public static PsiElement getLastSiblingOfType(@NotNull final PsiElement element, @NotNull IElementType type) {
-        return getLastSiblingOfType(element, type, false);
-    }
-
-    public static PsiElement getLastSiblingOfType(@NotNull final PsiElement element, @NotNull IElementType type, boolean backwards) {
-        PsiElement nextSibling = element;
-        PsiElement prevSibling;
-        do {
-            prevSibling = nextSibling;
-            nextSibling = getSiblingOfType(prevSibling, type, backwards);
-        } while (nextSibling != null);
-        return prevSibling == element ? null : prevSibling;
     }
 
     public static PsiElement findFirst(@Nullable final PsiElement root, @NotNull IElementType type) {

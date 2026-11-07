@@ -61,10 +61,6 @@ public class CsvValueSeparator extends CsvCustomizableElement {
         myRequiresCustomLexer = requiresCustomLexer;
     }
 
-    public boolean isValueSeparator(String text) {
-        return getPattern().matcher(text).matches();
-    }
-
     public boolean isValueSeparator(char c) {
         return getCharacter().charAt(0) == c;
     }

@@ -5,6 +5,8 @@ import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.command.CommandProcessor;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.fileTypes.FileType;
+import com.intellij.openapi.progress.ProgressManager;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.*;
@@ -12,8 +14,6 @@ import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.DocumentUtil;
 import net.seesharpsoft.intellij.plugins.csv.CsvHelper;
 import net.seesharpsoft.intellij.plugins.csv.CsvLexerFactory;
-import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableModel;
-import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableReorder;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import net.seesharpsoft.intellij.psi.PsiFileHolder;
 import net.seesharpsoft.intellij.psi.PsiHelper;
@@ -23,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -54,6 +55,16 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
                 // Intentionally left empty
             }
         });
+    }
+
+    public static void edit(@NotNull PsiFile file, @NotNull Consumer<CsvPsiTreeUpdater> operation) {
+        CsvPsiTreeUpdater updater = new CsvPsiTreeUpdater(file);
+        try {
+            operation.accept(updater);
+            updater.commit();
+        } finally {
+            updater.dispose();
+        }
     }
 
     private FileType getFileType() {
@@ -107,10 +118,6 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
         return SyntaxTraverser.psiTraverser(createFile(sanitizedValue)).filter(CsvField.class).first();
     }
 
-    public @Nullable CsvRecord createRecord() {
-        return ReadAction.compute(this::createRecordInternal);
-    }
-
     private @Nullable CsvRecord createRecordInternal() {
         return SyntaxTraverser.psiTraverser(createFile("\n")).filter(CsvRecord.class).first();
     }
@@ -154,16 +161,8 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
         Suspendable.super.dispose();
     }
 
-    public @Nullable PsiElement createValueSeparator() {
-        return ReadAction.compute(this::createValueSeparatorInternal);
-    }
-
     private @Nullable PsiElement createValueSeparatorInternal() {
         return PsiHelper.findFirst(createFile(CsvHelper.getValueSeparator(getPsiFile()).getCharacter()), CsvTypes.COMMA);
-    }
-
-    public @Nullable PsiElement createLineBreak() {
-        return ReadAction.compute(this::createLineBreakInternal);
     }
 
     private @Nullable PsiElement createLineBreakInternal() {
@@ -182,6 +181,64 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
         doAction(new DocumentPsiAction(getPsiFile(), replacements));
     }
 
+    public void setQuoted(boolean quoted) {
+        ReadAction.run(() -> {
+            List<Pair<TextRange, String>> replacements = new ArrayList<>();
+            PsiTreeUtil.processElements(getPsiFile(), CsvField.class, field -> {
+                collectQuotingReplacements(field, quoted, replacements);
+                return true;
+            });
+            replaceTexts(replacements);
+        });
+    }
+
+    public void setQuoted(@NotNull Collection<? extends CsvField> fields, boolean quoted) {
+        ReadAction.run(() -> {
+            List<Pair<TextRange, String>> replacements = new ArrayList<>();
+            PsiFile file = getPsiFile();
+            for (CsvField field : new LinkedHashSet<>(fields)) {
+                if (!field.isValid() || field.getContainingFile() != file) {
+                    throw new IllegalArgumentException("Quoted fields must belong to the edited CSV file");
+                }
+                collectQuotingReplacements(field, quoted, replacements);
+            }
+            replaceTexts(replacements);
+        });
+    }
+
+    public static boolean canUnquote(@NotNull CsvField field) {
+        if (PsiHelper.getElementType(field.getFirstChild()) != CsvTypes.QUOTE ||
+                PsiHelper.getElementType(field.getLastChild()) != CsvTypes.QUOTE) return false;
+        for (PsiElement child = field.getFirstChild(); child != null; child = child.getNextSibling()) {
+            if (PsiHelper.getElementType(child) == CsvTypes.ESCAPED_TEXT) return false;
+        }
+        return true;
+    }
+
+    private static void collectQuotingReplacements(CsvField field, boolean quoted,
+                                                   List<Pair<TextRange, String>> replacements) {
+        ProgressManager.checkCanceled();
+        if (quoted) {
+            if (PsiHelper.getElementType(field.getFirstChild()) != CsvTypes.QUOTE) {
+                replacements.add(Pair.create(TextRange.from(field.getTextRange().getStartOffset(), 0), "\""));
+            }
+            if (PsiHelper.getElementType(field.getLastChild()) != CsvTypes.QUOTE) {
+                replacements.add(Pair.create(TextRange.from(field.getTextRange().getEndOffset(), 0), "\""));
+            }
+        } else if (canUnquote(field)) {
+            replacements.add(Pair.create(field.getFirstChild().getTextRange(), ""));
+            replacements.add(Pair.create(field.getLastChild().getTextRange(), ""));
+        }
+    }
+
+    public void addQuotes(@NotNull Collection<Integer> positions) {
+        List<Pair<TextRange, String>> replacements = new ArrayList<>();
+        for (int position : positions) {
+            replacements.add(Pair.create(TextRange.from(position, 0), "\""));
+        }
+        replaceTexts(replacements);
+    }
+
     public void appendEmptyFields(@NotNull PsiElement anchor, int no) {
         if (no < 1) return;
         ReadAction.run(() -> {
@@ -189,14 +246,6 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
                 appendFieldInternal(anchor, "", false, false);
             }
         });
-    }
-
-    public void appendField(@NotNull PsiElement anchor) {
-        appendField(anchor, "", false, false);
-    }
-
-    public void appendField(@NotNull PsiElement anchor, boolean before) {
-        appendField(anchor, "", false, before);
     }
 
     public void appendField(@NotNull PsiElement anchor, String text, boolean enquoteCommentIndicator) {
@@ -217,22 +266,6 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
         assert commentOrField instanceof CsvField;
         doAddField(commentOrField, text, enquoteCommentIndicator, before);
         doAddValueSeparator(commentOrField, before);
-    }
-
-    public void removeField(@NotNull PsiElement field) {
-        ReadAction.run(() -> removeFieldInternal(field));
-    }
-
-    private void removeFieldInternal(@NotNull PsiElement field) {
-        assert field instanceof CsvField;
-        PsiElement separator = PsiTreeUtil.findSiblingBackward(field, CsvTypes.COMMA, null);
-        if (separator == null) separator = PsiTreeUtil.findSiblingForward(field, CsvTypes.COMMA, null);
-        // no separator means it is the only field in the row
-        if (separator == null) {
-            doAction(new DeleteChildrenPsiAction(field));
-            return;
-        }
-        delete(field, separator);
     }
 
     /**
@@ -289,7 +322,7 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
             PsiFile file = getPsiFile();
             Document document = getDocumentInternal();
             if (file == null || document == null) return;
-            CsvTableReorder.Change change = CsvTableReorder.prepare(document.getImmutableCharSequence(),
+            CsvDocumentReorder.Change change = CsvDocumentReorder.prepare(document.getImmutableCharSequence(),
                     CsvLexerFactory.getInstance().createLexer(file), order, columns, CsvHelper.getValueSeparator(file),
                     CsvHelper.getEscapeCharacter(file), CsvEditorSettings.getInstance().getCommentIndicator());
             if (change != null) {
@@ -300,7 +333,7 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
 
     private void deleteColumnsInternal(Collection<Integer> indices) {
         PsiFile psiFile = getPsiFile();
-        int columnCount = CsvTableModel.getColumnCount(psiFile);
+        int columnCount = CsvHelper.getColumnCount(psiFile);
         List<Integer> distinctIndices = indices.stream().distinct().collect(Collectors.toList());
         if (distinctIndices.size() == columnCount) {
             deleteContentInternal();
@@ -351,22 +384,6 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
         assert record != null;
         doAction(new AddSiblingPsiAction(record, createRecordInternal(), before));
         doAddLineBreak(record, before);
-    }
-
-    public void deleteRow(@NotNull PsiElement row) {
-        ReadAction.run(() -> deleteRowInternal(row));
-    }
-
-    private void deleteRowInternal(@NotNull PsiElement row) {
-        assert row instanceof CsvRecord;
-        PsiElement lf = PsiTreeUtil.findSiblingBackward(row, CsvTypes.CRLF, null);
-        if (lf == null) lf = PsiTreeUtil.findSiblingForward(row, CsvTypes.CRLF, null);
-        // no lf means only one record exists - this is a must, so don't delete it
-        if (lf == null) doAction(new ReplacePsiAction(row, createRecordInternal()));
-        else {
-            doAction(new DeletePsiAction(row));
-            doAction(new DeletePsiAction(lf));
-        }
     }
 
     public void deleteRows(Collection<Integer> indices) {
@@ -440,10 +457,6 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
         doAction(new DeleteChildrenPsiAction(anchor));
     }
 
-    public void deleteContent() {
-        ReadAction.run(this::deleteContentInternal);
-    }
-
     private void deleteContentInternal() {
         PsiFile psiFile = getPsiFile();
         deleteAllChildren(psiFile);
@@ -484,7 +497,7 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
         try {
             ApplicationManager.getApplication().runWriteAction(() ->
                     doCommit(
-                            psiFile,
+                            psiFile.getProject(),
                             document,
                             () -> actionsToCommit.forEach(PsiAction::execute)));
         } finally {
@@ -493,12 +506,27 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
         }
     }
 
-    private void doCommit(
-            @NotNull PsiFile psiFile,
+    public static boolean replaceDocumentText(@Nullable Project project, @NotNull Document document, long expectedStamp,
+                                              @NotNull TextRange range, @NotNull String text) {
+        boolean[] applied = {false};
+        ApplicationManager.getApplication().runWriteAction(() -> doCommit(project, document, () -> {
+            if (!document.isWritable()) return;
+            PsiDocumentManager manager = project == null ? null : PsiDocumentManager.getInstance(project);
+            if (manager != null) manager.doPostponedOperationsAndUnblockDocument(document);
+            if (document.getModificationStamp() != expectedStamp) return;
+            document.replaceString(range.getStartOffset(), range.getEndOffset(), text);
+            if (manager != null) manager.commitDocument(document);
+            applied[0] = true;
+        }));
+        return applied[0];
+    }
+
+    private static void doCommit(
+            @Nullable Project project,
             @NotNull Document document,
             @NotNull Runnable runnable) {
         CommandProcessor.getInstance().executeCommand(
-                psiFile.getProject(),
+                project,
                 () -> DocumentUtil.executeInBulk(document, runnable),
                 "CSV Editor Changes",
                 null,
@@ -507,10 +535,6 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
 
     public void addCommitListener(CommitListener l) {
         if (l != null) myCommitListeners.add(l);
-    }
-
-    public void removeCommitListener(CommitListener l) {
-        myCommitListeners.remove(l);
     }
 
     protected void fireCommitted() {
@@ -541,10 +565,6 @@ public class CsvPsiTreeUpdater implements PsiFileHolder, Suspendable {
 
         private final PsiElement myElementToAdd;
         private final boolean myBefore;
-
-        AddSiblingPsiAction(@NotNull PsiElement anchor, @Nullable PsiElement elementToAdd) {
-            this(anchor, elementToAdd, false);
-        }
 
         AddSiblingPsiAction(@NotNull PsiElement anchor, @Nullable PsiElement elementToAdd, boolean before) {
             super(anchor);

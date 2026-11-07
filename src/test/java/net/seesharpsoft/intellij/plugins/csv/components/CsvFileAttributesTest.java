@@ -27,7 +27,7 @@ public class CsvFileAttributesTest extends CsvBasePlatformTestCase {
         Paths.get(this.getProject().getBasePath(), "test").toFile().delete();
         Paths.get(this.getProject().getBasePath(), "csv_file_test.csv").toFile().delete();
 
-        CsvFileAttributes.getInstance(this.getProject()).reset();
+        CsvFileAttributes.getInstance(this.getProject()).attributeMap.clear();
         super.tearDown();
     }
 

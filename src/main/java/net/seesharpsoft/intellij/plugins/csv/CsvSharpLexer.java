@@ -88,8 +88,6 @@ public class CsvSharpLexer extends LexerBase implements CsvSeparatorHolder {
     }
 
     public static class Configuration {
-        public static final Configuration DEFAULT = new Configuration(",", "\n", "\"", "\"", "#");
-
         public String valueSeparator;
         public String recordSeparator;
         public String escapeCharacter;
@@ -103,10 +101,6 @@ public class CsvSharpLexer extends LexerBase implements CsvSeparatorHolder {
             this.quoteCharacter = Pattern.quote(quoteCharacter);
             this.commentCharacter = commentCharacter.isEmpty() ? "" : Pattern.quote(commentCharacter);
         }
-    }
-
-    public CsvSharpLexer() {
-        this(Configuration.DEFAULT);
     }
 
     public CsvSharpLexer(Configuration configuration) {

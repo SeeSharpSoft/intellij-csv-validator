@@ -1,21 +1,16 @@
 package net.seesharpsoft.intellij.plugins.csv;
 
-import com.intellij.lang.*;
-import com.intellij.lexer.Lexer;
+import com.intellij.lang.Language;
+import com.intellij.lang.LanguageUtil;
 import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.fileTypes.FileTypeRegistry;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiManager;
 import com.intellij.psi.TokenType;
-import com.intellij.psi.impl.source.DummyHolder;
-import com.intellij.psi.impl.source.DummyHolderFactory;
-import com.intellij.psi.impl.source.tree.FileElement;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
-import net.seesharpsoft.intellij.lang.FileParserDefinition;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvEscapeCharacter;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvFileAttributes;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvValueSeparator;
@@ -33,23 +28,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public final class CsvHelper {
-
-    // replaces PsiElementFactory.SERVICE.getInstance(element.getProject()).createDummyHolder("<undefined>", CsvTypes.FIELD, null);
-    // https://github.com/SeeSharpSoft/intellij-csv-validator/issues/4
-    public static PsiElement createEmptyCsvField(PsiFile psiFile) {
-        final Project project = psiFile.getProject();
-        final String text = "<undefined>";
-        final IElementType type = CsvTypes.FIELD;
-        final PsiManager psiManager = PsiManager.getInstance(project);
-        final DummyHolder dummyHolder = DummyHolderFactory.createHolder(psiManager, null);
-        final FileElement fileElement = dummyHolder.getTreeElement();
-        final FileParserDefinition parserDefinition = (FileParserDefinition) LanguageParserDefinitions.INSTANCE.forLanguage(CsvLanguage.INSTANCE);
-        final Lexer lexer = parserDefinition.createLexer(psiFile);
-        final PsiBuilder psiBuilder = PsiBuilderFactory.getInstance().createBuilder(project, fileElement, lexer, CsvLanguage.INSTANCE, text);
-        final ASTNode node = parserDefinition.createParser(project).parse(type, psiBuilder);
-        fileElement.rawAddChildren((com.intellij.psi.impl.source.tree.TreeElement) node);
-        return node.getPsi();
-    }
 
     public static boolean isCsvFile(FileType fileType) {
         Language language = LanguageUtil.getFileTypeLanguage(fileType);
@@ -110,66 +88,6 @@ public final class CsvHelper {
         return PsiHelper.getChildIndexOfType(fieldElement.getParent(), fieldElement, CsvField.class);
     }
 
-    public static PsiElement getPreviousCRLF(final PsiElement element) {
-        PsiElement currentElement = element;
-        while (currentElement != null) {
-            if (PsiHelper.getElementType(currentElement) == CsvTypes.CRLF) {
-                break;
-            }
-            currentElement = currentElement.getPrevSibling();
-        }
-        return currentElement;
-    }
-
-    public static PsiElement getNextCRLF(final PsiElement element) {
-        PsiElement currentElement = element;
-        while (currentElement != null) {
-            if (PsiHelper.getElementType(currentElement) == CsvTypes.CRLF) {
-                break;
-            }
-            currentElement = currentElement.getNextSibling();
-        }
-        return currentElement;
-    }
-
-    public static PsiElement getPreviousSeparator(PsiElement fieldElement) {
-        PsiElement current = fieldElement;
-        while (current != null) {
-            if (PsiHelper.getElementType(current) == CsvTypes.COMMA) {
-                break;
-            }
-            current = current.getPrevSibling();
-        }
-        return current;
-    }
-
-    public static PsiElement getNextSeparator(PsiElement fieldElement) {
-        PsiElement current = fieldElement;
-        while (current != null) {
-            if (PsiHelper.getElementType(current) == CsvTypes.COMMA) {
-                break;
-            }
-            current = current.getNextSibling();
-        }
-        return current;
-    }
-
-    public static int getFieldStartOffset(PsiElement field) {
-        PsiElement separator = CsvHelper.getPreviousSeparator(field);
-        if (separator == null) {
-            separator = getPreviousCRLF(field.getParent());
-        }
-        return separator == null ? 0 : separator.getTextOffset() + separator.getTextLength();
-    }
-
-    public static int getFieldEndOffset(PsiElement field) {
-        PsiElement separator = CsvHelper.getNextSeparator(field);
-        if (separator == null) {
-            separator = getNextCRLF(field.getParent());
-        }
-        return separator == null ? field.getContainingFile().getTextLength() : separator.getTextOffset();
-    }
-
     public static VirtualFile getVirtualFile(PsiFile psiFile) {
         if (psiFile == null) return null;
         PsiFile original = psiFile.getOriginalFile();
@@ -218,37 +136,15 @@ public final class CsvHelper {
         return CsvFileAttributes.getInstance(getProject(psiFile)).hasEscapeCharacterAttribute(getProject(psiFile), getVirtualFile(psiFile));
     }
 
-    public static CsvColumnInfoMap<PsiElement> createColumnInfoMap(PsiFile csvFile) {
-        return createColumnInfoMap(csvFile, CsvHelper::getMaxTextLineLength);
-    }
-
-    public static CsvColumnInfoMap<PsiElement> createColumnInfoMap(PsiFile csvFile, Function<CsvField, Integer> fnMaxTextLength) {
-        Map<Integer, CsvColumnInfo<PsiElement>> columnInfoMap = new HashMap<>();
-        int row = 0;
-        boolean hasComments = false;
-        for (PsiElement child = csvFile.getFirstChild(); child != null; child = child.getNextSibling()) {
-            if (!(child instanceof CsvRecord)) {
-                if (PsiHelper.getElementType(child) == CsvTypes.COMMENT) {
-                    hasComments = true;
-                }
-                continue;
+    public static int getColumnCount(PsiFile csvFile) {
+        int columns = 0;
+        for (PsiElement child = csvFile == null ? null : csvFile.getFirstChild();
+             child != null; child = child.getNextSibling()) {
+            if (child instanceof CsvRecord) {
+                columns = Math.max(columns, PsiTreeUtil.countChildrenOfType(child, CsvField.class));
             }
-
-            CsvRecord record = (CsvRecord) child;
-            int column = 0;
-            for (CsvField field : record.getFieldList()) {
-                int length = fnMaxTextLength.apply(field);
-                if (!columnInfoMap.containsKey(column)) {
-                    columnInfoMap.put(column, new CsvColumnInfo<>(column, length, row));
-                } else if (columnInfoMap.get(column).getMaxLength() < length) {
-                    columnInfoMap.get(column).setMaxLength(length, row);
-                }
-                columnInfoMap.get(column).addElement(field, row, getFieldStartOffset(field), getFieldEndOffset(field));
-                ++column;
-            }
-            ++row;
         }
-        return new CsvColumnInfoMap<>(columnInfoMap, PsiTreeUtil.hasErrorElements(csvFile), hasComments);
+        return columns;
     }
 
     public static String getFieldValue(PsiElement field, CsvEscapeCharacter escapeCharacter) {
@@ -264,10 +160,6 @@ public final class CsvHelper {
                 })
                 .reduce(String::concat)
                 .orElse("");
-    }
-
-    public static String unquoteCsvValue(String content) {
-        return unquoteCsvValue(content, null);
     }
 
     public static String unquoteCsvValue(String content, CsvEscapeCharacter escapeCharacter) {
@@ -305,10 +197,6 @@ public final class CsvHelper {
         return content;
     }
 
-    public static <T> T[][] deepCopy(T[][] matrix) {
-        return java.util.Arrays.stream(matrix).map(el -> el.clone()).toArray($ -> matrix.clone());
-    }
-
     public static int getMaxTextLineLength(String text, @NotNull Function<String, Integer> calcCallback) {
         if (text == null) {
             return 0;
@@ -321,10 +209,6 @@ public final class CsvHelper {
             }
         }
         return maxLength;
-    }
-
-    public static int getMaxTextLineLength(CsvField field) {
-        return getMaxTextLineLength(field.getText().strip(), input -> input == null ? 0 : input.length());
     }
 
     // source: https://www.baeldung.com/java-string-formatting-named-placeholders

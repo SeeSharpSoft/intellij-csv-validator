@@ -10,6 +10,36 @@
 
 ### Fixed
 
+## 252.55.0 - Nov 07, 2026
+
+### Added
+
+- Added a "CSV Table" view to the IDE's diff viewer that compares CSV/TSV/PSV records side by side, highlights changed cells, and supports editing cells and applying changes to either writable side with Undo/Redo (#255)
+- Added a resizable row-number column in the table editor, with the chosen width saved per file and existing automatic sizing preserved until manually resized
+
+### Changed
+
+- Unified column reordering and quoting/unquoting behind shared document-editing operations for the text and table editors
+- Reorganized shared table models, editing/search support, and Swing rendering into neutral packages, keeping file-editor and diff-specific adapters separate
+- Simplified tabular formatting and unified table context-menu creation without changing editor behavior
+- Replaced scheduled-for-removal IntelliJ Platform APIs for table-editor action data and CSV file references while retaining support for 2025.2 and newer
+- Improved README clarity by shortening table-editor documentation and focusing on key behavior
+
+### Removed
+
+- Removed duplicate searching and commenting on existing GitHub issues when submitting error reports
+- Removed unused helpers, obsolete formatter metadata, inactive settings notifications, and production APIs used only by tests
+
+### Fixed
+
+- Fixed text-editor column shifts to preserve final line breaks and quote comment-like values moved into the first column
+- Fixed IDE read-access errors when hovering over the table editor after PSI cache invalidation (#1140)
+- Fixed table-editor flickering and misplaced content at fractional display scaling by refreshing stale table and header snapshots after scrolling or resizing
+- Fixed GitHub error reporting compatibility with IntelliJ Platform 2026.3 by using public authentication APIs while retaining support for 2025.2 and newer
+- Fixed IDE startup freezes when opening CSV files by loading saved separator and escape settings in the background before constructing the text or table editor
+- Fixed IDE startup freezes during CSV settings cleanup by preventing slow filesystem checks from blocking syntax highlighting and IDE write actions
+- Fixed plugin-verification failures caused by calling an override-only IntelliJ Platform API during synchronous table-editor creation
+
 ## 252.54.0 - Nov 03, 2026
 
 ### Added

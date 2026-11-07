@@ -3,9 +3,9 @@ package net.seesharpsoft.intellij.plugins.csv.intention;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.TokenType;
+import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.IncorrectOperationException;
-import net.seesharpsoft.intellij.psi.PsiHelper;
+import net.seesharpsoft.intellij.plugins.csv.psi.CsvPsiTreeUpdater;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -23,13 +23,12 @@ public class CsvQuoteAllIntentionAction extends CsvIntentionAction {
             return false;
         }
 
-        return !CsvIntentionHelper.getAllElements(element.getContainingFile()).stream()
-                .anyMatch(psiElement -> PsiHelper.getElementType(psiElement) == TokenType.ERROR_ELEMENT);
+        return !PsiTreeUtil.hasErrorElements(element.getContainingFile());
     }
 
     @Override
     public void invoke(@NotNull Project project, Editor editor, PsiElement element) throws IncorrectOperationException {
-        CsvIntentionHelper.quoteAll(element.getContainingFile());
+        CsvPsiTreeUpdater.edit(element.getContainingFile(), updater -> updater.setQuoted(true));
     }
 
 }

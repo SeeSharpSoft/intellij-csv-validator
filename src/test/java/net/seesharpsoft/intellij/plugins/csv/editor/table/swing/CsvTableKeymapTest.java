@@ -5,6 +5,7 @@ import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.ActionPlaces;
+import com.intellij.openapi.actionSystem.ActionUiKind;
 import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.actionSystem.KeyboardShortcut;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
@@ -177,7 +178,8 @@ public class CsvTableKeymapTest extends CsvTableEditorSwingTestBase {
         String actionId = CsvTableEditorActions.AddRowAfter.class.getName();
         AnAction action = ActionManager.getInstance().getAction(actionId);
         assertTrue(ActionUtil.getActions(fileEditor.getTable()).contains(action));
-        assertSame(fileEditor, DataManager.getDataProvider(fileEditor.getComponent()).getData(PlatformDataKeys.FILE_EDITOR.getName()));
+        assertSame(fileEditor, PlatformDataKeys.FILE_EDITOR.getData(
+                DataManager.getInstance().getDataContext(fileEditor.getTable())));
         Keymap keymap = KeymapManagerEx.getInstanceEx().getActiveKeymap();
         keymap.removeAllActionShortcuts(actionId);
         KeyboardShortcut shortcut = new KeyboardShortcut(KeyStroke.getKeyStroke("alt F8"), null);
@@ -185,7 +187,7 @@ public class CsvTableKeymapTest extends CsvTableEditorSwingTestBase {
         assertEquals(Arrays.asList(shortcut), Arrays.asList(action.getShortcutSet().getShortcuts()));
         assertEquals("New Row After", action.getTemplateText());
         DataContext context = SimpleDataContext.getSimpleContext(PlatformDataKeys.FILE_EDITOR, fileEditor);
-        AnActionEvent event = AnActionEvent.createFromAnAction(action, null, ActionPlaces.POPUP, context);
+        AnActionEvent event = AnActionEvent.createEvent(action, context, null, ActionPlaces.POPUP, ActionUiKind.POPUP, null);
 
         action.update(event);
         assertTrue(event.getPresentation().isEnabled());

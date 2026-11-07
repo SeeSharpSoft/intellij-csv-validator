@@ -8,7 +8,6 @@ import com.intellij.openapi.fileEditor.impl.EditorComposite;
 import com.intellij.openapi.fileEditor.impl.EditorWindow;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
-import net.seesharpsoft.intellij.plugins.csv.editor.table.CsvTableEditorProvider;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -33,7 +32,7 @@ public record CsvEditorTab(@NotNull EditorWindow window, @NotNull EditorComposit
     }
 
     public boolean hasTextAndTableEditor() {
-        return hasEditor(CsvFileEditorProvider.EDITOR_TYPE_ID) && hasEditor(CsvTableEditorProvider.EDITOR_TYPE_ID);
+        return hasEditor(CsvFileEditorProviderBase.TEXT_EDITOR_TYPE_ID) && hasEditor(CsvFileEditorProviderBase.TABLE_EDITOR_TYPE_ID);
     }
 
     private boolean hasEditor(@NotNull String editorTypeId) {

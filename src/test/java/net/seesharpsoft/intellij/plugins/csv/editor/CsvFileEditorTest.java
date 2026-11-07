@@ -2,13 +2,13 @@ package net.seesharpsoft.intellij.plugins.csv.editor;
 
 import com.intellij.diff.editor.DiffVirtualFile;
 import com.intellij.diff.impl.DiffRequestProcessor;
+import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.editor.EditorSettings;
 import com.intellij.openapi.editor.ex.EditorSettingsExternalizable;
-import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.fileEditor.*;
 import com.intellij.openapi.fileEditor.ex.FileEditorProviderManager;
-import com.intellij.openapi.fileEditor.impl.text.TextEditorState;
 import com.intellij.openapi.fileEditor.impl.text.TextEditorProvider;
+import com.intellij.openapi.fileEditor.impl.text.TextEditorState;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.testFramework.LightVirtualFile;
@@ -50,7 +50,7 @@ public class CsvFileEditorTest extends CsvBasePlatformTestCase {
         assertInstanceOf(fileEditorProviders.get(0), CsvFileEditorProvider.class);
 
         FileEditorProvider fileEditorProvider = fileEditorProviders.get(0);
-        assertEquals(CsvFileEditorProvider.EDITOR_TYPE_ID, fileEditorProvider.getEditorTypeId());
+        assertEquals(CsvFileEditorProviderBase.TEXT_EDITOR_TYPE_ID, fileEditorProvider.getEditorTypeId());
         assertEquals(FileEditorPolicy.HIDE_DEFAULT_EDITOR, fileEditorProvider.getPolicy());
 
         CsvEditorSettings csvEditorSettings = CsvEditorSettings.getInstance();

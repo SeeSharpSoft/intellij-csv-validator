@@ -16,10 +16,6 @@ public class CsvHighlightingLexer extends DelegateLexer {
     private final IElementType mySeparatorElement;
     private int myCurrentColumnIndex = 0;
 
-    public CsvHighlightingLexer(@NotNull Lexer delegate) {
-        this(delegate, CsvHighlightingElement.TokenBased.COMMA);
-    }
-
     public CsvHighlightingLexer(@NotNull Lexer delegate, @NotNull IElementType separatorElement) {
         super(delegate);
         mySeparatorElement = separatorElement;

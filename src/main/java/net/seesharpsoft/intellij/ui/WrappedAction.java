@@ -39,14 +39,6 @@ abstract class WrappedAction implements Action {
     }
 
     /*
-     *  Replace the default Action with a custom Action
-     */
-    public WrappedAction(JComponent component, Object actionKey) {
-        this.component = component;
-        setActionForKey(actionKey);
-    }
-
-    /*
      *  Search the 3 InputMaps to find the KeyStroke binding
      */
     private Object getKeyForActionMap(JComponent component, KeyStroke keyStroke) {
@@ -98,13 +90,6 @@ abstract class WrappedAction implements Action {
         component.getActionMap().put(actionKey, this);
     }
 
-    /*
-     *	Restore the original Action as the default Action
-     */
-    public void unInstall() {
-        component.getActionMap().put(actionKey, originalAction);
-    }
-
     //
 //  Delegate the Action interface methods to the original Action
 //
@@ -130,24 +115,5 @@ abstract class WrappedAction implements Action {
 
     public void setEnabled(boolean newValue) {
         originalAction.setEnabled(newValue);
-    }
-
-    //
-//  Implement some AbstractAction methods
-//
-    public Object[] getKeys() {
-        if (originalAction instanceof AbstractAction abstractAction) {
-            return abstractAction.getKeys();
-        }
-
-        return null;
-    }
-
-    public PropertyChangeListener[] getPropertyChangeListeners() {
-        if (originalAction instanceof AbstractAction abstractAction) {
-            return abstractAction.getPropertyChangeListeners();
-        }
-
-        return null;
     }
 }
