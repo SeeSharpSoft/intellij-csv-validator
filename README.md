@@ -68,101 +68,34 @@ The file types TSV (Tab-Separated Values) and PSV (Pipe-Separated Values) are su
 
 ### Table Editor
 
-The plugin provides a table editor for CSV, TSV, and PSV files. This editor is separate from the _Edit as Table..._ functionality of [IntelliJ IDEA Ultimate, PhpStorm, DataGrip, and other JetBrains IDEs](https://www.jetbrains.com/help/phpstorm/editing-csv-and-tsv-files.html), and it does not share its implementation or settings. It is an alternative to the CSV text editor and is not intended to replace or mirror the capabilities of the JetBrains _Data_ tab.
+The plugin provides a table editor for CSV, TSV, and PSV files as an alternative to the text editor. It has its own features and settings, independent of JetBrains' [_Edit as Table..._](https://www.jetbrains.com/help/phpstorm/editing-csv-and-tsv-files.html) and _Data_ tab.
 
-To switch between the text editor and the table editor, open a CSV, TSV, or PSV file and use the **Show Text Editor** and **Show Table Editor** buttons on the right side of the editor tab bar. The buttons are shown whenever editor tabs are visible; alternatively, select the **Text Editor** or **Table Editor** tab at the bottom of the editor area. Both actions can also be run via _Find Action_ or assigned shortcuts in **Settings/Preferences > Keymap > CSV Editor View**. The order of the editors can be changed in _Settings > Editor > General > CSV/TSV Editor > Editor Usage_. If the **Table Editor** tab and the buttons are not shown, check that _Text Editor only_ is not selected and that the file is not too large for the IDE to load.
+Switch views using the editor tabs or **Show Text Editor** / **Show Table Editor** buttons. The [selected field is kept by default](#keep-selected-field-when-switching-editors).
 
-Switching between the editors keeps your place: the table editor selects and reveals the cell of the field at the text caret, and the text editor moves its caret to the start of the focused table cell. If the caret is already inside that field, it stays where it is. Switching between split windows that show the same file does not change their selections. This behavior can be disabled with [Keep selected field when switching editors](#keep-selected-field-when-switching-editors).
-
-**!!! IMPORTANT !!!**
-
-The table editor works best with a syntactically valid CSV file. If the file contains syntax errors, the table editor shows the data it can read but is read-only. Fix the errors in the text editor before continuing to edit the file in the table editor.
+**Note:** Files with syntax errors are read-only in the table editor. Fix the errors in the text editor before editing them as a table.
 
 ![Table editor](./docs/tableeditor.png)
 
 #### Find and Replace
 
-Use the IDE's **Find** and **Replace** shortcuts in the table editor (Ctrl+F and Ctrl+R in the default Windows/Linux keymap). The search bar supports case-sensitive, whole-word, and regular-expression searches. Matches select and scroll to the corresponding cell; use the previous/next buttons to navigate, including multiple matches within a cell. **Replace** changes the current occurrence, and **Replace All** changes every occurrence in the table as one undoable edit. Press Escape in the search bar to close it and return to the selected cell.
-
-Search starts in the background as you type, keeping the table responsive. The bar shows **Searching...** while scanning, then the current match and total count. Changing the query or closing the bar cancels the previous search.
+Use the IDE's **Find** and **Replace** shortcuts (Ctrl+F and Ctrl+R in the default Windows/Linux keymap) to search table cells, with case-sensitive, whole-word, and regular-expression options. Matches select and reveal the corresponding cell. **Replace All** is a single undoable edit. Press Escape to close the search bar.
 
 #### Table diffs
 
-When comparing two CSV, TSV, or PSV revisions or files, select **CSV Table** in the diff
-viewer's view selector; in IDEs showing icons there, it is the icon with two side-by-side tables.
-The normal side-by-side and unified text diffs remain available.
-The table diff aligns inserted and deleted records, highlights changed cells using the
-IDE's diff colors, and synchronizes horizontal and vertical scrolling. Use the diff
-toolbar's previous/next difference actions at the start of the common navigation toolbar
-to select and reveal changed records.
-**Jump to Source** opens the selected cell in its source file. When the selected side has no
-source file, as with clipboard contents, it opens the corresponding position on the other side.
-**Swap Sides** uses the same action as the text diff and is available for comparisons that
-support it, including clipboard comparisons. An active cell edit is committed before swapping.
-Like the text diff, the **Collapse Unchanged Fragments** toolbar toggle replaces unchanged records
-farther from a change than the diff's context range with a single row showing a wavy line, skipping
-their record numbers; click such a row to expand it. The toggle shares its state and context range
-with the text diff.
-It shares the CSV table editor's cell padding and borders, column coloring, header labels,
-wrapped cell controls, and merged comment rows. As in the text diff, the divider between both
-tables shows the record numbers of both sides, leaving a number empty where
-a record exists only on the other side. Numbers of changed records use the editor's text color so they
-stay readable on the change colors. A thin, fixed-width row header beside each table marks changed rows;
-click it to select entire rows. Drag the empty middle of the divider to change the width of both tables.
-Diff backgrounds overlay the column colors, and comment rows span all data columns.
-The headers use the IDE's native file paths and revision titles, including comparisons
-started with **Compare File with Editor** from the Project context menu.
+The plugin adds a **CSV Table** view alongside the existing text views in the diff viewer
+for CSV, TSV, and PSV files. Select it when comparing Git revisions, viewing **Local History**
+changes, using **Compare with Clipboard**, or comparing two files with **Compare Files**.
 
-Double-click a cell on a writable side to edit its value. Enter commits the edit,
-Ctrl+Enter inserts a line break, and Escape cancels. Colored bands in the divider connect
-the records of each change. Click a change's **>>** (left of the record numbers)
-or **<<** (right of the record numbers) arrow to copy its entire change block to the right or left side,
-including inserted or deleted records. The IDE's **Accept Left Side** and **Accept Right Side**
-shortcuts apply the selected row's change to the right or left side, respectively. Edits and applied changes
-update the original diff documents and support the IDE's Undo/Redo commands. Historical
-revisions and sides marked read-only cannot be edited or receive changes, so they offer no arrows.
-
-File-specific separators and escape characters are respected, including custom
-multicharacter separators, quoting, multiline values, and comment records. Applying
-between different formats uses the destination's separator and escape character.
-A difference in the final line break is displayed separately and can also be applied.
-Comparison is based on record order, not a key column.
-
-The **Options** cogwheel at the far right of the diff toolbar, after the diff-view selector,
-offers, in the same order as the text diff:
-
-- **Synchronize Scrolling**: link horizontal and vertical scrolling, or scroll each table independently.
-  Turning it back on aligns both viewports with the focused side.
-- **Ignore differences**: **None** compares exact record text; **Trim Whitespaces** ignores leading
-  and trailing whitespace on each line of a raw field; **Ignore Whitespaces** ignores whitespace
-  within raw fields. Field boundaries and blank records remain significant. **Ignore Formatting**
-  compares decoded cell values, ignoring separators, quoting, escaping, and padding outside quotes,
-  but preserving whitespace inside values, field boundaries, and the distinction between comments and records.
-- **Highlight Differences**: **Lines** colors entire changed cells; **Words** and **Characters** additionally
-  emphasize the changed portions inside cells. **None** hides cell highlighting without disabling difference
-  navigation, divider markers, or change application.
-- **Help** opens this section of the README.
-
-These settings share the text diff's preferences. Text-only settings are omitted: records always remain
-aligned; ignoring empty lines could hide actual CSV records; and **Split Changes** splits text-line
-changes rather than table records. If selected in the text diff, **Ignore Whitespaces and Empty Lines**
-acts as **Ignore Whitespaces** in the table diff, and **Split Changes** acts as **Words**.
-The **Appearance** submenu is not included.
-
-Comparisons refresh in the background when either document changes. Malformed CSV or
-comparisons too large to compute show an explicit message; use the text diff to inspect
-them. Three-way comparisons and merge-conflict resolution continue to use IntelliJ's
-standard text/merge viewers.
+**Note:** The table and text views may report difference counts that differ by one due to how they
+handle a newline at the end of a file.
 
 #### Copy and Paste
 
-Use the IDE's **Copy** and **Paste** shortcuts in the table editor. Copying selected cells provides CSV text using the file's separator, escape character, and quoting settings, as well as an HTML table. Selecting a column header selects the whole column for copying. Read-only files and files with syntax errors still allow selecting and copying cells; open a cell to select and copy part of its text without changing it.
+Use the IDE's usual **Copy** and **Paste** shortcuts for CSV or spreadsheet data. Paste starts at the focused cell and **overwrites existing values** rather than inserting or shifting cells. The table grows only if the pasted data extends beyond its edges.
 
-Outside a cell's text editor, paste starts at the focused cell, overwrites existing values, and adds rows or columns only when the clipboard extends beyond the table. Clipboard CSV uses the file's separator and escape character; tab-separated spreadsheet data is also supported. Quoted separators, quotes, and multiline values are preserved. A final clipboard line break does not add an extra row. Paste is a single undoable edit.
+While editing a cell, paste inserts text into that cell instead of filling multiple cells. A trailing line break in copied data does not create an extra row. You can undo the entire paste in one step.
 
-Comment rows are copied once, with their comment indicator. Pasting comment lines at the first column replaces whole rows and preserves them as comments. Quoted values beginning with the comment indicator remain CSV values. A comment pasted at another column, or multiple CSV values pasted into an existing comment row, is rejected without changing the file.
-
-Inside a cell's text editor, paste inserts text into that cell instead of spreading it across the table. Read-only tables cannot be pasted into. An existing comment row also accepts a single-line value in its first column to replace its text while keeping the comment indicator.
+Comment lines must be pasted into the first column and replace whole rows. Pasting multiple values into a comment row is not supported.
 
 #### Context menu
 
@@ -172,15 +105,9 @@ The actions in these menus apply to the currently selected rows or columns, whic
 
 #### Moving rows and columns
 
-Drag a column header left or right, or drag a row number up or down, to move that column or row in the file. Drag from the middle of a row number to move it; dragging its bottom edge still resizes rows. Drag the right edge of the header above the row numbers to widen or narrow the row number column.
+Drag column headers or the middle of row numbers to reorder columns or rows. Their context menus also offer **Move Selected Rows Up/Down** and **Move Selected Columns Left/Right**. Dragging a row number's bottom edge resizes the row instead.
 
-The context menus also provide **Move Selected Rows Up/Down** and **Move Selected Columns Left/Right**. These actions move the selection by one position, keeping the selected items in order. Movement stops at the table boundaries; the empty row representing a final line break is not movable.
-
-Moves change the CSV document, not just its display order, and can be undone or redone using the IDE's usual commands. Column widths follow their columns, and the moved items remain selected. Undo and redo also restore the corresponding column widths and row/column selection. Movement is supported even when columns are frozen. Files with syntax errors and read-only files cannot be reordered.
-
-Small moves complete immediately. Large moves use IntelliJ's standard cancellable progress dialog while preparing the change and updating the table. The editor waits for completion instead of maintaining a separate optimistic preview; no custom rendering or status bar is used.
-
-Cancel during preparation to leave the file unchanged. If the file or its CSV settings change before the move is applied, the prepared result is discarded rather than overwriting newer edits. Once application begins, the update finishes as one undoable change; use Undo to reverse it. Expensive preparation and model calculations run off the UI thread, while the document mutation uses the IDE's required write thread.
+Moves change the file, not just the display order, and support Undo/Redo. Read-only files and files with syntax errors cannot be reordered; the empty row for a final line break cannot be moved. Large moves show a progress dialog; cancelling during preparation leaves the file unchanged.
 
 #### Row-number column width
 

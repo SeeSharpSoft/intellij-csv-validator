@@ -4,11 +4,13 @@
 
 ### Added
 
+- Added a "CSV Table" view to the IDE's diff viewer that compares CSV/TSV/PSV records side by side, highlights changed cells, and supports editing cells and applying changes to either writable side with Undo/Redo (#255)
 - Added a resizable row-number column in the table editor, with the chosen width saved per file and existing automatic sizing preserved until manually resized
 
 ### Changed
 
 - Replaced scheduled-for-removal IntelliJ Platform APIs for table-editor action data and CSV file references while retaining support for 2025.2 and newer
+- Improved README clarity by shortening table-editor documentation and focusing on key behavior
 
 ### Removed
 
@@ -25,7 +27,6 @@
 ### Added
 
 - Added the general setting "Hide editors of other plugins", disabled by default, which keeps the CSV text and table editors available and first when other plugins, such as Big Data Tools, hide all other editors of CSV/TSV files (#937)
-- Added a "CSV Table" view to the IDE's diff viewer that compares CSV/TSV/PSV records side by side, highlights changed cells, and supports editing cells and applying changes to either writable side with Undo/Redo (#255)
 
 ### Changed
 
