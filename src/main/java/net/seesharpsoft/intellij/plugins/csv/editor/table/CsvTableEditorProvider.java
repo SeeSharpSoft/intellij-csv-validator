@@ -1,6 +1,5 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table;
 
-import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorState;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -30,12 +29,6 @@ public abstract class CsvTableEditorProvider extends CsvFileEditorProviderBase {
     public boolean accept(@NotNull Project project, @NotNull VirtualFile file) {
         return CsvEditorSettings.getInstance().getEditorPrio() != CsvEditorSettings.EditorPrio.TEXT_ONLY &&
                 CsvFileEditorProvider.acceptCsvFile(project, file);
-    }
-
-    @NotNull
-    @Override
-    public FileEditor createEditor(@NotNull Project project, @NotNull VirtualFile virtualFile) {
-        return createEditorAsync(project, virtualFile).build();
     }
 
     @Override

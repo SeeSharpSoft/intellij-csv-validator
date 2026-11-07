@@ -5,12 +5,15 @@ import com.intellij.openapi.fileEditor.FileEditorPolicy;
 import com.intellij.openapi.fileEditor.FileEditorProvider;
 import com.intellij.openapi.fileEditor.FileEditorState;
 import com.intellij.openapi.fileEditor.ex.FileEditorProviderManager;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VirtualFile;
 import net.seesharpsoft.intellij.plugins.csv.CsvBasePlatformTestCase;
 import net.seesharpsoft.intellij.plugins.csv.editor.CsvFileEditorProviderBase;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.swing.CsvTableEditorSwing;
 import net.seesharpsoft.intellij.plugins.csv.editor.table.swing.CsvTableEditorSwingProvider;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import org.jdom.Element;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Objects;
@@ -40,6 +43,21 @@ public class CsvTableEditorProviderTest extends CsvBasePlatformTestCase {
 
     public void testCreatesStyledSwingEditor() {
         CsvTableEditorProvider provider = new CsvTableEditorSwingProvider();
+        FileEditor editor = provider.createEditor(getProject(), myFixture.getFile().getVirtualFile());
+        try {
+            assertEquals(CsvTableEditorSwing.class, editor.getClass());
+        } finally {
+            provider.disposeEditor(editor);
+        }
+    }
+
+    public void testSynchronousEditorCreationDoesNotInvokeAsyncPreparationHook() {
+        CsvTableEditorProvider provider = new CsvTableEditorSwingProvider() {
+            @Override
+            public @NotNull Builder createEditorAsync(@NotNull Project project, @NotNull VirtualFile file) {
+                throw new AssertionError("Synchronous editor creation must not invoke the async preparation hook");
+            }
+        };
         FileEditor editor = provider.createEditor(getProject(), myFixture.getFile().getVirtualFile());
         try {
             assertEquals(CsvTableEditorSwing.class, editor.getClass());
