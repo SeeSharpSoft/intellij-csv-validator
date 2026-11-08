@@ -22,6 +22,7 @@ import java.awt.*;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
 import java.util.EventObject;
 import java.util.Set;
@@ -211,7 +212,7 @@ public class CsvMultiLineCellRenderer extends JBScrollPane implements TableCellR
 
     @Override
     public boolean isCellEditable(EventObject anEvent) {
-        return true;
+        return !(anEvent instanceof MouseEvent mouseEvent) || mouseEvent.getClickCount() >= 2;
     }
 
     @Override

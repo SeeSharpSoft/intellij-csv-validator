@@ -1,12 +1,96 @@
 package net.seesharpsoft.intellij.plugins.csv.editor.table.swing;
 
+import net.seesharpsoft.intellij.plugins.csv.CsvFileType;
 import org.mockito.Mockito;
 
 import javax.swing.*;
+import java.awt.Rectangle;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 
+import static org.junit.Assert.assertArrayEquals;
+
 public class CsvTableEditorMouseListenerTest extends CsvTableEditorSwingTestBase {
+
+    public void testSingleClickSelectsCellWithoutEditing() {
+        JTable table = fileEditor.getTable();
+        table.setSize(600, 300);
+
+        clickCell(table, 1, 1, 1);
+
+        assertFalse("A single click must select the cell without opening its editor", table.isEditing());
+        assertArrayEquals(new int[]{1}, table.getSelectedRows());
+        assertArrayEquals(new int[]{1}, table.getSelectedColumns());
+    }
+
+    public void testMouseDragSelectsRectangularCellRangeWithoutEditing() {
+        JTable table = fileEditor.getTable();
+        table.setSize(600, 300);
+        String original = myFixture.getFile().getText();
+
+        dispatchCellMouse(table, MouseEvent.MOUSE_PRESSED, 1, 0, 1, InputEvent.BUTTON1_DOWN_MASK);
+        dispatchCellMouse(table, MouseEvent.MOUSE_DRAGGED, 2, 1, 0, InputEvent.BUTTON1_DOWN_MASK);
+        dispatchCellMouse(table, MouseEvent.MOUSE_RELEASED, 2, 1, 1, 0);
+
+        assertFalse("Dragging must extend cell selection rather than edit cell text", table.isEditing());
+        assertArrayEquals(new int[]{1, 2}, table.getSelectedRows());
+        assertArrayEquals(new int[]{0, 1}, table.getSelectedColumns());
+        assertEquals(original, myFixture.getFile().getText());
+    }
+
+    public void testDoubleClickEditsCellAndUpdatesCsv() {
+        JTable table = fileEditor.getTable();
+        table.setSize(600, 300);
+        clickCell(table, 1, 1, 1);
+
+        clickCell(table, 1, 1, 2);
+
+        assertTrue(table.isEditing());
+        assertEquals(1, table.getEditingRow());
+        assertEquals(1, table.getEditingColumn());
+        JTextArea text = (JTextArea) ((JScrollPane) table.getEditorComponent()).getViewport().getView();
+        text.setText("Updated value");
+        assertTrue(table.getCellEditor().stopCellEditing());
+        assertEquals("Updated value", getTableModel().getValue(1, 1));
+    }
+
+    public void testCommentCellRequiresDoubleClickToEdit() {
+        fileEditor.dispose();
+        myFixture.configureByText(CsvFileType.INSTANCE, "# comment\na,b\n1,2\n");
+        fileEditor = createEditor();
+        fileEditor.selectNotify();
+        JTable table = fileEditor.getTable();
+        table.setSize(600, 300);
+
+        clickCell(table, 0, 1, 1);
+
+        assertFalse(table.isEditing());
+        assertEquals(0, table.getSelectedRow());
+        assertEquals(0, table.getSelectedColumn());
+
+        clickCell(table, 0, 1, 2);
+
+        assertTrue(table.isEditing());
+        assertEquals(0, table.getEditingRow());
+        assertEquals(0, table.getEditingColumn());
+        JTextArea text = (JTextArea) ((JScrollPane) table.getEditorComponent()).getViewport().getView();
+        text.setText("Updated comment");
+        assertTrue(table.getCellEditor().stopCellEditing());
+        assertEquals("Updated comment", getTableModel().getValue(0, 0));
+    }
+
+    private static void clickCell(JTable table, int row, int column, int clickCount) {
+        dispatchCellMouse(table, MouseEvent.MOUSE_PRESSED, row, column, clickCount, InputEvent.BUTTON1_DOWN_MASK);
+        dispatchCellMouse(table, MouseEvent.MOUSE_RELEASED, row, column, clickCount, 0);
+        dispatchCellMouse(table, MouseEvent.MOUSE_CLICKED, row, column, clickCount, 0);
+    }
+
+    private static void dispatchCellMouse(JTable table, int id, int row, int column, int clickCount, int modifiers) {
+        Rectangle cell = table.getCellRect(row, column, true);
+        table.dispatchEvent(new MouseEvent(table, id, System.currentTimeMillis(), modifiers,
+                cell.x + cell.width / 2, cell.y + cell.height / 2, clickCount, false,
+                id == MouseEvent.MOUSE_DRAGGED ? MouseEvent.NOBUTTON : MouseEvent.BUTTON1));
+    }
 
     private static class MockResult<T> {
         T result;

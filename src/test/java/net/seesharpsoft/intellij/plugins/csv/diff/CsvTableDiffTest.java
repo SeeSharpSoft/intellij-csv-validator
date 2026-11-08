@@ -410,6 +410,40 @@ public class CsvTableDiffTest extends CsvBasePlatformTestCase {
         return DiffContentFactory.getInstance().createEditable(getProject(), text, CsvFileType.INSTANCE);
     }
 
+    public void testDiffCellsRequireDoubleClickToOpenTheirTextEditor() {
+        DocumentContent left = content("id,name\n1,Alice\n");
+        DocumentContent right = editable("id,name\n1,Bob\n");
+        SimpleDiffRequest request = new SimpleDiffRequest("CSV comparison", left, right, "Before", "After");
+        FrameDiffTool.DiffViewer viewer = tableTool().createComponent(context, request);
+        Disposer.register(getTestRootDisposable(), viewer);
+        viewer.init();
+        List<JTable> tables = tables(viewer.getComponent());
+        PlatformTestUtil.waitWithEventsDispatching("CSV cells populated", () -> tables.getLast().getRowCount() == 2, 10);
+        show(viewer);
+
+        for (JTable table : tables) {
+            clickCell(table, 1, 1, 1);
+
+            assertFalse("A single click must select the diff cell without opening its text editor", table.isEditing());
+            assertArrayEquals(new int[]{1}, table.getSelectedRows());
+            assertArrayEquals(new int[]{1}, table.getSelectedColumns());
+
+            clickCell(table, 1, 1, 2);
+
+            assertEquals("Only the writable diff side may enter edit mode", table == tables.getLast(), table.isEditing());
+            if (table == tables.getFirst()) continue;
+            assertEquals(1, table.getEditingRow());
+            assertEquals(1, table.getEditingColumn());
+            JTextArea text = (JTextArea) ((JScrollPane) table.getEditorComponent()).getViewport().getView();
+            assertTrue(text.isEditable());
+            text.setText("Updated value");
+            assertTrue(table.getCellEditor().stopCellEditing());
+        }
+
+        assertEquals("id,name\n1,Alice\n", left.getDocument().getText());
+        assertEquals("id,name\n1,Updated value\n", right.getDocument().getText());
+    }
+
     public void testCellEditsUpdateOriginalDocumentAndCanBeUndone() {
         DocumentContent right = DiffContentFactory.getInstance().createEditable(getProject(), "id,name\n1,Bob\n", CsvFileType.INSTANCE);
         SimpleDiffRequest request = new SimpleDiffRequest("CSV comparison",
@@ -1925,8 +1959,19 @@ public class CsvTableDiffTest extends CsvBasePlatformTestCase {
     }
 
     private static MouseEvent mouseEvent(Component component, int id, Rectangle target) {
+        return mouseEvent(component, id, target, 1);
+    }
+
+    private static MouseEvent mouseEvent(Component component, int id, Rectangle target, int clickCount) {
         return new MouseEvent(component, id, System.currentTimeMillis(), 0,
-                (int) target.getCenterX(), (int) target.getCenterY(), 1, false, MouseEvent.BUTTON1);
+                (int) target.getCenterX(), (int) target.getCenterY(), clickCount, false, MouseEvent.BUTTON1);
+    }
+
+    private static void clickCell(JTable table, int row, int column, int clickCount) {
+        Rectangle cell = table.getCellRect(row, column, true);
+        table.dispatchEvent(mouseEvent(table, MouseEvent.MOUSE_PRESSED, cell, clickCount));
+        table.dispatchEvent(mouseEvent(table, MouseEvent.MOUSE_RELEASED, cell, clickCount));
+        table.dispatchEvent(mouseEvent(table, MouseEvent.MOUSE_CLICKED, cell, clickCount));
     }
 
     private static void layout(Container container) {

@@ -6,6 +6,8 @@
 
 ### Changed
 
+- Table editor and editable diff cells now require a double-click to start editing; single-click selects a cell and dragging selects a range of rows and columns
+
 ### Removed
 
 ### Fixed
