@@ -16,6 +16,7 @@
 ### Fixed
 
 - Fixed an exception when opening diffs for documents without an assigned file type (#1144)
+- Fixed CSV/TSV/PSV editor-provider timeouts caused by waiting for unnecessary PSI read access while opening files (#1143)
 
 ## 252.55.0 - Nov 07, 2026
 

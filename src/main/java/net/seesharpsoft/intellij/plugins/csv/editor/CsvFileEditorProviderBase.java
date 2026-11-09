@@ -36,6 +36,12 @@ public abstract class CsvFileEditorProviderBase extends WeighedFileEditorProvide
     protected abstract boolean isPrimaryEditor(@NotNull CsvEditorSettings.EditorPrio editorPrio);
 
     @Override
+    public boolean acceptRequiresReadAction() {
+        // Acceptance only checks settings and file metadata; waiting for PSI access can time out.
+        return false;
+    }
+
+    @Override
     public @Nullable Object createFileEditor(@NotNull Project project, @NotNull VirtualFile file,
                                              @Nullable Document document, @NotNull CoroutineScope editorCoroutineScope,
                                              @NotNull Continuation<? super FileEditor> continuation) {
