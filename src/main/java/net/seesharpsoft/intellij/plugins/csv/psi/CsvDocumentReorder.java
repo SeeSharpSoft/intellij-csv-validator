@@ -10,6 +10,7 @@ import net.seesharpsoft.intellij.plugins.csv.components.CsvEscapeCharacter;
 import net.seesharpsoft.intellij.plugins.csv.components.CsvValueSeparator;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -199,6 +200,26 @@ public final class CsvDocumentReorder {
         return order;
     }
 
+    public static int[] dropOrder(int count, int[] selected, int target, boolean after) {
+        if (target < 0 || target >= count) throw new IllegalArgumentException("Invalid drop target");
+        validateSelectedIndices(selected, count);
+        if (Arrays.binarySearch(selected, target) >= 0) return IntStream.range(0, count).toArray();
+        int boundary = target + (after ? 1 : 0);
+        int[] order = new int[count];
+        int position = 0;
+        int selection = 0;
+        for (int index = 0; index <= count; index++) {
+            if (index == boundary) {
+                System.arraycopy(selected, 0, order, position, selected.length);
+                position += selected.length;
+            }
+            if (index == count) break;
+            if (selection < selected.length && selected[selection] == index) selection++;
+            else order[position++] = index;
+        }
+        return order;
+    }
+
     public static Change prepare(CharSequence text, Lexer lexer, int[] order, boolean columns,
                                  CsvValueSeparator separator, CsvEscapeCharacter escape, String commentIndicator) {
         validateOrder(order, order.length);
@@ -222,6 +243,16 @@ public final class CsvDocumentReorder {
             newEnd--;
         }
         return start == end && start == newEnd ? null : new Change(new TextRange(start, end), reordered.substring(start, newEnd));
+    }
+
+    private static void validateSelectedIndices(int[] selected, int count) {
+        int previous = -1;
+        for (int index : selected) {
+            if (index <= previous || index >= count) {
+                throw new IllegalArgumentException("Selected indices must be ordered and in range");
+            }
+            previous = index;
+        }
     }
 
     private static void validateOrder(int[] order, int count) {

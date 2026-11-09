@@ -159,10 +159,22 @@ public class CsvTableBase extends JBTable {
 
     public void scrollCellToVisible(int row, int column) {
         Rectangle rect = getCellRect(row, column, true);
+        scrollRectToVisible(rect, column, isCommentRow(row));
+    }
+
+    public void scrollColumnToVisible(int column) {
+        Rectangle visible = getVisibleRect();
+        Rectangle rect = getTableHeader().getHeaderRect(column);
+        rect.y = visible.y;
+        rect.height = visible.height;
+        scrollRectToVisible(rect, column, false);
+    }
+
+    private void scrollRectToVisible(Rectangle rect, int column, boolean comment) {
         if (getFrozenColumnCount() > 0) {
             Rectangle visible = getVisibleRect();
             int x = visible.x;
-            if (column >= getFrozenColumnCount() && !isCommentRow(row)) {
+            if (column >= getFrozenColumnCount() && !comment) {
                 int frozenWidth = getFrozenColumnWidth();
                 if (rect.x < visible.x + frozenWidth || rect.width > visible.width - frozenWidth) {
                     x = Math.max(0, rect.x - frozenWidth);

@@ -107,6 +107,8 @@ The actions in these menus apply to the currently selected rows or columns, whic
 
 Drag column headers or the middle of row numbers to reorder columns or rows. Their context menus also offer **Move Selected Rows Up/Down** and **Move Selected Columns Left/Right**. Dragging a row number's bottom edge resizes the row instead.
 
+Use Ctrl/Cmd-click or Shift-click to select multiple headers, then drag any selected header to move the selection as one block. Non-adjacent selections keep their original order and become adjacent at the drop position. A click without dragging selects a single row or column.
+
 Moves change the file, not just the display order, and support Undo/Redo. Read-only files and files with syntax errors cannot be reordered; the empty row for a final line break cannot be moved. Large moves show a progress dialog; cancelling during preparation leaves the file unchanged.
 
 #### Row-number column width

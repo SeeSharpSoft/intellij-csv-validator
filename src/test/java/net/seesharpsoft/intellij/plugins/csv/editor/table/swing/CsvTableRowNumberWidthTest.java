@@ -16,6 +16,20 @@ import static org.junit.Assert.assertArrayEquals;
 
 public class CsvTableRowNumberWidthTest extends CsvTableEditorSwingTestBase {
 
+    public void testRowNumberHeaderKeepsItsTableAndStyleAfterUiRefresh() {
+        JTable rowNumbers = layoutEditor(800, 400);
+        JTableHeader header = rowNumbers.getTableHeader();
+        header.updateUI();
+        assertSame(rowNumbers, header.getTable());
+        JTableHeader dataHeader = fileEditor.getTable().getTableHeader();
+        assertEquals(dataHeader.getBackground(), header.getBackground());
+        assertEquals(dataHeader.getForeground(), header.getForeground());
+        assertEquals(dataHeader.getFont(), header.getFont());
+        int originalWidth = rowNumbers.getColumnModel().getColumn(0).getWidth();
+        dragHeaderEdge(header, 20);
+        assertEquals(originalWidth + 20, rowNumbers.getColumnModel().getColumn(0).getWidth());
+    }
+
     public void testDraggingRowNumberHeaderResizesGutterWithoutChangingCsvColumns() {
         JTable rowNumbers = layoutEditor(800, 400);
         JScrollPane scrollPane = fileEditor.getTableScrollPane();
