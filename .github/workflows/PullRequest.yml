@@ -48,10 +48,10 @@ jobs:
         IDEA_SOURCES: false
       run: xvfb-run ./gradlew test verifyPlugin
     - name: Set up Snyk CLI
-      if: matrix.ideaPlatform == 'IC'
+      if: matrix.ideaVersion == '2025.2.6.4'
       uses: snyk/actions/setup@master
     - name: Run Snyk to check for vulnerabilities
-      if: matrix.ideaPlatform == 'IC'
+      if: matrix.ideaVersion == '2025.2.6.4'
       env:
         IDEA_VERSION: ${{ matrix.ideaVersion }}
         IDEA_PLATFORM: ${{ matrix.ideaPlatform }}
