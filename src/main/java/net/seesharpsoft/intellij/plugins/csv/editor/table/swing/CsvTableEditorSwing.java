@@ -166,6 +166,7 @@ public class CsvTableEditorSwing extends CsvTableEditor implements CsvFieldView 
     @Override
     public void dispose() {
         getTable().cancelRowDragging();
+        ((CsvTableHeader) getTable().getTableHeader()).cancelColumnReordering();
         if (searchSession != null) searchSession.dispose();
         super.dispose();
     }
@@ -229,7 +230,7 @@ public class CsvTableEditorSwing extends CsvTableEditor implements CsvFieldView 
                 width -> getTableEditorState().setRowNumberColumnWidth(width),
                 this::storeCurrentTableLayout);
         CsvTableRowDragListener rowDragListener = new CsvTableRowDragListener(this, rowHeadersTable);
-        rowHeadersTable.addMouseListener(rowDragListener);
+        CsvTableRowUtilities.setRowHeaderMouseHandler(rowHeadersTable, rowDragListener::handleMouseEvent);
         rowHeadersTable.addMouseMotionListener(rowDragListener);
         rowHeadersTable.addMouseListener(tableEditorMouseListener);
         ((CsvTableHeader) tblEditor.getTableHeader()).setColumnReorderingHandler(this::finishColumnReordering);
@@ -404,16 +405,21 @@ public class CsvTableEditorSwing extends CsvTableEditor implements CsvFieldView 
     }
 
     void moveRow(int from, int to) {
+        moveRows(new int[]{from}, from, to);
+    }
+
+    void moveRows(int[] rows, int from, int to) {
         int count = getTableModel().getMovableRowCount();
         if (!isEditable() || getTableModel().hasErrors() || from < 0 || to < 0 ||
-                from >= count || to >= count || from == to || !stopCellEditing()) return;
-        int[] order = IntStream.range(0, tblEditor.getRowCount()).toArray();
-        int step = from < to ? 1 : -1;
-        for (int index = from; index != to; index += step) order[index] = order[index + step];
-        order[to] = from;
+                from >= count || to >= count || rows.length == 0 || rows[rows.length - 1] >= count ||
+                Arrays.binarySearch(rows, to) >= 0 || !stopCellEditing()) return;
+        int[] order = CsvDocumentReorder.dropOrder(tblEditor.getRowCount(), rows, to, from < to);
+        if (IntStream.range(0, order.length).allMatch(index -> order[index] == index)) return;
+        int[] selection = IntStream.range(0, order.length)
+                .filter(index -> Arrays.binarySearch(rows, order[index]) >= 0).toArray();
         int[] columns = IntStream.range(0, tblEditor.getColumnCount()).toArray();
-        getTable().scrollCellToVisible(to, 0);
-        applyOrder(false, order, new int[]{to}, columns);
+        getTable().scrollCellToVisible(selection[0], 0);
+        applyOrder(false, order, selection, columns);
     }
 
     public boolean stopCellEditing() {

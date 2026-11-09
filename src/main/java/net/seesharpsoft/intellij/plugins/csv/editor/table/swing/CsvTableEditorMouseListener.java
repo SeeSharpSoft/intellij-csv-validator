@@ -60,9 +60,11 @@ public class CsvTableEditorMouseListener extends CsvTableEditorUtilBase implemen
             return;
         }
         JPopupMenu menu;
-        if (e.getSource() instanceof JTableHeader) {
+        if (e.getSource() instanceof JTableHeader header) {
             if (e.getButton() == MouseEvent.BUTTON1) {
-                csvTableEditor.selectColumn(currentColumn, (e.isControlDown() || e.isShiftDown()));
+                boolean append = e.isControlDown() || e.isShiftDown() || e.isMetaDown() ||
+                        (header.getDraggedColumn() != null && csvTableEditor.getTable().isColumnSelected(currentColumn));
+                csvTableEditor.selectColumn(currentColumn, append);
             }
             menu = this.getColumnPopupMenu();
         } else {

@@ -6,7 +6,6 @@ import com.intellij.ui.JBColor;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
 import net.seesharpsoft.intellij.plugins.csv.table.ui.CsvMultiLineCellRenderer;
-import net.seesharpsoft.intellij.plugins.csv.table.ui.CsvTableHeader;
 import net.seesharpsoft.intellij.plugins.csv.table.ui.CsvTableScrollBarUI;
 
 import javax.swing.*;
@@ -44,6 +43,17 @@ public class CsvTableEditorSwingStyleTest extends CsvTableEditorSwingTestBase {
         assertEquals(table.getBackground(), scrollPane.getViewport().getBackground());
 
         JTableHeader header = table.getTableHeader();
+        assertStyledHeader(table);
+        JTable rowHeader = (JTable) scrollPane.getRowHeader().getView();
+        assertEquals(header.getBackground(), rowHeader.getBackground());
+        assertEquals(header.getForeground(), rowHeader.getForeground());
+        assertFalse(rowHeader.getShowVerticalLines());
+        assertSame(rowHeader.getTableHeader(), scrollPane.getCorner(JScrollPane.UPPER_LEFT_CORNER));
+        assertStyledHeader(rowHeader);
+    }
+
+    private void assertStyledHeader(JTable table) {
+        JTableHeader header = table.getTableHeader();
         JComponent cell = (JComponent) header.getDefaultRenderer().getTableCellRendererComponent(
                 table, "Header", false, false, -1, 0);
         assertEquals(UIUtil.getPanelBackground(), cell.getBackground());
@@ -51,12 +61,6 @@ public class CsvTableEditorSwingStyleTest extends CsvTableEditorSwingTestBase {
         assertTrue(cell.getFont().isBold());
         Insets padding = JBUI.insets(8, 10);
         assertEquals(new Insets(padding.top, padding.left, padding.bottom + 1, padding.right + 1), cell.getInsets());
-
-        JTable rowHeader = (JTable) scrollPane.getRowHeader().getView();
-        assertEquals(header.getBackground(), rowHeader.getBackground());
-        assertEquals(header.getForeground(), rowHeader.getForeground());
-        assertFalse(rowHeader.getShowVerticalLines());
-        assertInstanceOf(scrollPane.getCorner(JScrollPane.UPPER_LEFT_CORNER), CsvTableHeader.class);
     }
 
     public void testCellPaddingDoesNotJumpWhenFocusedOrEditing() {

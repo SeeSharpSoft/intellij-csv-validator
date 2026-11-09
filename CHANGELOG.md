@@ -4,9 +4,12 @@
 
 ### Added
 
+- Added drag-and-drop for multiple selected rows or columns, including non-adjacent selections, moving them as one ordered block with Undo/Redo and preserved column widths
+
 ### Changed
 
 - Table editor and editable diff cells now require a double-click to start editing; single-click selects a cell and dragging selects a range of rows and columns
+- Simplified table-header dragging and rendering, reducing allocations and unnecessary column moves while preserving frozen-column behavior and row-number header styling
 
 ### Removed
 
