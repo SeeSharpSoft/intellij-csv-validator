@@ -202,13 +202,7 @@ public final class CsvDocumentReorder {
 
     public static int[] dropOrder(int count, int[] selected, int target, boolean after) {
         if (target < 0 || target >= count) throw new IllegalArgumentException("Invalid drop target");
-        int previous = -1;
-        for (int index : selected) {
-            if (index <= previous || index >= count) {
-                throw new IllegalArgumentException("Selected indices must be ordered and in range");
-            }
-            previous = index;
-        }
+        validateSelectedIndices(selected, count);
         if (Arrays.binarySearch(selected, target) >= 0) return IntStream.range(0, count).toArray();
         int boundary = target + (after ? 1 : 0);
         int[] order = new int[count];
@@ -249,6 +243,16 @@ public final class CsvDocumentReorder {
             newEnd--;
         }
         return start == end && start == newEnd ? null : new Change(new TextRange(start, end), reordered.substring(start, newEnd));
+    }
+
+    private static void validateSelectedIndices(int[] selected, int count) {
+        int previous = -1;
+        for (int index : selected) {
+            if (index <= previous || index >= count) {
+                throw new IllegalArgumentException("Selected indices must be ordered and in range");
+            }
+            previous = index;
+        }
     }
 
     private static void validateOrder(int[] order, int count) {
