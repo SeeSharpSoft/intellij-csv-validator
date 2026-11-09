@@ -44,6 +44,7 @@ import java.util.function.BooleanSupplier;
 import java.util.function.IntConsumer;
 import java.util.function.IntFunction;
 import java.util.function.IntSupplier;
+import java.util.function.Predicate;
 
 /**
  * TableRowUtilities. Utility for adding a row column to a JTable.
@@ -63,8 +64,12 @@ public final class CsvTableRowUtilities {
 
     public static final int ROW_NUMBER_CELL_PADDING = 8;
     private static final Object ROW_HEADER_OVERLAY = new Object();
+    private static final Object ROW_HEADER_MOUSE_HANDLER = new Object();
 
     private record RowHeaderOverlay(BiConsumer<Graphics, JTable> painter) {
+    }
+
+    private record RowHeaderMouseHandler(Predicate<MouseEvent> handler) {
     }
 
     private CsvTableRowUtilities() {
@@ -112,7 +117,28 @@ public final class CsvTableRowUtilities {
 
             @Override
             protected @NotNull JTableHeader createDefaultTableHeader() {
-                return new CsvTableHeader(columnModel);
+                return new JTableHeader(columnModel) {
+                    @Override
+                    public void updateUI() {
+                        super.updateUI();
+                        CsvTableHeader.applyHeaderStyle(this);
+                    }
+                };
+            }
+
+            @Override
+            protected void processMouseEvent(MouseEvent event) {
+                if (!handleMouseEvent(event)) super.processMouseEvent(event);
+            }
+
+            @Override
+            protected void processMouseMotionEvent(MouseEvent event) {
+                if (!handleMouseEvent(event)) super.processMouseMotionEvent(event);
+            }
+
+            private boolean handleMouseEvent(MouseEvent event) {
+                return getClientProperty(ROW_HEADER_MOUSE_HANDLER) instanceof RowHeaderMouseHandler handler &&
+                        handler.handler().test(event);
             }
 
             @Override
@@ -142,6 +168,13 @@ public final class CsvTableRowUtilities {
 
     public static void setRowHeaderOverlay(JTable rowHeadersTable, BiConsumer<Graphics, JTable> painter) {
         rowHeadersTable.putClientProperty(ROW_HEADER_OVERLAY, new RowHeaderOverlay(Objects.requireNonNull(painter)));
+    }
+
+    /**
+     * Returning true consumes the event before Swing's selection and resizing handlers run.
+     */
+    public static void setRowHeaderMouseHandler(JTable rowHeadersTable, Predicate<MouseEvent> handler) {
+        rowHeadersTable.putClientProperty(ROW_HEADER_MOUSE_HANDLER, new RowHeaderMouseHandler(Objects.requireNonNull(handler)));
     }
 
     private static void installRowHeader(final JScrollPane scrollPane, final JTable rowHeadersTable) {

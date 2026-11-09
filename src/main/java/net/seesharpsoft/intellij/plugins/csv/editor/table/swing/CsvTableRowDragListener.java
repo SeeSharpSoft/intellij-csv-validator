@@ -14,11 +14,13 @@ import java.awt.dnd.DragSource;
 import java.awt.event.MouseEvent;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
+import java.util.Arrays;
 
 final class CsvTableRowDragListener extends MouseInputAdapter {
     private final CsvTableEditorSwing editor;
     private final JTable rowHeaders;
     private int sourceRow = -1;
+    private int[] sourceRows = new int[0];
     private int startY;
     private boolean dragging;
     private int targetRow = -1;
@@ -44,6 +46,23 @@ final class CsvTableRowDragListener extends MouseInputAdapter {
         });
     }
 
+    boolean handleMouseEvent(MouseEvent event) {
+        if (event.getID() == MouseEvent.MOUSE_PRESSED) {
+            mousePressed(event);
+            return sourceRow >= 0;
+        }
+        if (sourceRow < 0) return false;
+        if (event.getID() == MouseEvent.MOUSE_DRAGGED) {
+            mouseDragged(event);
+            return true;
+        }
+        if (event.getID() == MouseEvent.MOUSE_RELEASED && SwingUtilities.isLeftMouseButton(event)) {
+            mouseReleased(event);
+            return true;
+        }
+        return false;
+    }
+
     @Override
     public void mousePressed(MouseEvent event) {
         cancelDrag();
@@ -53,7 +72,11 @@ final class CsvTableRowDragListener extends MouseInputAdapter {
         if (row < 0 || !editor.stopCellEditing()) return;
         sourceRow = row;
         startY = event.getY();
-        rowHeaders.setRowSelectionInterval(row, row);
+        if (!rowHeaders.isRowSelected(row)) rowHeaders.setRowSelectionInterval(row, row);
+        sourceRows = Arrays.stream(rowHeaders.getSelectedRows())
+                .filter(index -> index < editor.getTableModel().getMovableRowCount()).toArray();
+        CsvTableRowUtilities.setSelection(rowHeaders.getSelectionModel(), sourceRows, rowHeaders.getRowCount());
+        rowHeaders.requestFocusInWindow();
     }
 
     private int draggableRow(Point point) {
@@ -76,7 +99,7 @@ final class CsvTableRowDragListener extends MouseInputAdapter {
     public void mouseDragged(MouseEvent event) {
         if (sourceRow < 0) return;
         if (!editor.isEditable() || editor.getTableModel().hasErrors() ||
-                sourceRow >= editor.getTableModel().getMovableRowCount()) {
+                sourceRows[sourceRows.length - 1] >= editor.getTableModel().getMovableRowCount()) {
             cancelDrag();
             return;
         }
@@ -86,18 +109,19 @@ final class CsvTableRowDragListener extends MouseInputAdapter {
             tableCursor = table.getCursor();
             rowHeaders.requestFocusInWindow();
             table.getSelectionModel().setValueIsAdjusting(true);
-            table.setRowSelectionInterval(sourceRow, sourceRow);
+            CsvTableRowUtilities.setSelection(table.getSelectionModel(), sourceRows, table.getRowCount());
             if (table.getColumnCount() > 0) table.setColumnSelectionInterval(0, table.getColumnCount() - 1);
             rowHeaders.getAccessibleContext().setAccessibleDescription(
-                    String.format(CsvPluginManager.getLocalizedText("table.row.dragging"), sourceRow + 1));
+                    sourceRows.length == 1
+                            ? String.format(CsvPluginManager.getLocalizedText("table.row.dragging"), sourceRow + 1)
+                            : String.format(CsvPluginManager.getLocalizedText("table.rows.dragging"), sourceRows.length));
             // Capture before enabling feedback so the preview cannot capture itself.
-            dragPreview = createDragPreview(table, sourceRow);
+            dragPreview = createDragPreview(table, sourceRow, sourceRows.length);
             dragging = true;
         }
         rowHeaders.setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
         table.setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
         targetRow = targetRow(event);
-        rowHeaders.setRowSelectionInterval(sourceRow, sourceRow);
         Rectangle target = table.getCellRect(targetRow, 0, true);
         target.x = table.getVisibleRect().x;
         target.width = table.getVisibleRect().width;
@@ -109,14 +133,17 @@ final class CsvTableRowDragListener extends MouseInputAdapter {
     @Override
     public void mouseReleased(MouseEvent event) {
         int from = sourceRow;
+        int[] rows = sourceRows;
         int to = dragging ? targetRow(event) : -1;
+        if (!dragging && sourceRow >= 0) rowHeaders.setRowSelectionInterval(sourceRow, sourceRow);
         cancelDrag();
-        if (from >= 0 && to >= 0) editor.moveRow(from, to);
+        if (from >= 0 && to >= 0) editor.moveRows(rows, from, to);
     }
 
     void cancelDrag() {
         if (sourceRow < 0 && !dragging) return;
         sourceRow = targetRow = -1;
+        sourceRows = new int[0];
         if (dragging) {
             editor.getTable().setCursor(tableCursor);
             rowHeaders.setCursor(Cursor.getDefaultCursor());
@@ -131,12 +158,16 @@ final class CsvTableRowDragListener extends MouseInputAdapter {
     }
 
     static BufferedImage createDragPreview(CsvTable table, int sourceRow) {
+        return createDragPreview(table, sourceRow, 1);
+    }
+
+    private static BufferedImage createDragPreview(CsvTable table, int sourceRow, int count) {
         int padding = JBUI.scale(6);
         Rectangle visible = table.getVisibleRect();
         Rectangle source = table.getCellRect(sourceRow, 0, true);
         Font font = table.getFont().deriveFont(Font.BOLD);
         FontMetrics metrics = table.getFontMetrics(font);
-        String number = Integer.toString(sourceRow + 1);
+        String number = Integer.toString(sourceRow + 1) + (count > 1 ? " +" + (count - 1) : "");
         int width = Math.max(1, Math.min(JBUI.scale(400), visible.width - padding * 2));
         int height = Math.max(metrics.getHeight() + padding * 2, Math.min(source.height, JBUI.scale(56)));
         int badgeWidth = Math.max(JBUI.scale(32), metrics.stringWidth(number) + padding * 2);
@@ -189,24 +220,30 @@ final class CsvTableRowDragListener extends MouseInputAdapter {
         Graphics g = graphics.create();
         try {
             g.clipRect(visible.x, visible.y, visible.width, visible.height);
-            paintSourceRow(g, target, visible);
+            paintSourceRows(g, target, visible);
             Rectangle destination = target.getCellRect(targetRow, 0, true);
             int y = destination.y + (targetRow > sourceRow ? destination.height : 0);
             boolean rowHeader = rowHeaders.equals(target);
-            if (targetRow != sourceRow) paintDropLine(g, visible, y, rowHeader);
+            if (Arrays.binarySearch(sourceRows, targetRow) < 0) paintDropLine(g, visible, y, rowHeader);
             if (!rowHeader && dragPreview != null) paintDragPreview(g, visible, y);
         } finally {
             g.dispose();
         }
     }
 
-    private void paintSourceRow(Graphics g, JTable target, Rectangle visible) {
+    private void paintSourceRows(Graphics g, JTable target, Rectangle visible) {
         Color accent = dragAccent(target);
-        Rectangle source = target.getCellRect(sourceRow, 0, true);
-        g.setColor(new Color(accent.getRed(), accent.getGreen(), accent.getBlue(), 40));
-        g.fillRect(visible.x, source.y, visible.width, source.height);
-        g.setColor(accent);
-        g.drawRect(visible.x, source.y, visible.width - 1, source.height - 1);
+        Color background = new Color(accent.getRed(), accent.getGreen(), accent.getBlue(), 40);
+        int first = Arrays.binarySearch(sourceRows, target.rowAtPoint(new Point(0, visible.y)));
+        if (first < 0) first = -first - 1;
+        for (int index = first; index < sourceRows.length; index++) {
+            Rectangle source = target.getCellRect(sourceRows[index], 0, true);
+            if (source.y >= visible.y + visible.height) break;
+            g.setColor(background);
+            g.fillRect(visible.x, source.y, visible.width, source.height);
+            g.setColor(accent);
+            g.drawRect(visible.x, source.y, visible.width - 1, source.height - 1);
+        }
     }
 
     private static void paintDropLine(Graphics g, Rectangle visible, int y, boolean withArrow) {

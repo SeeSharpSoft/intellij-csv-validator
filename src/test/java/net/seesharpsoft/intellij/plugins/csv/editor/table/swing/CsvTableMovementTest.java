@@ -107,6 +107,67 @@ public class CsvTableMovementTest extends CsvTableEditorSwingTestBase {
         assertEquals("b,c,a,d\n2,3,1,4\n6,7,5,8\n10,11,9,12\n", myFixture.getFile().getText());
     }
 
+    public void testColumnHeaderDragMovesSelectedColumnsAndWidthsTogetherWithUndoRedo() {
+        configure(ORIGINAL);
+        fileEditor.getTableEditorState().setColumnWidths(new int[]{80, 120, 160, 200});
+        fileEditor.updateEditorLayout();
+        fileEditor.selectColumn(1, false);
+        fileEditor.selectColumn(2, true);
+        nativeDragColumn(1, 3);
+        String moved = "a,d,b,c\n1,4,2,3\n5,8,6,7\n9,12,10,11\n";
+        assertEquals(moved, myFixture.getFile().getText());
+        assertColumnWidths(80, 200, 120, 160);
+        assertOrderedEquals(fileEditor.getTable().getSelectedColumns(), new int[]{2, 3});
+        UndoManager undo = UndoManager.getInstance(getProject());
+        undo.undo(fileEditor);
+        PsiDocumentManager.getInstance(getProject()).commitAllDocuments();
+        assertEquals(ORIGINAL, myFixture.getFile().getText());
+        assertColumnWidths(80, 120, 160, 200);
+        assertOrderedEquals(fileEditor.getTable().getSelectedColumns(), new int[]{1, 2});
+        undo.redo(fileEditor);
+        PsiDocumentManager.getInstance(getProject()).commitAllDocuments();
+        assertEquals(moved, myFixture.getFile().getText());
+        assertColumnWidths(80, 200, 120, 160);
+        assertOrderedEquals(fileEditor.getTable().getSelectedColumns(), new int[]{2, 3});
+        for (int column = 0; column < 4; column++) {
+            assertEquals(column, fileEditor.getTable().convertColumnIndexToModel(column));
+        }
+    }
+
+    public void testColumnHeaderDragCollectsNonAdjacentColumnsInOriginalOrder() {
+        configure(ORIGINAL);
+        fileEditor.getTableEditorState().setColumnWidths(new int[]{80, 120, 160, 200});
+        fileEditor.updateEditorLayout();
+        JTableHeader header = fileEditor.getTable().getTableHeader();
+        Rectangle first = header.getHeaderRect(1);
+        Rectangle second = header.getHeaderRect(3);
+        clickHeader(header, first.x + first.width / 2, 12, 0);
+        clickHeader(header, second.x + second.width / 2, 12, InputEvent.CTRL_DOWN_MASK);
+        assertOrderedEquals(fileEditor.getTable().getSelectedColumns(), new int[]{1, 3});
+        nativeDragColumn(3, 0);
+        assertEquals("b,d,a,c\n2,4,1,3\n6,8,5,7\n10,12,9,11\n", myFixture.getFile().getText());
+        assertColumnWidths(120, 200, 80, 160);
+        assertOrderedEquals(fileEditor.getTable().getSelectedColumns(), new int[]{0, 1});
+        nativeDragColumn(0, 3);
+        assertEquals("a,c,b,d\n1,3,2,4\n5,7,6,8\n9,11,10,12\n", myFixture.getFile().getText());
+        assertColumnWidths(80, 160, 120, 200);
+        assertOrderedEquals(fileEditor.getTable().getSelectedColumns(), new int[]{2, 3});
+    }
+
+    public void testColumnGroupDragCollectsColumnsFromBothSidesOfDropTarget() {
+        configure("a,b,c,d,e,f,g\n1,2,3,4,5,6,7\n");
+        fileEditor.getTableEditorState().setColumnWidths(new int[]{80, 90, 100, 110, 120, 130, 140});
+        fileEditor.updateEditorLayout();
+        fileEditor.selectColumn(0, false);
+        fileEditor.selectColumn(1, true);
+        fileEditor.selectColumn(5, true);
+        fileEditor.selectColumn(6, true);
+        nativeDragColumn(1, 3);
+        assertEquals("c,d,a,b,f,g,e\n3,4,1,2,6,7,5\n", myFixture.getFile().getText());
+        assertColumnWidths(100, 110, 80, 90, 130, 140, 120);
+        assertOrderedEquals(fileEditor.getTable().getSelectedColumns(), new int[]{2, 3, 4, 5});
+    }
+
     public void testColumnMovesWithoutMouseDragAlsoPersist() {
         configure(ORIGINAL);
         fileEditor.getTable().getColumnModel().moveColumn(0, 2);
@@ -156,6 +217,31 @@ public class CsvTableMovementTest extends CsvTableEditorSwingTestBase {
         assertEquals(2, fileEditor.getFrozenColumnCount());
         nativeDragColumn(4, 0);
         assertEquals("a,b,c,d,e,f\n1,2,3,4,5,6\n", myFixture.getFile().getText());
+    }
+
+    public void testColumnGroupDragCrossesFrozenBoundaryWithoutScrollingToFirstRow() {
+        String original = "a,b,c,d,e,f\n1,2,3,4,5,6\n".repeat(20);
+        configure(original);
+        fileEditor.getTableEditorState().setColumnWidths(new int[]{100, 100, 100, 100, 100, 100});
+        fileEditor.updateEditorLayout();
+        fileEditor.setFrozenColumnCount(2);
+        CsvTable table = fileEditor.getTable();
+        table.setRowHeight(20);
+        table.setSize(600, 1000);
+        JViewport viewport = fileEditor.getTableScrollPane().getViewport();
+        viewport.setExtentSize(new Dimension(400, 100));
+        viewport.setViewPosition(new Point(150, 200));
+        fileEditor.selectColumn(0, false);
+        fileEditor.selectColumn(1, true);
+        nativeDragColumn(1, 4);
+        assertEquals(200, viewport.getViewPosition().y);
+        assertEquals("c,d,e,a,b,f\n3,4,5,1,2,6\n".repeat(20), myFixture.getFile().getText());
+        assertEquals(2, fileEditor.getFrozenColumnCount());
+        assertOrderedEquals(table.getSelectedColumns(), new int[]{3, 4});
+        nativeDragColumn(4, 0);
+        assertEquals(original, myFixture.getFile().getText());
+        assertEquals(2, fileEditor.getFrozenColumnCount());
+        assertOrderedEquals(table.getSelectedColumns(), new int[]{0, 1});
     }
 
     public void testNativeColumnDragCommitsActiveCellEdit() {
@@ -326,6 +412,7 @@ public class CsvTableMovementTest extends CsvTableEditorSwingTestBase {
     public void testMovementPersistsWhenEditorIsReopened() {
         configure(ORIGINAL);
         fileEditor.moveRow(1, 3);
+        fileEditor.selectColumn(0, false);
         nativeDragColumn(0, 2);
         String moved = myFixture.getFile().getText();
         fileEditor.dispose();
@@ -344,6 +431,143 @@ public class CsvTableMovementTest extends CsvTableEditorSwingTestBase {
         assertEquals(4, fileEditor.getTable().getSelectedColumnCount());
         dragRow(3, 1);
         assertEquals(ORIGINAL, myFixture.getFile().getText());
+    }
+
+    public void testRowNumberDragMovesSelectedRowsTogetherAndSupportsUndoRedo() {
+        configure(ORIGINAL);
+        JTable headers = rowHeaders();
+        headers.setRowSelectionInterval(1, 2);
+        dragRow(1, 3);
+        String moved = "a,b,c,d\n9,10,11,12\n1,2,3,4\n5,6,7,8\n";
+        assertEquals(moved, myFixture.getFile().getText());
+        assertOrderedEquals(fileEditor.getTable().getSelectedRows(), new int[]{2, 3});
+        assertEquals(4, fileEditor.getTable().getSelectedColumnCount());
+        UndoManager undo = UndoManager.getInstance(getProject());
+        undo.undo(fileEditor);
+        PsiDocumentManager.getInstance(getProject()).commitAllDocuments();
+        assertEquals(ORIGINAL, myFixture.getFile().getText());
+        assertOrderedEquals(fileEditor.getTable().getSelectedRows(), new int[]{1, 2});
+        undo.redo(fileEditor);
+        PsiDocumentManager.getInstance(getProject()).commitAllDocuments();
+        assertEquals(moved, myFixture.getFile().getText());
+        assertOrderedEquals(fileEditor.getTable().getSelectedRows(), new int[]{2, 3});
+    }
+
+    public void testRowNumberDragCollectsNonAdjacentRowsInOriginalOrder() {
+        configure(ORIGINAL);
+        JTable headers = rowHeaders();
+        clickHeader(headers, 5, headers.getCellRect(1, 0, true).y + headers.getRowHeight() / 2, 0);
+        clickHeader(headers, 5, headers.getCellRect(3, 0, true).y + headers.getRowHeight() / 2, InputEvent.CTRL_DOWN_MASK);
+        assertOrderedEquals(fileEditor.getTable().getSelectedRows(), new int[]{1, 3});
+        dragRow(3, 0);
+        assertEquals("1,2,3,4\n9,10,11,12\na,b,c,d\n5,6,7,8\n", myFixture.getFile().getText());
+        assertOrderedEquals(fileEditor.getTable().getSelectedRows(), new int[]{0, 1});
+        dragRow(0, 3);
+        assertEquals("a,b,c,d\n5,6,7,8\n1,2,3,4\n9,10,11,12\n", myFixture.getFile().getText());
+        assertOrderedEquals(fileEditor.getTable().getSelectedRows(), new int[]{2, 3});
+    }
+
+    public void testRowGroupDragPreservesCommentsMultilineValuesAndTerminalEmptyRow() {
+        configure("#first\na,\"multi\nline\"\n#last\nb,value\n");
+        JTable headers = rowHeaders();
+        headers.setRowSelectionInterval(0, 1);
+        headers.addRowSelectionInterval(4, 4);
+        int fromY = headers.getCellRect(0, 0, true).y + headers.getRowHeight() / 2;
+        int toY = headers.getCellRect(4, 0, true).y + headers.getRowHeight() / 2;
+        headers.dispatchEvent(mouse(headers, MouseEvent.MOUSE_PRESSED, 5, fromY, MouseEvent.BUTTON1));
+        headers.dispatchEvent(mouse(headers, MouseEvent.MOUSE_DRAGGED, 5, toY, MouseEvent.NOBUTTON));
+        assertEquals("Moving 2 rows", headers.getAccessibleContext().getAccessibleDescription());
+        headers.dispatchEvent(mouse(headers, MouseEvent.MOUSE_RELEASED, 5, toY, MouseEvent.BUTTON1));
+        assertEquals("#last\nb,value\n#first\na,\"multi\nline\"\n", myFixture.getFile().getText());
+        assertOrderedEquals(fileEditor.getTable().getSelectedRows(), new int[]{2, 3});
+        assertEquals(4, fileEditor.getTableModel().getMovableRowCount());
+        assertEquals(5, fileEditor.getTable().getRowCount());
+    }
+
+    public void testDraggingGroupOntoSelectedItemDoesNotReorderOrLoseSelection() {
+        configure(ORIGINAL);
+        JTable headers = rowHeaders();
+        headers.setRowSelectionInterval(1, 2);
+        dragRow(1, 2);
+        assertEquals(ORIGINAL, myFixture.getFile().getText());
+        assertOrderedEquals(fileEditor.getTable().getSelectedRows(), new int[]{1, 2});
+        fileEditor.selectColumn(1, false);
+        fileEditor.selectColumn(2, true);
+        nativeDragColumn(1, 2);
+        assertEquals(ORIGINAL, myFixture.getFile().getText());
+        assertOrderedEquals(fileEditor.getTable().getSelectedColumns(), new int[]{1, 2});
+    }
+
+    public void testClickingSelectedHeaderWithoutDraggingStillSelectsOneItem() {
+        configure(ORIGINAL);
+        JTable headers = rowHeaders();
+        headers.setRowSelectionInterval(1, 2);
+        clickHeader(headers, 5, headers.getCellRect(1, 0, true).y + headers.getRowHeight() / 2, 0);
+        assertOrderedEquals(fileEditor.getTable().getSelectedRows(), new int[]{1});
+        fileEditor.selectColumn(1, false);
+        fileEditor.selectColumn(2, true);
+        JTableHeader header = fileEditor.getTable().getTableHeader();
+        Rectangle column = header.getHeaderRect(1);
+        clickHeader(header, column.x + column.width / 2, 12, 0);
+        assertOrderedEquals(fileEditor.getTable().getSelectedColumns(), new int[]{1});
+        assertEquals(ORIGINAL, myFixture.getFile().getText());
+    }
+
+    public void testReadOnlyHeaderClickStillSelectsOneColumn() {
+        configure(ORIGINAL);
+        fileEditor.setEditable(false);
+        fileEditor.selectColumn(1, false);
+        fileEditor.selectColumn(2, true);
+        JTableHeader header = fileEditor.getTable().getTableHeader();
+        Rectangle column = header.getHeaderRect(1);
+        clickHeader(header, column.x + column.width / 2, 12, 0);
+        assertOrderedEquals(fileEditor.getTable().getSelectedColumns(), new int[]{1});
+        assertEquals(ORIGINAL, myFixture.getFile().getText());
+    }
+
+    public void testModelRefreshCancelsColumnGroupDragWithoutPersistingIt() {
+        ManualUpdateScheduler scheduler = configureDelayed();
+        fileEditor.selectColumn(1, false);
+        fileEditor.selectColumn(3, true);
+        JTableHeader header = fileEditor.getTable().getTableHeader();
+        Rectangle source = header.getHeaderRect(1);
+        Rectangle target = header.getHeaderRect(2);
+        int fromX = source.x + source.width / 2;
+        int toX = target.x + target.width / 2;
+        header.dispatchEvent(mouse(header, MouseEvent.MOUSE_PRESSED, fromX, 12, MouseEvent.BUTTON1));
+        header.dispatchEvent(mouse(header, MouseEvent.MOUSE_DRAGGED, toX, 12, MouseEvent.NOBUTTON));
+        assertNotNull(header.getDraggedColumn());
+        assertOrderedEquals(fileEditor.getTable().getSelectedColumns(), new int[]{1, 3});
+        String latest = ORIGINAL.replace("1,2,3,4", "edited,2,3,4");
+        WriteCommandAction.runWriteCommandAction(getProject(), () -> {
+            myFixture.getEditor().getDocument().setText(latest);
+            PsiDocumentManager.getInstance(getProject()).commitAllDocuments();
+        });
+        scheduler.advanceBy(50);
+        assertNull(header.getDraggedColumn());
+        header.dispatchEvent(mouse(header, MouseEvent.MOUSE_RELEASED, toX, 12, MouseEvent.BUTTON1));
+        assertEquals(latest, myFixture.getFile().getText());
+        for (int column = 0; column < 4; column++) {
+            assertEquals(column, fileEditor.getTable().convertColumnIndexToModel(column));
+        }
+    }
+
+    public void testEscapeCancelsRowGroupDragWithoutLosingSelection() {
+        configure(ORIGINAL);
+        JTable headers = rowHeaders();
+        headers.setRowSelectionInterval(1, 1);
+        headers.addRowSelectionInterval(3, 3);
+        int fromY = headers.getCellRect(1, 0, true).y + headers.getRowHeight() / 2;
+        int toY = headers.getCellRect(2, 0, true).y + headers.getRowHeight() / 2;
+        headers.dispatchEvent(mouse(headers, MouseEvent.MOUSE_PRESSED, 5, fromY, MouseEvent.BUTTON1));
+        headers.dispatchEvent(mouse(headers, MouseEvent.MOUSE_DRAGGED, 5, toY, MouseEvent.NOBUTTON));
+        assertEquals("Moving 2 rows", headers.getAccessibleContext().getAccessibleDescription());
+        headers.getActionMap().get("csv.cancel.row.drag").actionPerformed(null);
+        assertNull(headers.getAccessibleContext().getAccessibleDescription());
+        assertFalse(fileEditor.getTable().getSelectionModel().getValueIsAdjusting());
+        headers.dispatchEvent(mouse(headers, MouseEvent.MOUSE_RELEASED, 5, toY, MouseEvent.BUTTON1));
+        assertEquals(ORIGINAL, myFixture.getFile().getText());
+        assertOrderedEquals(fileEditor.getTable().getSelectedRows(), new int[]{1, 3});
     }
 
     public void testDelayedRefreshCancelsPressedAndDraggingRowsWithoutMovingThem() {
@@ -743,5 +967,12 @@ public class CsvTableMovementTest extends CsvTableEditorSwingTestBase {
         return new MouseEvent(component, id, System.currentTimeMillis(),
                 id == MouseEvent.MOUSE_RELEASED ? 0 : InputEvent.BUTTON1_DOWN_MASK,
                 x, y, 1, false, button);
+    }
+
+    private void clickHeader(Component header, int x, int y, int modifiers) {
+        header.dispatchEvent(new MouseEvent(header, MouseEvent.MOUSE_PRESSED, System.currentTimeMillis(),
+                modifiers | InputEvent.BUTTON1_DOWN_MASK, x, y, 1, false, MouseEvent.BUTTON1));
+        header.dispatchEvent(new MouseEvent(header, MouseEvent.MOUSE_RELEASED, System.currentTimeMillis(),
+                modifiers, x, y, 1, false, MouseEvent.BUTTON1));
     }
 }

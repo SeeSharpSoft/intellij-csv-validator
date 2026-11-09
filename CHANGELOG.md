@@ -10,6 +10,23 @@
 
 ### Fixed
 
+## 252.56.0 - Nov 09, 2026
+
+### Added
+
+- Added drag-and-drop for multiple selected rows or columns, including non-adjacent selections, moving them as one ordered block with Undo/Redo and preserved column widths
+
+### Changed
+
+- Table editor and editable diff cells now require a double-click to start editing; single-click selects a cell and dragging selects a range of rows and columns
+- Simplified table-header dragging and rendering, reducing allocations and unnecessary column moves while preserving frozen-column behavior and row-number header styling
+- Reduced horizontal cell padding while keeping focused and unfocused cell content aligned
+
+### Fixed
+
+- Fixed an exception when opening diffs for documents without an assigned file type (#1144)
+- Fixed CSV/TSV/PSV editor-provider timeouts caused by waiting for unnecessary PSI read access while opening files (#1143)
+
 ## 252.55.0 - Nov 07, 2026
 
 ### Added
