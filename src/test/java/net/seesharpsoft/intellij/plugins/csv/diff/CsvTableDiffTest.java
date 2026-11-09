@@ -10,6 +10,7 @@ import com.intellij.diff.chains.DiffRequestChain;
 import com.intellij.diff.chains.SimpleDiffRequestChain;
 import com.intellij.diff.impl.CacheDiffRequestChainProcessor;
 import com.intellij.diff.contents.DocumentContent;
+import com.intellij.diff.contents.DocumentContentImpl;
 import com.intellij.diff.requests.SimpleDiffRequest;
 import com.intellij.diff.requests.ContentDiffRequest;
 import com.intellij.diff.tools.util.base.TextDiffSettingsHolder;
@@ -1252,6 +1253,65 @@ public class CsvTableDiffTest extends CsvBasePlatformTestCase {
                 DiffContentFactory.getInstance().createEmpty(), content("id,name\n1,Alice\n"), "Before", "After")));
         assertTrue(tool.canShow(context, new SimpleDiffRequest("Deleted CSV",
                 content("id,name\n1,Alice\n"), DiffContentFactory.getInstance().createEmpty(), "Before", "After")));
+    }
+
+    public void testUntypedDocumentsWithoutHighlightFilesDoNotOfferTheTableTool() {
+        DocumentContent untyped = new DocumentContentImpl(EditorFactory.getInstance().createDocument("before"));
+        assertNull(untyped.getContentType());
+        assertNull(untyped.getHighlightFile());
+        FrameDiffTool tool = tableTool();
+        assertFalse(tool.canShow(context, new SimpleDiffRequest("Untyped left",
+                untyped, content("after"), "Before", "After")));
+        assertFalse(tool.canShow(context, new SimpleDiffRequest("Untyped right",
+                content("before"), untyped, "Before", "After")));
+        assertFalse(tool.canShow(context, new SimpleDiffRequest("Untyped documents",
+                untyped, untyped, "Before", "After")));
+    }
+
+    public void testUntypedCsvFamilyRevisionsUseTheirHighlightFiles() {
+        Map<String, String> revisions = Map.of(
+                "revision.csv", "id,name\n1,Alice\n",
+                "revision.tsv", "id\tname\n1\tAlice\n",
+                "revision.psv", "id|name\n1|Alice\n");
+        for (var revision : revisions.entrySet()) {
+            VirtualFile file = myFixture.addFileToProject(revision.getKey(), revision.getValue()).getVirtualFile();
+            DocumentContent untyped = new DocumentContentImpl(getProject(),
+                    EditorFactory.getInstance().createDocument(revision.getValue()), null, file, null, null, null);
+            assertNull(untyped.getContentType());
+            for (int untypedSide = 0; untypedSide < 2; untypedSide++) {
+                DocumentContent typed = content("id,name\n1,Bob\n");
+                SimpleDiffRequest request = new SimpleDiffRequest("Untyped CSV revision",
+                        untypedSide == 0 ? untyped : typed, untypedSide == 0 ? typed : untyped, "Before", "After");
+                FrameDiffTool tool = tableTool();
+                assertTrue(tool.canShow(context, request));
+                FrameDiffTool.DiffViewer viewer = tool.createComponent(context, request);
+                Disposer.register(getTestRootDisposable(), viewer);
+                viewer.init();
+                List<JTable> tables = tables(viewer.getComponent());
+                JTable untypedTable = tables.get(untypedSide);
+                PlatformTestUtil.waitWithEventsDispatching("Untyped CSV revision displayed",
+                        () -> untypedTable.getRowCount() == 2, 10);
+                assertEquals("Alice", untypedTable.getValueAt(1, 1));
+                assertEquals("Bob", tables.get(1 - untypedSide).getValueAt(1, 1));
+                Disposer.dispose(viewer);
+            }
+        }
+    }
+
+    public void testUntypedNonCsvHighlightFilesDoNotOfferTheTableTool() {
+        VirtualFile file = myFixture.addFileToProject("revision.txt", "before").getVirtualFile();
+        DocumentContent untyped = new DocumentContentImpl(getProject(),
+                EditorFactory.getInstance().createDocument("before"), null, file, null, null, null);
+        assertFalse(tableTool().canShow(context, new SimpleDiffRequest("Untyped non-CSV revision",
+                untyped, content("after"), "Before", "After")));
+    }
+
+    public void testExplicitNonCsvContentTypeTakesPrecedenceOverCsvHighlightFile() {
+        VirtualFile file = myFixture.addFileToProject("revision.csv", "id,name\n1,Alice\n").getVirtualFile();
+        DocumentContent plainText = new DocumentContentImpl(getProject(),
+                EditorFactory.getInstance().createDocument("before"), PlainTextFileType.INSTANCE, file, null, null, null);
+        assertFalse(tableTool().canShow(context, new SimpleDiffRequest("Explicit plain text revision",
+                plainText, content("after"), "Before", "After")));
     }
 
     public void testApplyingCsvRowsToPsvUsesTheTargetSeparator() {

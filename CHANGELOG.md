@@ -15,6 +15,8 @@
 
 ### Fixed
 
+- Fixed an exception when opening diffs for documents without an assigned file type (#1144)
+
 ## 252.55.0 - Nov 07, 2026
 
 ### Added

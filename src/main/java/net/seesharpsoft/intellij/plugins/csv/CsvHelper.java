@@ -30,6 +30,7 @@ import java.util.regex.Pattern;
 public final class CsvHelper {
 
     public static boolean isCsvFile(FileType fileType) {
+        if (fileType == null) return false;
         Language language = LanguageUtil.getFileTypeLanguage(fileType);
         return language != null && language.isKindOf(CsvLanguage.INSTANCE);
     }
