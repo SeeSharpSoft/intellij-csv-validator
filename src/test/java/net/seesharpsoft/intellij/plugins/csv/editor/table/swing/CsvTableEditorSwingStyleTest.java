@@ -66,17 +66,18 @@ public class CsvTableEditorSwingStyleTest extends CsvTableEditorSwingTestBase {
     public void testCellPaddingDoesNotJumpWhenFocusedOrEditing() {
         JTable table = fileEditor.getTable();
         CsvMultiLineCellRenderer renderer = (CsvMultiLineCellRenderer) table.getDefaultRenderer(Object.class);
+        Insets padding = JBUI.insets(3, 5);
         for (boolean focused : new boolean[]{false, true}) {
             renderer.getTableCellRendererComponent(table, "Value", true, focused, 1, 0);
             JTextArea text = (JTextArea) renderer.getViewport().getView();
-            assertEquals(JBUI.insets(3, 8), text.getInsets());
+            assertEquals(padding, text.getInsets());
             assertEquals(table.getSelectionBackground(), text.getBackground());
             assertEquals(table.getSelectionForeground(), text.getForeground());
         }
 
         assertTrue(table.editCellAt(1, 0));
         JScrollPane editor = (JScrollPane) table.getEditorComponent();
-        assertEquals(JBUI.insets(3, 8), ((JTextArea) editor.getViewport().getView()).getInsets());
+        assertEquals(padding, ((JTextArea) editor.getViewport().getView()).getInsets());
         table.getCellEditor().cancelCellEditing();
     }
 

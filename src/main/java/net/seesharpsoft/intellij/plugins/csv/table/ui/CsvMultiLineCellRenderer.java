@@ -40,7 +40,7 @@ public class CsvMultiLineCellRenderer extends JBScrollPane implements TableCellR
     private final UserDataHolder myUserDataHolder;
 
     private final JTextArea myTextArea;
-    private final Border cellPadding = JBUI.Borders.empty(CELL_VERTICAL_PADDING, 8);
+    private final Border cellPadding = JBUI.Borders.empty(CELL_VERTICAL_PADDING, 5);
 
     public CsvMultiLineCellRenderer(KeyListener keyListener, UserDataHolder userDataHolderParam) {
         this(userDataHolderParam);
@@ -124,8 +124,7 @@ public class CsvMultiLineCellRenderer extends JBScrollPane implements TableCellR
             myTextArea.setBackground(getCellBackgroundColor(table, row, column));
         }
         if (hasFocus) {
-            myTextArea.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createLineBorder(table.getSelectionBackground(), JBUI.scale(1)), JBUI.Borders.empty(2, 7)));
+            myTextArea.setBorder(createFocusedCellBorder(table));
             if (!isSelected && table.isCellEditable(row, column) && usePlainFocusedCellColors()) {
                 myTextArea.setForeground(table.getForeground());
                 myTextArea.setBackground(table.getBackground());
@@ -144,6 +143,15 @@ public class CsvMultiLineCellRenderer extends JBScrollPane implements TableCellR
         Dimension size = getCellSize(table, row, column);
         this.setSize(size);
         myTextArea.setSize(size);
+    }
+
+    private Border createFocusedCellBorder(JTable table) {
+        Insets padding = cellPadding.getBorderInsets(myTextArea);
+        int thickness = JBUI.scale(1);
+        return BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(table.getSelectionBackground(), thickness),
+                BorderFactory.createEmptyBorder(padding.top - thickness, padding.left - thickness,
+                        padding.bottom - thickness, padding.right - thickness));
     }
 
     protected Dimension getCellSize(JTable table, int row, int column) {
