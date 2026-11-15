@@ -49,9 +49,8 @@ public class CsvTableUiTest extends CsvBasePlatformTestCase {
             }
 
             @Override
-            protected boolean deferPaintWithoutReadAccess() {
+            protected void requestPaintSnapshotRefresh() {
                 paintChecks.incrementAndGet();
-                return false;
             }
         };
         table.getTableHeader().setSize(100, 30);

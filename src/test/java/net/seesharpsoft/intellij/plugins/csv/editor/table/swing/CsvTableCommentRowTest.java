@@ -59,7 +59,7 @@ public class CsvTableCommentRowTest extends CsvTableEditorSwingTestBase {
         Graphics2D graphics = image.createGraphics();
         try {
             graphics.setClip(viewport().getViewRect());
-            component.paint(graphics);
+            paintOffscreen(component, graphics);
         } finally {
             graphics.dispose();
         }

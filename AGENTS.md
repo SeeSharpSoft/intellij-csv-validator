@@ -162,22 +162,26 @@ The default scheduler still refreshes immediately in other unit tests.
 ## Table painting and read access
 
 PSI-backed table reads reuse existing IDE read access without entering another read action, since even redundant
-read-action entry can be prohibited during painting. Their table/header paints without read access draw
-their last viewport-sized pixel snapshots and coalesce a refresh into one application UI callback per
-table. The callback paints the visible scroll-pane area immediately while it has read access;
-queuing `repaint()` instead would lose that access before rendering. Viewports use simple scrolling
+read-action entry can be prohibited during painting. Native table/header paints always draw their last
+viewport-sized pixel snapshots and coalesce a refresh into one application UI callback per table:
+held read access does not imply that PSI use is permitted during painting. The callback renders fresh
+snapshots offscreen with read access, then paints the visible scroll-pane area immediately. Its pending
+flag stays set through native painting so ancestors that prohibit locks cannot start a refresh loop.
+Explicit `paintOffscreen` calls retain live rendering for row-drag previews and pixel comparisons.
+Viewports use simple scrolling
 so native blitting cannot mix scrolled pixels with a retained frame. Snapshot capture preserves the
 caller's clip, including offscreen row-drag previews, and reuses HiDPI-aware images until their size
 or scale changes. Snapshots are released when components leave the display hierarchy. Hidden targets
 are skipped and disposed editors/projects expire the callback. No CSV values or file-wide render data
 are cached; other PSI reads still acquire a read lock when necessary.
 
-The Swing paint regressions remove actual IDE read access and reject explicit
-read-action entry. A test-only scroll pane adapts the native display seam for headless execution;
-the real table/header renderers still run, and deferred callbacks use the real application UI queue.
+The Swing paint regressions remove actual IDE read access and prohibit locks even with read access held.
+They invalidate real PSI and replay the prohibition during the native deferred paint, including the
+row-number gutter. A test-only scroll pane adapts the native display seam for headless execution;
+the real table/header renderers still run offscreen, and callbacks use the real application UI queue.
 
 The relevant implementation is in `CsvTableModelBase.computeWithReadAccess`, `CsvTable.paint`,
-`CsvTable.deferPaintWithoutReadAccess`, `CsvTableHeader.paint`, and `CsvTablePaintSnapshot`;
+`CsvTable.requestPaintSnapshotRefresh`, `CsvTableHeader.paint`, and `CsvTablePaintSnapshot`;
 regression coverage is in `CsvTableEditorSwingTest`. Snapshot-backed diff tables share the
 geometry and renderer behavior but render their immutable data without acquiring PSI read access.
 
