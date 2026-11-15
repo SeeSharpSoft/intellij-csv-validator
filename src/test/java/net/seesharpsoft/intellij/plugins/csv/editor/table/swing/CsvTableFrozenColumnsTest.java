@@ -207,7 +207,7 @@ public class CsvTableFrozenColumnsTest extends CsvTableEditorSwingTestBase {
         Graphics2D graphics = image.createGraphics();
         try {
             graphics.setClip(clip);
-            component.paint(graphics);
+            paintOffscreen(component, graphics);
         } finally {
             graphics.dispose();
         }

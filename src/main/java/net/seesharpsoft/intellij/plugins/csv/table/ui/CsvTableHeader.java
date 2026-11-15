@@ -3,6 +3,7 @@ package net.seesharpsoft.intellij.plugins.csv.table.ui;
 import com.intellij.ui.JBColor;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
+import net.seesharpsoft.intellij.plugins.csv.table.CsvTableModelBase;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.BorderFactory;
@@ -222,10 +223,27 @@ public class CsvTableHeader extends JTableHeader {
     public void paint(Graphics g) {
         CsvTableBase table = getTable();
         if (table != null && table.usesPaintSnapshot()) {
-            paintSnapshot.paint(this, g, !table.deferPaintWithoutReadAccess(), super::paint);
+            table.requestPaintSnapshotRefresh();
+            paintSnapshot.paint(this, g, false, super::paint);
         } else {
             super.paint(g);
         }
+    }
+
+    public void paintOffscreen(Graphics g) {
+        CsvTableBase table = getTable();
+        if (table != null && table.usesPaintSnapshot()) {
+            CsvTableModelBase.computeWithReadAccess(() -> {
+                paintSnapshot.paint(this, g, true, super::paint);
+                return null;
+            });
+        } else {
+            super.paint(g);
+        }
+    }
+
+    public void refreshPaintSnapshot() {
+        paintSnapshot.refresh(this, super::paint);
     }
 
     @Override

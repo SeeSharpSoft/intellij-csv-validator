@@ -10,6 +10,12 @@
 
 ### Fixed
 
+## 252.56.1 - Nov 14, 2026
+
+### Fixed
+
+- Fixed table-editor read-access errors after PSI cache invalidation by refreshing table and header snapshots outside native painting (#1151)
+
 ## 252.56.0 - Nov 09, 2026
 
 ### Added

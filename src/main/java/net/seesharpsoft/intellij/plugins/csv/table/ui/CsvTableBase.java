@@ -123,8 +123,8 @@ public class CsvTableBase extends JBTable {
         return false;
     }
 
-    protected boolean deferPaintWithoutReadAccess() {
-        return false;
+    protected void requestPaintSnapshotRefresh() {
+        // Only PSI-backed tables need deferred paint snapshot refreshes.
     }
 
     public void updateFrozenColumnLayout() {
