@@ -25,7 +25,7 @@ jobs:
           - ideaVersion: '2026.1.5.1'
             ideaPlatform: IU
             javaVersion: '21'
-          - ideaVersion: '2026.2.4'
+          - ideaVersion: '2026.2.5'
             ideaPlatform: IU
             javaVersion: '25'
           - ideaVersion: '2026.3'
