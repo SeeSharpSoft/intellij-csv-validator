@@ -126,12 +126,11 @@ public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
         BufferedImage image = new BufferedImage(800, 400, BufferedImage.TYPE_INT_ARGB);
         Graphics2D graphics = image.createGraphics();
 
-        // The baseline SDK predates the platform's paint-time lock prohibition.
         Application paintApplication = prohibitReadActions(ApplicationManager.getApplication());
         try (MockedStatic<ApplicationManager> manager = mockStatic(ApplicationManager.class, CALLS_REAL_METHODS)) {
             manager.when(ApplicationManager::getApplication).thenReturn(paintApplication);
-            table.paint(graphics);
-            table.getTableHeader().paint(graphics);
+            paintOffscreen(table, graphics);
+            paintOffscreen(table.getTableHeader(), graphics);
             assertions.run();
         } finally {
             graphics.dispose();
@@ -155,7 +154,7 @@ public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
 
         try (DeferredPaintProbe probe = new DeferredPaintProbe()) {
             probe.paint(false, 1);
-            assertEquals("Ordinary painting must not queue a callback", 0, probe.queuedPaints);
+            assertEquals("Offscreen rendering must not queue a callback", 0, probe.queuedPaints);
             assertFalse(probe.cellValues.isEmpty());
             assertFalse(probe.headerValues.isEmpty());
             probe.cellValues.clear();
@@ -174,6 +173,48 @@ public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
             assertTrue(probe.cellValues.contains("multi\nline"));
             assertTrue(probe.headerValues.contains("New \"header\" (1)"));
             assertEquals("Deferred painting must not start a callback loop", 1, probe.queuedPaints);
+        }
+    }
+
+    @SuppressWarnings({"UnstableApiUsage", "InternalApiUsage"})
+    public void testProhibitedPaintsWithReadAccessRefreshInvalidatedPsi() {
+        WriteCommandAction.runWriteCommandAction(getProject(), () -> myFixture.getEditor().getDocument().setText("a"));
+        PsiDocumentManager.getInstance(getProject()).commitAllDocuments();
+
+        try (DeferredPaintProbe probe = new DeferredPaintProbe()) {
+            probe.surface.setRowHeaderView(probe.originalRowHeaders);
+            probe.surface.setCorner(JScrollPane.UPPER_LEFT_CORNER, probe.originalCorner);
+            probe.layout(probe.surface);
+            probe.paint(false, 1);
+            int[] original = probe.image.getRGB(0, 0, 800, 400, null, 0, 800);
+            probe.cellValues.clear();
+            probe.headerValues.clear();
+
+            WriteCommandAction.runWriteCommandAction(getProject(), () -> myFixture.getEditor().getDocument().setText("b"));
+            PsiDocumentManager.getInstance(getProject()).commitAllDocuments();
+            FileManagerImpl fileManager = (FileManagerImpl) PsiManagerEx.getInstanceEx(getProject()).getFileManager();
+            WriteAction.run(() -> DebugUtil.performPsiModification("Invalidate CSV view providers before painting",
+                    fileManager::possiblyInvalidatePhysicalPsi));
+            probe.prohibitPaintLocks = true;
+
+            probe.paint(false, 32);
+
+            assertTrue("Prohibited paints must not render PSI-backed cells", probe.cellValues.isEmpty());
+            assertTrue("Prohibited paints must not render PSI-backed headers", probe.headerValues.isEmpty());
+            assertEquals("Table and header paints must share one refresh", 1, probe.queuedPaints);
+            assertArrayEquals("Prohibited paints must retain the previous complete frame",
+                    original, probe.image.getRGB(0, 0, 800, 400, null, 0, 800));
+            probe.paint(false, 32, probe.surface);
+            assertTrue("The scroll pane and row numbers must not reenter cell rendering", probe.cellValues.isEmpty());
+            assertTrue("The scroll pane must not reenter header rendering", probe.headerValues.isEmpty());
+
+            UIUtil.dispatchAllInvocationEvents();
+
+            assertTrue("The refresh must render the current CSV value", probe.cellValues.contains("b"));
+            assertTrue("The refresh must render the current column name", probe.headerValues.contains("b (1)"));
+            assertFalse("The refresh must replace stale pixels",
+                    Arrays.equals(original, probe.image.getRGB(0, 0, 800, 400, null, 0, 800)));
+            assertEquals("Native painting must not start another refresh", 1, probe.queuedPaints);
         }
     }
 
@@ -354,9 +395,11 @@ public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
 
     private final class DeferredPaintProbe implements AutoCloseable {
         private final ApplicationImpl application = (ApplicationImpl) ApplicationManager.getApplication();
-        private final Application paintApplication = prohibitReadActions(application);
+        private final Application paintApplication = mock(Application.class, delegatesTo(application));
         private final CsvTable table = fileEditor.getTable();
         private final JScrollPane originalScrollPane = fileEditor.getTableScrollPane();
+        private final Component originalRowHeaders = originalScrollPane.getRowHeader().getView();
+        private final Component originalCorner = originalScrollPane.getCorner(JScrollPane.UPPER_LEFT_CORNER);
         private final TableCellRenderer cellRenderer = table.getDefaultRenderer(Object.class);
         private final TableCellRenderer commentRenderer = table.getDefaultRenderer(CsvTable.CommentColumn.class);
         private final TableCellRenderer headerRenderer = table.getTableHeader().getDefaultRenderer();
@@ -367,6 +410,7 @@ public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
         private int immediatePaints;
         private double paintScale = 1;
         private Shape paintClip;
+        private boolean prohibitPaintLocks;
 
         // Adapt the native display seam so the real table/renderers can also run headlessly.
         private final JScrollPane surface = new JScrollPane(table) {
@@ -384,7 +428,7 @@ public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
                 try {
                     graphics.scale(paintScale, paintScale);
                     graphics.setClip(rectangle);
-                    paint(graphics);
+                    withPaintLockPolicy(() -> paint(graphics));
                 } finally {
                     graphics.dispose();
                 }
@@ -401,6 +445,7 @@ public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
 
             doAnswer(invocation -> {
                 queuedPaints++;
+                assertTrue("A deferred refresh must not schedule itself", !prohibitPaintLocks || queuedPaints == 1);
                 Runnable callback = invocation.getArgument(0);
                 ModalityState modality = invocation.getArgument(1);
                 Condition<?> expired = invocation.getArgument(2);
@@ -411,6 +456,9 @@ public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
 
         private TableCellRenderer recordValues(TableCellRenderer renderer, List<Object> values) {
             return (table, value, selected, focused, row, column) -> {
+                if (prohibitPaintLocks) {
+                    assertNull("PSI-backed renderers must run outside prohibited painting", application.isLockingProhibited());
+                }
                 values.add(value);
                 return renderer.getTableCellRendererComponent(table, value, selected, focused, row, column);
             };
@@ -456,7 +504,17 @@ public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
                     graphics.scale(paintScale, paintScale);
                     graphics.setClip(paintClip);
                     for (int i = 0; i < repetitions; i++) {
-                        for (JComponent component : components) component.paint(graphics);
+                        for (JComponent component : components) {
+                            if (!unlocked && !prohibitPaintLocks) {
+                                if (component == surface) {
+                                    paintOffscreen(table, graphics);
+                                    paintOffscreen(table.getTableHeader(), graphics);
+                                }
+                                paintOffscreen(component, graphics);
+                            } else {
+                                component.paint(graphics);
+                            }
+                        }
                     }
                 } finally {
                     graphics.dispose();
@@ -468,6 +526,16 @@ public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
                     painting.run();
                     return null;
                 });
+            } else {
+                withPaintLockPolicy(painting);
+            }
+        }
+
+        @SuppressWarnings({"UnstableApiUsage", "InternalApiUsage"})
+        private void withPaintLockPolicy(Runnable painting) {
+            if (prohibitPaintLocks) {
+                application.prohibitTakingLocksInsideAndRun(painting, true,
+                        "The Read/Write lock is disallowed during paint");
             } else {
                 painting.run();
             }
@@ -488,6 +556,8 @@ public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
             table.getTableHeader().setDefaultRenderer(headerRenderer);
             originalScrollPane.setViewportView(table);
             originalScrollPane.setColumnHeaderView(table.getTableHeader());
+            originalScrollPane.setRowHeaderView(originalRowHeaders);
+            originalScrollPane.setCorner(JScrollPane.UPPER_LEFT_CORNER, originalCorner);
             UIUtil.dispatchAllInvocationEvents();
         }
     }

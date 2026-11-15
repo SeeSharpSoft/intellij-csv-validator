@@ -38,10 +38,32 @@ public final class CsvTablePaintSnapshot {
         }
     }
 
+    public void refresh(JComponent component, Consumer<Graphics> painter) {
+        Rectangle visible = component.getVisibleRect();
+        if (visible.isEmpty()) return;
+        double currentScale = JBUIScale.sysScale(component);
+        if (needsImage(visible, currentScale)) {
+            clear();
+            image = ImageUtil.createImage(component.getGraphicsConfiguration(),
+                    visible.width, visible.height, BufferedImage.TYPE_INT_ARGB);
+        }
+        Graphics2D graphics = image.createGraphics();
+        try {
+            graphics.setFont(component.getFont());
+            updateImage(graphics, visible, currentScale, painter);
+        } finally {
+            graphics.dispose();
+        }
+    }
+
+    private boolean needsImage(Rectangle visible, double currentScale) {
+        return image == null || bounds.width != visible.width || bounds.height != visible.height ||
+                Double.compare(scale, currentScale) != 0;
+    }
+
     private boolean update(Graphics graphics, Rectangle visible, Consumer<Graphics> painter) {
         double currentScale = graphics instanceof Graphics2D graphics2D ? JBUIScale.sysScale(graphics2D) : 1;
-        boolean resized = image == null || bounds.width != visible.width || bounds.height != visible.height ||
-                Double.compare(scale, currentScale) != 0;
+        boolean resized = needsImage(visible, currentScale);
         Shape clip = graphics.getClip();
         if ((resized || !visible.equals(bounds)) && !coversViewport(clip, visible, currentScale)) {
             // Row-drag previews and partial repaints must keep their original clipping.
@@ -52,6 +74,12 @@ public final class CsvTablePaintSnapshot {
             clear();
             image = ImageUtil.createImage(graphics, visible.width, visible.height, BufferedImage.TYPE_INT_ARGB);
         }
+        updateImage(graphics, visible, currentScale, painter);
+        return true;
+    }
+
+    private void updateImage(Graphics graphics, Rectangle visible, double currentScale, Consumer<Graphics> painter) {
+        Shape clip = graphics.getClip();
         Graphics2D buffer = image.createGraphics();
         boolean painted = false;
         try {
@@ -74,7 +102,6 @@ public final class CsvTablePaintSnapshot {
         }
         bounds = visible;
         scale = currentScale;
-        return true;
     }
 
     private static boolean coversViewport(Shape clip, Rectangle visible, double scale) {

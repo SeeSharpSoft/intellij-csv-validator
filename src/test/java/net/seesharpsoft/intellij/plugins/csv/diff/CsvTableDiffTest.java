@@ -88,6 +88,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import static net.seesharpsoft.intellij.plugins.csv.editor.table.swing.CsvTableEditorSwingTestBase.paintOffscreen;
 import static org.junit.Assert.assertArrayEquals;
 
 public class CsvTableDiffTest extends CsvBasePlatformTestCase {
@@ -1956,7 +1957,7 @@ public class CsvTableDiffTest extends CsvBasePlatformTestCase {
         Graphics2D graphics = image.createGraphics();
         try {
             graphics.setClip(cell);
-            table.paint(graphics);
+            paintOffscreen(table, graphics);
         } finally {
             graphics.dispose();
         }

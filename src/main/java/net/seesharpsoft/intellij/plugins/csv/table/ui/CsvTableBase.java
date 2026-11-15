@@ -123,8 +123,7 @@ public class CsvTableBase extends JBTable {
         return false;
     }
 
-    protected boolean deferPaintWithoutReadAccess() {
-        return false;
+    protected void requestPaintSnapshotRefresh() {
     }
 
     public void updateFrozenColumnLayout() {

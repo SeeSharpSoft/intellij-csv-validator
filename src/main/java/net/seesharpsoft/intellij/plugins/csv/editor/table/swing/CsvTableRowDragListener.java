@@ -184,7 +184,7 @@ final class CsvTableRowDragListener extends MouseInputAdapter {
                 Graphics cells = g.create(badgeWidth, cellTop, width - badgeWidth - 1, Math.min(source.height, height - 2));
                 try {
                     cells.translate(-visible.x, -source.y);
-                    table.paint(cells);
+                    table.paintOffscreen(cells);
                 } finally {
                     cells.dispose();
                 }

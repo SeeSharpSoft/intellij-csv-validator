@@ -17,11 +17,13 @@ import com.intellij.openapi.util.Disposer;
 import net.seesharpsoft.intellij.plugins.csv.CsvBasePlatformTestCase;
 import net.seesharpsoft.intellij.plugins.csv.settings.CsvEditorSettings;
 import net.seesharpsoft.intellij.plugins.csv.table.CsvTableModel;
+import net.seesharpsoft.intellij.plugins.csv.table.ui.CsvTableHeader;
 import net.seesharpsoft.intellij.util.UpdateScheduler;
 
 import javax.swing.*;
 
 import java.awt.Component;
+import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
@@ -75,6 +77,16 @@ public abstract class CsvTableEditorSwingTestBase extends CsvBasePlatformTestCas
 
     protected CsvTableModel getTableModel() {
         return fileEditor.getTableModel();
+    }
+
+    public static void paintOffscreen(JComponent component, Graphics graphics) {
+        if (component instanceof CsvTable table) {
+            table.paintOffscreen(graphics);
+        } else if (component instanceof CsvTableHeader header) {
+            header.paintOffscreen(graphics);
+        } else {
+            component.paint(graphics);
+        }
     }
 
     protected boolean performShortcut(KeyEvent event) {
