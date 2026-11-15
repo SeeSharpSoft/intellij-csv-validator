@@ -58,6 +58,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.mockito.AdditionalAnswers.delegatesTo;
@@ -457,7 +458,8 @@ public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
         private TableCellRenderer recordValues(TableCellRenderer renderer, List<Object> values) {
             return (table, value, selected, focused, row, column) -> {
                 if (prohibitPaintLocks) {
-                    assertNull("PSI-backed renderers must run outside prohibited painting", application.isLockingProhibited());
+                    assertNull("PSI-backed renderers must run outside prohibited painting",
+                            application.getThreadingSupport().getLockingProhibitedAdvice());
                 }
                 values.add(value);
                 return renderer.getTableCellRendererComponent(table, value, selected, focused, row, column);
@@ -533,11 +535,38 @@ public class CsvTableEditorSwingTest extends CsvTableEditorSwingTestBase {
 
         @SuppressWarnings({"UnstableApiUsage", "InternalApiUsage"})
         private void withPaintLockPolicy(Runnable painting) {
-            if (prohibitPaintLocks) {
-                application.prohibitTakingLocksInsideAndRun(painting, true,
-                        "The Read/Write lock is disallowed during paint");
-            } else {
+            if (!prohibitPaintLocks) {
                 painting.run();
+                return;
+            }
+            Runnable prohibitedPainting = () -> {
+                assertNotNull("Native paints must run with IDE locking prohibited",
+                        application.getThreadingSupport().getLockingProhibitedAdvice());
+                painting.run();
+            };
+            try {
+                runWithPaintLocksProhibited(prohibitedPainting);
+            } catch (ReflectiveOperationException exception) {
+                throw new AssertionError("Cannot enforce the IDE paint lock policy", exception);
+            }
+        }
+
+        private void runWithPaintLocksProhibited(Runnable painting) throws ReflectiveOperationException {
+            String advice = "The Read/Write lock is disallowed during paint";
+            try {
+                ApplicationImpl.class.getMethod("withLocksProhibited", String.class, Supplier.class)
+                        .invoke(application, advice, (Supplier<Void>) () -> {
+                            painting.run();
+                            return null;
+                        });
+            } catch (NoSuchMethodException exception) {
+                try {
+                    ApplicationImpl.class.getMethod("prohibitTakingLocksInsideAndRun", Runnable.class, String.class)
+                            .invoke(application, painting, advice);
+                } catch (NoSuchMethodException legacyException) {
+                    ApplicationImpl.class.getMethod("prohibitTakingLocksInsideAndRun", Runnable.class, boolean.class, String.class)
+                            .invoke(application, painting, true, advice);
+                }
             }
         }
 
